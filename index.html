@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Galgame 聚合搜索</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>🎮 Galgame 聚合搜索</h1>
+      <form id="searchForm">
+        <label for="game">游戏名称 *</label>
+        <input
+          type="text"
+          id="game"
+          name="game"
+          required
+          placeholder="请输入游戏名称..."
+        />
+        <div class="options">
+          <input type="checkbox" id="magic" name="magic" />
+          <label for="magic">启用魔法搜索</label>
+        </div>
+        <label for="zypassword">紫缘Gal 平台密码 (可选)</label>
+        <input
+          type="password"
+          id="zypassword"
+          name="zypassword"
+          placeholder="如需搜索紫缘Gal请填写"
+        />
+        <button type="submit">开始搜索</button>
+      </form>
+      <div class="progress" id="progress"></div>
+      <div class="error" id="error"></div>
+      <div class="results" id="results"></div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
