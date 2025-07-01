@@ -4,7 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Galgame 聚合搜索</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta
+      name="description"
+      content="一个聚合搜索 Galgame 的网站，支持多平台搜索"
+    />
+    <meta name="keywords" content="Galgame, 搜索, 聚合搜索, 游戏" />
+    <meta name="author" content="Moe-Sakura" />
+    <meta property="og:title" content="Galgame 聚合搜索" />
+    <meta
+      property="og:description"
+      content="一个聚合搜索 Galgame 的网站，支持多平台搜索"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Galgame 聚合搜索" />
+    <link rel="shortcut icon" href="./gamepad-solid.svg" type="image/svg+xml" />
     <link
       fetchpriority="low"
       href="https://registry.npmmirror.com/artalk/latest/files/dist/Artalk.css"
@@ -15,6 +28,7 @@
       href="https://registry.npmmirror.com/lightgallery/latest/files/css/lightgallery.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="style.css" fetchpriority="high" />
   </head>
 
   <body>
@@ -75,7 +89,7 @@
       fetchpriority="low"
       src="https://registry.npmmirror.com/@artalk/plugin-lightbox/latest/files/dist/artalk-plugin-lightbox.js"
     ></script>
-    <script src="main.js"></script>
+    <script src="main.js" fetchpriority="high"></script>
     <script
       async
       src="https://registry.npmmirror.com/js-asuna/latest/files/js/bsz.pure.mini.js"
