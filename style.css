@@ -5,9 +5,19 @@ body {
     padding: 0;
 }
 
+.hero-img {
+    max-width: 600px;
+    margin: 0 auto;
+    height: 300px;
+    background: #fff url("https://www.loliapi.com/acg/") center / cover no-repeat;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #0001;
+    padding: 32px;
+}
+
 .container {
     max-width: 600px;
-    margin: 40px auto;
+    margin: 20px auto;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px #0001;
