@@ -1,3 +1,10 @@
+Artalk.init({
+  el: "#Comments",
+  pageKey: "https://searchgal.homes",
+  server: "https://artalk.saop.cc",
+  site: "Galgame 聚合搜索",
+});
+
 const form = document.getElementById("searchForm");
 const resultsDiv = document.getElementById("results");
 const errorDiv = document.getElementById("error");

@@ -29,10 +29,34 @@ body {
     padding: 32px;
 }
 
+#Comments {
+    margin: 0 auto;
+    max-width: 800px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #0001;
+    padding: 32px;
+}
+
+.footer {
+    text-align: center;
+    color: #888;
+}
+
 h1 {
     text-align: center;
     color: #333;
 }
+
+a {
+    color: #4caf50;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 
 form {
     display: flex;
