@@ -6,7 +6,7 @@ body {
 }
 
 .hero-img {
-    max-width: 664px;
+    max-width: 864px;
     margin: 0 auto;
     background: #fff;
     border-radius: 8px;
@@ -21,7 +21,7 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 20px auto;
     background: #fff;
     border-radius: 8px;
