@@ -1,15 +1,15 @@
 body {
-    font-family: Arial, sans-serif;
-    background: #f7f7f7;
+    background: #f0bbbb;
     margin: 0;
     padding: 0;
 }
 
 .hero-img {
-    max-width: 864px;
+    width: 864px;
     margin: 0 auto;
     background: #fff;
-    border-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px #0001;
 }
@@ -17,71 +17,57 @@ body {
 .hero-img img {
     display: block;
     width: 100%;
-    height: auto;
 }
 
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px #0001;
-    padding: 32px;
-}
-
+.container,
 #Comments {
-    margin: 0 auto;
-    max-width: 800px;
+    box-sizing: border-box;
+    width: 800px;
+    margin: 16px auto;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px #0001;
     padding: 32px;
 }
 
-.footer {
+.container .footer {
     text-align: center;
     color: #888;
 }
 
-h1 {
+.container h1 {
     text-align: center;
     color: #333;
 }
 
-a {
+.container a {
     color: #4caf50;
     text-decoration: none;
 }
 
-a:hover {
+.container a:hover {
     text-decoration: underline;
 }
 
 
-form {
+.container form {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-label {
+.container label {
     font-weight: bold;
 }
 
-input[type="text"],
-input[type="password"] {
+.container input[type="text"],
+.container input[type="password"] {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-.options {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-button {
+.container button {
     padding: 10px 0;
     background: #4caf50;
     color: #fff;
@@ -91,15 +77,15 @@ button {
     cursor: pointer;
 }
 
-button:disabled {
+.container button:disabled {
     background: #aaa;
 }
 
-.results {
+.container .results {
     margin-top: 32px;
 }
 
-.platform {
+.container .platform {
     border-left: 6px solid #ccc;
     background: #fafafa;
     margin-bottom: 18px;
@@ -107,42 +93,54 @@ button:disabled {
     border-radius: 4px;
 }
 
-.platform.lime {
+.container .platform.lime {
     border-color: lime;
 }
 
-.platform.white {
+.container .platform.white {
     border-color: #eee;
 }
 
-.platform.gold {
+.container .platform.gold {
     border-color: gold;
 }
 
-.platform.red {
+.container .platform.red {
     border-color: red;
 }
 
-.platform-title {
+.container .platform-title {
     font-size: 1.1em;
     font-weight: bold;
 }
 
-.error {
+.container .error {
     color: red;
     margin-top: 12px;
 }
 
-.progress {
+.container .progress {
     color: #888;
     margin-bottom: 8px;
 }
 
-ul {
+.container ul {
     margin: 8px 0 0 0;
     padding-left: 20px;
 }
 
-li {
+.container li {
     margin-bottom: 4px;
+}
+
+@media (max-width: 960px) {
+
+    .container,
+    #Comments {
+        width: 100%;
+    }
+
+    .hero-img {
+        width: 100%;
+    }
 }
