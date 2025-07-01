@@ -1,3 +1,5 @@
+quicklink.listen({ priority: true });
+
 Artalk.init({
   el: "#Comments",
   pageKey: "https://searchgal.homes",
