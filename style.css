@@ -5,7 +5,7 @@ body {
 }
 
 .hero-img {
-    width: 864px;
+    width: 1000px;
     margin: 0 auto;
     background: #fff;
     border-bottom-left-radius: 8px;
@@ -22,7 +22,7 @@ body {
 .container,
 #Comments {
     box-sizing: border-box;
-    width: 800px;
+    width: 1000px;
     margin: 16px auto;
     background: #fff;
     border-radius: 8px;
@@ -142,5 +142,6 @@ body {
 
     .hero-img {
         width: 100%;
+        border-radius: initial;
     }
 }
