@@ -15,16 +15,16 @@ const progressDiv = document.getElementById("progress");
 function renderPlatform(result) {
   const color = result.color || "white";
   let html = `<div class="platform ${color}">`;
-  html += `<div class="platform-title">${result.name}</div>`;
+  html += `<h2 class="platform-title">${result.name}</h2>`;
   if (result.error) {
     html += `<div class="error">${result.error}</div>`;
   }
   if (result.items && result.items.length > 0) {
-    html += "<ul>";
+    html += "<ol>";
     for (const item of result.items) {
-      html += `<ol><a href="${item.url}" target="_blank">${item.name}</a></ol>`;
+      html += `<li><a href="${item.url}" target="_blank">${item.name}</a></li>`;
     }
-    html += "</ul>";
+    html += "</ol>";
   }
   html += "</div>";
   return html;
