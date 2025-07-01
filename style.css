@@ -6,13 +6,18 @@ body {
 }
 
 .hero-img {
-    max-width: 600px;
+    max-width: 664px;
     margin: 0 auto;
-    height: 300px;
-    background: #fff url("https://www.loliapi.com/acg/") center / cover no-repeat;
+    background: #fff;
     border-radius: 8px;
+    overflow: hidden;
     box-shadow: 0 2px 8px #0001;
-    padding: 32px;
+}
+
+.hero-img img {
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
 .container {
