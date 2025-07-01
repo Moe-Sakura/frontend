@@ -31,7 +31,6 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   clearUI();
   const game = form.game.value.trim();
-  const magic = form.magic.checked;
   const zypassword = form.zypassword.value.trim();
   if (!game) {
     errorDiv.textContent = "游戏名称不能为空";
@@ -40,7 +39,7 @@ form.addEventListener("submit", async (e) => {
   form.querySelector("button").disabled = true;
   try {
     await searchGameStream(
-      { gameName: game, magic, zypassword },
+      { gameName: game, zypassword },
       {
         onProgress: (progress) => {
           progressDiv.textContent = `进度: ${progress.completed} / ${progress.total}`;
@@ -65,13 +64,12 @@ form.addEventListener("submit", async (e) => {
 });
 
 async function searchGameStream(
-  { gameName, magic = false, zypassword = "" },
+  { gameName, zypassword = "" },
   { onProgress, onResult, onDone, onError }
 ) {
   const url = "https://searchgal.homes/search";
   const formData = new FormData();
   formData.append("game", gameName);
-  formData.append("magic", magic.toString());
   if (zypassword) formData.append("zypassword", zypassword);
   try {
     const response = await fetch(url, {

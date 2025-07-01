@@ -14,7 +14,7 @@
     <div class="container">
       <h1>🎮 Galgame 聚合搜索</h1>
       <form id="searchForm">
-        <label for="game">游戏名称 *</label>
+        <label for="game">游戏名或关键词 *</label>
         <input
           type="text"
           id="game"
@@ -22,17 +22,14 @@
           required
           placeholder="请输入游戏名称..."
         />
-        <div class="options">
-          <input type="checkbox" id="magic" name="magic" />
-          <label for="magic">启用魔法搜索</label>
-        </div>
-        <label for="zypassword">紫缘Gal 平台密码 (可选)</label>
+        <label for="zypassword">紫缘 Gal 密码（可选）</label>
         <input
           type="password"
           id="zypassword"
           name="zypassword"
-          placeholder="如需搜索紫缘Gal请填写"
+          placeholder="如需搜索紫缘 Gal 请填写"
         />
+        <a href="https://galzy.eu.org/" target="_blank">点我获取密码</a>
         <button type="submit">开始搜索</button>
       </form>
       <div class="progress" id="progress"></div>
