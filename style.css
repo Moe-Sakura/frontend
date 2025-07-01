@@ -8,9 +8,9 @@ body {
     width: 1000px;
     margin: 0 auto;
     background: #fff;
+    overflow: hidden;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
-    overflow: hidden;
     box-shadow: 0 2px 8px #0001;
 }
 
@@ -23,7 +23,7 @@ body {
 #Comments {
     box-sizing: border-box;
     width: 1000px;
-    margin: 16px auto;
+    margin: 0 auto 16px auto;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 8px #0001;
