@@ -22,7 +22,7 @@ function renderPlatform(result) {
   if (result.items && result.items.length > 0) {
     html += "<ul>";
     for (const item of result.items) {
-      html += `<li><a href="${item.url}" target="_blank">${item.name}</a></li>`;
+      html += `<ol><a href="${item.url}" target="_blank">${item.name}</a></ol>`;
     }
     html += "</ul>";
   }
