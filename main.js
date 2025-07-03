@@ -41,31 +41,55 @@ form.addEventListener("submit", async (e) => {
   clearUI();
   const game = form.game.value.trim();
   const zypassword = form.zypassword.value.trim();
+  const patchMode = form.patchMode && form.patchMode.checked;
+  const gameMode = form.gameMode && form.gameMode.checked;
   if (!game) {
     errorDiv.textContent = "游戏名称不能为空";
     return;
   }
   form.querySelector("button").disabled = true;
   try {
-    await searchGameStream(
-      { gameName: game, zypassword },
-      {
-        onProgress: (progress) => {
-          progressDiv.textContent = `进度: ${progress.completed} / ${progress.total}`;
-        },
-        onResult: (result) => {
-          resultsDiv.innerHTML += renderPlatform(result);
-        },
-        onDone: () => {
-          progressDiv.textContent = "搜索完成！";
-          form.querySelector("button").disabled = false;
-        },
-        onError: (err) => {
-          errorDiv.textContent = err.message || "发生未知错误";
-          form.querySelector("button").disabled = false;
-        },
-      }
-    );
+    if (patchMode) {
+      await searchGameStream(
+        { gameName: game, zypassword, patchMode: true },
+        {
+          onProgress: (progress) => {
+            progressDiv.textContent = `进度: ${progress.completed} / ${progress.total}`;
+          },
+          onResult: (result) => {
+            resultsDiv.innerHTML += renderPlatform(result);
+          },
+          onDone: () => {
+            progressDiv.textContent = "搜索完成！";
+            form.querySelector("button").disabled = false;
+          },
+          onError: (err) => {
+            errorDiv.textContent = err.message || "发生未知错误";
+            form.querySelector("button").disabled = false;
+          },
+        }
+      );
+    } else if (gameMode) {
+      await searchGameStream(
+        { gameName: game, zypassword, patchMode: false },
+        {
+          onProgress: (progress) => {
+            progressDiv.textContent = `进度: ${progress.completed} / ${progress.total}`;
+          },
+          onResult: (result) => {
+            resultsDiv.innerHTML += renderPlatform(result);
+          },
+          onDone: () => {
+            progressDiv.textContent = "搜索完成！";
+            form.querySelector("button").disabled = false;
+          },
+          onError: (err) => {
+            errorDiv.textContent = err.message || "发生未知错误";
+            form.querySelector("button").disabled = false;
+          },
+        }
+      );
+    }
   } catch (err) {
     errorDiv.textContent = err.message || "发生未知错误";
     form.querySelector("button").disabled = false;
@@ -73,10 +97,13 @@ form.addEventListener("submit", async (e) => {
 });
 
 async function searchGameStream(
-  { gameName, zypassword = "" },
+  { gameName, zypassword = "", patchMode = false },
   { onProgress, onResult, onDone, onError }
 ) {
-  const url = "https://searchgal.homes/search-gal";
+  const site = "searchgal.homes";
+  const url = patchMode
+    ? `https://${site}/search-patch`
+    : `https://${site}/search-gal`;
   const formData = new FormData();
   formData.append("game", gameName);
   if (zypassword) formData.append("zypassword", zypassword);

@@ -56,7 +56,7 @@
         >
       </h1>
       <form id="searchForm">
-        <label for="game">游戏名或关键词：</label>
+        <label for="game">游戏或补丁关键词：</label>
         <input
           type="text"
           id="game"
@@ -72,6 +72,14 @@
           placeholder="如需搜索紫缘 Gal 请填写"
         />
         <a href="https://galzy.eu.org/" target="_blank">点我获取密码</a>
+        <div style="margin: 10px 0; display: flex; gap: 1em; align-items: center">
+          <label style="font-weight: bold">
+            <input type="radio" id="gameMode" name="searchMode" value="game" checked /> 搜游戏
+          </label>
+          <label style="font-weight: bold">
+            <input type="radio" id="patchMode" name="searchMode" value="patch" /> 搜补丁
+          </label>
+        </div>
         <button type="submit">开始搜索</button>
       </form>
       <div class="progress" id="progress"></div>
