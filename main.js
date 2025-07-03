@@ -76,7 +76,7 @@ async function searchGameStream(
   { gameName, zypassword = "" },
   { onProgress, onResult, onDone, onError }
 ) {
-  const url = "https://searchgal.homes/search";
+  const url = "https://searchgal.homes/search-gal";
   const formData = new FormData();
   formData.append("game", gameName);
   if (zypassword) formData.append("zypassword", zypassword);
