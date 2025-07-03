@@ -48,48 +48,26 @@ form.addEventListener("submit", async (e) => {
     return;
   }
   form.querySelector("button").disabled = true;
+  const searchParams = patchMode
+    ? { gameName: game, zypassword, patchMode: true }
+    : { gameName: game, zypassword, patchMode: false };
   try {
-    if (patchMode) {
-      await searchGameStream(
-        { gameName: game, zypassword, patchMode: true },
-        {
-          onProgress: (progress) => {
-            progressDiv.textContent = `进度: ${progress.completed} / ${progress.total}`;
-          },
-          onResult: (result) => {
-            resultsDiv.innerHTML += renderPlatform(result);
-          },
-          onDone: () => {
-            progressDiv.textContent = "搜索完成！";
-            form.querySelector("button").disabled = false;
-          },
-          onError: (err) => {
-            errorDiv.textContent = err.message || "发生未知错误";
-            form.querySelector("button").disabled = false;
-          },
-        }
-      );
-    } else if (gameMode) {
-      await searchGameStream(
-        { gameName: game, zypassword, patchMode: false },
-        {
-          onProgress: (progress) => {
-            progressDiv.textContent = `进度: ${progress.completed} / ${progress.total}`;
-          },
-          onResult: (result) => {
-            resultsDiv.innerHTML += renderPlatform(result);
-          },
-          onDone: () => {
-            progressDiv.textContent = "搜索完成！";
-            form.querySelector("button").disabled = false;
-          },
-          onError: (err) => {
-            errorDiv.textContent = err.message || "发生未知错误";
-            form.querySelector("button").disabled = false;
-          },
-        }
-      );
-    }
+    await searchGameStream(searchParams, {
+      onProgress: (progress) => {
+        progressDiv.textContent = `进度: ${progress.completed} / ${progress.total}`;
+      },
+      onResult: (result) => {
+        resultsDiv.innerHTML += renderPlatform(result);
+      },
+      onDone: () => {
+        progressDiv.textContent = "搜索完成！";
+        form.querySelector("button").disabled = false;
+      },
+      onError: (err) => {
+        errorDiv.textContent = err.message || "发生未知错误";
+        form.querySelector("button").disabled = false;
+      },
+    });
   } catch (err) {
     errorDiv.textContent = err.message || "发生未知错误";
     form.querySelector("button").disabled = false;
@@ -132,7 +110,6 @@ async function searchGameStream(
         try {
           const data = JSON.parse(line);
           if (data.total) {
-            // 可用于设置总数
           } else if (data.progress && onProgress) {
             onProgress(data.progress);
             if (data.result && onResult) {
@@ -142,9 +119,7 @@ async function searchGameStream(
             onDone();
             return;
           }
-        } catch (e) {
-          // 跳过解析失败的行
-        }
+        } catch (e) {}
       }
     }
   } catch (error) {
