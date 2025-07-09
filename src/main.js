@@ -81,15 +81,27 @@ function renderPlatform(result, withAnimation = true) {
       home = "";
     }
   }
-  let magicTag = "";
+  let tag = "";
   if (isMagicPlatform(result)) {
-    magicTag =
-      '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-yellow-400 text-white align-middle">需魔法访问</span>';
+    tag =
+      '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-yellow-400 text-white align-middle">需要魔法</span>';
+  } else if (colorKey === "lime") {
+    tag =
+      '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-lime-400 text-white align-middle">无需登录</span>';
+  } else if (colorKey === "red") {
+    tag =
+      '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-red-400 text-white align-middle">错误</span>';
+  } else if (colorKey === "white") {
+    tag =
+      '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-300 text-gray-700 align-middle">需要登录</span>';
+  } else if (colorKey === "default") {
+    tag =
+      '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-indigo-200 text-indigo-700 align-middle">综合</span>';
   }
   html += `<div class="flex items-center gap-2 px-5 py-3 bg-white/80 border-b ${color.border}">
     <i class="fas fa-dice-d6 ${color.icon}"></i>
     <a href="${home}" target="_blank" class="flex items-center gap-2 group/link outline-none focus:ring-2 focus:ring-indigo-300 rounded" title="访问站点首页">
-      <span class="text-lg font-bold ${color.text} group-hover/link:text-indigo-800">${result.name}${magicTag}</span>
+      <span class="text-lg font-bold ${color.text} group-hover/link:text-indigo-800">${result.name}${tag}</span>
       <span class="text-xs text-gray-400 group-hover/link:text-indigo-400 ml-2">${domain}</span>
     </a>
   </div>`;
