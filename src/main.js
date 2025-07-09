@@ -150,8 +150,6 @@ function clearUI() {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   clearUI();
-  if (window.Pace && typeof window.Pace.restart === "function")
-    window.Pace.restart();
   setTimeout(async () => {
     const game = form.game.value.trim();
     const zypassword = form.zypassword.value.trim();
