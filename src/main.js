@@ -263,7 +263,7 @@ async function searchGameStream(
   { gameName, zypassword = "", patchMode = false, magic = false },
   { onProgress, onResult, onDone, onError }
 ) {
-  const site = "searchgal.homes";
+  const site = "api.searchgal.homes";
   const url = patchMode
     ? `https://${site}/search-patch`
     : `https://${site}/search-gal`;
