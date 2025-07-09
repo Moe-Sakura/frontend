@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 Allow: /
-Sitemap: https://sg.saop.cc/sitemap.xml
+Sitemap: https://searchgal.homes/sitemap.xml
