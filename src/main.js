@@ -15,9 +15,63 @@ const customApiInput = document.getElementById("customApi");
 let siteNavigationDiv;
 let toggleNavButton;
 let navLinksContainer;
-let isNavCollapsed = false; // Track navigation state for mobile
+let isNavCollapsed = false; // Track navigation state for mobile (now largely ignored for mobile)
 let isMobileView = false; // Track if we are in mobile view
-let siteNavOriginalTop = 0; // Store the original top position of the navigation bar
+let siteNavOriginalTop = 0; // Store the original top position of the navigation bar (less relevant for fixed bottom)
+let scrollbarWidth = 0; // Store calculated scrollbar width
+
+// Scroll to top functionality
+const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+const scrollToCommentsBtn = document.getElementById("scrollToCommentsBtn"); // Get the comments button
+
+window.addEventListener("scroll", () => {
+  if (window.scrollY > 200) {
+    // Show buttons after scrolling down 200px
+    scrollToTopBtn.classList.add("flex");
+    scrollToTopBtn.classList.remove("hidden");
+    scrollToCommentsBtn.classList.add("flex"); // Show comments button
+    scrollToCommentsBtn.classList.remove("hidden");
+  } else {
+    scrollToTopBtn.classList.add("hidden");
+    scrollToTopBtn.classList.remove("flex");
+    scrollToCommentsBtn.classList.add("hidden"); // Hide comments button
+    scrollToCommentsBtn.classList.remove("flex");
+  }
+});
+
+// Initialize button visibility on page load (in case user refreshes scrolled down)
+// This also handles the case where the user might load the page already scrolled
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.scrollY > 200) {
+    scrollToTopBtn.classList.add("flex");
+    scrollToTopBtn.classList.remove("hidden");
+    scrollToCommentsBtn.classList.add("flex");
+    scrollToCommentsBtn.classList.remove("hidden");
+  } else {
+    scrollToTopBtn.classList.add("hidden");
+    scrollToTopBtn.classList.remove("flex");
+    scrollToCommentsBtn.classList.add("hidden");
+    scrollToCommentsBtn.classList.remove("flex");
+  }
+});
+
+scrollToTopBtn.addEventListener("click", () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+});
+
+// Smooth scroll to comments
+scrollToCommentsBtn.addEventListener("click", (e) => {
+  e.preventDefault(); // Prevent default anchor jump
+  const commentsSection = document.getElementById("Comments");
+  if (commentsSection) {
+    commentsSection.scrollIntoView({
+      behavior: "smooth",
+    });
+  }
+});
 
 /**
  * 页面加载后初始化
@@ -33,28 +87,29 @@ window.addEventListener("DOMContentLoaded", () => {
   quicklink.listen({ priority: true });
   Artalk.init({
     el: "#Comments",
-    pageKey: "https://searchgal.homes",
+    pageKey: "https://searchgal.homes", // Original domain from user's file
     server: "https://artalk.saop.cc",
     site: "Galgame 聚合搜索",
   });
 
   siteNavigationDiv = document.createElement("div");
   siteNavigationDiv.id = "siteNavigation";
-  // Initial class names, will be adjusted by updateNavigationLayout
+  // Initial classes are minimal, updateNavigationLayout will set full classes
   siteNavigationDiv.className =
-    "z-20 flex flex-col items-center animate__animated animate__fadeInUp animate__faster hidden rounded-t-xl";
-  document.body.appendChild(siteNavigationDiv); // Still append to body for flexible positioning
+    "z-20 flex flex-col items-center animate__animated animate__fadeInUp animate__faster";
+  document.body.appendChild(siteNavigationDiv);
 
   navLinksContainer = document.createElement("div");
-  // Added max-h-40 overflow-y-auto for scrollability
+  // Changed to fixed height, horizontal scroll, no wrap
+  // Increased horizontal padding (px-2 to px-4) to prevent focus ring clipping
   navLinksContainer.className =
-    "nav-links-container flex flex-wrap gap-2 justify-center w-full max-h-40 overflow-y-auto";
+    "nav-links-container flex flex-nowrap overflow-x-auto gap-2 items-center w-full h-12 px-4";
   siteNavigationDiv.appendChild(navLinksContainer);
 
   toggleNavButton = document.createElement("button");
   toggleNavButton.id = "toggleNavButton";
-  toggleNavButton.className =
-    "absolute -top-7 right-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-t-lg text-xs hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 z-30 opacity-75 hover:opacity-100 transition-opacity animate__animated animate__fadeInUp animate__faster hidden";
+  // Always hidden as mobile collapse is removed
+  toggleNavButton.className = "hidden"; // Always hidden
   toggleNavButton.innerHTML = '<i class="fas fa-chevron-down"></i>';
   siteNavigationDiv.appendChild(toggleNavButton);
 
@@ -78,14 +133,13 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  toggleNavButton.addEventListener("click", () => {
-    isNavCollapsed = !isNavCollapsed; // Toggle collapse state
-    updateNavigationLayout(); // Update layout based on new state
-  });
+  // Calculate scrollbar width once
+  scrollbarWidth = getScrollbarWidth();
 
   // Initial layout update and event listeners
   updateNavigationLayout();
-  updateSiteNavigation();
+  updateSiteNavigation(); // Call to set initial visibility
+  adjustBodyPaddingForScrollbar(); // Adjust padding on initial load
 
   if (searchForm) {
     searchForm.addEventListener("submit", handleSearchSubmit);
@@ -94,84 +148,71 @@ window.addEventListener("DOMContentLoaded", () => {
     resultsDiv.addEventListener("click", handlePaginationClick);
   }
 
-  // Recalculate navigation width/position on window resize and layout change
   window.addEventListener(
     "resize",
     debounce(() => {
+      scrollbarWidth = getScrollbarWidth(); // Recalculate scrollbar width on resize
+      adjustBodyPaddingForScrollbar(); // Adjust padding after resize
       updateNavigationLayout(); // Update layout (fixed/absolute, bottom/top)
       updateSiteNavigationWidth(); // Update width
     }, 200)
   );
 
-  // Scroll event listener for desktop fixed navigation
   window.addEventListener("scroll", debounce(handleScroll, 10));
 });
 
 /**
- * 处理页面滚动事件，用于桌面端导航栏固定
+ * Calculates the width of the scrollbar.
+ * @returns {number} The width of the scrollbar in pixels.
  */
-function handleScroll() {
-  if (!siteNavigationDiv || isMobileView) return;
+function getScrollbarWidth() {
+  // Create a temporary div to measure scrollbar width
+  const outer = document.createElement("div");
+  outer.style.visibility = "hidden";
+  outer.style.overflow = "scroll"; // Force scrollbar
+  outer.style.msOverflowStyle = "scrollbar"; // For IE11
+  document.body.appendChild(outer);
 
-  const currentScrollY = window.scrollY;
+  const inner = document.createElement("div");
+  outer.appendChild(inner);
 
-  // If the scroll position is past the original top of the navigation
-  if (currentScrollY > siteNavOriginalTop) {
-    // Add fixed class if not already fixed
-    if (!siteNavigationDiv.classList.contains("fixed-nav")) {
-      // Save current computed width to prevent reflow issues when changing to fixed
-      siteNavigationDiv.style.width = siteNavigationDiv.offsetWidth + "px";
-      siteNavigationDiv.classList.add(
-        "fixed-nav",
-        "fixed",
-        "top-0",
-        "left-1/2",
-        "-translate-x-1/2",
-        "bg-gray-100/95",
-        "shadow-lg",
-        "rounded-b-xl",
-        "animate__animated",
-        "animate__fadeInDown",
-        "animate__faster"
-      );
-      siteNavigationDiv.classList.remove(
-        "absolute",
-        "rounded-t-xl",
-        "rounded-none",
-        "shadow"
-      ); // Remove absolute positioning and other rounded styles
-      siteNavigationDiv.style.top = ""; // Clear inline top from absolute positioning
-      siteNavigationDiv.style.left = ""; // Clear inline left from absolute positioning
+  const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
 
-      // Add margin to resultsDiv to prevent content jump
-      resultsDiv.style.marginTop = `${siteNavigationDiv.offsetHeight + 24}px`;
-    }
-  } else {
-    // Revert to original absolute position if scrolled back up
-    if (siteNavigationDiv.classList.contains("fixed-nav")) {
-      siteNavigationDiv.classList.remove(
-        "fixed-nav",
-        "fixed",
-        "top-0",
-        "left-1/2",
-        "-translate-x-1/2",
-        "bg-gray-100/95",
-        "shadow-lg",
-        "rounded-b-xl",
-        "animate__animated",
-        "animate__fadeInDown",
-        "animate__faster"
-      );
-      siteNavigationDiv.classList.add("absolute", "rounded-b-xl", "shadow"); // Add back original absolute styles
-      // Restore original position
-      updateSiteNavigationWidth(); // This will recalculate and set top/left
-      resultsDiv.style.marginTop = `${siteNavigationDiv.offsetHeight + 24}px`; // Ensure correct margin
-    }
+  outer.parentNode.removeChild(outer);
+
+  return scrollbarWidth;
+}
+
+/**
+ * Adjusts body padding to prevent content shifting when scrollbar appears/disappears.
+ */
+function adjustBodyPaddingForScrollbar() {
+  if (isMobileView) {
+    // Do not adjust for mobile, as scrollbars are often overlaid
+    document.body.style.paddingRight = "";
+    return;
+  }
+
+  const hasScrollbar = document.body.scrollHeight > window.innerHeight;
+  const currentPaddingRight =
+    parseInt(getComputedStyle(document.body).paddingRight, 10) || 0;
+
+  if (hasScrollbar && currentPaddingRight === 0) {
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+  } else if (!hasScrollbar && currentPaddingRight === scrollbarWidth) {
+    document.body.style.paddingRight = "";
   }
 }
 
 /**
- * 根据屏幕宽度调整导航栏布局 (fixed/absolute, top/bottom)
+ * 处理页面滚动事件 (不再用于桌面导航栏固定，仅用于滚动条调整)
+ */
+function handleScroll() {
+  adjustBodyPaddingForScrollbar();
+}
+
+/**
+ * 根据屏幕宽度调整导航栏布局 (fixed bottom)
  */
 function updateNavigationLayout() {
   if (!siteNavigationDiv || !resultsDiv) return;
@@ -179,95 +220,43 @@ function updateNavigationLayout() {
   const breakpoint = 768; // Tailwind's 'md' breakpoint
   isMobileView = window.innerWidth < breakpoint;
 
-  // Reset all position-related classes first
-  siteNavigationDiv.classList.remove(
-    "fixed",
-    "absolute",
-    "bottom-0",
-    "top-0",
-    "left-1/2",
-    "-translate-x-1/2",
-    "rounded-t-xl",
-    "rounded-b-xl",
-    "fixed-nav",
-    "bg-white/95",
-    "bg-gray-100/90",
-    "shadow",
-    "shadow-lg",
-    "shadow-inner", // Also remove shadow-inner here for a clean reset
-    "border",
-    "border-gray-100",
-    "animate__fadeInDown",
+  // Clear all existing classes to ensure a clean slate
+  siteNavigationDiv.className = "";
+
+  // Apply base classes for fixed bottom, centered, full width, padding
+  siteNavigationDiv.classList.add(
+    "z-20",
+    "flex",
+    "flex-col",
+    "items-center",
+    "animate__animated",
+    "animate__fadeInUp",
     "animate__faster",
-    "p-0",
-    "p-2",
-    "py-1",
-    "px-2", // Reset all padding classes
-    "min-h-7", // Reset height class
-    "mb-2" // Remove potential mobile margin for clean reset
+    "fixed",
+    "bottom-0", // Stays at the very bottom
+    "w-full", // Full width
+    "px-2" // Consistent padding - changed from 'p-2' to 'px-2' to avoid top/bottom padding affecting height calculation for resultsDiv margin
   );
-  siteNavigationDiv.style.left = ""; // Clear inline style set by desktop positioning
-  siteNavigationDiv.style.top = ""; // Clear inline style set by desktop positioning
-  siteNavigationDiv.style.width = ""; // Clear inline width
 
+  // Apply responsive max-width and rounding
   if (isMobileView) {
-    siteNavigationDiv.classList.add(
-      "fixed",
-      "bottom-0",
-      "left-1/2",
-      "-translate-x-1/2",
-      "rounded-t-xl",
-      "bg-white/95",
-      "mb-2" // Add margin-bottom for mobile
-    );
-    toggleNavButton.classList.remove("hidden");
-    resultsDiv.style.marginTop = ""; // Clear desktop specific margin
-
-    if (isNavCollapsed) {
-      navLinksContainer.classList.add("hidden");
-      navLinksContainer.classList.remove(
-        "animate__animated",
-        "animate__fadeIn"
-      );
-      toggleNavButton.innerHTML = '<i class="fas fa-chevron-up"></i>';
-      // Mobile collapsed: Small padding, no shadow, no border
-      siteNavigationDiv.classList.add("py-1", "px-2", "min-h-7"); // Changed p-0 to py-1 px-2
-    } else {
-      navLinksContainer.classList.remove("hidden");
-      navLinksContainer.classList.add("animate__animated", "animate__fadeIn");
-      toggleNavButton.innerHTML = '<i class="fas fa-chevron-down"></i>';
-      // Mobile expanded: Padding, shadow, border
-      siteNavigationDiv.classList.add(
-        "p-2",
-        "shadow-inner",
-        "border",
-        "border-gray-100"
-      );
-    }
-    // Ensure that fixed-nav class is not present in mobile view
-    siteNavigationDiv.classList.remove("fixed-nav");
+    siteNavigationDiv.classList.add("rounded-t-xl", "max-w-md");
   } else {
-    // Desktop view: absolute positioning relative to resultsDiv
-    siteNavigationDiv.classList.add(
-      "absolute",
-      "rounded-b-xl",
-      "bg-gray-100/90",
-      "shadow",
-      "border",
-      "border-gray-100"
-    );
-    toggleNavButton.classList.add("hidden"); // No toggle button on desktop
-    navLinksContainer.classList.remove("hidden", "animate__fadeIn"); // Always expanded on desktop
-    siteNavigationDiv.classList.add("p-2", "shadow-inner"); // Always show padding/shadow on desktop
-    isNavCollapsed = false; // Reset mobile collapse state for desktop
-
-    // This will be handled by handleScroll for fixed positioning after scroll
-    // Initially, it's positioned absolutely above resultsDiv
-    updateSiteNavigationWidth();
+    // For desktop, remove max-width and make it truly full viewport width
+    siteNavigationDiv.classList.remove("max-w-4xl"); // Remove previous max-width
+    siteNavigationDiv.classList.add("rounded-t-xl"); // Keep rounded top for desktop
   }
-  // Update original top position after layout changes for scroll handling
+
+  // Ensure toggle button is hidden and nav links are always visible
+  toggleNavButton.classList.add("hidden");
+  navLinksContainer.classList.remove("hidden", "animate__fadeIn");
+
+  // Update resultsDiv margin to account for fixed bottom navigation
+  updateSiteNavigationWidth();
+
   siteNavOriginalTop =
-    siteNavigationDiv.getBoundingClientRect().top + window.scrollY;
+    siteNavigationDiv.getBoundingClientRect().top + window.scrollY; // Still update, though less critical
+  adjustBodyPaddingForScrollbar();
 }
 
 /**
@@ -343,16 +332,16 @@ async function handleSearchSubmit(e) {
           });
           const platformCard = createPlatformCard(result, true);
           resultsDiv.appendChild(platformCard);
-          updateSiteNavigation();
+          updateSiteNavigation(); // Update navigation visibility and content
         },
         onDone: () => {
           if (searchBtnText) searchBtnText.textContent = "搜索完成！";
           setTimeout(() => setLoadingState(false), 1200);
-          updateNavigationLayout(); // Re-evaluate layout after results are done
-          // After results are done and nav layout is updated, set original top for scroll
+          updateNavigationLayout();
           siteNavOriginalTop =
             siteNavigationDiv.getBoundingClientRect().top + window.scrollY;
-          handleScroll(); // Check if it should be fixed immediately after search
+          handleScroll();
+          adjustBodyPaddingForScrollbar(); // Adjust padding after content is rendered
         },
         onError: (err) => {
           showError(err.message);
@@ -416,6 +405,7 @@ function handlePaginationClick(e) {
       { once: true }
     );
   }
+  adjustBodyPaddingForScrollbar(); // Adjust padding after pagination
 }
 
 /**
@@ -426,70 +416,23 @@ function updateSiteNavigationWidth() {
 
   const firstCard = resultsDiv.querySelector("[data-platform]");
   if (firstCard) {
-    const cardWidth = firstCard.offsetWidth;
-    siteNavigationDiv.style.width = `${cardWidth}px`;
+    // The width is now primarily controlled by Tailwind's 'w-full' and removed 'max-w-*' for desktop
+    siteNavigationDiv.style.width = ""; // Ensure no inline width overrides Tailwind
+    siteNavigationDiv.style.left = ""; // Ensure no inline left overrides Tailwind centering
+    siteNavigationDiv.style.transform = ""; // Ensure no inline transform overrides Tailwind centering
 
-    if (!isMobileView && !siteNavigationDiv.classList.contains("fixed-nav")) {
-      // Desktop specific positioning AND not yet fixed
-      const resultsRect = resultsDiv.getBoundingClientRect();
-      const siteNavRect = siteNavigationDiv.getBoundingClientRect();
-
-      const desiredTop = resultsRect.top + window.scrollY;
-
-      // Calculate left to center it horizontally within resultsDiv's max-width
-      const resultsDivLeftOffset = resultsDiv.getBoundingClientRect().left;
-      const windowWidth = window.innerWidth;
-      const resultsDivCenter =
-        resultsDivLeftOffset + resultsDiv.offsetWidth / 2;
-      const navLeft = resultsDivCenter - siteNavigationDiv.offsetWidth / 2;
-
-      siteNavigationDiv.style.left = `${navLeft}px`;
-      siteNavigationDiv.style.top = `${
-        desiredTop - siteNavigationDiv.offsetHeight
-      }px`; // Place above resultsDiv
-      siteNavigationDiv.classList.add("bg-gray-100/90", "shadow"); // Ensure desktop styling
-      siteNavigationDiv.classList.remove(
-        "bottom-0",
-        "left-1/2",
-        "-translate-x-1/2",
-        "rounded-t-xl",
-        "bg-white/95"
-      );
-
-      resultsDiv.style.marginTop = `${siteNavigationDiv.offsetHeight + 24}px`; // Add some margin below nav
-    } else if (isMobileView) {
-      // Mobile view: fixed bottom, centered
-      // Ensure no lingering desktop positioning
-      siteNavigationDiv.style.left = "";
-      siteNavigationDiv.style.top = "";
-      siteNavigationDiv.classList.add(
-        "fixed",
-        "bottom-0",
-        "left-1/2",
-        "-translate-x-1/2",
-        "rounded-t-xl",
-        "bg-white/95"
-      );
-      siteNavigationDiv.classList.remove(
-        "top-0",
-        "absolute",
-        "rounded-b-xl",
-        "shadow",
-        "bg-gray-100/90",
-        "fixed-nav"
-      );
-      resultsDiv.style.marginTop = ""; // Remove desktop margin
-    }
+    // Set marginBottom for resultsDiv as nav is at the bottom
+    resultsDiv.style.marginBottom = `${siteNavigationDiv.offsetHeight}px`; // Removed +24
+    resultsDiv.style.marginTop = ""; // Clear any lingering top margin
   } else {
     siteNavigationDiv.style.width = "";
     siteNavigationDiv.style.left = "";
     siteNavigationDiv.style.top = "";
-    siteNavigationDiv.classList.add("hidden"); // Hide if no cards
-    resultsDiv.style.marginTop = ""; // Ensure margin is reset if no cards
+    siteNavigationDiv.classList.add("hidden");
+    resultsDiv.style.marginTop = "";
+    resultsDiv.style.marginBottom = ""; // Clear margin if nav is hidden
   }
-  // Update the original top position whenever navigation layout or width changes
-  siteNavOriginalTop =
-    siteNavigationDiv.getBoundingClientRect().top + window.scrollY;
+  // siteNavOriginalTop is less relevant now as nav is always fixed at bottom
 }
 
 /**
@@ -530,27 +473,25 @@ function updateSiteNavigation() {
 
   const sortedPlatformNames = Array.from(platformResults.keys()).sort();
 
+  // Unified visibility control for siteNavigationDiv
   if (sortedPlatformNames.length === 0) {
-    siteNavigationDiv.classList.remove("animate__fadeInUp");
-    siteNavigationDiv.classList.add("animate__fadeOutDown");
-    siteNavigationDiv.addEventListener(
-      "animationend",
-      function handler() {
-        this.classList.add("hidden");
-        this.classList.remove("animate__fadeOutDown");
-        this.removeEventListener("animationend", handler);
-      },
-      { once: true }
-    );
-
+    siteNavigationDiv.classList.add("hidden");
     toggleNavButton.classList.add("hidden");
-    isNavCollapsed = false;
-    resultsDiv.style.marginTop = ""; // Reset margin if nav hidden
+    isNavCollapsed = false; // Reset collapse state
+    resultsDiv.style.marginBottom = ""; // Reset margin if nav hidden
+    console.log(
+      "updateSiteNavigation: No results, hiding nav. platformResults.size:",
+      platformResults.size
+    );
     return;
   } else {
     siteNavigationDiv.classList.remove("hidden");
-    siteNavigationDiv.classList.add("animate__fadeInUp");
-    siteNavigationDiv.classList.remove("animate__fadeOutDown");
+    siteNavigationDiv.classList.add("animate__fadeInUp"); // Re-add entrance animation
+    siteNavigationDiv.classList.remove("animate__fadeOutDown"); // Ensure fadeOut is removed
+    console.log(
+      "updateSiteNavigation: Results present, showing nav. platformResults.size:",
+      platformResults.size
+    );
   }
 
   sortedPlatformNames.forEach((name) => {
@@ -562,14 +503,13 @@ function updateSiteNavigation() {
       platform.color && colorMap[platform.color] ? platform.color : "default";
     const colorClasses = colorMap[colorKey];
 
-    link.className = `text-sm px-3 py-1 rounded-full transition-all duration-200 ease-in-out
+    link.className = `text-sm px-3 py-1 rounded-full transition-all duration-200 ease-in-out whitespace-nowrap
                           ${colorClasses.text} ${colorClasses.bg} ${colorClasses.hoverBg}
                           hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400`;
     link.textContent = platform.name;
     navLinksContainer.appendChild(link);
   });
 
-  // Apply layout based on device
   updateNavigationLayout();
 }
 
@@ -621,7 +561,7 @@ function createPlatformCard(result, withAnimation = true) {
     domain = "";
   if (result.items && result.items.length > 0) {
     try {
-      const url = new URL(result.items[0].url);
+      const url = new URL(item.url);
       home = url.origin;
       domain = url.hostname;
     } catch {}
@@ -703,7 +643,7 @@ function createPlatformCard(result, withAnimation = true) {
               color.border
             }">
                 <i class="fas fa-dice-d6 ${color.icon}"></i>
-                <a href="${home}" target="_blank" class="flex items-center gap-2 group/link outline-none focus:ring-2 focus:ring-indigo-300 rounded" title="访问站点首页">
+                <a href="${home}" target="_blank" class="flex items-center gap-2 group/link outline-none focus:ring-2 focus:ring-indigo-300 rounded" title="访问具体页面">
                     <span class="text-lg font-bold ${
                       color.text
                     } group-hover/link:text-indigo-800">${
@@ -740,24 +680,12 @@ function createPlatformCard(result, withAnimation = true) {
 function clearUI() {
   resultsDiv.innerHTML = "";
 
-  siteNavigationDiv.classList.remove("animate__fadeInUp");
-  siteNavigationDiv.classList.add("animate__fadeOutDown");
-  siteNavigationDiv.addEventListener(
-    "animationend",
-    function handler() {
-      this.classList.add("hidden");
-      this.classList.remove("animate__fadeOutDown");
-      this.removeEventListener("animationend", handler);
-    },
-    { once: true }
-  );
-
-  // Reset nav bar state for next search
   isNavCollapsed = false;
-  updateNavigationLayout(); // Re-apply default layout (e.g., desktop expanded)
+  updateNavigationLayout(); // This will call updateSiteNavigation which will hide the nav if platformResults is empty
 
   siteNavigationDiv.style.width = "";
-  resultsDiv.style.marginTop = ""; // Clear margin on clearUI
+  resultsDiv.style.marginTop = "";
+  resultsDiv.style.marginBottom = ""; // Clear bottom margin as well
   siteNavigationDiv.classList.remove("fixed-nav"); // Ensure fixed-nav class is removed
 
   errorDiv.textContent = "";
@@ -766,6 +694,7 @@ function clearUI() {
     progressBar.style.opacity = "0";
     progressBar.classList.remove("animate__fadeIn", "animate__fadeOut");
   }
+  adjustBodyPaddingForScrollbar(); // Adjust padding after clearing UI
 }
 
 function showError(message) {
