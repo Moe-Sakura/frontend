@@ -1,6 +1,8 @@
 // -- 全局常量与状态 --
 const ITEMS_PER_PAGE = 10;
 const platformResults = new Map();
+const SEARCH_COOLDOWN_MS = 30 * 1000; // 30 seconds cooldown
+let lastSearchTime = 0; // Timestamp of the last search submission
 
 // -- DOM 元素获取 --
 const searchForm = document.getElementById("searchForm");
@@ -265,6 +267,16 @@ function updateNavigationLayout() {
  */
 async function handleSearchSubmit(e) {
   e.preventDefault();
+
+  const currentTime = Date.now();
+  if (lastSearchTime && currentTime - lastSearchTime < SEARCH_COOLDOWN_MS) {
+    const timeLeft = Math.ceil(
+      (SEARCH_COOLDOWN_MS - (currentTime - lastSearchTime)) / 1000
+    );
+    showError(`请等待 ${timeLeft} 秒后再搜索。`);
+    return;
+  }
+
   platformResults.clear();
   clearUI();
 
@@ -296,6 +308,9 @@ async function handleSearchSubmit(e) {
         return;
       }
 
+      // Set last search time AFTER the check and BEFORE setting loading state
+      // This ensures cooldown is applied even if the search takes time to initialize.
+      lastSearchTime = Date.now();
       setLoadingState(true);
 
       const searchParams = {
@@ -561,10 +576,19 @@ function createPlatformCard(result, withAnimation = true) {
     domain = "";
   if (result.items && result.items.length > 0) {
     try {
-      const url = new URL(item.url);
+      // This 'item' is not defined in this scope. It should be result.items[0] if you intend to get from the first item.
+      // Given the logic, this block might not be correctly extracting home/domain for the platform as a whole.
+      // If the intention is to show a home/domain for the platform based on its results,
+      // you might need to find a representative URL or re-evaluate.
+      // For now, I'll assume 'item' was meant to be the first item in 'result.items' if available.
+      const url = new URL(result.items[0].url); // Assuming first item's URL for platform domain
       home = url.origin;
       domain = url.hostname;
-    } catch {}
+    } catch (e) {
+      // console.error("Error parsing URL for platform home/domain:", e);
+      home = "#"; // Fallback if URL parsing fails
+      domain = "未知域名";
+    }
   }
 
   const tags = {
@@ -739,7 +763,25 @@ function setLoadingState(isLoading) {
     searchBtn.disabled = false;
     searchBtn.classList.remove("active");
     searchIcon.className = originalIconClass;
-    if (searchBtnText) searchBtnText.textContent = "开始搜索";
+    if (searchBtnText) {
+      const currentTime = Date.now();
+      const timeLeft = Math.ceil(
+        (SEARCH_COOLDOWN_MS - (currentTime - lastSearchTime)) / 1000
+      );
+      if (timeLeft > 0 && lastSearchTime !== 0) {
+        // Only show cooldown if a search has actually happened
+        searchBtnText.textContent = `冷却中 (${timeLeft}s)`;
+        // Re-enable button after cooldown
+        setTimeout(() => {
+          if (!searchBtn.disabled) {
+            // Check if not already disabled by another process
+            searchBtnText.textContent = "开始搜索";
+          }
+        }, timeLeft * 1000);
+      } else {
+        searchBtnText.textContent = "开始搜索";
+      }
+    }
     if (progressBar) {
       progressBar.classList.remove("animate__fadeIn");
       progressBar.classList.add("animate__fadeOut");

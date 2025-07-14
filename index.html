@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="upgrade-insecure-requests; block-all-mixed-content"
+    />
     <title>Galgame 聚合搜索</title>
     <style>
       @import "tailwindcss";
@@ -146,6 +150,37 @@
               </div>
             </div>
           </div>
+          <div class="relative flex-1 min-w-0 mt-2">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none text-base z-10"
+            >
+              <i class="fas fa-code"></i>
+            </span>
+            <input
+              type="text"
+              id="customApi"
+              name="customApi"
+              placeholder="自定义 API 地址（可选）"
+              class="pl-10 pr-4 sm:pr-48 h-9 border border-gray-200 rounded-[6px] focus:outline-none focus:ring-1 focus:ring-purple-400 bg-gray-50 text-sm shadow-xs transition w-full placeholder-gray-400"
+              autocomplete="off"
+              spellcheck="false"
+              aria-describedby="apiHint"
+            />
+            <span
+              id="apiHint"
+              class="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-500 pointer-events-none z-10 transition-opacity duration-200"
+              data-hint-desktop
+            >
+              例如: https://api.searchgal.homes 或 http://127.0.0.1:8898
+            </span>
+            <span
+              id="apiHintMobile"
+              class="sm:hidden absolute left-0 bottom-[-18px] text-[11px] text-gray-500 w-full text-center leading-none transition-opacity duration-200"
+              data-hint-mobile
+            >
+              例如: https://api.searchgal.homes 或 http://127.0.0.1:8898
+            </span>
+          </div>
           <div class="flex flex-col gap-2 w-full mt-4">
             <button
               type="submit"
@@ -208,24 +243,6 @@
                   ><i class="fas fa-hat-wizard"></i>魔搜</label
                 >
               </div>
-            </div>
-            <div class="relative flex-1 min-w-0 flex items-center mt-3">
-              <span
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none text-lg z-10"
-                ><i class="fas fa-code"></i
-              ></span>
-              <input
-                type="text"
-                id="customApi"
-                name="customApi"
-                placeholder="自定义 API 地址（可选）"
-                class="pl-10 pr-4 h-11 border border-gray-300 rounded-[8px] focus:outline-none focus:ring-2 focus:ring-purple-400 bg-gray-50 text-base shadow-sm transition w-full placeholder-gray-400"
-                autocomplete="off"
-                spellcheck="false"
-              />
-            </div>
-            <div class="text-xs text-gray-500 mt-1 ml-1 px-1">
-              例如: `https://api.searchgal.homes` 或 `http://127.0.0.1:8898`
             </div>
           </div>
         </form>
