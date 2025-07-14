@@ -783,7 +783,7 @@ async function searchGameStream(
     baseUrl = `${protocol}://${defaultSite}`;
   }
 
-  const url = patchMode ? `${baseUrl}/search-patch` : `${baseUrl}/search-gal`;
+  const url = patchMode ? `${baseUrl}/patch` : `${baseUrl}/gal`;
 
   const formData = new FormData();
   formData.append("game", gameName);
