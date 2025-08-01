@@ -79,6 +79,13 @@ scrollToCommentsBtn.addEventListener("click", (e) => {
  * 页面加载后初始化
  */
 window.addEventListener("DOMContentLoaded", () => {
+  // 从 URL 获取 API 参数并填充输入框
+  const urlParams = new URLSearchParams(window.location.search);
+  const apiUrl = urlParams.get("api");
+  if (apiUrl && customApiInput) {
+    customApiInput.value = decodeURIComponent(apiUrl);
+  }
+
   if (searchBtn) searchBtn.disabled = false;
 
   const magicCheckbox = document.getElementById("magicAccess");
