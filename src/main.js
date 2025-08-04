@@ -1,4 +1,5 @@
 // -- 全局常量与状态 --
+const VNDB_API_BASE_URL = "https://api.vndb.org/kana";
 const ITEMS_PER_PAGE = 10;
 const platformResults = new Map();
 const SEARCH_COOLDOWN_MS = 30 * 1000; // 30 seconds cooldown
@@ -1114,7 +1115,7 @@ async function searchGameStream(
  */
 async function fetchVndbData(gameName) {
   console.log(`[DEBUG] Fetching VNDB data for: "${gameName}"`);
-  const url = "https://api.vndb.org/kana/vn";
+  const url = `${VNDB_API_BASE_URL}/vn`;
   const body = {
     filters: ["search", "=", gameName],
     fields: "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description",
@@ -1301,7 +1302,7 @@ function debounce(func, delay) {
  * @param {string} mainName The main title of the game.
  */
 async function fetchVndbExtLinks(mainName) {
-  const url = "https://api.vndb.org/kana/release";
+  const url = `${VNDB_API_BASE_URL}/release`;
   const body = {
     filters: ["search", "=", mainName],
     fields: "title, extlinks.url",

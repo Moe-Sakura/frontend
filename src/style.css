@@ -1,126 +1,36 @@
+
 @keyframes glowing-border {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
-
 .best-match-highlight {
-    background: linear-gradient(90deg,
-            #ffc1f3,
-            #e0b0ff,
-            #d1c4e9,
-            #ffc1f3);
+    background: linear-gradient(90deg, #ffc1f3, #e0b0ff, #d1c4e9, #ffc1f3);
     background-size: 400% 400%;
     animation: glowing-border 8s ease infinite;
 }
-
-#version-container {
-    transition: background-color 0.5s ease-in-out;
-}
-
-/* Styles for the new VNDB animation */
 #background-layer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-size: cover; background-position: center;
     transition: background-image 1s ease-in-out;
     z-index: -1;
 }
-
 #background-layer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0);
     transition: background-color 1s ease-in-out;
 }
-
-.vndb-mode #background-layer::before {
+.group\/body.vndb-mode #background-layer::before {
     background-color: rgba(0, 0, 0, 0.5);
-    /* Darken by 50% */
 }
-
-#scrollable-content {
-    transition: transform 0.8s ease-in-out;
-}
-
-#vndb-info-panel {
-    transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
-}
-
-/* Custom scrollbar for VNDB description */
-#vndb-description::-webkit-scrollbar {
-    width: 4px;
-}
-
-#vndb-description::-webkit-scrollbar-track {
-    background: transparent;
-}
-
+#vndb-description::-webkit-scrollbar { width: 4px; }
+#vndb-description::-webkit-scrollbar-track { background: transparent; }
 #vndb-description::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 20px;
     border: transparent;
 }
-
-.vndb-mode #scrollable-content {
-    transform: translateX(calc(16.666667% + 4rem));
-    /* Move right by half of panel width + gap */
-}
-
-.vndb-mode #vndb-info-panel {
-    width: 50%;
-    /* Corresponds to w-1/3 */
-    opacity: 1;
-    padding: 0.5rem;
-    /* Corresponds to p-6 */
-    position: sticky;
-    top: 8rem;
-    align-self: flex-start;
-}
-
-.locked-mode #content-wrapper,
-.locked-mode #scrollToTopBtn,
-.locked-mode #scrollToCommentsBtn {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.locked-mode #background-layer::before {
+.group\/body.locked-mode #background-layer::before {
     background-color: rgba(0, 0, 0, 0);
-}
-
-#content-wrapper,
-#scrollToTopBtn,
-#scrollToCommentsBtn {
-    transition: opacity 0.5s ease-in-out;
-}
-/* 手机端适配 */
-@media (max-width: 768px) {
-  #lock-view-btn {
-    display: none;
-  }
-
-  .vndb-mode #vndb-info-panel {
-    display: none;
-  }
-
-  .vndb-mode #scrollable-content {
-    transform: translateX(0);
-  }
 }

@@ -20,8 +20,7 @@
         padding: 0;
       }
     </style>
-    <link rel="stylesheet" href="src/style.css" />
-    
+    <link rel="stylesheet" href="/src/style.css" />
     <meta
       name="description"
       content="SearchGal 是一个聚合搜索 Galgame 的网站，支持多平台搜索"
@@ -72,11 +71,11 @@
     />
   </head>
 
-  <body>
+  <body class="group/body">
     <div id="background-layer"></div>
     <main class="flex-1 flex flex-col min-h-screen">
-      <div id="content-wrapper" class="flex justify-center w-full max-w-7xl mx-auto gap-8">
-        <div id="vndb-info-panel" class="hidden md:block w-0 max-w-md p-0 flex-shrink-0 opacity-0">
+      <div id="content-wrapper" class="flex justify-center w-full max-w-7xl mx-auto gap-8 transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none">
+        <div id="vndb-info-panel" class="hidden md:block w-0 max-w-md p-0 flex-shrink-0 opacity-0 transition-opacity duration-800 ease-in-out transform transition-transform duration-800 ease-in-out group-[.vndb-mode]/body:w-1/2 group-[.vndb-mode]/body:opacity-100 group-[.vndb-mode]/body:p-2 group-[.vndb-mode]/body:sticky group-[.vndb-mode]/body:top-32 group-[.vndb-mode]/body:self-start group-[.vndb-mode]/body:max-md:hidden">
           <div class="relative">
             <div id="ext-links-container" class="absolute top-2 -left-14 flex flex-col gap-2"></div>
             <img id="vndb-image" src="" alt="Game Art" class="rounded-lg shadow-lg w-full h-auto object-contain mb-4">
@@ -84,7 +83,7 @@
           <h2 id="vndb-title" class="text-4xl font-bold text-white text-center drop-shadow-lg mb-10"></h2>
           <div id="vndb-description" class="text-base text-gray-200 max-h-80 overflow-y-auto pr-2"></div>
         </div>
-        <div id="scrollable-content" class="w-full max-w-4xl flex-shrink-0">
+        <div id="scrollable-content" class="w-full max-w-4xl flex-shrink-0 transition-transform duration-800 ease-in-out group-[.vndb-mode]/body:translate-x-[calc(16.666667%_+_4rem)] group-[.vndb-mode]/body:max-md:translate-x-0">
           <div
             id="main-container"
             class="container mx-auto w-full bg-white/95 rounded-[8px] shadow-xl px-0 py-0 mt-0 z-10 relative flex flex-col transition-all duration-300"
@@ -361,7 +360,7 @@
               <div class="mt-3 inline-flex items-center gap-3 justify-center">
                 <span
                   id="version-container"
-                  class="inline-flex items-center gap-1 text-xs text-gray-400 bg-gray-100 rounded-[8px] px-2 py-1 font-mono select-none"
+                  class="inline-flex items-center gap-1 text-xs text-gray-400 bg-gray-100 rounded-[8px] px-2 py-1 font-mono select-none transition-colors duration-500 ease-in-out"
                 >
                   <i class="fas fa-code-branch"></i>
                   <a
@@ -397,7 +396,7 @@
     <div class="fixed bottom-16 right-3 flex flex-col space-y-3 z-50">
       <button
         id="scrollToTopBtn"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-300 flex items-center justify-center translate-z-0 **hidden**"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-300 flex items-center justify-center translate-z-0 **hidden** transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none"
         title="回到顶部"
       >
         <i class="fas fa-arrow-up"></i>
@@ -405,14 +404,14 @@
       <a
         href="#Comments"
         id="scrollToCommentsBtn"
-        class="bg-pink-500 hover:bg-pink-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-pink-300 flex items-center justify-center **hidden**"
+        class="bg-pink-500 hover:bg-pink-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-pink-300 flex items-center justify-center **hidden** transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none"
         title="直达评论"
       >
         <i class="fas fa-comments"></i>
       </a>
       <button
         id="lock-view-btn"
-        class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-green-300 flex items-center justify-center"
+        class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-green-300 flex items-center justify-center max-md:hidden"
         title="隐藏视图"
       >
         <i class="fas fa-lock"></i>
