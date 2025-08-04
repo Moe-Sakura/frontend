@@ -349,6 +349,11 @@ async function handleSearchSubmit(e) {
       if (vndbDescription) vndbDescription.classList.add("hidden"); // Hide description instantly
     }
     document.body.classList.remove("vndb-mode");
+    const mainContainer = document.getElementById("main-container");
+    if (mainContainer) {
+      mainContainer.classList.remove("bg-white");
+      mainContainer.classList.add("bg-white/95");
+    }
     if (backgroundLayer) {
       backgroundLayer.style.backgroundImage = "none";
     }
@@ -452,11 +457,21 @@ async function handleSearchSubmit(e) {
                   img.onload = () => {
                     backgroundLayer.style.backgroundImage = `url(${vndbInfo.screenshotUrl})`;
                     document.body.classList.add("vndb-mode");
+                    const mainContainer = document.getElementById("main-container");
+                    if (mainContainer) {
+                      mainContainer.classList.remove("bg-white/95");
+                      mainContainer.classList.add("bg-white");
+                    }
                   };
                   img.src = vndbInfo.screenshotUrl;
                 } else {
                   backgroundLayer.style.backgroundImage = "none";
                   document.body.classList.remove("vndb-mode");
+                  const mainContainer = document.getElementById("main-container");
+                  if (mainContainer) {
+                    mainContainer.classList.remove("bg-white");
+                    mainContainer.classList.add("bg-white/95");
+                  }
                 }
 
                 // Show panel only if there is something to display
