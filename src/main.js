@@ -294,6 +294,11 @@ function updateNavigationLayout() {
   // Apply responsive max-width and rounding
   if (isMobileView) {
     siteNavigationDiv.classList.add("rounded-t-xl", "max-w-md");
+    // If we are in mobile view, find and remove the vndb-info-panel if it exists
+    const panel = document.getElementById("vndb-info-panel");
+    if (panel) {
+      panel.remove();
+    }
   } else {
     // For desktop, remove max-width and make it truly full viewport width
     siteNavigationDiv.classList.remove("max-w-4xl"); // Remove previous max-width
@@ -337,7 +342,9 @@ async function handleSearchSubmit(e) {
     if (!isFirstSearch) {
       // On subsequent searches, hide the info panel instantly.
       // The background will fade out via the class removal below.
-      if (vndbInfoPanel) vndbInfoPanel.classList.add("hidden");
+      if (vndbInfoPanel) {
+        vndbInfoPanel.classList.add("hidden");
+      }
       if (vndbTitle) vndbTitle.classList.add("hidden"); // Hide title instantly
       if (vndbDescription) vndbDescription.classList.add("hidden"); // Hide description instantly
     }
@@ -417,30 +424,49 @@ async function handleSearchSubmit(e) {
                 fetchVndbExtLinks(vndbInfo.mainName);
               }
 
-              // --- Trigger Animation ---
-              if (vndbInfo.mainImageUrl && vndbImage) {
-                vndbImage.src = vndbInfo.mainImageUrl;
+              // --- Trigger Animation (only if panel exists) ---
+              if (vndbInfoPanel) {
+                if (vndbInfo.mainImageUrl && vndbImage) {
+                  vndbImage.src = vndbInfo.mainImageUrl;
+                  vndbImage.classList.remove("hidden");
+                } else if (vndbImage) {
+                  vndbImage.classList.add("hidden");
+                }
+
+                if (vndbInfo.description && vndbDescription) {
+                  vndbDescription.textContent = vndbInfo.description;
+                  vndbDescription.classList.remove("hidden");
+                } else if (vndbDescription) {
+                  vndbDescription.classList.add("hidden");
+                }
+
+                if (vndbInfo.mainName && vndbTitle) {
+                  vndbTitle.textContent = vndbInfo.mainName;
+                  vndbTitle.classList.remove("hidden");
+                } else if (vndbTitle) {
+                  vndbTitle.classList.add("hidden");
+                }
+
+                if (vndbInfo.screenshotUrl && backgroundLayer) {
+                  const img = new Image();
+                  img.onload = () => {
+                    backgroundLayer.style.backgroundImage = `url(${vndbInfo.screenshotUrl})`;
+                    document.body.classList.add("vndb-mode");
+                  };
+                  img.src = vndbInfo.screenshotUrl;
+                } else {
+                  backgroundLayer.style.backgroundImage = "none";
+                  document.body.classList.remove("vndb-mode");
+                }
+
+                // Show panel only if there is something to display
+                const hasContent =
+                  vndbInfo.mainImageUrl ||
+                  vndbInfo.description ||
+                  vndbInfo.mainName;
+                vndbInfoPanel.classList.toggle("hidden", !hasContent);
               }
-              if (vndbInfo.description && vndbDescription) {
-                vndbDescription.textContent = vndbInfo.description;
-                vndbDescription.classList.remove("hidden"); // Make description visible again
-              }
-              if (vndbInfo.mainName && vndbTitle) {
-               vndbTitle.textContent = vndbInfo.mainName;
-               if (vndbTitle) vndbTitle.classList.remove("hidden"); // Make title visible again
-              }
-              if (vndbInfo.screenshotUrl && backgroundLayer) {
-                // Preload the image before fading to it
-                const img = new Image();
-                img.onload = () => {
-                  backgroundLayer.style.backgroundImage = `url(${vndbInfo.screenshotUrl})`;
-                };
-                img.src = vndbInfo.screenshotUrl;
-              }
-              // Ensure panel is visible before class is added to trigger animation
-              if (vndbInfoPanel) vndbInfoPanel.classList.remove("hidden");
-              document.body.classList.add("vndb-mode");
-              isFirstSearch = false; // Mark that the first search has happened
+              isFirstSearch = false;
 
             } else {
               console.log("[DEBUG] No exact match from VNDB or empty names list. Skipping highlight.");
@@ -1076,7 +1102,7 @@ async function fetchVndbData(gameName) {
   const url = "https://api.vndb.org/kana/vn";
   const body = {
     filters: ["search", "=", gameName],
-    fields: "titles.title, titles.lang, aliases, title, image.url, screenshots.url, description",
+    fields: "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description",
   };
 
   try {
@@ -1146,8 +1172,13 @@ async function fetchVndbData(gameName) {
     }
 
     // Extract image URLs
-    const mainImageUrl = result.image?.url || null;
-    const screenshotUrl = result.screenshots?.[0]?.url || null;
+    const mainImageUrl = (result.image && result.image.sexual <= 1 && result.image.violence === 0) ? result.image.url : null;
+    const sortedScreenshots = result.screenshots
+      ? [...result.screenshots].sort((a, b) => b.votecount - a.votecount)
+      : [];
+    const screenshotUrl =
+      sortedScreenshots.find((s) => s.sexual <= 1 && s.violence === 0)?.url ||
+      null;
     const description = result.description || null;
 
     const finalResult = {
