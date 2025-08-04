@@ -3,6 +3,10 @@ const ITEMS_PER_PAGE = 10;
 const platformResults = new Map();
 const SEARCH_COOLDOWN_MS = 30 * 1000; // 30 seconds cooldown
 let lastSearchTime = 0; // Timestamp of the last search submission
+let bgmBestMatches = []; // Array to store best matches from VNDB
+let vndbInfo = {}; // Object to store detailed info from VNDB
+let cooldownInterval = null; // Timer for cooldown countdown
+let isFirstSearch = true; // Track if it's the first search to control animations
 
 // -- DOM 元素获取 --
 const searchForm = document.getElementById("searchForm");
@@ -13,11 +17,19 @@ const searchBtn = document.getElementById("searchBtn");
 const searchBtnText = document.getElementById("searchBtnText");
 const searchIcon = searchBtn?.querySelector("i");
 const customApiInput = document.getElementById("customApi");
+const scrollableContent = document.getElementById("scrollable-content");
+const vndbInfoPanel = document.getElementById("vndb-info-panel");
+const vndbImage = document.getElementById("vndb-image");
+const vndbDescription = document.getElementById("vndb-description");
+const vndbTitle = document.getElementById("vndb-title");
+const backgroundLayer = document.getElementById("background-layer");
+let originalBackgroundImage = "";
 
 let siteNavigationDiv;
 let toggleNavButton;
 let navLinksContainer;
 let isNavCollapsed = false; // Track navigation state for mobile (now largely ignored for mobile)
+let isNavManuallyHidden = false; // Track if user has manually hidden the navigation
 let isMobileView = false; // Track if we are in mobile view
 let siteNavOriginalTop = 0; // Store the original top position of the navigation bar (less relevant for fixed bottom)
 let scrollbarWidth = 0; // Store calculated scrollbar width
@@ -25,6 +37,7 @@ let scrollbarWidth = 0; // Store calculated scrollbar width
 // Scroll to top functionality
 const scrollToTopBtn = document.getElementById("scrollToTopBtn");
 const scrollToCommentsBtn = document.getElementById("scrollToCommentsBtn"); // Get the comments button
+const lockViewBtn = document.getElementById("lock-view-btn");
 
 window.addEventListener("scroll", () => {
   if (window.scrollY > 200) {
@@ -33,11 +46,15 @@ window.addEventListener("scroll", () => {
     scrollToTopBtn.classList.remove("hidden");
     scrollToCommentsBtn.classList.add("flex"); // Show comments button
     scrollToCommentsBtn.classList.remove("hidden");
+    lockViewBtn.classList.add("flex");
+    lockViewBtn.classList.remove("hidden");
   } else {
     scrollToTopBtn.classList.add("hidden");
     scrollToTopBtn.classList.remove("flex");
     scrollToCommentsBtn.classList.add("hidden"); // Hide comments button
     scrollToCommentsBtn.classList.remove("flex");
+    lockViewBtn.classList.add("hidden");
+    lockViewBtn.classList.remove("flex");
   }
 });
 
@@ -49,11 +66,15 @@ document.addEventListener("DOMContentLoaded", () => {
     scrollToTopBtn.classList.remove("hidden");
     scrollToCommentsBtn.classList.add("flex");
     scrollToCommentsBtn.classList.remove("hidden");
+    lockViewBtn.classList.add("flex");
+    lockViewBtn.classList.remove("hidden");
   } else {
     scrollToTopBtn.classList.add("hidden");
     scrollToTopBtn.classList.remove("flex");
     scrollToCommentsBtn.classList.add("hidden");
     scrollToCommentsBtn.classList.remove("flex");
+    lockViewBtn.classList.add("hidden");
+    lockViewBtn.classList.remove("flex");
   }
 });
 
@@ -75,10 +96,23 @@ scrollToCommentsBtn.addEventListener("click", (e) => {
   }
 });
 
+lockViewBtn.addEventListener("click", () => {
+  if (siteNavigationDiv) {
+    isNavManuallyHidden = !isNavManuallyHidden; // Toggle the state
+    siteNavigationDiv.classList.toggle("hidden", isNavManuallyHidden); // Apply state
+  }
+});
+
 /**
  * 页面加载后初始化
  */
 window.addEventListener("DOMContentLoaded", () => {
+  // Store the original background image
+  // The original background is no longer set on load.
+  if (backgroundLayer) {
+      backgroundLayer.style.backgroundImage = 'none';
+  }
+
   // 从 URL 获取 API 参数并填充输入框
   const urlParams = new URLSearchParams(window.location.search);
   const apiUrl = urlParams.get("api");
@@ -168,6 +202,16 @@ window.addEventListener("DOMContentLoaded", () => {
   );
 
   window.addEventListener("scroll", debounce(handleScroll, 10));
+
+  fetchAndDisplayVersion(); // Fetch and display version on page load
+
+  const lockViewBtn = document.getElementById('lock-view-btn');
+  if (lockViewBtn) {
+    lockViewBtn.addEventListener('click', () => {
+      document.body.classList.toggle('locked-mode');
+      lockViewBtn.blur();
+    });
+  }
 });
 
 /**
@@ -285,6 +329,24 @@ async function handleSearchSubmit(e) {
   }
 
   platformResults.clear();
+  bgmBestMatches = []; // Reset best matches on new search
+  vndbInfo = {}; // Reset VNDB info
+  
+  // Reset animation state if it's active
+  if (document.body.classList.contains("vndb-mode")) {
+    if (!isFirstSearch) {
+      // On subsequent searches, hide the info panel instantly.
+      // The background will fade out via the class removal below.
+      if (vndbInfoPanel) vndbInfoPanel.classList.add("hidden");
+      if (vndbTitle) vndbTitle.classList.add("hidden"); // Hide title instantly
+      if (vndbDescription) vndbDescription.classList.add("hidden"); // Hide description instantly
+    }
+    document.body.classList.remove("vndb-mode");
+    if (backgroundLayer) {
+      backgroundLayer.style.backgroundImage = "none";
+    }
+  }
+
   clearUI();
 
   resultsDiv.classList.add(
@@ -330,9 +392,63 @@ async function handleSearchSubmit(e) {
 
       let totalTasks = 0;
 
+      // Start the main search stream. It will run in the background.
       searchGameStream(searchParams, {
         onTotal: (total) => {
           totalTasks = total;
+          fetchVndbData(gameName).then(vndbResult => {
+            console.log("[DEBUG] VNDB fetch completed. Processing result.");
+            console.log("[DEBUG] Received from VNDB:", vndbResult);
+
+            if (vndbResult && vndbResult.names && vndbResult.names.length > 0) {
+              bgmBestMatches = vndbResult.names;
+              vndbInfo = {
+                mainName: vndbResult.mainName,
+                mainImageUrl: vndbResult.mainImageUrl,
+                screenshotUrl: vndbResult.screenshotUrl,
+                description: vndbResult.description,
+              };
+              // Now that we have the names, immediately re-highlight any existing cards.
+              console.log("[DEBUG] Applying highlights based on VNDB names:", bgmBestMatches);
+              highlightBestMatches();
+
+              // --- Fetch External Links ---
+              if (vndbInfo.mainName) {
+                fetchVndbExtLinks(vndbInfo.mainName);
+              }
+
+              // --- Trigger Animation ---
+              if (vndbInfo.mainImageUrl && vndbImage) {
+                vndbImage.src = vndbInfo.mainImageUrl;
+              }
+              if (vndbInfo.description && vndbDescription) {
+                vndbDescription.textContent = vndbInfo.description;
+                vndbDescription.classList.remove("hidden"); // Make description visible again
+              }
+              if (vndbInfo.mainName && vndbTitle) {
+               vndbTitle.textContent = vndbInfo.mainName;
+               if (vndbTitle) vndbTitle.classList.remove("hidden"); // Make title visible again
+              }
+              if (vndbInfo.screenshotUrl && backgroundLayer) {
+                // Preload the image before fading to it
+                const img = new Image();
+                img.onload = () => {
+                  backgroundLayer.style.backgroundImage = `url(${vndbInfo.screenshotUrl})`;
+                };
+                img.src = vndbInfo.screenshotUrl;
+              }
+              // Ensure panel is visible before class is added to trigger animation
+              if (vndbInfoPanel) vndbInfoPanel.classList.remove("hidden");
+              document.body.classList.add("vndb-mode");
+              isFirstSearch = false; // Mark that the first search has happened
+
+            } else {
+              console.log("[DEBUG] No exact match from VNDB or empty names list. Skipping highlight.");
+            }
+          }).catch(err => {
+            console.error("An error occurred during the VNDB fetch:", err);
+            // Don't show error to user for this, as it's an enhancement
+          });
         },
         onProgress: (progress) => {
           if (progressBar && totalTasks > 0) {
@@ -347,12 +463,14 @@ async function handleSearchSubmit(e) {
           }
         },
         onResult: (result) => {
-          platformResults.set(result.name, {
+          const platformData = {
             ...result,
             items: result.items || [],
             currentPage: 1,
-          });
-          const platformCard = createPlatformCard(result, true);
+          };
+          platformResults.set(result.name, platformData);
+          // The card is created here. It will be highlighted if bgmBestMatches is already populated.
+          const platformCard = createPlatformCard(platformData, true);
           resultsDiv.appendChild(platformCard);
           updateSiteNavigation(); // Update navigation visibility and content
         },
@@ -370,9 +488,14 @@ async function handleSearchSubmit(e) {
           setLoadingState(false);
         },
       }).catch((err) => {
-        showError(err.message || "发生未知错误");
-        setLoadingState(false);
+        // This catch is for the searchGameStream promise itself
+        console.error("Error in searchGameStream:", err);
+        if (searchBtn.disabled) {
+          setLoadingState(false);
+          showError(err.message || "流式搜索发生未知错误");
+        }
       });
+
     },
     { once: true }
   );
@@ -507,7 +630,9 @@ function updateSiteNavigation() {
     );
     return;
   } else {
-    siteNavigationDiv.classList.remove("hidden");
+    if (!isNavManuallyHidden) {
+      siteNavigationDiv.classList.remove("hidden");
+    }
     siteNavigationDiv.classList.add("animate__fadeInUp"); // Re-add entrance animation
     siteNavigationDiv.classList.remove("animate__fadeOutDown"); // Ensure fadeOut is removed
     console.log(
@@ -629,7 +754,12 @@ function createPlatformCard(result, withAnimation = true) {
                       item.name === ".bzEmpty" || !item.name
                         ? "未知文件"
                         : item.name;
-                    return `<li class="group transition hover:bg-indigo-50 flex flex-col px-5 py-3">
+                    
+                    // Check if the current item's name is one of the best matches, ONLY on the first page.
+                    const isBestMatch = result.currentPage === 1 && bgmBestMatches.some(matchName => displayName.includes(matchName));
+                    const bestMatchClass = isBestMatch ? 'best-match-highlight' : '';
+
+                    return `<li class="group transition hover:bg-indigo-50 flex flex-col px-5 py-3 ${bestMatchClass}">
                                 <a href="${item.url}" target="_blank" class="font-medium text-gray-800 group-hover:text-indigo-700 text-sm flex items-center gap-1" title="访问具体页面">
                                     <span class="flex-1 min-w-0 break-words">${displayName}</span>
                                     <i class="fas fa-arrow-up-right-from-square text-gray-300 group-hover:text-indigo-400 ml-1"></i>
@@ -649,7 +779,7 @@ function createPlatformCard(result, withAnimation = true) {
     const prevDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages;
     paginationHtml = `<div class="px-5 py-3 flex justify-center gap-2 items-center">
-                <button class="prev-page-btn bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${
+                <button class="prev-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${
                   prevDisabled
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-110 active:scale-90"
@@ -659,7 +789,7 @@ function createPlatformCard(result, withAnimation = true) {
                 <span class="text-sm font-semibold text-indigo-700 px-3 py-1 bg-indigo-100 rounded-full shadow-sm">
                   ${currentPage} / ${totalPages}
                 </span>
-                <button class="next-page-btn bg-indigo-500 text-white p-2 rounded-full hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${
+                <button class="next-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${
                   nextDisabled
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-110 active:scale-90"
@@ -706,10 +836,43 @@ function createPlatformCard(result, withAnimation = true) {
 }
 
 /**
+ * Highlights search result items that are considered "best matches".
+ */
+function highlightBestMatches() {
+  if (bgmBestMatches.length === 0) return;
+
+  // Iterate over each platform card that is currently on its first page
+  platformResults.forEach((platformData, platformName) => {
+    if (platformData.currentPage === 1) {
+      const platformCard = resultsDiv.querySelector(`div[data-platform="${platformName}"]`);
+      if (platformCard) {
+        const listItems = platformCard.querySelectorAll("li[class*='group']");
+        listItems.forEach(item => {
+          const titleElement = item.querySelector('a > span');
+          if (titleElement) {
+            const title = titleElement.textContent;
+            const isMatch = bgmBestMatches.some(matchName => title.includes(matchName));
+            if (isMatch) {
+              item.classList.add('best-match-highlight');
+            } else {
+              item.classList.remove('best-match-highlight');
+            }
+          }
+        });
+      }
+    }
+  });
+}
+
+/**
  * 重置/清空UI界面
  */
 function clearUI() {
   resultsDiv.innerHTML = "";
+
+  // Clear external link buttons
+  const extLinksContainer = document.getElementById("ext-links-container");
+  if (extLinksContainer) extLinksContainer.innerHTML = "";
 
   isNavCollapsed = false;
   updateNavigationLayout(); // This will call updateSiteNavigation which will hide the nav if platformResults is empty
@@ -752,6 +915,12 @@ function showError(message) {
 function setLoadingState(isLoading) {
   if (!searchBtn || !searchIcon) return;
 
+  // Always clear any existing cooldown interval when state changes
+  if (cooldownInterval) {
+    clearInterval(cooldownInterval);
+    cooldownInterval = null;
+  }
+
   const originalIconClass = searchIcon.dataset.originalClass || "fas fa-search";
   if (isLoading) {
     if (!searchIcon.dataset.originalClass) {
@@ -770,25 +939,29 @@ function setLoadingState(isLoading) {
     searchBtn.disabled = false;
     searchBtn.classList.remove("active");
     searchIcon.className = originalIconClass;
-    if (searchBtnText) {
+
+    const updateCooldownText = () => {
       const currentTime = Date.now();
       const timeLeft = Math.ceil(
         (SEARCH_COOLDOWN_MS - (currentTime - lastSearchTime)) / 1000
       );
+
       if (timeLeft > 0 && lastSearchTime !== 0) {
-        // Only show cooldown if a search has actually happened
-        searchBtnText.textContent = `冷却中 (${timeLeft}s)`;
-        // Re-enable button after cooldown
-        setTimeout(() => {
-          if (!searchBtn.disabled) {
-            // Check if not already disabled by another process
-            searchBtnText.textContent = "开始搜索";
-          }
-        }, timeLeft * 1000);
+        if (searchBtnText) searchBtnText.textContent = `冷却中 (${timeLeft}s)`;
+        searchBtn.disabled = true; // Ensure button is disabled during cooldown
       } else {
-        searchBtnText.textContent = "开始搜索";
+        if (searchBtnText) searchBtnText.textContent = "开始搜索";
+        searchBtn.disabled = false;
+        if (cooldownInterval) {
+          clearInterval(cooldownInterval);
+          cooldownInterval = null;
+        }
       }
-    }
+    };
+
+    updateCooldownText(); // Initial call
+    cooldownInterval = setInterval(updateCooldownText, 1000); // Update every second
+
     if (progressBar) {
       progressBar.classList.remove("animate__fadeIn");
       progressBar.classList.add("animate__fadeOut");
@@ -876,8 +1049,8 @@ async function searchGameStream(
             if (onProgress) onProgress(data.progress);
             if (data.result && onResult) onResult(data.result);
           } else if (data.done && onDone) {
-            onDone();
-            return;
+           onDone();
+           return;
           }
         } catch (e) {
           console.error("无法解析JSON行:", line, e);
@@ -893,6 +1066,180 @@ async function searchGameStream(
   }
 }
 
+/**
+ * Fetches data from the VNDB API.
+ * @param {string} gameName The name of the game to search for.
+ * @returns {Promise<object|null>} An object with names and other info, or null.
+ */
+async function fetchVndbData(gameName) {
+  console.log(`[DEBUG] Fetching VNDB data for: "${gameName}"`);
+  const url = "https://api.vndb.org/kana/vn";
+  const body = {
+    filters: ["search", "=", gameName],
+    fields: "titles.title, titles.lang, aliases, title, image.url, screenshots.url, description",
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    // Clone the response to log it, so the body can be read again later
+    const responseForLog = response.clone();
+    console.log("[DEBUG] Raw VNDB response:", await responseForLog.text());
+
+    if (!response.ok) {
+      console.error(`[DEBUG] VNDB API error! Status: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log("[DEBUG] Parsed VNDB JSON data:", data);
+
+    // If 'more' is true, it's not an exact match, so we ignore it.
+    console.log(`[DEBUG] VNDB 'more' flag is: ${data.more}.`);
+    if (data.more || !data.results || data.results.length === 0) {
+      console.log("[DEBUG] VNDB returned no exact match or no results. Aborting.");
+      return null;
+    }
+
+    const result = data.results[0];
+    const names = [];
+
+    // Collect all aliases
+    if (Array.isArray(result.aliases)) {
+      result.aliases.forEach(alias => names.push(String(alias)));
+    }
+
+    // Collect main title
+    if (result.title) {
+      names.push(result.title);
+    }
+
+    // Collect all alternative titles
+    let mainName = result.title || ""; // Default main name
+    let zhName = "";
+    let jaName = "";
+
+    if (Array.isArray(result.titles)) {
+      result.titles.forEach((titleEntry) => {
+        if (titleEntry.title) {
+          names.push(titleEntry.title);
+          if (titleEntry.lang === 'zh-Hans') {
+            zhName = titleEntry.title;
+          } else if (titleEntry.lang === 'ja') {
+            jaName = titleEntry.title;
+          }
+        }
+      });
+    }
+    
+    // Determine the main name based on priority
+    if (zhName) {
+      mainName = zhName;
+    } else if (jaName) {
+      mainName = jaName;
+    }
+
+    // Extract image URLs
+    const mainImageUrl = result.image?.url || null;
+    const screenshotUrl = result.screenshots?.[0]?.url || null;
+    const description = result.description || null;
+
+    const finalResult = {
+      names: [...new Set(names)], // Return unique names
+      mainName,
+      mainImageUrl,
+      screenshotUrl,
+      description,
+    };
+
+    console.log("[DEBUG] Extracted Names:", finalResult.names);
+    console.log("[DEBUG] Determined Main Name:", finalResult.mainName);
+    console.log("[DEBUG] Extracted Main Image URL:", finalResult.mainImageUrl);
+    console.log("[DEBUG] Extracted Screenshot URL:", finalResult.screenshotUrl);
+    console.log("[DEBUG] Extracted Description:", finalResult.description);
+    console.log("[DEBUG] Final VNDB result object:", finalResult);
+
+    return finalResult;
+  } catch (error) {
+    console.error("Failed to fetch or process VNDB data:", error);
+    return null; // Return null on any error
+  }
+}
+
+/**
+ * Fetches the latest commit dates from GitHub repos and displays them as version.
+ */
+async function fetchAndDisplayVersion() {
+  const versionContainer = document.getElementById("version-container");
+  const versionElement = document.getElementById("version-display");
+  if (!versionElement || !versionContainer) return;
+
+  const backendUrl = "https://api.github.com/repos/Moe-Sakura/SearchGal/commits?per_page=1";
+  const frontendUrl = "https://api.github.com/repos/Moe-Sakura/frontend/commits?per_page=1";
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "ERROR";
+    const date = new Date(dateString);
+    const year = String(date.getFullYear()).slice(-2);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
+  };
+
+  try {
+    const [backendResponse, frontendResponse] = await Promise.all([
+      fetch(backendUrl),
+      fetch(frontendUrl)
+    ]);
+
+    if (!backendResponse.ok || !frontendResponse.ok) {
+      throw new Error("Failed to fetch version from GitHub API");
+    }
+
+    const backendData = await backendResponse.json();
+    const frontendData = await frontendResponse.json();
+
+    const backendDate = backendData[0]?.commit?.committer?.date;
+    const frontendDate = frontendData[0]?.commit?.committer?.date;
+
+    const backendVersion = formatDate(backendDate);
+    const frontendVersion = formatDate(frontendDate);
+
+    let isShowingBackend = true;
+
+    const updateVersionDisplay = () => {
+      if (isShowingBackend) {
+        versionElement.textContent = `后端 ${backendVersion}`;
+        versionContainer.classList.remove("bg-red-200", "text-red-800");
+        versionContainer.classList.add("bg-green-200", "text-green-800");
+        versionElement.href = "https://github.com/Moe-Sakura/SearchGal/blob/main/version.md";
+      } else {
+        versionElement.textContent = `前端 ${frontendVersion}`;
+        versionContainer.classList.remove("bg-green-200", "text-green-800");
+        versionContainer.classList.add("bg-red-200", "text-red-800");
+        versionElement.href = "https://github.com/Moe-Sakura/frontend/commits/main";
+      }
+      isShowingBackend = !isShowingBackend;
+    };
+
+    // Initial display
+    updateVersionDisplay();
+    
+    // Start interval to switch every 5 seconds
+    setInterval(updateVersionDisplay, 5000);
+
+  } catch (error) {
+    console.error("Error fetching version:", error);
+    versionElement.textContent = "版本获取失败";
+  }
+}
+
 function debounce(func, delay) {
   let timeout;
   return function () {
@@ -901,4 +1248,137 @@ function debounce(func, delay) {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(context, args), delay);
   };
+}
+
+/**
+ * Fetches external links from VNDB for a given game title.
+ * @param {string} mainName The main title of the game.
+ */
+async function fetchVndbExtLinks(mainName) {
+  const url = "https://api.vndb.org/kana/release";
+  const body = {
+    filters: ["search", "=", mainName],
+    fields: "title, extlinks.url",
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error(`VNDB extlink API request failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("[DEBUG] Received extlinks from VNDB:", data);
+
+    if (data.results && data.results.length > 0) {
+      const allUrls = data.results.flatMap(
+        (result) => result.extlinks?.map((link) => link.url) || []
+      );
+      renderExtLinkButtons(allUrls);
+    }
+  } catch (error) {
+    console.error("Error fetching VNDB external links:", error);
+  }
+}
+
+/**
+ * Renders categorized external link buttons based on URLs.
+ * @param {string[]} urls A list of all external URLs.
+ */
+function renderExtLinkButtons(urls) {
+  const container = document.getElementById("ext-links-container");
+  if (!container) return;
+  container.innerHTML = ""; // Clear previous buttons
+
+  const steamUrls = urls.filter((url) => url.includes("store.steampowered.com"));
+  const dlsiteUrls = urls.filter((url) => url.includes("dlsite"));
+  const officialUrls = urls.filter(
+    (url) =>
+      url.includes("shiravune.com") ||
+      url.includes("mangagamer.com") ||
+      url.includes("yuzu-soft.com") ||
+      url.includes("hikarifield")
+  );
+  const otherUrls = urls.filter(
+    (url) =>
+      !steamUrls.includes(url) &&
+      !dlsiteUrls.includes(url) &&
+      !officialUrls.includes(url) &&
+      !url.includes("steamdb")
+  );
+
+  const categories = [
+    {
+      name: "Steam",
+      urls: steamUrls,
+      color: "bg-blue-500",
+      icon: "fab fa-steam",
+    },
+    {
+      name: "Dlsite",
+      urls: dlsiteUrls,
+      color: "bg-pink-500",
+      icon: "fas fa-shopping-cart",
+    },
+    {
+      name: "Official",
+      urls: officialUrls,
+      color: "bg-orange-500",
+      icon: "fas fa-globe",
+    },
+    {
+      name: "Other",
+      urls: otherUrls,
+      color: "bg-gray-400",
+      icon: "fas fa-link",
+    },
+  ];
+
+  categories.forEach((category) => {
+    if (category.urls.length > 0) {
+      const buttonWrapper = document.createElement("div");
+      buttonWrapper.className = "relative";
+
+      const button = document.createElement("button");
+      button.className = `w-10 h-10 rounded-lg ${category.color} text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform`;
+      button.innerHTML = `<i class="${category.icon} text-xl"></i>`;
+
+      if (category.urls.length === 1) {
+        button.addEventListener("click", () => {
+          window.open(category.urls[0], "_blank");
+        });
+      } else {
+        const popup = document.createElement("div");
+        popup.className =
+          "absolute left-full top-0 ml-2 w-max bg-white rounded-md shadow-xl p-2 z-20 hidden flex-col gap-1";
+        category.urls.forEach((url) => {
+          const link = document.createElement("a");
+          link.href = url;
+          link.target = "_blank";
+          link.className =
+            "flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 p-1 rounded";
+          link.innerHTML = `<i class="fas fa-external-link-alt text-gray-400"></i> ${
+            new URL(url).hostname
+          }`;
+          popup.appendChild(link);
+        });
+        buttonWrapper.appendChild(popup);
+
+        button.addEventListener("mouseenter", () => popup.classList.remove("hidden"));
+        button.addEventListener("mouseleave", () => popup.classList.add("hidden"));
+        popup.addEventListener("mouseenter", () => popup.classList.remove("hidden"));
+        popup.addEventListener("mouseleave", () => popup.classList.add("hidden"));
+      }
+
+      buttonWrapper.appendChild(button);
+      container.appendChild(buttonWrapper);
+    }
+  });
 }
