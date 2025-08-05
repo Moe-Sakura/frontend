@@ -111,7 +111,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // Store the original background image
   // The original background is no longer set on load.
   if (backgroundLayer) {
-      backgroundLayer.style.backgroundImage = 'none';
+    backgroundLayer.style.backgroundImage = "none";
   }
 
   // 从 URL 获取 API 参数并填充输入框
@@ -206,10 +206,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   fetchAndDisplayVersion(); // Fetch and display version on page load
 
-  const lockViewBtn = document.getElementById('lock-view-btn');
+  const lockViewBtn = document.getElementById("lock-view-btn");
   if (lockViewBtn) {
-    lockViewBtn.addEventListener('click', () => {
-      document.body.classList.toggle('locked-mode');
+    lockViewBtn.addEventListener("click", () => {
+      document.body.classList.toggle("locked-mode");
       lockViewBtn.blur();
     });
   }
@@ -337,7 +337,7 @@ async function handleSearchSubmit(e) {
   platformResults.clear();
   bgmBestMatches = []; // Reset best matches on new search
   vndbInfo = {}; // Reset VNDB info
-  
+
   // Reset animation state if it's active
   if (document.body.classList.contains("vndb-mode")) {
     if (!isFirstSearch) {
@@ -409,88 +409,100 @@ async function handleSearchSubmit(e) {
       searchGameStream(searchParams, {
         onTotal: (total) => {
           totalTasks = total;
-          fetchVndbData(gameName).then(vndbResult => {
-            console.log("[DEBUG] VNDB fetch completed. Processing result.");
-            console.log("[DEBUG] Received from VNDB:", vndbResult);
+          fetchVndbData(gameName)
+            .then((vndbResult) => {
+              console.log("[DEBUG] VNDB fetch completed. Processing result.");
+              console.log("[DEBUG] Received from VNDB:", vndbResult);
 
-            if (vndbResult && vndbResult.names && vndbResult.names.length > 0) {
-              bgmBestMatches = vndbResult.names;
-              vndbInfo = {
-                mainName: vndbResult.mainName,
-                mainImageUrl: vndbResult.mainImageUrl,
-                screenshotUrl: vndbResult.screenshotUrl,
-                description: vndbResult.description,
-              };
-              // Now that we have the names, immediately re-highlight any existing cards.
-              console.log("[DEBUG] Applying highlights based on VNDB names:", bgmBestMatches);
-              highlightBestMatches();
+              if (
+                vndbResult &&
+                vndbResult.names &&
+                vndbResult.names.length > 0
+              ) {
+                bgmBestMatches = vndbResult.names;
+                vndbInfo = {
+                  mainName: vndbResult.mainName,
+                  mainImageUrl: vndbResult.mainImageUrl,
+                  screenshotUrl: vndbResult.screenshotUrl,
+                  description: vndbResult.description,
+                };
+                // Now that we have the names, immediately re-highlight any existing cards.
+                console.log(
+                  "[DEBUG] Applying highlights based on VNDB names:",
+                  bgmBestMatches
+                );
+                highlightBestMatches();
 
-              // --- Fetch External Links ---
-              if (vndbInfo.mainName) {
-                fetchVndbExtLinks(vndbInfo.mainName);
-              }
-
-              // --- Trigger Animation (only if panel exists) ---
-              if (vndbInfoPanel) {
-                if (vndbInfo.mainImageUrl && vndbImage) {
-                  vndbImage.src = vndbInfo.mainImageUrl;
-                  vndbImage.classList.remove("hidden");
-                } else if (vndbImage) {
-                  vndbImage.classList.add("hidden");
+                // --- Fetch External Links ---
+                if (vndbInfo.mainName) {
+                  fetchVndbExtLinks(vndbInfo.mainName);
                 }
 
-                if (vndbInfo.description && vndbDescription) {
-                  vndbDescription.textContent = vndbInfo.description;
-                  vndbDescription.classList.remove("hidden");
-                } else if (vndbDescription) {
-                  vndbDescription.classList.add("hidden");
-                }
-
-                if (vndbInfo.mainName && vndbTitle) {
-                  vndbTitle.textContent = vndbInfo.mainName;
-                  vndbTitle.classList.remove("hidden");
-                } else if (vndbTitle) {
-                  vndbTitle.classList.add("hidden");
-                }
-
-                if (vndbInfo.screenshotUrl && backgroundLayer) {
-                  const img = new Image();
-                  img.onload = () => {
-                    backgroundLayer.style.backgroundImage = `url(${vndbInfo.screenshotUrl})`;
-                    document.body.classList.add("vndb-mode");
-                    const mainContainer = document.getElementById("main-container");
-                    if (mainContainer) {
-                      mainContainer.classList.remove("bg-white/95");
-                      mainContainer.classList.add("bg-white");
-                    }
-                  };
-                  img.src = vndbInfo.screenshotUrl;
-                } else {
-                  backgroundLayer.style.backgroundImage = "none";
-                  document.body.classList.remove("vndb-mode");
-                  const mainContainer = document.getElementById("main-container");
-                  if (mainContainer) {
-                    mainContainer.classList.remove("bg-white");
-                    mainContainer.classList.add("bg-white/95");
+                // --- Trigger Animation (only if panel exists) ---
+                if (vndbInfoPanel) {
+                  if (vndbInfo.mainImageUrl && vndbImage) {
+                    vndbImage.src = vndbInfo.mainImageUrl;
+                    vndbImage.classList.remove("hidden");
+                  } else if (vndbImage) {
+                    vndbImage.classList.add("hidden");
                   }
+
+                  if (vndbInfo.description && vndbDescription) {
+                    vndbDescription.textContent = vndbInfo.description;
+                    vndbDescription.classList.remove("hidden");
+                  } else if (vndbDescription) {
+                    vndbDescription.classList.add("hidden");
+                  }
+
+                  if (vndbInfo.mainName && vndbTitle) {
+                    vndbTitle.textContent = vndbInfo.mainName;
+                    vndbTitle.classList.remove("hidden");
+                  } else if (vndbTitle) {
+                    vndbTitle.classList.add("hidden");
+                  }
+
+                  if (vndbInfo.screenshotUrl && backgroundLayer) {
+                    const img = new Image();
+                    img.onload = () => {
+                      backgroundLayer.style.backgroundImage = `url(${vndbInfo.screenshotUrl})`;
+                      document.body.classList.add("vndb-mode");
+                      const mainContainer =
+                        document.getElementById("main-container");
+                      if (mainContainer) {
+                        mainContainer.classList.remove("bg-white/95");
+                        mainContainer.classList.add("bg-white");
+                      }
+                    };
+                    img.src = vndbInfo.screenshotUrl;
+                  } else {
+                    backgroundLayer.style.backgroundImage = "none";
+                    document.body.classList.remove("vndb-mode");
+                    const mainContainer =
+                      document.getElementById("main-container");
+                    if (mainContainer) {
+                      mainContainer.classList.remove("bg-white");
+                      mainContainer.classList.add("bg-white/95");
+                    }
+                  }
+
+                  // Show panel only if there is something to display
+                  const hasContent =
+                    vndbInfo.mainImageUrl ||
+                    vndbInfo.description ||
+                    vndbInfo.mainName;
+                  vndbInfoPanel.classList.toggle("hidden", !hasContent);
                 }
-
-                // Show panel only if there is something to display
-                const hasContent =
-                  vndbInfo.mainImageUrl ||
-                  vndbInfo.description ||
-                  vndbInfo.mainName;
-                vndbInfoPanel.classList.toggle("hidden", !hasContent);
+                isFirstSearch = false;
+              } else {
+                console.log(
+                  "[DEBUG] No exact match from VNDB or empty names list. Skipping highlight."
+                );
               }
-              isFirstSearch = false;
-
-            } else {
-              console.log("[DEBUG] No exact match from VNDB or empty names list. Skipping highlight.");
-            }
-          }).catch(err => {
-            console.error("An error occurred during the VNDB fetch:", err);
-            // Don't show error to user for this, as it's an enhancement
-          });
+            })
+            .catch((err) => {
+              console.error("An error occurred during the VNDB fetch:", err);
+              // Don't show error to user for this, as it's an enhancement
+            });
         },
         onProgress: (progress) => {
           if (progressBar && totalTasks > 0) {
@@ -537,7 +549,6 @@ async function handleSearchSubmit(e) {
           showError(err.message || "流式搜索发生未知错误");
         }
       });
-
     },
     { once: true }
   );
@@ -796,10 +807,16 @@ function createPlatformCard(result, withAnimation = true) {
                       item.name === ".bzEmpty" || !item.name
                         ? "未知文件"
                         : item.name;
-                    
+
                     // Check if the current item's name is one of the best matches, ONLY on the first page.
-                    const isBestMatch = result.currentPage === 1 && bgmBestMatches.some(matchName => displayName.includes(matchName));
-                    const bestMatchClass = isBestMatch ? 'best-match-highlight' : '';
+                    const isBestMatch =
+                      result.currentPage === 1 &&
+                      bgmBestMatches.some((matchName) =>
+                        displayName.includes(matchName)
+                      );
+                    const bestMatchClass = isBestMatch
+                      ? "best-match-highlight"
+                      : "";
 
                     return `<li class="group transition hover:bg-indigo-50 flex flex-col px-5 py-3 ${bestMatchClass}">
                                 <a href="${item.url}" target="_blank" class="font-medium text-gray-800 group-hover:text-indigo-700 text-sm flex items-center gap-1" title="访问具体页面">
@@ -886,18 +903,22 @@ function highlightBestMatches() {
   // Iterate over each platform card that is currently on its first page
   platformResults.forEach((platformData, platformName) => {
     if (platformData.currentPage === 1) {
-      const platformCard = resultsDiv.querySelector(`div[data-platform="${platformName}"]`);
+      const platformCard = resultsDiv.querySelector(
+        `div[data-platform="${platformName}"]`
+      );
       if (platformCard) {
         const listItems = platformCard.querySelectorAll("li[class*='group']");
-        listItems.forEach(item => {
-          const titleElement = item.querySelector('a > span');
+        listItems.forEach((item) => {
+          const titleElement = item.querySelector("a > span");
           if (titleElement) {
             const title = titleElement.textContent;
-            const isMatch = bgmBestMatches.some(matchName => title.includes(matchName));
+            const isMatch = bgmBestMatches.some((matchName) =>
+              title.includes(matchName)
+            );
             if (isMatch) {
-              item.classList.add('best-match-highlight');
+              item.classList.add("best-match-highlight");
             } else {
-              item.classList.remove('best-match-highlight');
+              item.classList.remove("best-match-highlight");
             }
           }
         });
@@ -1091,8 +1112,8 @@ async function searchGameStream(
             if (onProgress) onProgress(data.progress);
             if (data.result && onResult) onResult(data.result);
           } else if (data.done && onDone) {
-           onDone();
-           return;
+            onDone();
+            return;
           }
         } catch (e) {
           console.error("无法解析JSON行:", line, e);
@@ -1118,7 +1139,8 @@ async function fetchVndbData(gameName) {
   const url = `${VNDB_API_BASE_URL}/vn`;
   const body = {
     filters: ["search", "=", gameName],
-    fields: "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description",
+    fields:
+      "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description",
   };
 
   try {
@@ -1145,7 +1167,9 @@ async function fetchVndbData(gameName) {
     // If 'more' is true, it's not an exact match, so we ignore it.
     console.log(`[DEBUG] VNDB 'more' flag is: ${data.more}.`);
     if (data.more || !data.results || data.results.length === 0) {
-      console.log("[DEBUG] VNDB returned no exact match or no results. Aborting.");
+      console.log(
+        "[DEBUG] VNDB returned no exact match or no results. Aborting."
+      );
       return null;
     }
 
@@ -1154,7 +1178,7 @@ async function fetchVndbData(gameName) {
 
     // Collect all aliases
     if (Array.isArray(result.aliases)) {
-      result.aliases.forEach(alias => names.push(String(alias)));
+      result.aliases.forEach((alias) => names.push(String(alias)));
     }
 
     // Collect main title
@@ -1171,15 +1195,15 @@ async function fetchVndbData(gameName) {
       result.titles.forEach((titleEntry) => {
         if (titleEntry.title) {
           names.push(titleEntry.title);
-          if (titleEntry.lang === 'zh-Hans') {
+          if (titleEntry.lang === "zh-Hans") {
             zhName = titleEntry.title;
-          } else if (titleEntry.lang === 'ja') {
+          } else if (titleEntry.lang === "ja") {
             jaName = titleEntry.title;
           }
         }
       });
     }
-    
+
     // Determine the main name based on priority
     if (zhName) {
       mainName = zhName;
@@ -1188,7 +1212,10 @@ async function fetchVndbData(gameName) {
     }
 
     // Extract image URLs
-    const mainImageUrl = (result.image && result.image.sexual <= 1 && result.image.violence === 0) ? result.image.url : null;
+    const mainImageUrl =
+      result.image && result.image.sexual <= 1 && result.image.violence === 0
+        ? result.image.url
+        : null;
     const sortedScreenshots = result.screenshots
       ? [...result.screenshots].sort((a, b) => b.votecount - a.votecount)
       : [];
@@ -1227,22 +1254,24 @@ async function fetchAndDisplayVersion() {
   const versionElement = document.getElementById("version-display");
   if (!versionElement || !versionContainer) return;
 
-  const backendUrl = "https://api.github.com/repos/Moe-Sakura/SearchGal/commits?per_page=1";
-  const frontendUrl = "https://api.github.com/repos/Moe-Sakura/frontend/commits?per_page=1";
+  const backendUrl =
+    "https://api.github.com/repos/Moe-Sakura/SearchGal/commits?per_page=1";
+  const frontendUrl =
+    "https://api.github.com/repos/Moe-Sakura/frontend/commits?per_page=1";
 
   const formatDate = (dateString) => {
     if (!dateString) return "ERROR";
     const date = new Date(dateString);
     const year = String(date.getFullYear()).slice(-2);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}${month}${day}`;
   };
 
   try {
     const [backendResponse, frontendResponse] = await Promise.all([
       fetch(backendUrl),
-      fetch(frontendUrl)
+      fetch(frontendUrl),
     ]);
 
     if (!backendResponse.ok || !frontendResponse.ok) {
@@ -1265,22 +1294,23 @@ async function fetchAndDisplayVersion() {
         versionElement.textContent = `后端 ${backendVersion}`;
         versionContainer.classList.remove("bg-red-200", "text-red-800");
         versionContainer.classList.add("bg-green-200", "text-green-800");
-        versionElement.href = "https://github.com/Moe-Sakura/SearchGal/blob/main/version.md";
+        versionElement.href =
+          "https://github.com/Moe-Sakura/SearchGal/blob/main/version.md";
       } else {
         versionElement.textContent = `前端 ${frontendVersion}`;
         versionContainer.classList.remove("bg-green-200", "text-green-800");
         versionContainer.classList.add("bg-red-200", "text-red-800");
-        versionElement.href = "https://github.com/Moe-Sakura/frontend/commits/main";
+        versionElement.href =
+          "https://github.com/Moe-Sakura/frontend/commits/main";
       }
       isShowingBackend = !isShowingBackend;
     };
 
     // Initial display
     updateVersionDisplay();
-    
+
     // Start interval to switch every 5 seconds
     setInterval(updateVersionDisplay, 5000);
-
   } catch (error) {
     console.error("Error fetching version:", error);
     versionElement.textContent = "版本获取失败";
@@ -1318,7 +1348,9 @@ async function fetchVndbExtLinks(mainName) {
     });
 
     if (!response.ok) {
-      throw new Error(`VNDB extlink API request failed: ${response.statusText}`);
+      throw new Error(
+        `VNDB extlink API request failed: ${response.statusText}`
+      );
     }
 
     const data = await response.json();
@@ -1344,7 +1376,9 @@ function renderExtLinkButtons(urls) {
   if (!container) return;
   container.innerHTML = ""; // Clear previous buttons
 
-  const steamUrls = urls.filter((url) => url.includes("store.steampowered.com"));
+  const steamUrls = urls.filter((url) =>
+    url.includes("store.steampowered.com")
+  );
   const dlsiteUrls = urls.filter((url) => url.includes("dlsite"));
   const officialUrls = urls.filter(
     (url) =>
@@ -1418,10 +1452,18 @@ function renderExtLinkButtons(urls) {
         });
         buttonWrapper.appendChild(popup);
 
-        button.addEventListener("mouseenter", () => popup.classList.remove("hidden"));
-        button.addEventListener("mouseleave", () => popup.classList.add("hidden"));
-        popup.addEventListener("mouseenter", () => popup.classList.remove("hidden"));
-        popup.addEventListener("mouseleave", () => popup.classList.add("hidden"));
+        button.addEventListener("mouseenter", () =>
+          popup.classList.remove("hidden")
+        );
+        button.addEventListener("mouseleave", () =>
+          popup.classList.add("hidden")
+        );
+        popup.addEventListener("mouseenter", () =>
+          popup.classList.remove("hidden")
+        );
+        popup.addEventListener("mouseleave", () =>
+          popup.classList.add("hidden")
+        );
       }
 
       buttonWrapper.appendChild(button);
