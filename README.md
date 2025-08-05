@@ -1,6 +1,4 @@
-# frontend
-
-SearchGal 前端
+# SearchGal Frontend
 
 To run the project locally, first install the dependencies:
 
