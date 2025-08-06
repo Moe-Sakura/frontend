@@ -20,6 +20,51 @@
       padding: 0;
     }
 
+    /* Custom responsive variables */
+    :root {
+      /* 基准宽度为 2560px (2K) */
+      --base-width: 2560px;
+
+      /* 白色容器宽度：原 max-w-4xl (896px) */
+      --main-container-width: clamp(550px, 35vw, 896px);
+
+      /* 游戏标题大小 */
+      --game-title-font-size: clamp(22px, 1.8vw, 34px); /* 调整以放大 */
+      /* VNDB 标题大小 */
+      --vndb-title-font-size: clamp(20px, 1.5vw, 32px);
+      /* 游戏描述字体大小 */
+      --vndb-description-font-size: clamp(14px, 0.8vw, 18px); /* 调整以放大 */
+      /* AI 文本框字体大小 */
+      --ai-text-font-size: clamp(14px, 0.8vw, 18px);
+      /* 章节标题大小 */
+      --section-title-font-size: clamp(20px, 1.5vw, 26px); /* 调整以放大 */
+      /* 普通文字大小 (咱家的使用须知内容) */
+      --general-text-font-size: clamp(14px, 0.8vw, 18px);
+
+      /* VNDB 信息面板宽度：原 max-w-md (448px) */
+      --vndb-info-panel-width: clamp(300px, 18vw, 448px);
+      /* 游戏描述文本框最大高度 */
+      --vndb-description-max-height: clamp(120px, 15vh, 300px);
+      /* VNDB 信息面板顶部位置：原 top-32 (128px) */
+      --vndb-info-panel-top: clamp(100px, 10vh, 150px); /* 调整以根据分辨率向下调整 */
+      /* VNDB 标题底部外边距 */
+      --vndb-title-margin-bottom: clamp(20px, 3vw, 60px); /* 调整以随着分辨率变化更大 */
+      /* VNDB 标题底部外边距 */
+      --vndb-title-margin-bottom: clamp(20px, 2vw, 40px); /* 调整以减小间距 */
+
+      /* scrollable-content 宽度：原 max-w-4xl (896px) */
+      --scrollable-content-width: clamp(700px, 35vw, 896px);
+      /* scrollable-content 偏移：原 translate-x-[calc(16.666667%_+_4rem)] */
+      --scrollable-content-translate-x: calc(clamp(10%, 8.333333vw, 16.666667%) + clamp(2rem, 2vw, 4rem));
+    }
+
+    @media (max-width: 767px) { /* For mobile viewports */
+      :root {
+        --main-container-width: 100%;
+        --scrollable-content-translate-x: 0;
+      }
+    }
+
     /* Custom animations and styles that are difficult to replicate with Tailwind */
     @keyframes glowing-border {
       0% {
@@ -221,23 +266,28 @@
   </div>
   <main class="flex-1 flex flex-col min-h-screen">
     <div id="content-wrapper"
-      class="flex justify-center w-full max-w-7xl mx-auto gap-8 transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none">
+      class="flex justify-center w-full mx-auto gap-8 transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none">
       <div id="vndb-info-panel"
-        class="hidden md:block w-0 max-w-md p-0 flex-shrink-0 opacity-0 transition-opacity duration-800 ease-in-out transform transition-transform duration-800 ease-in-out group-[.vndb-mode]/body:w-1/2 group-[.vndb-mode]/body:opacity-100 group-[.vndb-mode]/body:p-2 group-[.vndb-mode]/body:sticky group-[.vndb-mode]/body:top-32 group-[.vndb-mode]/body:self-start group-[.vndb-mode]/body:max-md:hidden">
+        class="hidden md:block w-0 p-0 flex-shrink-0 opacity-0 transition-opacity duration-800 ease-in-out transform transition-transform duration-800 ease-in-out group-[.vndb-mode]/body:w-[var(--vndb-info-panel-width)] group-[.vndb-mode]/body:opacity-100 group-[.vndb-mode]/body:p-2 group-[.vndb-mode]/body:sticky group-[.vndb-mode]/body:top-[var(--vndb-info-panel-top)] group-[.vndb-mode]/body:self-start group-[.vndb-mode]/body:max-md:hidden">
         <div class="relative">
           <div id="ext-links-container" class="absolute top-2 -left-14 flex flex-col gap-2"></div>
           <img id="vndb-image" src="" alt="Game Art" class="rounded-lg shadow-lg w-full h-auto object-contain mb-4">
         </div>
-        <h2 id="vndb-title" class="relative text-4xl font-bold text-white text-center drop-shadow-lg mb-10">
+        <h2 id="vndb-title" class="relative font-bold text-white text-center drop-shadow-lg"
+          style="font-size: var(--vndb-title-font-size); margin-bottom: var(--vndb-title-margin-bottom);">
         </h2>
 
-        <div id="vndb-description" class="text-base text-gray-200 max-h-72 overflow-y-auto pr-2 no-scrollbar"></div>
+        <div id="vndb-description" class="text-base text-gray-200 overflow-y-auto pr-2 no-scrollbar"
+          style="font-size: var(--vndb-description-font-size); max-height: var(--vndb-description-max-height);"></div>
       </div>
       <div id="scrollable-content"
-        class="relative w-full max-w-4xl flex-shrink-0 transition-transform duration-800 ease-in-out group-[.vndb-mode]/body:translate-x-[calc(16.666667%_+_4rem)] group-[.vndb-mode]/body:max-md:translate-x-0">
+        class="relative w-full flex-shrink-0 transition-transform duration-800 ease-in-out group-[.vndb-mode]/body:translate-x-[var(--scrollable-content-translate-x)] group-[.vndb-mode]/body:max-md:translate-x-0"
+        style="max-width: var(--scrollable-content-width);">
         <div id="main-container"
-          class="container mx-auto w-full bg-white/95 rounded-[8px] shadow-xl px-0 py-0 mt-0 z-10 relative flex flex-col transition-all duration-300">
-          <div class="relative px-0 pt-0 pb-0 border-b border-gray-100 overflow-hidden">
+          class="container mx-auto w-full bg-white/95 rounded-[8px] shadow-xl px-0 py-0 z-10 relative flex flex-col transition-all duration-300"
+          style="width: var(--main-container-width); margin-top: var(--main-container-margin-top);">
+          <div class="relative border-b border-gray-100 overflow-hidden"
+            style="padding-top: var(--cover-padding-y); padding-bottom: var(--cover-padding-y); height: var(--cover-image-height);">
             <img src="https://www.loliapi.com/acg/pc/" alt="随图"
               class="w-full object-contain object-center transition-all duration-300 hover:scale-105 hover:brightness-95 draggable"
               draggable="true" />
@@ -245,7 +295,8 @@
           <div
             class="px-12 pt-6 pb-5 bg-gradient-to-r from-indigo-50 via-pink-50 to-yellow-50 text-center flex items-center justify-center min-h-[56px] transition-all duration-300">
             <h1
-              class="text-2xl md:text-3xl font-extrabold text-indigo-700 drop-shadow-lg inline-flex items-center gap-2 md:gap-3 whitespace-nowrap">
+              class="font-extrabold text-indigo-700 drop-shadow-lg inline-flex items-center gap-2 md:gap-3 whitespace-nowrap"
+              style="font-size: var(--game-title-font-size);">
               <i class="fas fa-gamepad text-pink-400"></i>
               Galgame 聚合搜索
             </h1>
@@ -328,10 +379,11 @@
           <div class="results mt-2 px-6" id="results"></div>
           <section class="w-full max-w-4xl mx-auto mt-8">
             <div class="bg-white/95 rounded-[8px] p-6 text-gray-700">
-              <h2 class="text-xl font-bold text-indigo-700 mb-4 inline-flex items-center gap-2">
+              <h2 class="font-bold text-indigo-700 mb-4 inline-flex items-center gap-2"
+                style="font-size: var(--section-title-font-size);">
                 <i class="fas fa-info-circle text-blue-500"></i> 咱家的使用须知
               </h2>
-              <ul class="list-disc list-inside space-y-2 text-sm">
+              <ul class="list-disc list-inside space-y-2" style="font-size: var(--general-text-font-size);">
                 <li>
                   首先，衷心感谢
                   <a href="https://saop.cc/" target="_blank"
@@ -419,7 +471,7 @@
             </div>
           </div>
         </div>
-        <section class="w-full max-w-4xl mx-auto mt-8 mb-8">
+        <section class="mx-auto mt-8 mb-8" style="width: var(--main-container-width);">
           <div id="Comments" class="bg-white/80 rounded-lg shadow p-4 md:p-6 transition-all duration-300"></div>
         </section>
       </div>
@@ -428,7 +480,8 @@
 
   <div id="ai-response-container"
     class="fixed top-1/2 -translate-y-1/2 z-40 opacity-0 transition-opacity duration-500 ease-in-out pointer-events-none">
-    <div id="ai-response-box" class="text-xl text-gray-200 h-full overflow-y-auto p-6 rounded-lg no-scrollbar"></div>
+    <div id="ai-response-box" class="text-xl text-gray-200 h-full overflow-y-auto p-6 rounded-lg no-scrollbar"
+      style="font-size: var(--ai-text-font-size); line-height: 1.8;"></div>
   </div>
 
   <div class="fixed bottom-16 right-3 flex flex-col space-y-3 z-50">
