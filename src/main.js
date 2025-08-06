@@ -1,5 +1,14 @@
 // -- 全局常量与状态 --
 const VNDB_API_BASE_URL = "https://api.vndb.org/kana";
+
+// 针对项目调试者与开发者的提示：
+// -- 下列预置的 API 接口与 ApiKey 仅用于为 SearchGal.Homes 网站正常访客提供 LLM 服务
+// -- 如需进行项目调试，请修改 AI_TRANSLATE 变量为自己的 API 接口与 ApiKey
+// -- 除此以外，ai.searchgal.homes 接口无法为其他任何非正当请求提供 LLM 服务
+const AI_TRANSLATE_API_URL = "https://ai.searchgal.homes/v1/chat/completions";
+const AI_TRANSLATE_API_KEY = "sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e";
+const AI_TRANSLATE_MODEL = "Qwen/Qwen2.5-32B-Instruct";
+
 const ITEMS_PER_PAGE = 10;
 const platformResults = new Map();
 const SEARCH_COOLDOWN_MS = 30 * 1000; // 30 seconds cooldown
@@ -8,6 +17,8 @@ let bgmBestMatches = []; // Array to store best matches from VNDB
 let vndbInfo = {}; // Object to store detailed info from VNDB
 let cooldownInterval = null; // Timer for cooldown countdown
 let isFirstSearch = true; // Track if it's the first search to control animations
+let hasShownViewToggleToast = false; // Track if the view toggle toast has been shown
+let isViewTransitioning = false; // Lock to prevent spamming the view toggle
 
 // -- DOM 元素获取 --
 const searchForm = document.getElementById("searchForm");
@@ -40,44 +51,6 @@ const scrollToTopBtn = document.getElementById("scrollToTopBtn");
 const scrollToCommentsBtn = document.getElementById("scrollToCommentsBtn"); // Get the comments button
 const lockViewBtn = document.getElementById("lock-view-btn");
 
-window.addEventListener("scroll", () => {
-  if (window.scrollY > 200) {
-    // Show buttons after scrolling down 200px
-    scrollToTopBtn.classList.add("flex");
-    scrollToTopBtn.classList.remove("hidden");
-    scrollToCommentsBtn.classList.add("flex"); // Show comments button
-    scrollToCommentsBtn.classList.remove("hidden");
-    lockViewBtn.classList.add("flex");
-    lockViewBtn.classList.remove("hidden");
-  } else {
-    scrollToTopBtn.classList.add("hidden");
-    scrollToTopBtn.classList.remove("flex");
-    scrollToCommentsBtn.classList.add("hidden"); // Hide comments button
-    scrollToCommentsBtn.classList.remove("flex");
-    lockViewBtn.classList.add("hidden");
-    lockViewBtn.classList.remove("flex");
-  }
-});
-
-// Initialize button visibility on page load (in case user refreshes scrolled down)
-// This also handles the case where the user might load the page already scrolled
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.scrollY > 200) {
-    scrollToTopBtn.classList.add("flex");
-    scrollToTopBtn.classList.remove("hidden");
-    scrollToCommentsBtn.classList.add("flex");
-    scrollToCommentsBtn.classList.remove("hidden");
-    lockViewBtn.classList.add("flex");
-    lockViewBtn.classList.remove("hidden");
-  } else {
-    scrollToTopBtn.classList.add("hidden");
-    scrollToTopBtn.classList.remove("flex");
-    scrollToCommentsBtn.classList.add("hidden");
-    scrollToCommentsBtn.classList.remove("flex");
-    lockViewBtn.classList.add("hidden");
-    lockViewBtn.classList.remove("flex");
-  }
-});
 
 scrollToTopBtn.addEventListener("click", () => {
   window.scrollTo({
@@ -97,12 +70,6 @@ scrollToCommentsBtn.addEventListener("click", (e) => {
   }
 });
 
-lockViewBtn.addEventListener("click", () => {
-  if (siteNavigationDiv) {
-    isNavManuallyHidden = !isNavManuallyHidden; // Toggle the state
-    siteNavigationDiv.classList.toggle("hidden", isNavManuallyHidden); // Apply state
-  }
-});
 
 /**
  * 页面加载后初始化
@@ -111,7 +78,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // Store the original background image
   // The original background is no longer set on load.
   if (backgroundLayer) {
-      backgroundLayer.style.backgroundImage = 'none';
+    backgroundLayer.style.backgroundImage = 'none';
   }
 
   // 从 URL 获取 API 参数并填充输入框
@@ -140,7 +107,7 @@ window.addEventListener("DOMContentLoaded", () => {
   siteNavigationDiv.id = "siteNavigation";
   // Initial classes are minimal, updateNavigationLayout will set full classes
   siteNavigationDiv.className =
-    "z-20 flex flex-col items-center animate__animated animate__fadeInUp animate__faster";
+    "z-20 flex flex-col items-center";
   document.body.appendChild(siteNavigationDiv);
 
   navLinksContainer = document.createElement("div");
@@ -199,6 +166,7 @@ window.addEventListener("DOMContentLoaded", () => {
       adjustBodyPaddingForScrollbar(); // Adjust padding after resize
       updateNavigationLayout(); // Update layout (fixed/absolute, bottom/top)
       updateSiteNavigationWidth(); // Update width
+      updateAiViewPosition(); // Update AI view position on resize
     }, 200)
   );
 
@@ -208,17 +176,380 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const lockViewBtn = document.getElementById('lock-view-btn');
   if (lockViewBtn) {
-    lockViewBtn.addEventListener('click', () => {
-      document.body.classList.toggle('locked-mode');
-      lockViewBtn.blur();
+    lockViewBtn.disabled = true; // Disable by default
+    lockViewBtn.addEventListener('click', handleLockViewToggle);
+  }
+
+  // Add spacebar listener for view toggle
+  window.addEventListener('keydown', (e) => {
+    // Check if spacebar is pressed and the active element is not an input field
+    if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+      e.preventDefault(); // Prevent default spacebar action (e.g., scrolling)
+      // Only trigger if the button is actually visible and enabled
+      if (lockViewBtn && !lockViewBtn.disabled) {
+        handleLockViewToggle();
+      }
+    }
+  });
+});
+
+let isViewLocked = false;
+
+async function handleLockViewToggle() {
+  if (isViewTransitioning) return; // Prevent action if animation is in progress
+  isViewTransitioning = true;
+
+  if (isViewLocked) {
+    document.body.classList.remove('ai-view-active');
+    await showMainContent();
+  } else {
+    document.body.classList.add('ai-view-active');
+    await hideMainContent();
+  }
+  isViewLocked = !isViewLocked;
+  lockViewBtn.blur();
+
+  // Release the lock after the animation duration (approx 1.3s)
+  setTimeout(() => {
+    isViewTransitioning = false;
+  }, 1300);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Parses the AI's XML response and renders it into a formatted HTML view.
+ * @param {string} xmlString The raw XML string from the AI.
+ */
+function renderAiView(xmlString) {
+  const aiResponseBox = document.getElementById('ai-response-box');
+  if (!aiResponseBox) return;
+  aiResponseBox.innerHTML = ''; // Always re-render from scratch
+
+  // Helper to get all content within a major block, even if incomplete
+  const getBlockContent = (tagName, xml) => {
+    const match = xml.match(new RegExp(`<${tagName}>([\\s\\S]*)`));
+    if (!match) return null;
+    return match[1].split(new RegExp(`</${tagName}>`))[0];
+  };
+
+  // Helper to extract a single value from a block, can be partial
+  const getPartialValue = (tagName, block) => {
+    const match = block.match(new RegExp(`<${tagName}>([\\s\\S]*)`));
+    if (!match) return null;
+    return match[1].split(/<\//)[0]; // Get content until the next closing tag starts
+  };
+
+  // Helper to extract all complete values from a block
+  const getCompleteValues = (tagName, block) => {
+    const regex = new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, 'g');
+    return [...block.matchAll(regex)].map(m => m[1]);
+  };
+
+  // 1. Game Description
+  const descriptionContent = getBlockContent('game_description_translated', xmlString);
+  if (descriptionContent) {
+    // Render all complete paragraphs
+    getCompleteValues('p', descriptionContent).forEach(pText => {
+      const pElement = document.createElement('p');
+      pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${pText}`;
+      aiResponseBox.appendChild(pElement);
+    });
+    // Check for and render an incomplete paragraph at the end
+    const lastPOpen = descriptionContent.lastIndexOf('<p>');
+    const lastPClosed = descriptionContent.lastIndexOf('</p>');
+    if (lastPOpen > lastPClosed) {
+      const pElement = document.createElement('p');
+      pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${descriptionContent.substring(lastPOpen + 3)}`;
+      aiResponseBox.appendChild(pElement);
+    }
+  }
+
+  // 2. Characters
+  const charactersContent = getBlockContent('characters_translated', xmlString);
+  if (charactersContent) {
+    const charactersWrapper = document.createElement('div');
+    charactersWrapper.className = 'mt-12';
+    aiResponseBox.appendChild(charactersWrapper);
+
+    const roleMap = {
+      main: { title: '主人公', order: 1 },
+      primary: { title: '主要角色', order: 2 },
+      side: { title: '次要角色', order: 3 },
+      appears: { title: '配角', order: 4 }
+    };
+
+    const characterBlocks = charactersContent.split('<character>').slice(1);
+    const characters = characterBlocks.map(block => ({
+      imageUrl: getPartialValue('image_url', block),
+      translatedName: getPartialValue('translated_name', block),
+      originalName: getPartialValue('original_name', block),
+      description: getPartialValue('description', block),
+      role: getPartialValue('role', block)
+    })).filter(c => c.translatedName !== null && c.role !== null);
+
+    const groupedCharacters = characters.reduce((acc, char) => {
+      (acc[char.role] = acc[char.role] || []).push(char);
+      return acc;
+    }, {});
+
+    const sortedRoles = Object.keys(groupedCharacters).sort((a, b) => (roleMap[a]?.order || 99) - (roleMap[b]?.order || 99));
+
+    sortedRoles.forEach(role => {
+      const roleInfo = roleMap[role];
+      if (roleInfo && groupedCharacters[role].length > 0) {
+        if (!charactersWrapper.querySelector(`[data-role-title="${role}"]`)) {
+          const titleElement = document.createElement('h2');
+          titleElement.className = 'text-2xl font-bold text-white mt-8 mb-4';
+          titleElement.textContent = roleInfo.title;
+          titleElement.dataset.roleTitle = role;
+          charactersWrapper.appendChild(titleElement);
+        }
+      }
+
+      groupedCharacters[role].forEach((char, index) => {
+        if (index > 0) {
+          const hr = document.createElement('hr');
+          hr.className = 'my-4 border-gray-600';
+          charactersWrapper.appendChild(hr);
+        }
+        const charContainer = document.createElement('div');
+        charContainer.className = 'flex items-center my-4';
+        if (char.imageUrl) {
+          const imgElement = document.createElement('img');
+          imgElement.src = char.imageUrl;
+          imgElement.alt = char.translatedName;
+          imgElement.className = 'w-24 h-32 object-cover rounded-lg mr-4 flex-shrink-0';
+          charContainer.appendChild(imgElement);
+        }
+        const textContainer = document.createElement('div');
+        textContainer.className = 'flex-grow';
+        const nameElement = document.createElement('div');
+        nameElement.innerHTML = `<strong class="text-xl font-bold">${char.translatedName}</strong> <span class="text-sm text-gray-400">(${char.originalName || ''})</span>`;
+        textContainer.appendChild(nameElement);
+        if (char.description !== null) {
+          const descElement = document.createElement('p');
+          descElement.className = 'mt-1';
+          descElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${char.description}`;
+          textContainer.appendChild(descElement);
+        }
+        charContainer.appendChild(textContainer);
+        charactersWrapper.appendChild(charContainer);
+      });
     });
   }
-});
+
+  // 3. Summary
+  const summaryContent = getBlockContent('summary_and_insight', xmlString);
+  if (summaryContent) {
+    const questionContent = getPartialValue('question', summaryContent);
+    if (questionContent !== null) {
+      const summaryElement = document.createElement('p');
+      // Check if it's the fallback message and style accordingly
+      if (questionContent === "AI翻译服务当前不可用，以上为原始信息。") {
+        summaryElement.className = 'mt-16 text-lg text-red-500 font-bold';
+      } else {
+        summaryElement.className = 'mt-16 text-lg italic';
+      }
+      summaryElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${questionContent}`;
+      aiResponseBox.appendChild(summaryElement);
+    }
+  }
+}
+
+/**
+ * Dynamically sets the position and size of the AI view container
+ * to match the horizontal alignment of the main content container.
+ */
+function updateAiViewPosition() {
+  const mainContent = document.getElementById('scrollable-content');
+  const aiContainer = document.getElementById('ai-response-container');
+
+  if (mainContent && aiContainer) {
+    const rect = mainContent.getBoundingClientRect();
+    aiContainer.style.left = `${rect.left}px`;
+    aiContainer.style.width = `${rect.width}px`;
+    aiContainer.style.height = '80vh'; // Keep a fixed height
+  }
+}
+
+
+
+function createAliasButton() {
+  if (document.getElementById('alias-btn')) return;
+
+  const extLinksContainer = document.getElementById('ext-links-container');
+  if (!extLinksContainer) return;
+
+  const aliasBtn = document.createElement('button');
+  aliasBtn.id = 'alias-btn';
+  // Removed title attribute and focus ring styles, changed to purple
+  aliasBtn.className = 'w-10 h-10 rounded-lg bg-purple-600 text-white flex items-center justify-center shadow-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-110';
+  aliasBtn.innerHTML = '<i class="fas fa-tags"></i>';
+
+  const aliasTooltip = document.getElementById('alias-tooltip');
+  const aliasList = document.getElementById('alias-list');
+
+  if (!aliasTooltip || !aliasList) return;
+
+  let hideTimeout;
+
+  const showTooltip = () => {
+    clearTimeout(hideTimeout);
+    const aliases = vndbInfo.names.filter(name => name !== vndbInfo.mainName);
+
+    if (aliases.length > 0) {
+      aliasList.innerHTML = '';
+      aliases.forEach(alias => {
+        const li = document.createElement('li');
+        li.textContent = alias;
+        aliasList.appendChild(li);
+      });
+
+      const btnRect = aliasBtn.getBoundingClientRect();
+      aliasTooltip.style.left = `${btnRect.right + 5}px`; // Reduced gap
+      aliasTooltip.style.top = `${btnRect.top}px`;
+      aliasTooltip.classList.remove('hidden');
+      setTimeout(() => (aliasTooltip.style.opacity = '1'), 10);
+    }
+  };
+
+  const hideTooltip = () => {
+    hideTimeout = setTimeout(() => {
+      aliasTooltip.style.opacity = '0';
+      setTimeout(() => aliasTooltip.classList.add('hidden'), 300);
+    }, 300);
+  };
+
+  aliasBtn.addEventListener('mouseenter', showTooltip);
+  aliasBtn.addEventListener('mouseleave', hideTooltip);
+  aliasTooltip.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+  aliasTooltip.addEventListener('mouseleave', hideTooltip);
+
+  extLinksContainer.appendChild(aliasBtn);
+}
+
+async function hideMainContent() {
+  document.body.classList.add('noscroll');
+  const mainContainer = document.getElementById('main-container');
+  const siteNavigation = document.getElementById('siteNavigation');
+  const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+  const scrollToCommentsBtn = document.getElementById('scrollToCommentsBtn');
+  const vndbInfoPanel = document.getElementById('vndb-info-panel');
+  const vndbDescription = document.getElementById('vndb-description');
+  const aiResponseContainer = document.getElementById('ai-response-container');
+  const commentsSection = document.getElementById('Comments');
+  const extLinksContainer = document.getElementById('ext-links-container');
+
+  // 1. Hide main container and buttons
+  mainContainer.style.opacity = '0';
+  mainContainer.style.pointerEvents = 'none'; // Allow clicks to pass through
+  scrollToTopBtn.style.opacity = '0';
+  scrollToCommentsBtn.style.opacity = '0';
+  if (extLinksContainer) extLinksContainer.style.opacity = '0';
+  if (commentsSection) {
+    commentsSection.style.opacity = '0';
+    commentsSection.style.pointerEvents = 'none';
+  }
+
+  // Delay hiding the site navigation to sync with the main container
+  setTimeout(() => {
+    siteNavigation.style.opacity = '0';
+  }, 0);
+
+  // 2. Hide game description
+  vndbDescription.style.opacity = '0';
+
+  // Wait for the 0.5s fade-out animations to complete
+  await sleep(500);
+
+  // 3. Slide down game info
+  // Set a fixed height before animation to prevent wobbling from translateY(-50%)
+  const infoPanelRect = vndbInfoPanel.getBoundingClientRect();
+  vndbInfoPanel.style.height = `${infoPanelRect.height}px`;
+  vndbInfoPanel.style.transform = 'translateY(47vh) translateY(-50%)';
+
+  // Wait for the 0.8s slide animation to complete
+  await sleep(800);
+
+  // 4. Position, populate, and show AI response container
+  updateAiViewPosition();
+  if (vndbInfo.aiRawResponse) {
+    renderAiView(vndbInfo.aiRawResponse);
+  }
+  aiResponseContainer.style.opacity = '1';
+  aiResponseContainer.style.pointerEvents = 'auto';
+}
+
+async function showMainContent() {
+  document.body.classList.remove('noscroll');
+  const mainContainer = document.getElementById('main-container');
+  const siteNavigation = document.getElementById('siteNavigation');
+  const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+  const scrollToCommentsBtn = document.getElementById('scrollToCommentsBtn');
+  const vndbInfoPanel = document.getElementById('vndb-info-panel');
+  const vndbDescription = document.getElementById('vndb-description');
+  const aiResponseContainer = document.getElementById('ai-response-container');
+  const commentsSection = document.getElementById('Comments');
+
+  // 1. Hide AI response container
+  aiResponseContainer.style.opacity = '0';
+  aiResponseContainer.style.pointerEvents = 'none';
+
+  // Wait for AI container to fade out (0.5s)
+  await sleep(500);
+
+  // 2. Slide up game info
+  vndbInfoPanel.style.transform = 'translateY(0)';
+  // Restore original height behavior after animation
+  setTimeout(() => {
+    vndbInfoPanel.style.height = '';
+  }, 800); // Match transition duration
+
+  // Wait for slide up animation (0.8s)
+  await sleep(800);
+
+  // 3. Show game description and main container first
+  vndbDescription.style.opacity = '1';
+  mainContainer.style.opacity = '1';
+  mainContainer.style.pointerEvents = ''; // Restore pointer events
+  if (commentsSection) {
+    commentsSection.style.opacity = '1';
+    commentsSection.style.pointerEvents = '';
+  }
+
+  // 4. Then, show the platform buttons and other floating buttons at the same time
+  siteNavigation.style.opacity = '1';
+  scrollToTopBtn.style.opacity = '1';
+  scrollToCommentsBtn.style.opacity = '1';
+  const extLinksContainer = document.getElementById('ext-links-container');
+  if (extLinksContainer) extLinksContainer.style.opacity = '1';
+}
 
 /**
  * Calculates the width of the scrollbar.
  * @returns {number} The width of the scrollbar in pixels.
  */
+function showToast(message, duration = 4000) {
+  const toast = document.getElementById('toast-notification');
+  if (!toast) return;
+
+  const toastText = toast.querySelector('span');
+  if (toastText) {
+    toastText.textContent = message;
+  }
+
+  toast.classList.remove('hide');
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+  }, duration);
+}
+
 function getScrollbarWidth() {
   // Create a temporary div to measure scrollbar width
   const outer = document.createElement("div");
@@ -283,9 +614,6 @@ function updateNavigationLayout() {
     "flex",
     "flex-col",
     "items-center",
-    "animate__animated",
-    "animate__fadeInUp",
-    "animate__faster",
     "fixed",
     "bottom-0", // Stays at the very bottom
     "w-full", // Full width
@@ -325,6 +653,11 @@ function updateNavigationLayout() {
 async function handleSearchSubmit(e) {
   e.preventDefault();
 
+  if (lockViewBtn) {
+    lockViewBtn.disabled = true; // Disable on new search
+    lockViewBtn.classList.remove('visible');
+  }
+
   const currentTime = Date.now();
   if (lastSearchTime && currentTime - lastSearchTime < SEARCH_COOLDOWN_MS) {
     const timeLeft = Math.ceil(
@@ -337,7 +670,7 @@ async function handleSearchSubmit(e) {
   platformResults.clear();
   bgmBestMatches = []; // Reset best matches on new search
   vndbInfo = {}; // Reset VNDB info
-  
+
   // Reset animation state if it's active
   if (document.body.classList.contains("vndb-mode")) {
     if (!isFirstSearch) {
@@ -409,25 +742,29 @@ async function handleSearchSubmit(e) {
       searchGameStream(searchParams, {
         onTotal: (total) => {
           totalTasks = total;
-          fetchVndbData(gameName).then(vndbResult => {
+          fetchVndbData(gameName).then(async vndbResult => {
             console.log("[DEBUG] VNDB fetch completed. Processing result.");
             console.log("[DEBUG] Received from VNDB:", vndbResult);
 
             if (vndbResult && vndbResult.names && vndbResult.names.length > 0) {
               bgmBestMatches = vndbResult.names;
               vndbInfo = {
+                names: vndbResult.names, // Add the names array to vndbInfo
                 mainName: vndbResult.mainName,
                 mainImageUrl: vndbResult.mainImageUrl,
                 screenshotUrl: vndbResult.screenshotUrl,
                 description: vndbResult.description,
+                va: vndbResult.va,
+                aiRawResponse: "", // Add a field to store the full AI response
               };
+              console.log("[DEBUG] Stored VNDB Info with characters:", vndbInfo);
               // Now that we have the names, immediately re-highlight any existing cards.
               console.log("[DEBUG] Applying highlights based on VNDB names:", bgmBestMatches);
               highlightBestMatches();
 
               // --- Fetch External Links ---
               if (vndbInfo.mainName) {
-                fetchVndbExtLinks(vndbInfo.mainName);
+                await fetchVndbExtLinks(vndbInfo.mainName);
               }
 
               // --- Trigger Animation (only if panel exists) ---
@@ -440,8 +777,11 @@ async function handleSearchSubmit(e) {
                 }
 
                 if (vndbInfo.description && vndbDescription) {
-                  vndbDescription.textContent = vndbInfo.description;
+                  // New: Clear previous content and show the element
+                  vndbDescription.innerHTML = "";
                   vndbDescription.classList.remove("hidden");
+                  // New: Call the streaming translation function
+                  translateAndStreamDescription(vndbInfo.description, vndbInfo.va);
                 } else if (vndbDescription) {
                   vndbDescription.classList.add("hidden");
                 }
@@ -449,6 +789,7 @@ async function handleSearchSubmit(e) {
                 if (vndbInfo.mainName && vndbTitle) {
                   vndbTitle.textContent = vndbInfo.mainName;
                   vndbTitle.classList.remove("hidden");
+                  createAliasButton(); // Create the alias button
                 } else if (vndbTitle) {
                   vndbTitle.classList.add("hidden");
                 }
@@ -481,6 +822,12 @@ async function handleSearchSubmit(e) {
                   vndbInfo.description ||
                   vndbInfo.mainName;
                 vndbInfoPanel.classList.toggle("hidden", !hasContent);
+                // Hide ext links until the second VNDB fetch is complete
+                const extLinksContainer = document.getElementById('ext-links-container');
+                if (extLinksContainer) {
+                  extLinksContainer.style.opacity = '0';
+                  extLinksContainer.style.pointerEvents = 'none';
+                }
               }
               isFirstSearch = false;
 
@@ -784,32 +1131,32 @@ function createPlatformCard(result, withAnimation = true) {
 
     itemsHtml = `<ol class="divide-y divide-gray-100" data-items>
                 ${paginatedItems
-                  .map((item) => {
-                    let decodedPath = "";
-                    try {
-                      const urlObj = new URL(item.url);
-                      decodedPath = decodeURIComponent(
-                        urlObj.pathname + (urlObj.search || "")
-                      );
-                    } catch {}
-                    const displayName =
-                      item.name === ".bzEmpty" || !item.name
-                        ? "未知文件"
-                        : item.name;
-                    
-                    // Check if the current item's name is one of the best matches, ONLY on the first page.
-                    const isBestMatch = result.currentPage === 1 && bgmBestMatches.some(matchName => displayName.includes(matchName));
-                    const bestMatchClass = isBestMatch ? 'best-match-highlight' : '';
+        .map((item) => {
+          let decodedPath = "";
+          try {
+            const urlObj = new URL(item.url);
+            decodedPath = decodeURIComponent(
+              urlObj.pathname + (urlObj.search || "")
+            );
+          } catch { }
+          const displayName =
+            item.name === ".bzEmpty" || !item.name
+              ? "未知文件"
+              : item.name;
 
-                    return `<li class="group transition hover:bg-indigo-50 flex flex-col px-5 py-3 ${bestMatchClass}">
+          // Check if the current item's name is one of the best matches, ONLY on the first page.
+          const isBestMatch = result.currentPage === 1 && bgmBestMatches.some(matchName => displayName.includes(matchName));
+          const bestMatchClass = isBestMatch ? 'best-match-highlight' : '';
+
+          return `<li class="group transition hover:bg-indigo-50 flex flex-col px-5 py-3 ${bestMatchClass}">
                                 <a href="${item.url}" target="_blank" class="font-medium text-gray-800 group-hover:text-indigo-700 text-sm flex items-center gap-1" title="访问具体页面">
                                     <span class="flex-1 min-w-0 break-words">${displayName}</span>
                                     <i class="fas fa-arrow-up-right-from-square text-gray-300 group-hover:text-indigo-400 ml-1"></i>
                                 </a>
                                 <span class="text-xs text-gray-400 mt-0.5 ml-1 break-all block w-full">${decodedPath}</span>
                             </li>`;
-                  })
-                  .join("")}
+        })
+        .join("")}
             </ol>`;
   } else if (!result.error) {
     itemsHtml = '<div class="px-5 py-3 text-gray-400 italic">暂无结果</div>';
@@ -821,45 +1168,37 @@ function createPlatformCard(result, withAnimation = true) {
     const prevDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages;
     paginationHtml = `<div class="px-5 py-3 flex justify-center gap-2 items-center">
-                <button class="prev-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${
-                  prevDisabled
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:scale-110 active:scale-90"
-                }" data-platform="${result.name}" ${
-      prevDisabled ? "disabled" : ""
-    }><i class="fas fa-chevron-left text-sm"></i></button>
+                <button class="prev-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${prevDisabled
+        ? "opacity-50 cursor-not-allowed"
+        : "hover:scale-110 active:scale-90"
+      }" data-platform="${result.name}" ${prevDisabled ? "disabled" : ""
+      }><i class="fas fa-chevron-left text-sm"></i></button>
                 <span class="text-sm font-semibold text-indigo-700 px-3 py-1 bg-indigo-100 rounded-full shadow-sm">
                   ${currentPage} / ${totalPages}
                 </span>
-                <button class="next-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${
-                  nextDisabled
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:scale-110 active:scale-90"
-                }" data-platform="${result.name}" ${
-      nextDisabled ? "disabled" : ""
-    }><i class="fas fa-chevron-right text-sm"></i></button>
+                <button class="next-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${nextDisabled
+        ? "opacity-50 cursor-not-allowed"
+        : "hover:scale-110 active:scale-90"
+      }" data-platform="${result.name}" ${nextDisabled ? "disabled" : ""
+      }><i class="fas fa-chevron-right text-sm"></i></button>
             </div>`;
   }
 
   const cardHtml = `
-            <div class="flex items-center gap-2 px-5 py-3 bg-white/80 border-b ${
-              color.border
-            }">
+            <div class="flex items-center gap-2 px-5 py-3 bg-white/80 border-b ${color.border
+    }">
                 <i class="fas fa-dice-d6 ${color.icon}"></i>
                 <a href="${home}" target="_blank" class="flex items-center gap-2 group/link outline-none focus:ring-2 focus:ring-indigo-300 rounded" title="访问具体页面">
-                    <span class="text-lg font-bold ${
-                      color.text
-                    } group-hover/link:text-indigo-800">${
-    result.name
-  }${tag}</span>
+                    <span class="text-lg font-bold ${color.text
+    } group-hover/link:text-indigo-800">${result.name
+    }${tag}</span>
                     <span class="text-xs text-gray-400 group-hover/link:text-indigo-400 ml-2">${domain}</span>
                 </a>
             </div>
-            ${
-              result.error
-                ? `<div class="px-5 py-3 text-red-500 font-semibold flex items-center gap-2"><i class='fas fa-exclamation-circle'></i> ${result.error}</div>`
-                : ""
-            }
+            ${result.error
+      ? `<div class="px-5 py-3 text-red-500 font-semibold flex items-center gap-2"><i class='fas fa-exclamation-circle'></i> ${result.error}</div>`
+      : ""
+    }
             ${itemsHtml}
             ${paginationHtml}
         `;
@@ -867,11 +1206,9 @@ function createPlatformCard(result, withAnimation = true) {
   const cardElement = document.createElement("div");
   cardElement.dataset.platform = result.name;
   cardElement.id = result.name;
-  cardElement.className = `mb-6 rounded-xl shadow-lg rounded-t-2xl ${
-    color.bg
-  } border ${color.border} overflow-hidden ${
-    withAnimation ? "animate__animated animate__fadeInUp animate__faster" : ""
-  }`;
+  cardElement.className = `mb-6 rounded-xl shadow-lg rounded-t-2xl ${color.bg
+    } border ${color.border} overflow-hidden ${withAnimation ? "animate__animated animate__fadeInUp animate__faster" : ""
+    }`;
   cardElement.innerHTML = cardHtml;
 
   return cardElement;
@@ -1091,8 +1428,8 @@ async function searchGameStream(
             if (onProgress) onProgress(data.progress);
             if (data.result && onResult) onResult(data.result);
           } else if (data.done && onDone) {
-           onDone();
-           return;
+            onDone();
+            return;
           }
         } catch (e) {
           console.error("无法解析JSON行:", line, e);
@@ -1109,6 +1446,28 @@ async function searchGameStream(
 }
 
 /**
+ * Recursively traverses an object or array and removes spoiler tags from all string values.
+ * @param {any} obj The object or array to process.
+ */
+function removeSpoilersRecursively(obj) {
+  if (obj === null || typeof obj !== 'object') {
+    return;
+  }
+
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = obj[key];
+      if (typeof value === 'string') {
+        // Also trims whitespace that might be left after removal
+        obj[key] = value.replace(/\[spoiler\][\s\S]*?\[\/spoiler\]/g, '').trim();
+      } else if (typeof value === 'object') {
+        removeSpoilersRecursively(value);
+      }
+    }
+  }
+}
+
+/**
  * Fetches data from the VNDB API.
  * @param {string} gameName The name of the game to search for.
  * @returns {Promise<object|null>} An object with names and other info, or null.
@@ -1118,7 +1477,7 @@ async function fetchVndbData(gameName) {
   const url = `${VNDB_API_BASE_URL}/vn`;
   const body = {
     filters: ["search", "=", gameName],
-    fields: "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description",
+    fields: "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description, va.character.name, va.character.description, va.character.original, va.character.image.url, va.character.image.sexual, va.character.image.violence, va.character.traits.name, va.character.traits.spoiler, va.character.vns.role, va.character.vns.spoiler",
   };
 
   try {
@@ -1141,6 +1500,9 @@ async function fetchVndbData(gameName) {
 
     const data = await response.json();
     console.log("[DEBUG] Parsed VNDB JSON data:", data);
+
+    // Remove all spoiler tags from the response data
+    removeSpoilersRecursively(data);
 
     // If 'more' is true, it's not an exact match, so we ignore it.
     console.log(`[DEBUG] VNDB 'more' flag is: ${data.more}.`);
@@ -1179,7 +1541,7 @@ async function fetchVndbData(gameName) {
         }
       });
     }
-    
+
     // Determine the main name based on priority
     if (zhName) {
       mainName = zhName;
@@ -1197,12 +1559,95 @@ async function fetchVndbData(gameName) {
       null;
     const description = result.description || null;
 
+    // --- Process VA/Character Data ---
+    if (result.va && Array.isArray(result.va)) {
+      console.log("[DEBUG] Processing character data (VA)...");
+
+      // 1. Extract characters
+      let characters = result.va
+        .map(item => item.character)
+        .filter(Boolean)
+        .filter(char => {
+          if (!char.vns || char.vns.length === 0) return false;
+          const gameAppearance = char.vns.find(vn => vn.id === result.id);
+          return gameAppearance && gameAppearance.spoiler === 0;
+        });
+
+      // 2. Define role weights and sort characters
+      const roleWeights = { main: 1, primary: 2, side: 3, appears: 4 };
+      characters.sort((a, b) => {
+        const roleA = a.vns.find(vn => vn.id === result.id)?.role;
+        const roleB = b.vns.find(vn => vn.id === result.id)?.role;
+        const weightA = roleWeights[roleA] || Infinity;
+        const weightB = roleWeights[roleB] || Infinity;
+        return weightA - weightB;
+      });
+
+      console.log("[DEBUG] Sorted characters by role:", characters);
+
+      // 3. Process each character (traits, names, images, and new role logic)
+      characters.forEach(character => {
+        // Process traits into a single 'tag' string
+        if (character.traits && Array.isArray(character.traits)) {
+          character.tag = character.traits
+            .filter(trait => trait.spoiler === 0 && trait.name !== "Not Sexually Involved")
+            .map(trait => trait.name)
+            .join(", ");
+          delete character.traits;
+        } else {
+          character.tag = "";
+        }
+
+        // Rename 'original' to 'originalName'
+        if (character.original) {
+          character.originalName = character.original;
+          delete character.original;
+        }
+
+        // Delete the original character ID
+        delete character.id;
+
+        // Process character image based on safety flags
+        if (character.image && character.image.url) {
+          if (character.image.sexual <= 1 && character.image.violence === 0) {
+            character.image = character.image.url;
+          } else {
+            character.image = "";
+          }
+        } else {
+          character.image = "";
+        }
+
+        // Add 'role' and delete 'vns'
+        const gameAppearance = character.vns.find(vn => vn.id === result.id);
+        if (gameAppearance) {
+          character.role = gameAppearance.role;
+        } else {
+          character.role = 'unknown'; // Should not happen due to earlier filter
+        }
+        delete character.vns;
+      });
+
+      // 4. Filter for unique characters after processing
+      const uniqueCharacters = characters.reduce((acc, current) => {
+        if (!acc.some(item => item.name === current.name)) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
+      result.va = uniqueCharacters; // Replace original va with processed, sorted, and unique characters
+      console.log("[DEBUG] Final processed character data (before assigning to finalResult):", result.va);
+    }
+    // --- End of VA Processing ---
+
     const finalResult = {
       names: [...new Set(names)], // Return unique names
       mainName,
       mainImageUrl,
       screenshotUrl,
       description,
+      va: result.va, // Pass processed character data
     };
 
     console.log("[DEBUG] Extracted Names:", finalResult.names);
@@ -1277,7 +1722,7 @@ async function fetchAndDisplayVersion() {
 
     // Initial display
     updateVersionDisplay();
-    
+
     // Start interval to switch every 5 seconds
     setInterval(updateVersionDisplay, 5000);
 
@@ -1404,28 +1849,229 @@ function renderExtLinkButtons(urls) {
       } else {
         const popup = document.createElement("div");
         popup.className =
-          "absolute left-full top-0 ml-2 w-max bg-white rounded-md shadow-xl p-2 z-20 hidden flex-col gap-1";
+          "absolute left-full top-0 ml-2 w-max bg-white rounded-md shadow-xl p-2 z-20 hidden flex-col gap-1 opacity-0 transition-opacity duration-300";
         category.urls.forEach((url) => {
           const link = document.createElement("a");
           link.href = url;
           link.target = "_blank";
           link.className =
             "flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 p-1 rounded";
-          link.innerHTML = `<i class="fas fa-external-link-alt text-gray-400"></i> ${
-            new URL(url).hostname
-          }`;
+          link.innerHTML = `<i class="fas fa-external-link-alt text-gray-400"></i> ${new URL(url).hostname
+            }`;
           popup.appendChild(link);
         });
         buttonWrapper.appendChild(popup);
 
-        button.addEventListener("mouseenter", () => popup.classList.remove("hidden"));
-        button.addEventListener("mouseleave", () => popup.classList.add("hidden"));
-        popup.addEventListener("mouseenter", () => popup.classList.remove("hidden"));
-        popup.addEventListener("mouseleave", () => popup.classList.add("hidden"));
+        let hideTimeout;
+        const showPopup = () => {
+          clearTimeout(hideTimeout);
+          popup.classList.remove("hidden");
+          setTimeout(() => (popup.style.opacity = "1"), 10);
+        };
+        const hidePopup = () => {
+          hideTimeout = setTimeout(() => {
+            popup.style.opacity = "0";
+            setTimeout(() => popup.classList.add("hidden"), 300);
+          }, 300);
+        };
+
+        button.addEventListener("mouseenter", showPopup);
+        button.addEventListener("mouseleave", hidePopup);
+        popup.addEventListener("mouseenter", () => clearTimeout(hideTimeout));
+        popup.addEventListener("mouseleave", hidePopup);
       }
 
       buttonWrapper.appendChild(button);
       container.appendChild(buttonWrapper);
     }
   });
+
+  // Use a short timeout to ensure the browser has rendered the initial hidden state
+  // before applying the transition, allowing the fade-in to work correctly.
+  setTimeout(() => {
+    container.style.transition = 'opacity 0.5s ease-in-out';
+    container.style.opacity = '1';
+    container.style.pointerEvents = 'auto';
+  }, 10); // A small delay is enough
+}
+
+/**
+ * Fetches a translated version of the description from an AI service and streams it.
+ * @param {string} description The original description text.
+ */
+async function translateAndStreamDescription(description, characters) {
+  if (!vndbDescription) return;
+
+  // Show the lock view button with a ripple effect when AI response starts
+  const lockViewBtn = document.getElementById('lock-view-btn');
+  if (lockViewBtn && !lockViewBtn.classList.contains('visible')) {
+    lockViewBtn.classList.add('visible');
+    // Create 3 staggered ripples for a more noticeable effect
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        lockViewBtn.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 1000); // Animation duration is 1s
+      }, i * 500); // Stagger the start of each ripple
+    }
+    // Show the one-time toast notification
+    if (!hasShownViewToggleToast && !isMobileView) {
+      const toastMessage = "再次点击按钮或空格键退出游戏介绍";
+      showToast(toastMessage);
+      hasShownViewToggleToast = true;
+      hasShownViewToggleToast = true;
+    }
+  }
+
+  let characterInfoString = "";
+  try {
+    if (isMobileView) {
+      console.log("[DEBUG] Mobile view detected, skipping AI translation.");
+      vndbDescription.innerHTML = `<p>${description.replace(/\n/g, "<br>")}</p>`;
+      return;
+    }
+
+    const userLanguage = navigator.language || "zh-CN";
+
+    if (characters && characters.length > 0) {
+      characterInfoString = characters.map(c => `Name: ${c.name}, Role: ${c.role}`).join("\n");
+    }
+
+    const response = await fetch(AI_TRANSLATE_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${AI_TRANSLATE_API_KEY}` },
+      body: JSON.stringify({
+        model: AI_TRANSLATE_MODEL,
+        messages: [
+          {
+            role: "system", content: `
+作为专业的游戏内容翻译、格式化与主题分析专家，请将提供的游戏信息（游戏介绍与人物信息）精确翻译成'${userLanguage}'，按指定XML格式输出，并提出一个引人深思的总结问题。
+
+输入处理要求：
+
+1.游戏介绍：
+ 翻译目标语言：'${userLanguage}'。
+ 格式化移除：翻译前，彻底移除所有非内容性格式代码/标签（HTML, Markdown, XML等），只保留纯文本内容。
+ 人名校对：介绍中出现的人名，按2.人物信息规则翻译。
+ 来源移除：移除介绍末尾的来源引用（如“来源：XXX”）。
+
+2.人物信息：
+ 描述翻译：将每个人物描述翻译成'${userLanguage}'。为空时，根据角色的其他信息尝试生成该角色的人物介绍，严禁输出不雅内容。
+ 人名翻译：优先使用'中文名'或'日文名'作为'original_name'。如无，则翻译原始非中日名称。
+ 日译中直译：人名翻译（日译中）时，请直译日文名，而非英/罗马名。
+ 全部输出：确保输出所有角色信息。
+
+
+输出结构与格式要求：
+ 最终输出必须是严格的XML格式，所有内容包裹在根元素'<game_data>'中。
+
+1.根元素： \`<game_data>\`
+
+2.游戏介绍部分：
+ \`<game_description_translated>\`：翻译后的游戏介绍。内部允许\`<p>\`分段，但禁止其他复杂HTML/样式标签。
+
+3.人物信息列表：
+ \`<characters_translated>\`：包含所有\`<character>\`子元素。
+ 每个\`<character>\`包含以下子元素（严格按顺序）：
+     \`<image_url>\`：若有则包含URL，否则输出\`<image_url/>\`空标签。
+     \`<translated_name>\`：人物翻译后的姓名。
+     \`<role>\`：原始值(main/primary/side/appears)，勿翻译。
+     \`<original_name>\`：原始姓名（优先中文/日文名）, 如无, 则输出未翻译的主姓名。
+     \`<description>\`：人物描述。结合游戏介绍与角色'tag'（'tag'本身勿输出），灵活撰写以突出特点，严禁输出不雅内容。
+
+4.总结与思考：
+ \`<summary_and_insight>\`：包含\`<question>\`子元素。
+ \`<question>\`：基于翻译后的故事与人物，提出一个引人深思/好奇的问题。勿用总结性开场白（如“总体来说”）。
+
+最终输出约束：
+ 纯XML内容，严格遵循XML标准及结构，所有标签正确嵌套/闭合。勿含任何额外文字/评论。使用\`\`\`xml \`\`\`的代码块来包裹。` },
+          { role: "user", content: `Game Description:\n${description}\n\nCharacter Details:\n${JSON.stringify(characters, null, 2)}` }
+        ],
+        stream: true,
+      }),
+    });
+
+    if (response.ok) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let isFirstChunk = true;
+      vndbInfo.aiRawResponse = ""; // Reset before streaming
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          console.log("Stream finished.");
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        let boundary = buffer.indexOf('\n');
+        while (boundary !== -1) {
+          const line = buffer.substring(0, boundary).trim();
+          buffer = buffer.substring(boundary + 1);
+
+          if (line.startsWith("data: ")) {
+            const jsonStr = line.substring(6);
+            if (jsonStr !== "[DONE]") {
+              try {
+                const chunk = JSON.parse(jsonStr);
+                if (chunk.choices && chunk.choices[0].delta && chunk.choices[0].delta.content) {
+                  if (isFirstChunk) {
+                    if (lockViewBtn) lockViewBtn.disabled = false;
+                    isFirstChunk = false;
+                  }
+                  vndbInfo.aiRawResponse += chunk.choices[0].delta.content;
+                  renderAiView(vndbInfo.aiRawResponse);
+
+                  const startIndexDesc = vndbInfo.aiRawResponse.indexOf("<game_description_translated>");
+                  if (startIndexDesc !== -1) {
+                    const endIndexDesc = vndbInfo.aiRawResponse.indexOf("</game_description_translated>");
+                    let contentToRenderDesc = (endIndexDesc !== -1)
+                      ? vndbInfo.aiRawResponse.substring(startIndexDesc + "<game_description_translated>".length, endIndexDesc)
+                      : vndbInfo.aiRawResponse.substring(startIndexDesc + "<game_description_translated>".length);
+                    contentToRenderDesc = contentToRenderDesc.replace(/<p>/g, '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+                    vndbDescription.innerHTML = contentToRenderDesc;
+                  }
+                }
+              } catch (e) {
+                // Ignore JSON parsing errors
+              }
+            }
+          }
+          boundary = buffer.indexOf('\n');
+        }
+      }
+    } else {
+      // Fallback for non-200 responses
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error or fallback during AI translation:", error);
+    vndbDescription.innerHTML = description.replace(/\n/g, "<br>");
+
+    // Construct fallback XML for AI view
+    let fallbackXml = "<game_data>";
+    fallbackXml += `<game_description_translated><p>${description.replace(/\n/g, "</p><p>")}</p></game_description_translated>`;
+    if (characters && characters.length > 0) {
+      fallbackXml += "<characters_translated>";
+      characters.forEach(c => {
+        fallbackXml += "<character>";
+        fallbackXml += `<image_url>${c.image || ''}</image_url>`;
+        fallbackXml += `<translated_name>${c.name}</translated_name>`;
+        fallbackXml += `<role>${c.role}</role>`;
+        fallbackXml += `<original_name>${c.originalName || c.name}</original_name>`;
+        fallbackXml += `<description>${c.description || '无可用描述'}</description>`;
+        fallbackXml += "</character>";
+      });
+      fallbackXml += "</characters_translated>";
+    }
+    fallbackXml += "<summary_and_insight><question>AI翻译服务当前不可用，以上为原始信息。</question></summary_and_insight>";
+    fallbackXml += "</game_data>";
+
+    vndbInfo.aiRawResponse = fallbackXml;
+    renderAiView(vndbInfo.aiRawResponse);
+    if (lockViewBtn) lockViewBtn.disabled = false;
+  }
 }
