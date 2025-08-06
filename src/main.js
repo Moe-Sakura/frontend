@@ -174,7 +174,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   fetchAndDisplayVersion(); // Fetch and display version on page load
 
-  const lockViewBtn = document.getElementById('lock-view-btn');
+  const lockViewBtn = document.getElementById("lock-view-btn");
   if (lockViewBtn) {
     lockViewBtn.disabled = true; // Disable by default
     lockViewBtn.addEventListener('click', handleLockViewToggle);
@@ -671,6 +671,7 @@ async function handleSearchSubmit(e) {
   bgmBestMatches = []; // Reset best matches on new search
   vndbInfo = {}; // Reset VNDB info
 
+
   // Reset animation state if it's active
   if (document.body.classList.contains("vndb-mode")) {
     if (!isFirstSearch) {
@@ -767,14 +768,14 @@ async function handleSearchSubmit(e) {
                 await fetchVndbExtLinks(vndbInfo.mainName);
               }
 
-              // --- Trigger Animation (only if panel exists) ---
-              if (vndbInfoPanel) {
-                if (vndbInfo.mainImageUrl && vndbImage) {
-                  vndbImage.src = vndbInfo.mainImageUrl;
-                  vndbImage.classList.remove("hidden");
-                } else if (vndbImage) {
-                  vndbImage.classList.add("hidden");
-                }
+                // --- Trigger Animation (only if panel exists) ---
+                if (vndbInfoPanel) {
+                  if (vndbInfo.mainImageUrl && vndbImage) {
+                    vndbImage.src = vndbInfo.mainImageUrl;
+                    vndbImage.classList.remove("hidden");
+                  } else if (vndbImage) {
+                    vndbImage.classList.add("hidden");
+                  }
 
                 if (vndbInfo.description && vndbDescription) {
                   // New: Clear previous content and show the element
@@ -794,27 +795,29 @@ async function handleSearchSubmit(e) {
                   vndbTitle.classList.add("hidden");
                 }
 
-                if (vndbInfo.screenshotUrl && backgroundLayer) {
-                  const img = new Image();
-                  img.onload = () => {
-                    backgroundLayer.style.backgroundImage = `url(${vndbInfo.screenshotUrl})`;
-                    document.body.classList.add("vndb-mode");
-                    const mainContainer = document.getElementById("main-container");
+                  if (vndbInfo.screenshotUrl && backgroundLayer) {
+                    const img = new Image();
+                    img.onload = () => {
+                      backgroundLayer.style.backgroundImage = `url(${vndbInfo.screenshotUrl})`;
+                      document.body.classList.add("vndb-mode");
+                      const mainContainer =
+                        document.getElementById("main-container");
+                      if (mainContainer) {
+                        mainContainer.classList.remove("bg-white/95");
+                        mainContainer.classList.add("bg-white");
+                      }
+                    };
+                    img.src = vndbInfo.screenshotUrl;
+                  } else {
+                    backgroundLayer.style.backgroundImage = "none";
+                    document.body.classList.remove("vndb-mode");
+                    const mainContainer =
+                      document.getElementById("main-container");
                     if (mainContainer) {
-                      mainContainer.classList.remove("bg-white/95");
-                      mainContainer.classList.add("bg-white");
+                      mainContainer.classList.remove("bg-white");
+                      mainContainer.classList.add("bg-white/95");
                     }
-                  };
-                  img.src = vndbInfo.screenshotUrl;
-                } else {
-                  backgroundLayer.style.backgroundImage = "none";
-                  document.body.classList.remove("vndb-mode");
-                  const mainContainer = document.getElementById("main-container");
-                  if (mainContainer) {
-                    mainContainer.classList.remove("bg-white");
-                    mainContainer.classList.add("bg-white/95");
                   }
-                }
 
                 // Show panel only if there is something to display
                 const hasContent =
@@ -884,7 +887,6 @@ async function handleSearchSubmit(e) {
           showError(err.message || "流式搜索发生未知错误");
         }
       });
-
     },
     { once: true }
   );
@@ -1223,18 +1225,22 @@ function highlightBestMatches() {
   // Iterate over each platform card that is currently on its first page
   platformResults.forEach((platformData, platformName) => {
     if (platformData.currentPage === 1) {
-      const platformCard = resultsDiv.querySelector(`div[data-platform="${platformName}"]`);
+      const platformCard = resultsDiv.querySelector(
+        `div[data-platform="${platformName}"]`
+      );
       if (platformCard) {
         const listItems = platformCard.querySelectorAll("li[class*='group']");
-        listItems.forEach(item => {
-          const titleElement = item.querySelector('a > span');
+        listItems.forEach((item) => {
+          const titleElement = item.querySelector("a > span");
           if (titleElement) {
             const title = titleElement.textContent;
-            const isMatch = bgmBestMatches.some(matchName => title.includes(matchName));
+            const isMatch = bgmBestMatches.some((matchName) =>
+              title.includes(matchName)
+            );
             if (isMatch) {
-              item.classList.add('best-match-highlight');
+              item.classList.add("best-match-highlight");
             } else {
-              item.classList.remove('best-match-highlight');
+              item.classList.remove("best-match-highlight");
             }
           }
         });
@@ -1430,6 +1436,8 @@ async function searchGameStream(
           } else if (data.done && onDone) {
             onDone();
             return;
+            onDone();
+            return;
           }
         } catch (e) {
           console.error("无法解析JSON行:", line, e);
@@ -1507,7 +1515,9 @@ async function fetchVndbData(gameName) {
     // If 'more' is true, it's not an exact match, so we ignore it.
     console.log(`[DEBUG] VNDB 'more' flag is: ${data.more}.`);
     if (data.more || !data.results || data.results.length === 0) {
-      console.log("[DEBUG] VNDB returned no exact match or no results. Aborting.");
+      console.log(
+        "[DEBUG] VNDB returned no exact match or no results. Aborting."
+      );
       return null;
     }
 
@@ -1516,7 +1526,7 @@ async function fetchVndbData(gameName) {
 
     // Collect all aliases
     if (Array.isArray(result.aliases)) {
-      result.aliases.forEach(alias => names.push(String(alias)));
+      result.aliases.forEach((alias) => names.push(String(alias)));
     }
 
     // Collect main title
@@ -1533,14 +1543,15 @@ async function fetchVndbData(gameName) {
       result.titles.forEach((titleEntry) => {
         if (titleEntry.title) {
           names.push(titleEntry.title);
-          if (titleEntry.lang === 'zh-Hans') {
+          if (titleEntry.lang === "zh-Hans") {
             zhName = titleEntry.title;
-          } else if (titleEntry.lang === 'ja') {
+          } else if (titleEntry.lang === "ja") {
             jaName = titleEntry.title;
           }
         }
       });
     }
+
 
     // Determine the main name based on priority
     if (zhName) {
@@ -1550,7 +1561,10 @@ async function fetchVndbData(gameName) {
     }
 
     // Extract image URLs
-    const mainImageUrl = (result.image && result.image.sexual <= 1 && result.image.violence === 0) ? result.image.url : null;
+    const mainImageUrl =
+      result.image && result.image.sexual <= 1 && result.image.violence === 0
+        ? result.image.url
+        : null;
     const sortedScreenshots = result.screenshots
       ? [...result.screenshots].sort((a, b) => b.votecount - a.votecount)
       : [];
@@ -1672,22 +1686,24 @@ async function fetchAndDisplayVersion() {
   const versionElement = document.getElementById("version-display");
   if (!versionElement || !versionContainer) return;
 
-  const backendUrl = "https://api.github.com/repos/Moe-Sakura/SearchGal/commits?per_page=1";
-  const frontendUrl = "https://api.github.com/repos/Moe-Sakura/frontend/commits?per_page=1";
+  const backendUrl =
+    "https://api.github.com/repos/Moe-Sakura/SearchGal/commits?per_page=1";
+  const frontendUrl =
+    "https://api.github.com/repos/Moe-Sakura/frontend/commits?per_page=1";
 
   const formatDate = (dateString) => {
     if (!dateString) return "ERROR";
     const date = new Date(dateString);
     const year = String(date.getFullYear()).slice(-2);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}${month}${day}`;
   };
 
   try {
     const [backendResponse, frontendResponse] = await Promise.all([
       fetch(backendUrl),
-      fetch(frontendUrl)
+      fetch(frontendUrl),
     ]);
 
     if (!backendResponse.ok || !frontendResponse.ok) {
@@ -1710,12 +1726,14 @@ async function fetchAndDisplayVersion() {
         versionElement.textContent = `后端 ${backendVersion}`;
         versionContainer.classList.remove("bg-red-200", "text-red-800");
         versionContainer.classList.add("bg-green-200", "text-green-800");
-        versionElement.href = "https://github.com/Moe-Sakura/SearchGal/blob/main/version.md";
+        versionElement.href =
+          "https://github.com/Moe-Sakura/SearchGal/blob/main/version.md";
       } else {
         versionElement.textContent = `前端 ${frontendVersion}`;
         versionContainer.classList.remove("bg-green-200", "text-green-800");
         versionContainer.classList.add("bg-red-200", "text-red-800");
-        versionElement.href = "https://github.com/Moe-Sakura/frontend/commits/main";
+        versionElement.href =
+          "https://github.com/Moe-Sakura/frontend/commits/main";
       }
       isShowingBackend = !isShowingBackend;
     };
@@ -1723,9 +1741,9 @@ async function fetchAndDisplayVersion() {
     // Initial display
     updateVersionDisplay();
 
+
     // Start interval to switch every 5 seconds
     setInterval(updateVersionDisplay, 5000);
-
   } catch (error) {
     console.error("Error fetching version:", error);
     versionElement.textContent = "版本获取失败";
@@ -1763,7 +1781,9 @@ async function fetchVndbExtLinks(mainName) {
     });
 
     if (!response.ok) {
-      throw new Error(`VNDB extlink API request failed: ${response.statusText}`);
+      throw new Error(
+        `VNDB extlink API request failed: ${response.statusText}`
+      );
     }
 
     const data = await response.json();
@@ -1789,7 +1809,9 @@ function renderExtLinkButtons(urls) {
   if (!container) return;
   container.innerHTML = ""; // Clear previous buttons
 
-  const steamUrls = urls.filter((url) => url.includes("store.steampowered.com"));
+  const steamUrls = urls.filter((url) =>
+    url.includes("store.steampowered.com")
+  );
   const dlsiteUrls = urls.filter((url) => url.includes("dlsite"));
   const officialUrls = urls.filter(
     (url) =>
