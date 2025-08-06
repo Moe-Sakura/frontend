@@ -1939,7 +1939,7 @@ async function translateAndStreamDescription(description, characters) {
     }
     // Show the one-time toast notification
     if (!hasShownViewToggleToast && !isMobileView) {
-      const toastMessage = "再次点击按钮或空格键退出游戏介绍";
+      const toastMessage = "按下空格键进入游戏详情视图";
       showToast(toastMessage);
       hasShownViewToggleToast = true;
       hasShownViewToggleToast = true;
