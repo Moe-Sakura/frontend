@@ -6,7 +6,8 @@ const VNDB_API_BASE_URL = "https://api.vndb.org/kana";
 // -- 如需进行项目调试，请修改 AI_TRANSLATE 变量为自己的 API 接口与 ApiKey
 // -- 除此以外，ai.searchgal.homes 接口无法为其他任何非正当请求提供 LLM 服务
 const AI_TRANSLATE_API_URL = "https://ai.searchgal.homes/v1/chat/completions";
-const AI_TRANSLATE_API_KEY = "sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e";
+const AI_TRANSLATE_API_KEY =
+  "sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e";
 const AI_TRANSLATE_MODEL = "Qwen/Qwen2.5-32B-Instruct";
 
 const ITEMS_PER_PAGE = 10;
@@ -51,7 +52,6 @@ const scrollToTopBtn = document.getElementById("scrollToTopBtn");
 const scrollToCommentsBtn = document.getElementById("scrollToCommentsBtn"); // Get the comments button
 const lockViewBtn = document.getElementById("lock-view-btn");
 
-
 scrollToTopBtn.addEventListener("click", () => {
   window.scrollTo({
     top: 0,
@@ -70,7 +70,6 @@ scrollToCommentsBtn.addEventListener("click", (e) => {
   }
 });
 
-
 /**
  * 页面加载后初始化
  */
@@ -78,7 +77,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // Store the original background image
   // The original background is no longer set on load.
   if (backgroundLayer) {
-    backgroundLayer.style.backgroundImage = 'none';
+    backgroundLayer.style.backgroundImage = "none";
   }
 
   // 从 URL 获取 API 参数并填充输入框
@@ -106,8 +105,7 @@ window.addEventListener("DOMContentLoaded", () => {
   siteNavigationDiv = document.createElement("div");
   siteNavigationDiv.id = "siteNavigation";
   // Initial classes are minimal, updateNavigationLayout will set full classes
-  siteNavigationDiv.className =
-    "z-20 flex flex-col items-center";
+  siteNavigationDiv.className = "z-20 flex flex-col items-center";
   document.body.appendChild(siteNavigationDiv);
 
   navLinksContainer = document.createElement("div");
@@ -177,13 +175,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const lockViewBtn = document.getElementById("lock-view-btn");
   if (lockViewBtn) {
     lockViewBtn.disabled = true; // Disable by default
-    lockViewBtn.addEventListener('click', handleLockViewToggle);
+    lockViewBtn.addEventListener("click", handleLockViewToggle);
   }
 
   // Add spacebar listener for view toggle
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener("keydown", (e) => {
     // Check if spacebar is pressed and the active element is not an input field
-    if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+    if (e.code === "Space" && document.activeElement.tagName !== "INPUT") {
       e.preventDefault(); // Prevent default spacebar action (e.g., scrolling)
       // Only trigger if the button is actually visible and enabled
       if (lockViewBtn && !lockViewBtn.disabled) {
@@ -200,10 +198,10 @@ async function handleLockViewToggle() {
   isViewTransitioning = true;
 
   if (isViewLocked) {
-    document.body.classList.remove('ai-view-active');
+    document.body.classList.remove("ai-view-active");
     await showMainContent();
   } else {
-    document.body.classList.add('ai-view-active');
+    document.body.classList.add("ai-view-active");
     await hideMainContent();
   }
   isViewLocked = !isViewLocked;
@@ -216,7 +214,7 @@ async function handleLockViewToggle() {
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -224,9 +222,9 @@ function sleep(ms) {
  * @param {string} xmlString The raw XML string from the AI.
  */
 function renderAiView(xmlString) {
-  const aiResponseBox = document.getElementById('ai-response-box');
+  const aiResponseBox = document.getElementById("ai-response-box");
   if (!aiResponseBox) return;
-  aiResponseBox.innerHTML = ''; // Always re-render from scratch
+  aiResponseBox.innerHTML = ""; // Always re-render from scratch
 
   // Helper to get all content within a major block, even if incomplete
   const getBlockContent = (tagName, xml) => {
@@ -244,65 +242,74 @@ function renderAiView(xmlString) {
 
   // Helper to extract all complete values from a block
   const getCompleteValues = (tagName, block) => {
-    const regex = new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, 'g');
-    return [...block.matchAll(regex)].map(m => m[1]);
+    const regex = new RegExp(`<${tagName}>([\\s\\S]*?)</${tagName}>`, "g");
+    return [...block.matchAll(regex)].map((m) => m[1]);
   };
 
   // 1. Game Description
-  const descriptionContent = getBlockContent('game_description_translated', xmlString);
+  const descriptionContent = getBlockContent(
+    "game_description_translated",
+    xmlString
+  );
   if (descriptionContent) {
     // Render all complete paragraphs
-    getCompleteValues('p', descriptionContent).forEach(pText => {
-      const pElement = document.createElement('p');
+    getCompleteValues("p", descriptionContent).forEach((pText) => {
+      const pElement = document.createElement("p");
       pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${pText}`;
       aiResponseBox.appendChild(pElement);
     });
     // Check for and render an incomplete paragraph at the end
-    const lastPOpen = descriptionContent.lastIndexOf('<p>');
-    const lastPClosed = descriptionContent.lastIndexOf('</p>');
+    const lastPOpen = descriptionContent.lastIndexOf("<p>");
+    const lastPClosed = descriptionContent.lastIndexOf("</p>");
     if (lastPOpen > lastPClosed) {
-      const pElement = document.createElement('p');
-      pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${descriptionContent.substring(lastPOpen + 3)}`;
+      const pElement = document.createElement("p");
+      pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${descriptionContent.substring(
+        lastPOpen + 3
+      )}`;
       aiResponseBox.appendChild(pElement);
     }
   }
 
   // 2. Characters
-  const charactersContent = getBlockContent('characters_translated', xmlString);
+  const charactersContent = getBlockContent("characters_translated", xmlString);
   if (charactersContent) {
-    const charactersWrapper = document.createElement('div');
-    charactersWrapper.className = 'mt-12';
+    const charactersWrapper = document.createElement("div");
+    charactersWrapper.className = "mt-12";
     aiResponseBox.appendChild(charactersWrapper);
 
     const roleMap = {
-      main: { title: '主人公', order: 1 },
-      primary: { title: '主要角色', order: 2 },
-      side: { title: '次要角色', order: 3 },
-      appears: { title: '配角', order: 4 }
+      main: { title: "主人公", order: 1 },
+      primary: { title: "主要角色", order: 2 },
+      side: { title: "次要角色", order: 3 },
+      appears: { title: "配角", order: 4 },
     };
 
-    const characterBlocks = charactersContent.split('<character>').slice(1);
-    const characters = characterBlocks.map(block => ({
-      imageUrl: getPartialValue('image_url', block),
-      translatedName: getPartialValue('translated_name', block),
-      originalName: getPartialValue('original_name', block),
-      description: getPartialValue('description', block),
-      role: getPartialValue('role', block)
-    })).filter(c => c.translatedName !== null && c.role !== null);
+    const characterBlocks = charactersContent.split("<character>").slice(1);
+    const characters = characterBlocks
+      .map((block) => ({
+        imageUrl: getPartialValue("image_url", block),
+        translatedName: getPartialValue("translated_name", block),
+        originalName: getPartialValue("original_name", block),
+        description: getPartialValue("description", block),
+        role: getPartialValue("role", block),
+      }))
+      .filter((c) => c.translatedName !== null && c.role !== null);
 
     const groupedCharacters = characters.reduce((acc, char) => {
       (acc[char.role] = acc[char.role] || []).push(char);
       return acc;
     }, {});
 
-    const sortedRoles = Object.keys(groupedCharacters).sort((a, b) => (roleMap[a]?.order || 99) - (roleMap[b]?.order || 99));
+    const sortedRoles = Object.keys(groupedCharacters).sort(
+      (a, b) => (roleMap[a]?.order || 99) - (roleMap[b]?.order || 99)
+    );
 
-    sortedRoles.forEach(role => {
+    sortedRoles.forEach((role) => {
       const roleInfo = roleMap[role];
       if (roleInfo && groupedCharacters[role].length > 0) {
         if (!charactersWrapper.querySelector(`[data-role-title="${role}"]`)) {
-          const titleElement = document.createElement('h2');
-          titleElement.className = 'text-2xl font-bold text-white mt-8 mb-4';
+          const titleElement = document.createElement("h2");
+          titleElement.className = "text-2xl font-bold text-white mt-8 mb-4";
           titleElement.textContent = roleInfo.title;
           titleElement.dataset.roleTitle = role;
           charactersWrapper.appendChild(titleElement);
@@ -311,27 +318,32 @@ function renderAiView(xmlString) {
 
       groupedCharacters[role].forEach((char, index) => {
         if (index > 0) {
-          const hr = document.createElement('hr');
-          hr.className = 'my-4 border-gray-600';
+          const hr = document.createElement("hr");
+          hr.className = "my-4 border-gray-600";
           charactersWrapper.appendChild(hr);
         }
-        const charContainer = document.createElement('div');
-        charContainer.className = 'flex items-center my-4';
+        const charContainer = document.createElement("div");
+        charContainer.className = "flex items-center my-4";
         if (char.imageUrl) {
-          const imgElement = document.createElement('img');
+          const imgElement = document.createElement("img");
           imgElement.src = char.imageUrl;
           imgElement.alt = char.translatedName;
-          imgElement.className = 'w-24 h-32 object-cover rounded-lg mr-4 flex-shrink-0';
+          imgElement.className =
+            "w-24 h-32 object-cover rounded-lg mr-4 flex-shrink-0";
           charContainer.appendChild(imgElement);
         }
-        const textContainer = document.createElement('div');
-        textContainer.className = 'flex-grow';
-        const nameElement = document.createElement('div');
-        nameElement.innerHTML = `<strong class="text-xl font-bold">${char.translatedName}</strong> <span class="text-sm text-gray-400">(${char.originalName || ''})</span>`;
+        const textContainer = document.createElement("div");
+        textContainer.className = "flex-grow";
+        const nameElement = document.createElement("div");
+        nameElement.innerHTML = `<strong class="text-xl font-bold">${
+          char.translatedName
+        }</strong> <span class="text-sm text-gray-400">(${
+          char.originalName || ""
+        })</span>`;
         textContainer.appendChild(nameElement);
         if (char.description !== null) {
-          const descElement = document.createElement('p');
-          descElement.className = 'mt-1';
+          const descElement = document.createElement("p");
+          descElement.className = "mt-1";
           descElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${char.description}`;
           textContainer.appendChild(descElement);
         }
@@ -342,16 +354,16 @@ function renderAiView(xmlString) {
   }
 
   // 3. Summary
-  const summaryContent = getBlockContent('summary_and_insight', xmlString);
+  const summaryContent = getBlockContent("summary_and_insight", xmlString);
   if (summaryContent) {
-    const questionContent = getPartialValue('question', summaryContent);
+    const questionContent = getPartialValue("question", summaryContent);
     if (questionContent !== null) {
-      const summaryElement = document.createElement('p');
+      const summaryElement = document.createElement("p");
       // Check if it's the fallback message and style accordingly
       if (questionContent === "AI翻译服务当前不可用，以上为原始信息。") {
-        summaryElement.className = 'mt-16 text-lg text-red-500 font-bold';
+        summaryElement.className = "mt-16 text-lg text-red-500 font-bold";
       } else {
-        summaryElement.className = 'mt-16 text-lg italic';
+        summaryElement.className = "mt-16 text-lg italic";
       }
       summaryElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${questionContent}`;
       aiResponseBox.appendChild(summaryElement);
@@ -364,33 +376,32 @@ function renderAiView(xmlString) {
  * to match the horizontal alignment of the main content container.
  */
 function updateAiViewPosition() {
-  const mainContent = document.getElementById('scrollable-content');
-  const aiContainer = document.getElementById('ai-response-container');
+  const mainContent = document.getElementById("scrollable-content");
+  const aiContainer = document.getElementById("ai-response-container");
 
   if (mainContent && aiContainer) {
     const rect = mainContent.getBoundingClientRect();
     aiContainer.style.left = `${rect.left}px`;
     aiContainer.style.width = `${rect.width}px`;
-    aiContainer.style.height = '80vh'; // Keep a fixed height
+    aiContainer.style.height = "80vh"; // Keep a fixed height
   }
 }
 
-
-
 function createAliasButton() {
-  if (document.getElementById('alias-btn')) return;
+  if (document.getElementById("alias-btn")) return;
 
-  const extLinksContainer = document.getElementById('ext-links-container');
+  const extLinksContainer = document.getElementById("ext-links-container");
   if (!extLinksContainer) return;
 
-  const aliasBtn = document.createElement('button');
-  aliasBtn.id = 'alias-btn';
+  const aliasBtn = document.createElement("button");
+  aliasBtn.id = "alias-btn";
   // Removed title attribute and focus ring styles, changed to purple
-  aliasBtn.className = 'w-10 h-10 rounded-lg bg-purple-600 text-white flex items-center justify-center shadow-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-110';
+  aliasBtn.className =
+    "w-10 h-10 rounded-lg bg-purple-600 text-white flex items-center justify-center shadow-lg hover:bg-purple-700 transition-all duration-300 transform hover:scale-110";
   aliasBtn.innerHTML = '<i class="fas fa-tags"></i>';
 
-  const aliasTooltip = document.getElementById('alias-tooltip');
-  const aliasList = document.getElementById('alias-list');
+  const aliasTooltip = document.getElementById("alias-tooltip");
+  const aliasList = document.getElementById("alias-list");
 
   if (!aliasTooltip || !aliasList) return;
 
@@ -398,12 +409,12 @@ function createAliasButton() {
 
   const showTooltip = () => {
     clearTimeout(hideTimeout);
-    const aliases = vndbInfo.names.filter(name => name !== vndbInfo.mainName);
+    const aliases = vndbInfo.names.filter((name) => name !== vndbInfo.mainName);
 
     if (aliases.length > 0) {
-      aliasList.innerHTML = '';
-      aliases.forEach(alias => {
-        const li = document.createElement('li');
+      aliasList.innerHTML = "";
+      aliases.forEach((alias) => {
+        const li = document.createElement("li");
         li.textContent = alias;
         aliasList.appendChild(li);
       });
@@ -411,56 +422,56 @@ function createAliasButton() {
       const btnRect = aliasBtn.getBoundingClientRect();
       aliasTooltip.style.left = `${btnRect.right + 5}px`; // Reduced gap
       aliasTooltip.style.top = `${btnRect.top}px`;
-      aliasTooltip.classList.remove('hidden');
-      setTimeout(() => (aliasTooltip.style.opacity = '1'), 10);
+      aliasTooltip.classList.remove("hidden");
+      setTimeout(() => (aliasTooltip.style.opacity = "1"), 10);
     }
   };
 
   const hideTooltip = () => {
     hideTimeout = setTimeout(() => {
-      aliasTooltip.style.opacity = '0';
-      setTimeout(() => aliasTooltip.classList.add('hidden'), 300);
+      aliasTooltip.style.opacity = "0";
+      setTimeout(() => aliasTooltip.classList.add("hidden"), 300);
     }, 300);
   };
 
-  aliasBtn.addEventListener('mouseenter', showTooltip);
-  aliasBtn.addEventListener('mouseleave', hideTooltip);
-  aliasTooltip.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
-  aliasTooltip.addEventListener('mouseleave', hideTooltip);
+  aliasBtn.addEventListener("mouseenter", showTooltip);
+  aliasBtn.addEventListener("mouseleave", hideTooltip);
+  aliasTooltip.addEventListener("mouseenter", () => clearTimeout(hideTimeout));
+  aliasTooltip.addEventListener("mouseleave", hideTooltip);
 
   extLinksContainer.appendChild(aliasBtn);
 }
 
 async function hideMainContent() {
-  document.body.classList.add('noscroll');
-  const mainContainer = document.getElementById('main-container');
-  const siteNavigation = document.getElementById('siteNavigation');
-  const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-  const scrollToCommentsBtn = document.getElementById('scrollToCommentsBtn');
-  const vndbInfoPanel = document.getElementById('vndb-info-panel');
-  const vndbDescription = document.getElementById('vndb-description');
-  const aiResponseContainer = document.getElementById('ai-response-container');
-  const commentsSection = document.getElementById('Comments');
-  const extLinksContainer = document.getElementById('ext-links-container');
+  document.body.classList.add("noscroll");
+  const mainContainer = document.getElementById("main-container");
+  const siteNavigation = document.getElementById("siteNavigation");
+  const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+  const scrollToCommentsBtn = document.getElementById("scrollToCommentsBtn");
+  const vndbInfoPanel = document.getElementById("vndb-info-panel");
+  const vndbDescription = document.getElementById("vndb-description");
+  const aiResponseContainer = document.getElementById("ai-response-container");
+  const commentsSection = document.getElementById("Comments");
+  const extLinksContainer = document.getElementById("ext-links-container");
 
   // 1. Hide main container and buttons
-  mainContainer.style.opacity = '0';
-  mainContainer.style.pointerEvents = 'none'; // Allow clicks to pass through
-  scrollToTopBtn.style.opacity = '0';
-  scrollToCommentsBtn.style.opacity = '0';
-  if (extLinksContainer) extLinksContainer.style.opacity = '0';
+  mainContainer.style.opacity = "0";
+  mainContainer.style.pointerEvents = "none"; // Allow clicks to pass through
+  scrollToTopBtn.style.opacity = "0";
+  scrollToCommentsBtn.style.opacity = "0";
+  if (extLinksContainer) extLinksContainer.style.opacity = "0";
   if (commentsSection) {
-    commentsSection.style.opacity = '0';
-    commentsSection.style.pointerEvents = 'none';
+    commentsSection.style.opacity = "0";
+    commentsSection.style.pointerEvents = "none";
   }
 
   // Delay hiding the site navigation to sync with the main container
   setTimeout(() => {
-    siteNavigation.style.opacity = '0';
+    siteNavigation.style.opacity = "0";
   }, 0);
 
   // 2. Hide game description
-  vndbDescription.style.opacity = '0';
+  vndbDescription.style.opacity = "0";
 
   // Wait for the 0.5s fade-out animations to complete
   await sleep(500);
@@ -469,7 +480,7 @@ async function hideMainContent() {
   // Set a fixed height before animation to prevent wobbling from translateY(-50%)
   const infoPanelRect = vndbInfoPanel.getBoundingClientRect();
   vndbInfoPanel.style.height = `${infoPanelRect.height}px`;
-  vndbInfoPanel.style.transform = 'translateY(47vh) translateY(-50%)';
+  vndbInfoPanel.style.transform = "translateY(47vh) translateY(-50%)";
 
   // Wait for the 0.8s slide animation to complete
   await sleep(800);
@@ -479,53 +490,53 @@ async function hideMainContent() {
   if (vndbInfo.aiRawResponse) {
     renderAiView(vndbInfo.aiRawResponse);
   }
-  aiResponseContainer.style.opacity = '1';
-  aiResponseContainer.style.pointerEvents = 'auto';
+  aiResponseContainer.style.opacity = "1";
+  aiResponseContainer.style.pointerEvents = "auto";
 }
 
 async function showMainContent() {
-  document.body.classList.remove('noscroll');
-  const mainContainer = document.getElementById('main-container');
-  const siteNavigation = document.getElementById('siteNavigation');
-  const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-  const scrollToCommentsBtn = document.getElementById('scrollToCommentsBtn');
-  const vndbInfoPanel = document.getElementById('vndb-info-panel');
-  const vndbDescription = document.getElementById('vndb-description');
-  const aiResponseContainer = document.getElementById('ai-response-container');
-  const commentsSection = document.getElementById('Comments');
+  document.body.classList.remove("noscroll");
+  const mainContainer = document.getElementById("main-container");
+  const siteNavigation = document.getElementById("siteNavigation");
+  const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+  const scrollToCommentsBtn = document.getElementById("scrollToCommentsBtn");
+  const vndbInfoPanel = document.getElementById("vndb-info-panel");
+  const vndbDescription = document.getElementById("vndb-description");
+  const aiResponseContainer = document.getElementById("ai-response-container");
+  const commentsSection = document.getElementById("Comments");
 
   // 1. Hide AI response container
-  aiResponseContainer.style.opacity = '0';
-  aiResponseContainer.style.pointerEvents = 'none';
+  aiResponseContainer.style.opacity = "0";
+  aiResponseContainer.style.pointerEvents = "none";
 
   // Wait for AI container to fade out (0.5s)
   await sleep(500);
 
   // 2. Slide up game info
-  vndbInfoPanel.style.transform = 'translateY(0)';
+  vndbInfoPanel.style.transform = "translateY(0)";
   // Restore original height behavior after animation
   setTimeout(() => {
-    vndbInfoPanel.style.height = '';
+    vndbInfoPanel.style.height = "";
   }, 800); // Match transition duration
 
   // Wait for slide up animation (0.8s)
   await sleep(800);
 
   // 3. Show game description and main container first
-  vndbDescription.style.opacity = '1';
-  mainContainer.style.opacity = '1';
-  mainContainer.style.pointerEvents = ''; // Restore pointer events
+  vndbDescription.style.opacity = "1";
+  mainContainer.style.opacity = "1";
+  mainContainer.style.pointerEvents = ""; // Restore pointer events
   if (commentsSection) {
-    commentsSection.style.opacity = '1';
-    commentsSection.style.pointerEvents = '';
+    commentsSection.style.opacity = "1";
+    commentsSection.style.pointerEvents = "";
   }
 
   // 4. Then, show the platform buttons and other floating buttons at the same time
-  siteNavigation.style.opacity = '1';
-  scrollToTopBtn.style.opacity = '1';
-  scrollToCommentsBtn.style.opacity = '1';
-  const extLinksContainer = document.getElementById('ext-links-container');
-  if (extLinksContainer) extLinksContainer.style.opacity = '1';
+  siteNavigation.style.opacity = "1";
+  scrollToTopBtn.style.opacity = "1";
+  scrollToCommentsBtn.style.opacity = "1";
+  const extLinksContainer = document.getElementById("ext-links-container");
+  if (extLinksContainer) extLinksContainer.style.opacity = "1";
 }
 
 /**
@@ -533,20 +544,20 @@ async function showMainContent() {
  * @returns {number} The width of the scrollbar in pixels.
  */
 function showToast(message, duration = 4000) {
-  const toast = document.getElementById('toast-notification');
+  const toast = document.getElementById("toast-notification");
   if (!toast) return;
 
-  const toastText = toast.querySelector('span');
+  const toastText = toast.querySelector("span");
   if (toastText) {
     toastText.textContent = message;
   }
 
-  toast.classList.remove('hide');
-  toast.classList.add('show');
+  toast.classList.remove("hide");
+  toast.classList.add("show");
 
   setTimeout(() => {
-    toast.classList.remove('show');
-    toast.classList.add('hide');
+    toast.classList.remove("show");
+    toast.classList.add("hide");
   }, duration);
 }
 
@@ -655,7 +666,7 @@ async function handleSearchSubmit(e) {
 
   if (lockViewBtn) {
     lockViewBtn.disabled = true; // Disable on new search
-    lockViewBtn.classList.remove('visible');
+    lockViewBtn.classList.remove("visible");
   }
 
   const currentTime = Date.now();
@@ -670,7 +681,6 @@ async function handleSearchSubmit(e) {
   platformResults.clear();
   bgmBestMatches = []; // Reset best matches on new search
   vndbInfo = {}; // Reset VNDB info
-
 
   // Reset animation state if it's active
   if (document.body.classList.contains("vndb-mode")) {
@@ -743,30 +753,41 @@ async function handleSearchSubmit(e) {
       searchGameStream(searchParams, {
         onTotal: (total) => {
           totalTasks = total;
-          fetchVndbData(gameName).then(async vndbResult => {
-            console.log("[DEBUG] VNDB fetch completed. Processing result.");
-            console.log("[DEBUG] Received from VNDB:", vndbResult);
+          fetchVndbData(gameName)
+            .then(async (vndbResult) => {
+              console.log("[DEBUG] VNDB fetch completed. Processing result.");
+              console.log("[DEBUG] Received from VNDB:", vndbResult);
 
-            if (vndbResult && vndbResult.names && vndbResult.names.length > 0) {
-              bgmBestMatches = vndbResult.names;
-              vndbInfo = {
-                names: vndbResult.names, // Add the names array to vndbInfo
-                mainName: vndbResult.mainName,
-                mainImageUrl: vndbResult.mainImageUrl,
-                screenshotUrl: vndbResult.screenshotUrl,
-                description: vndbResult.description,
-                va: vndbResult.va,
-                aiRawResponse: "", // Add a field to store the full AI response
-              };
-              console.log("[DEBUG] Stored VNDB Info with characters:", vndbInfo);
-              // Now that we have the names, immediately re-highlight any existing cards.
-              console.log("[DEBUG] Applying highlights based on VNDB names:", bgmBestMatches);
-              highlightBestMatches();
+              if (
+                vndbResult &&
+                vndbResult.names &&
+                vndbResult.names.length > 0
+              ) {
+                bgmBestMatches = vndbResult.names;
+                vndbInfo = {
+                  names: vndbResult.names, // Add the names array to vndbInfo
+                  mainName: vndbResult.mainName,
+                  mainImageUrl: vndbResult.mainImageUrl,
+                  screenshotUrl: vndbResult.screenshotUrl,
+                  description: vndbResult.description,
+                  va: vndbResult.va,
+                  aiRawResponse: "", // Add a field to store the full AI response
+                };
+                console.log(
+                  "[DEBUG] Stored VNDB Info with characters:",
+                  vndbInfo
+                );
+                // Now that we have the names, immediately re-highlight any existing cards.
+                console.log(
+                  "[DEBUG] Applying highlights based on VNDB names:",
+                  bgmBestMatches
+                );
+                highlightBestMatches();
 
-              // --- Fetch External Links ---
-              if (vndbInfo.mainName) {
-                await fetchVndbExtLinks(vndbInfo.mainName);
-              }
+                // --- Fetch External Links ---
+                if (vndbInfo.mainName) {
+                  await fetchVndbExtLinks(vndbInfo.mainName);
+                }
 
                 // --- Trigger Animation (only if panel exists) ---
                 if (vndbInfoPanel) {
@@ -777,23 +798,26 @@ async function handleSearchSubmit(e) {
                     vndbImage.classList.add("hidden");
                   }
 
-                if (vndbInfo.description && vndbDescription) {
-                  // New: Clear previous content and show the element
-                  vndbDescription.innerHTML = "";
-                  vndbDescription.classList.remove("hidden");
-                  // New: Call the streaming translation function
-                  translateAndStreamDescription(vndbInfo.description, vndbInfo.va);
-                } else if (vndbDescription) {
-                  vndbDescription.classList.add("hidden");
-                }
+                  if (vndbInfo.description && vndbDescription) {
+                    // New: Clear previous content and show the element
+                    vndbDescription.innerHTML = "";
+                    vndbDescription.classList.remove("hidden");
+                    // New: Call the streaming translation function
+                    translateAndStreamDescription(
+                      vndbInfo.description,
+                      vndbInfo.va
+                    );
+                  } else if (vndbDescription) {
+                    vndbDescription.classList.add("hidden");
+                  }
 
-                if (vndbInfo.mainName && vndbTitle) {
-                  vndbTitle.textContent = vndbInfo.mainName;
-                  vndbTitle.classList.remove("hidden");
-                  createAliasButton(); // Create the alias button
-                } else if (vndbTitle) {
-                  vndbTitle.classList.add("hidden");
-                }
+                  if (vndbInfo.mainName && vndbTitle) {
+                    vndbTitle.textContent = vndbInfo.mainName;
+                    vndbTitle.classList.remove("hidden");
+                    createAliasButton(); // Create the alias button
+                  } else if (vndbTitle) {
+                    vndbTitle.classList.add("hidden");
+                  }
 
                   if (vndbInfo.screenshotUrl && backgroundLayer) {
                     const img = new Image();
@@ -819,28 +843,32 @@ async function handleSearchSubmit(e) {
                     }
                   }
 
-                // Show panel only if there is something to display
-                const hasContent =
-                  vndbInfo.mainImageUrl ||
-                  vndbInfo.description ||
-                  vndbInfo.mainName;
-                vndbInfoPanel.classList.toggle("hidden", !hasContent);
-                // Hide ext links until the second VNDB fetch is complete
-                const extLinksContainer = document.getElementById('ext-links-container');
-                if (extLinksContainer) {
-                  extLinksContainer.style.opacity = '0';
-                  extLinksContainer.style.pointerEvents = 'none';
+                  // Show panel only if there is something to display
+                  const hasContent =
+                    vndbInfo.mainImageUrl ||
+                    vndbInfo.description ||
+                    vndbInfo.mainName;
+                  vndbInfoPanel.classList.toggle("hidden", !hasContent);
+                  // Hide ext links until the second VNDB fetch is complete
+                  const extLinksContainer = document.getElementById(
+                    "ext-links-container"
+                  );
+                  if (extLinksContainer) {
+                    extLinksContainer.style.opacity = "0";
+                    extLinksContainer.style.pointerEvents = "none";
+                  }
                 }
+                isFirstSearch = false;
+              } else {
+                console.log(
+                  "[DEBUG] No exact match from VNDB or empty names list. Skipping highlight."
+                );
               }
-              isFirstSearch = false;
-
-            } else {
-              console.log("[DEBUG] No exact match from VNDB or empty names list. Skipping highlight.");
-            }
-          }).catch(err => {
-            console.error("An error occurred during the VNDB fetch:", err);
-            // Don't show error to user for this, as it's an enhancement
-          });
+            })
+            .catch((err) => {
+              console.error("An error occurred during the VNDB fetch:", err);
+              // Don't show error to user for this, as it's an enhancement
+            });
         },
         onProgress: (progress) => {
           if (progressBar && totalTasks > 0) {
@@ -1133,32 +1161,38 @@ function createPlatformCard(result, withAnimation = true) {
 
     itemsHtml = `<ol class="divide-y divide-gray-100" data-items>
                 ${paginatedItems
-        .map((item) => {
-          let decodedPath = "";
-          try {
-            const urlObj = new URL(item.url);
-            decodedPath = decodeURIComponent(
-              urlObj.pathname + (urlObj.search || "")
-            );
-          } catch { }
-          const displayName =
-            item.name === ".bzEmpty" || !item.name
-              ? "未知文件"
-              : item.name;
+                  .map((item) => {
+                    let decodedPath = "";
+                    try {
+                      const urlObj = new URL(item.url);
+                      decodedPath = decodeURIComponent(
+                        urlObj.pathname + (urlObj.search || "")
+                      );
+                    } catch {}
+                    const displayName =
+                      item.name === ".bzEmpty" || !item.name
+                        ? "未知文件"
+                        : item.name;
 
-          // Check if the current item's name is one of the best matches, ONLY on the first page.
-          const isBestMatch = result.currentPage === 1 && bgmBestMatches.some(matchName => displayName.includes(matchName));
-          const bestMatchClass = isBestMatch ? 'best-match-highlight' : '';
+                    // Check if the current item's name is one of the best matches, ONLY on the first page.
+                    const isBestMatch =
+                      result.currentPage === 1 &&
+                      bgmBestMatches.some((matchName) =>
+                        displayName.includes(matchName)
+                      );
+                    const bestMatchClass = isBestMatch
+                      ? "best-match-highlight"
+                      : "";
 
-          return `<li class="group transition hover:bg-indigo-50 flex flex-col px-5 py-3 ${bestMatchClass}">
+                    return `<li class="group transition hover:bg-indigo-50 flex flex-col px-5 py-3 ${bestMatchClass}">
                                 <a href="${item.url}" target="_blank" class="font-medium text-gray-800 group-hover:text-indigo-700 text-sm flex items-center gap-1" title="访问具体页面">
                                     <span class="flex-1 min-w-0 break-words">${displayName}</span>
                                     <i class="fas fa-arrow-up-right-from-square text-gray-300 group-hover:text-indigo-400 ml-1"></i>
                                 </a>
                                 <span class="text-xs text-gray-400 mt-0.5 ml-1 break-all block w-full">${decodedPath}</span>
                             </li>`;
-        })
-        .join("")}
+                  })
+                  .join("")}
             </ol>`;
   } else if (!result.error) {
     itemsHtml = '<div class="px-5 py-3 text-gray-400 italic">暂无结果</div>';
@@ -1170,37 +1204,45 @@ function createPlatformCard(result, withAnimation = true) {
     const prevDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages;
     paginationHtml = `<div class="px-5 py-3 flex justify-center gap-2 items-center">
-                <button class="prev-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${prevDisabled
-        ? "opacity-50 cursor-not-allowed"
-        : "hover:scale-110 active:scale-90"
-      }" data-platform="${result.name}" ${prevDisabled ? "disabled" : ""
-      }><i class="fas fa-chevron-left text-sm"></i></button>
+                <button class="prev-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${
+                  prevDisabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:scale-110 active:scale-90"
+                }" data-platform="${result.name}" ${
+      prevDisabled ? "disabled" : ""
+    }><i class="fas fa-chevron-left text-sm"></i></button>
                 <span class="text-sm font-semibold text-indigo-700 px-3 py-1 bg-indigo-100 rounded-full shadow-sm">
                   ${currentPage} / ${totalPages}
                 </span>
-                <button class="next-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${nextDisabled
-        ? "opacity-50 cursor-not-allowed"
-        : "hover:scale-110 active:scale-90"
-      }" data-platform="${result.name}" ${nextDisabled ? "disabled" : ""
-      }><i class="fas fa-chevron-right text-sm"></i></button>
+                <button class="next-page-btn bg-indigo-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-300 transition-all duration-200 ease-in-out ${
+                  nextDisabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:scale-110 active:scale-90"
+                }" data-platform="${result.name}" ${
+      nextDisabled ? "disabled" : ""
+    }><i class="fas fa-chevron-right text-sm"></i></button>
             </div>`;
   }
 
   const cardHtml = `
-            <div class="flex items-center gap-2 px-5 py-3 bg-white/80 border-b ${color.border
-    }">
+            <div class="flex items-center gap-2 px-5 py-3 bg-white/80 border-b ${
+              color.border
+            }">
                 <i class="fas fa-dice-d6 ${color.icon}"></i>
                 <a href="${home}" target="_blank" class="flex items-center gap-2 group/link outline-none focus:ring-2 focus:ring-indigo-300 rounded" title="访问具体页面">
-                    <span class="text-lg font-bold ${color.text
-    } group-hover/link:text-indigo-800">${result.name
-    }${tag}</span>
+                    <span class="text-lg font-bold ${
+                      color.text
+                    } group-hover/link:text-indigo-800">${
+    result.name
+  }${tag}</span>
                     <span class="text-xs text-gray-400 group-hover/link:text-indigo-400 ml-2">${domain}</span>
                 </a>
             </div>
-            ${result.error
-      ? `<div class="px-5 py-3 text-red-500 font-semibold flex items-center gap-2"><i class='fas fa-exclamation-circle'></i> ${result.error}</div>`
-      : ""
-    }
+            ${
+              result.error
+                ? `<div class="px-5 py-3 text-red-500 font-semibold flex items-center gap-2"><i class='fas fa-exclamation-circle'></i> ${result.error}</div>`
+                : ""
+            }
             ${itemsHtml}
             ${paginationHtml}
         `;
@@ -1208,9 +1250,11 @@ function createPlatformCard(result, withAnimation = true) {
   const cardElement = document.createElement("div");
   cardElement.dataset.platform = result.name;
   cardElement.id = result.name;
-  cardElement.className = `mb-6 rounded-xl shadow-lg rounded-t-2xl ${color.bg
-    } border ${color.border} overflow-hidden ${withAnimation ? "animate__animated animate__fadeInUp animate__faster" : ""
-    }`;
+  cardElement.className = `mb-6 rounded-xl shadow-lg rounded-t-2xl ${
+    color.bg
+  } border ${color.border} overflow-hidden ${
+    withAnimation ? "animate__animated animate__fadeInUp animate__faster" : ""
+  }`;
   cardElement.innerHTML = cardHtml;
 
   return cardElement;
@@ -1458,17 +1502,19 @@ async function searchGameStream(
  * @param {any} obj The object or array to process.
  */
 function removeSpoilersRecursively(obj) {
-  if (obj === null || typeof obj !== 'object') {
+  if (obj === null || typeof obj !== "object") {
     return;
   }
 
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const value = obj[key];
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         // Also trims whitespace that might be left after removal
-        obj[key] = value.replace(/\[spoiler\][\s\S]*?\[\/spoiler\]/g, '').trim();
-      } else if (typeof value === 'object') {
+        obj[key] = value
+          .replace(/\[spoiler\][\s\S]*?\[\/spoiler\]/g, "")
+          .trim();
+      } else if (typeof value === "object") {
         removeSpoilersRecursively(value);
       }
     }
@@ -1485,7 +1531,8 @@ async function fetchVndbData(gameName) {
   const url = `${VNDB_API_BASE_URL}/vn`;
   const body = {
     filters: ["search", "=", gameName],
-    fields: "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description, va.character.name, va.character.description, va.character.original, va.character.image.url, va.character.image.sexual, va.character.image.violence, va.character.traits.name, va.character.traits.spoiler, va.character.vns.role, va.character.vns.spoiler",
+    fields:
+      "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description, va.character.name, va.character.description, va.character.original, va.character.image.url, va.character.image.sexual, va.character.image.violence, va.character.traits.name, va.character.traits.spoiler, va.character.vns.role, va.character.vns.spoiler",
   };
 
   try {
@@ -1552,7 +1599,6 @@ async function fetchVndbData(gameName) {
       });
     }
 
-
     // Determine the main name based on priority
     if (zhName) {
       mainName = zhName;
@@ -1579,19 +1625,19 @@ async function fetchVndbData(gameName) {
 
       // 1. Extract characters
       let characters = result.va
-        .map(item => item.character)
+        .map((item) => item.character)
         .filter(Boolean)
-        .filter(char => {
+        .filter((char) => {
           if (!char.vns || char.vns.length === 0) return false;
-          const gameAppearance = char.vns.find(vn => vn.id === result.id);
+          const gameAppearance = char.vns.find((vn) => vn.id === result.id);
           return gameAppearance && gameAppearance.spoiler === 0;
         });
 
       // 2. Define role weights and sort characters
       const roleWeights = { main: 1, primary: 2, side: 3, appears: 4 };
       characters.sort((a, b) => {
-        const roleA = a.vns.find(vn => vn.id === result.id)?.role;
-        const roleB = b.vns.find(vn => vn.id === result.id)?.role;
+        const roleA = a.vns.find((vn) => vn.id === result.id)?.role;
+        const roleB = b.vns.find((vn) => vn.id === result.id)?.role;
         const weightA = roleWeights[roleA] || Infinity;
         const weightB = roleWeights[roleB] || Infinity;
         return weightA - weightB;
@@ -1600,12 +1646,15 @@ async function fetchVndbData(gameName) {
       console.log("[DEBUG] Sorted characters by role:", characters);
 
       // 3. Process each character (traits, names, images, and new role logic)
-      characters.forEach(character => {
+      characters.forEach((character) => {
         // Process traits into a single 'tag' string
         if (character.traits && Array.isArray(character.traits)) {
           character.tag = character.traits
-            .filter(trait => trait.spoiler === 0 && trait.name !== "Not Sexually Involved")
-            .map(trait => trait.name)
+            .filter(
+              (trait) =>
+                trait.spoiler === 0 && trait.name !== "Not Sexually Involved"
+            )
+            .map((trait) => trait.name)
             .join(", ");
           delete character.traits;
         } else {
@@ -1633,25 +1682,28 @@ async function fetchVndbData(gameName) {
         }
 
         // Add 'role' and delete 'vns'
-        const gameAppearance = character.vns.find(vn => vn.id === result.id);
+        const gameAppearance = character.vns.find((vn) => vn.id === result.id);
         if (gameAppearance) {
           character.role = gameAppearance.role;
         } else {
-          character.role = 'unknown'; // Should not happen due to earlier filter
+          character.role = "unknown"; // Should not happen due to earlier filter
         }
         delete character.vns;
       });
 
       // 4. Filter for unique characters after processing
       const uniqueCharacters = characters.reduce((acc, current) => {
-        if (!acc.some(item => item.name === current.name)) {
+        if (!acc.some((item) => item.name === current.name)) {
           acc.push(current);
         }
         return acc;
       }, []);
 
       result.va = uniqueCharacters; // Replace original va with processed, sorted, and unique characters
-      console.log("[DEBUG] Final processed character data (before assigning to finalResult):", result.va);
+      console.log(
+        "[DEBUG] Final processed character data (before assigning to finalResult):",
+        result.va
+      );
     }
     // --- End of VA Processing ---
 
@@ -1740,7 +1792,6 @@ async function fetchAndDisplayVersion() {
 
     // Initial display
     updateVersionDisplay();
-
 
     // Start interval to switch every 5 seconds
     setInterval(updateVersionDisplay, 5000);
@@ -1878,8 +1929,9 @@ function renderExtLinkButtons(urls) {
           link.target = "_blank";
           link.className =
             "flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 p-1 rounded";
-          link.innerHTML = `<i class="fas fa-external-link-alt text-gray-400"></i> ${new URL(url).hostname
-            }`;
+          link.innerHTML = `<i class="fas fa-external-link-alt text-gray-400"></i> ${
+            new URL(url).hostname
+          }`;
           popup.appendChild(link);
         });
         buttonWrapper.appendChild(popup);
@@ -1911,9 +1963,9 @@ function renderExtLinkButtons(urls) {
   // Use a short timeout to ensure the browser has rendered the initial hidden state
   // before applying the transition, allowing the fade-in to work correctly.
   setTimeout(() => {
-    container.style.transition = 'opacity 0.5s ease-in-out';
-    container.style.opacity = '1';
-    container.style.pointerEvents = 'auto';
+    container.style.transition = "opacity 0.5s ease-in-out";
+    container.style.opacity = "1";
+    container.style.pointerEvents = "auto";
   }, 10); // A small delay is enough
 }
 
@@ -1925,14 +1977,14 @@ async function translateAndStreamDescription(description, characters) {
   if (!vndbDescription) return;
 
   // Show the lock view button with a ripple effect when AI response starts
-  const lockViewBtn = document.getElementById('lock-view-btn');
-  if (lockViewBtn && !lockViewBtn.classList.contains('visible')) {
-    lockViewBtn.classList.add('visible');
+  const lockViewBtn = document.getElementById("lock-view-btn");
+  if (lockViewBtn && !lockViewBtn.classList.contains("visible")) {
+    lockViewBtn.classList.add("visible");
     // Create 3 staggered ripples for a more noticeable effect
     for (let i = 0; i < 3; i++) {
       setTimeout(() => {
-        const ripple = document.createElement('span');
-        ripple.className = 'ripple';
+        const ripple = document.createElement("span");
+        ripple.className = "ripple";
         lockViewBtn.appendChild(ripple);
         setTimeout(() => ripple.remove(), 1000); // Animation duration is 1s
       }, i * 500); // Stagger the start of each ripple
@@ -1950,24 +2002,33 @@ async function translateAndStreamDescription(description, characters) {
   try {
     if (isMobileView) {
       console.log("[DEBUG] Mobile view detected, skipping AI translation.");
-      vndbDescription.innerHTML = `<p>${description.replace(/\n/g, "<br>")}</p>`;
+      vndbDescription.innerHTML = `<p>${description.replace(
+        /\n/g,
+        "<br>"
+      )}</p>`;
       return;
     }
 
     const userLanguage = navigator.language || "zh-CN";
 
     if (characters && characters.length > 0) {
-      characterInfoString = characters.map(c => `Name: ${c.name}, Role: ${c.role}`).join("\n");
+      characterInfoString = characters
+        .map((c) => `Name: ${c.name}, Role: ${c.role}`)
+        .join("\n");
     }
 
     const response = await fetch(AI_TRANSLATE_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${AI_TRANSLATE_API_KEY}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${AI_TRANSLATE_API_KEY}`,
+      },
       body: JSON.stringify({
         model: AI_TRANSLATE_MODEL,
         messages: [
           {
-            role: "system", content: `
+            role: "system",
+            content: `
 作为专业的游戏内容翻译、格式化与主题分析专家，请将提供的游戏信息（游戏介绍与人物信息）精确翻译成'${userLanguage}'，按指定XML格式输出，并提出一个引人深思的总结问题。
 
 输入处理要求：
@@ -2007,8 +2068,16 @@ async function translateAndStreamDescription(description, characters) {
  \`<question>\`：基于翻译后的故事与人物，提出一个引人深思/好奇的问题。勿用总结性开场白（如“总体来说”）。
 
 最终输出约束：
- 纯XML内容，严格遵循XML标准及结构，所有标签正确嵌套/闭合。勿含任何额外文字/评论。使用\`\`\`xml \`\`\`的代码块来包裹。` },
-          { role: "user", content: `Game Description:\n${description}\n\nCharacter Details:\n${JSON.stringify(characters, null, 2)}` }
+ 纯XML内容，严格遵循XML标准及结构，所有标签正确嵌套/闭合。勿含任何额外文字/评论。使用\`\`\`xml \`\`\`的代码块来包裹。`,
+          },
+          {
+            role: "user",
+            content: `Game Description:\n${description}\n\nCharacter Details:\n${JSON.stringify(
+              characters,
+              null,
+              2
+            )}`,
+          },
         ],
         stream: true,
       }),
@@ -2029,7 +2098,7 @@ async function translateAndStreamDescription(description, characters) {
         }
 
         buffer += decoder.decode(value, { stream: true });
-        let boundary = buffer.indexOf('\n');
+        let boundary = buffer.indexOf("\n");
         while (boundary !== -1) {
           const line = buffer.substring(0, boundary).trim();
           buffer = buffer.substring(boundary + 1);
@@ -2039,7 +2108,11 @@ async function translateAndStreamDescription(description, characters) {
             if (jsonStr !== "[DONE]") {
               try {
                 const chunk = JSON.parse(jsonStr);
-                if (chunk.choices && chunk.choices[0].delta && chunk.choices[0].delta.content) {
+                if (
+                  chunk.choices &&
+                  chunk.choices[0].delta &&
+                  chunk.choices[0].delta.content
+                ) {
                   if (isFirstChunk) {
                     if (lockViewBtn) lockViewBtn.disabled = false;
                     isFirstChunk = false;
@@ -2047,13 +2120,28 @@ async function translateAndStreamDescription(description, characters) {
                   vndbInfo.aiRawResponse += chunk.choices[0].delta.content;
                   renderAiView(vndbInfo.aiRawResponse);
 
-                  const startIndexDesc = vndbInfo.aiRawResponse.indexOf("<game_description_translated>");
+                  const startIndexDesc = vndbInfo.aiRawResponse.indexOf(
+                    "<game_description_translated>"
+                  );
                   if (startIndexDesc !== -1) {
-                    const endIndexDesc = vndbInfo.aiRawResponse.indexOf("</game_description_translated>");
-                    let contentToRenderDesc = (endIndexDesc !== -1)
-                      ? vndbInfo.aiRawResponse.substring(startIndexDesc + "<game_description_translated>".length, endIndexDesc)
-                      : vndbInfo.aiRawResponse.substring(startIndexDesc + "<game_description_translated>".length);
-                    contentToRenderDesc = contentToRenderDesc.replace(/<p>/g, '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+                    const endIndexDesc = vndbInfo.aiRawResponse.indexOf(
+                      "</game_description_translated>"
+                    );
+                    let contentToRenderDesc =
+                      endIndexDesc !== -1
+                        ? vndbInfo.aiRawResponse.substring(
+                            startIndexDesc +
+                              "<game_description_translated>".length,
+                            endIndexDesc
+                          )
+                        : vndbInfo.aiRawResponse.substring(
+                            startIndexDesc +
+                              "<game_description_translated>".length
+                          );
+                    contentToRenderDesc = contentToRenderDesc.replace(
+                      /<p>/g,
+                      "<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                    );
                     vndbDescription.innerHTML = contentToRenderDesc;
                   }
                 }
@@ -2062,7 +2150,7 @@ async function translateAndStreamDescription(description, characters) {
               }
             }
           }
-          boundary = buffer.indexOf('\n');
+          boundary = buffer.indexOf("\n");
         }
       }
     } else {
@@ -2075,21 +2163,29 @@ async function translateAndStreamDescription(description, characters) {
 
     // Construct fallback XML for AI view
     let fallbackXml = "<game_data>";
-    fallbackXml += `<game_description_translated><p>${description.replace(/\n/g, "</p><p>")}</p></game_description_translated>`;
+    fallbackXml += `<game_description_translated><p>${description.replace(
+      /\n/g,
+      "</p><p>"
+    )}</p></game_description_translated>`;
     if (characters && characters.length > 0) {
       fallbackXml += "<characters_translated>";
-      characters.forEach(c => {
+      characters.forEach((c) => {
         fallbackXml += "<character>";
-        fallbackXml += `<image_url>${c.image || ''}</image_url>`;
+        fallbackXml += `<image_url>${c.image || ""}</image_url>`;
         fallbackXml += `<translated_name>${c.name}</translated_name>`;
         fallbackXml += `<role>${c.role}</role>`;
-        fallbackXml += `<original_name>${c.originalName || c.name}</original_name>`;
-        fallbackXml += `<description>${c.description || '无可用描述'}</description>`;
+        fallbackXml += `<original_name>${
+          c.originalName || c.name
+        }</original_name>`;
+        fallbackXml += `<description>${
+          c.description || "无可用描述"
+        }</description>`;
         fallbackXml += "</character>";
       });
       fallbackXml += "</characters_translated>";
     }
-    fallbackXml += "<summary_and_insight><question>AI翻译服务当前不可用，以上为原始信息。</question></summary_and_insight>";
+    fallbackXml +=
+      "<summary_and_insight><question>AI翻译服务当前不可用，以上为原始信息。</question></summary_and_insight>";
     fallbackXml += "</game_data>";
 
     vndbInfo.aiRawResponse = fallbackXml;
