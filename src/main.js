@@ -5,7 +5,8 @@ const VNDB_API_BASE_URL = "https://api.vndb.org/kana";
 // -- 下列预置的 API 接口与 ApiKey 仅用于为 SearchGal.Homes 网站正常访客提供 LLM 服务
 // -- 如需进行项目调试，请修改 AI_TRANSLATE 变量为自己的 API 接口与 ApiKey
 // -- 除此以外，ai.searchgal.homes 接口无法为其他任何非正当请求提供 LLM 服务
-const AI_TRANSLATE_API_URL = "https://ai.searchgal.homes/v1/chat/completions";
+// const AI_TRANSLATE_API_URL = "https://ai.searchgal.homes/v1/chat/completions";
+const AI_TRANSLATE_API_URL = "http://10.241.10.3:3000/v1/chat/completions";
 const AI_TRANSLATE_API_KEY =
   "sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e";
 const AI_TRANSLATE_MODEL = "Qwen/Qwen2.5-32B-Instruct";
@@ -767,6 +768,7 @@ async function handleSearchSubmit(e) {
                 vndbInfo = {
                   names: vndbResult.names, // Add the names array to vndbInfo
                   mainName: vndbResult.mainName,
+                  originalTitle: vndbResult.originalTitle, // Store the original title
                   mainImageUrl: vndbResult.mainImageUrl,
                   screenshotUrl: vndbResult.screenshotUrl,
                   description: vndbResult.description,
@@ -785,8 +787,8 @@ async function handleSearchSubmit(e) {
                 highlightBestMatches();
 
                 // --- Fetch External Links ---
-                if (vndbInfo.mainName) {
-                  await fetchVndbExtLinks(vndbInfo.mainName);
+                if (vndbInfo.originalTitle) {
+                  await fetchVndbExtLinks(vndbInfo.originalTitle);
                 }
 
                 // --- Trigger Animation (only if panel exists) ---
@@ -1577,12 +1579,13 @@ async function fetchVndbData(gameName) {
     }
 
     // Collect main title
-    if (result.title) {
-      names.push(result.title);
+    const originalTitle = result.title;
+    if (originalTitle) {
+      names.push(originalTitle);
     }
 
     // Collect all alternative titles
-    let mainName = result.title || ""; // Default main name
+    let mainName = originalTitle || ""; // Default main name
     let zhName = "";
     let jaName = "";
 
@@ -1710,6 +1713,7 @@ async function fetchVndbData(gameName) {
     const finalResult = {
       names: [...new Set(names)], // Return unique names
       mainName,
+      originalTitle,
       mainImageUrl,
       screenshotUrl,
       description,
@@ -1818,8 +1822,8 @@ function debounce(func, delay) {
 async function fetchVndbExtLinks(mainName) {
   const url = `${VNDB_API_BASE_URL}/release`;
   const body = {
-    filters: ["search", "=", mainName],
-    fields: "title, extlinks.url",
+    filters: ["vn", "=", ["search", "=", mainName]],
+    fields: "title, official, extlinks.url",
   };
 
   try {
@@ -1841,10 +1845,8 @@ async function fetchVndbExtLinks(mainName) {
     console.log("[DEBUG] Received extlinks from VNDB:", data);
 
     if (data.results && data.results.length > 0) {
-      const allUrls = data.results.flatMap(
-        (result) => result.extlinks?.map((link) => link.url) || []
-      );
-      renderExtLinkButtons(allUrls);
+      // Pass the entire results array to the rendering function
+      renderExtLinkButtons(data.results);
     }
   } catch (error) {
     console.error("Error fetching VNDB external links:", error);
@@ -1852,32 +1854,58 @@ async function fetchVndbExtLinks(mainName) {
 }
 
 /**
- * Renders categorized external link buttons based on URLs.
- * @param {string[]} urls A list of all external URLs.
+ * Renders categorized external link buttons based on release data.
+ * @param {object[]} releases A list of release objects from VNDB.
  */
-function renderExtLinkButtons(urls) {
+function renderExtLinkButtons(releases) {
+  const allUrls = releases.flatMap(
+    (release) => release.extlinks?.map((link) => link.url) || []
+  );
+  console.log("获取到的所有VNDB链接:", allUrls);
+
   const container = document.getElementById("ext-links-container");
   if (!container) return;
   container.innerHTML = ""; // Clear previous buttons
 
-  const steamUrls = urls.filter((url) =>
-    url.includes("store.steampowered.com")
-  );
-  const dlsiteUrls = urls.filter((url) => url.includes("dlsite"));
-  const officialUrls = urls.filter(
-    (url) =>
-      url.includes("shiravune.com") ||
-      url.includes("mangagamer.com") ||
-      url.includes("yuzu-soft.com") ||
-      url.includes("hikarifield")
-  );
-  const otherUrls = urls.filter(
-    (url) =>
-      !steamUrls.includes(url) &&
-      !dlsiteUrls.includes(url) &&
-      !officialUrls.includes(url) &&
-      !url.includes("steamdb")
-  );
+  // --- URL Categorization & Deduplication ---
+  const steamUrls = [
+    ...new Set(
+      allUrls.filter((url) => url.includes("store.steampowered.com"))
+    ),
+  ];
+  const dlsiteUrls = [
+    ...new Set(allUrls.filter((url) => url.includes("dlsite"))),
+  ];
+
+  // Create a set of already categorized URLs for quick lookup
+  const categorizedUrls = new Set([...steamUrls, ...dlsiteUrls]);
+
+  // Find official URLs from releases marked as 'official'.
+  // This logic also prevents duplicates within the official list and against other lists.
+  const officialUrls = releases
+    .filter((release) => release.official)
+    .flatMap((release) => release.extlinks?.map((link) => link.url) || [])
+    .filter((url) => {
+      if (categorizedUrls.has(url)) {
+        return false; // Exclude if already in Steam or DLsite
+      }
+      categorizedUrls.add(url); // Add to the set to avoid duplicates in "Other"
+      return true;
+    });
+
+  // "Other" URLs are everything not yet categorized, with duplicates removed.
+  const otherUrls = [
+    ...new Set(
+      allUrls.filter(
+        (url) => !categorizedUrls.has(url) && !url.includes("steamdb")
+      )
+    ),
+  ];
+
+  console.log("筛选后的Steam链接:", steamUrls);
+  console.log("筛选后的DLsite链接:", dlsiteUrls);
+  console.log("筛选后的官方链接:", officialUrls);
+  console.log("筛选后的其他链接:", otherUrls);
 
   const categories = [
     {
@@ -2094,6 +2122,7 @@ async function translateAndStreamDescription(description, characters) {
         const { done, value } = await reader.read();
         if (done) {
           console.log("Stream finished.");
+          console.log("AI响应原文:", vndbInfo.aiRawResponse);
           break;
         }
 
