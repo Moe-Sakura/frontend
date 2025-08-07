@@ -5,8 +5,7 @@ const VNDB_API_BASE_URL = "https://api.vndb.org/kana";
 // -- 下列预置的 API 接口与 ApiKey 仅用于为 SearchGal.Homes 网站正常访客提供 LLM 服务
 // -- 如需进行项目调试，请修改 AI_TRANSLATE 变量为自己的 API 接口与 ApiKey
 // -- 除此以外，ai.searchgal.homes 接口无法为其他任何非正当请求提供 LLM 服务
-// const AI_TRANSLATE_API_URL = "https://ai.searchgal.homes/v1/chat/completions";
-const AI_TRANSLATE_API_URL = "http://10.241.10.3:3000/v1/chat/completions";
+const AI_TRANSLATE_API_URL = "https://ai.searchgal.homes/v1/chat/completions";
 const AI_TRANSLATE_API_KEY =
   "sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e";
 const AI_TRANSLATE_MODEL = "Qwen/Qwen2.5-32B-Instruct";
