@@ -1307,7 +1307,7 @@ function createPlatformCard(result, withAnimation = true) {
             </div>
             ${
               result.error
-                ? `<div class="px-5 py-3 text-red-500 font-semibold flex items-center gap-2"><i class='fas fa-exclamation-circle'></i> ${result.error}</div>`
+                ? `<div class="px-5 py-3 text-red-500 font-semibold text-sm"><i class='fas fa-exclamation-circle mr-2'></i> ${result.error}</div>`
                 : ""
             }
             ${itemsHtml}
