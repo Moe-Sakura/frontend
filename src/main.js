@@ -252,11 +252,20 @@ function renderAiView(xmlString) {
     xmlString
   );
   if (descriptionContent) {
+    const descriptionWrapper = document.createElement("div");
+    descriptionWrapper.className = "mt-8"; // Add some margin top
+    aiResponseBox.appendChild(descriptionWrapper);
+
+    const titleElement = document.createElement("h2");
+    titleElement.className = "text-2xl font-bold text-white mb-4";
+    titleElement.innerHTML = `游戏介绍&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`; // "游戏介绍" followed by 8 spaces
+    descriptionWrapper.appendChild(titleElement);
+
     // Render all complete paragraphs
     getCompleteValues("p", descriptionContent).forEach((pText) => {
       const pElement = document.createElement("p");
       pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${pText}`;
-      aiResponseBox.appendChild(pElement);
+      descriptionWrapper.appendChild(pElement);
     });
     // Check for and render an incomplete paragraph at the end
     const lastPOpen = descriptionContent.lastIndexOf("<p>");
@@ -266,15 +275,70 @@ function renderAiView(xmlString) {
       pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${descriptionContent.substring(
         lastPOpen + 3
       )}`;
-      aiResponseBox.appendChild(pElement);
+      descriptionWrapper.appendChild(pElement);
     }
   }
 
-  // 2. Characters
+  // 2. Tag列表
+  const tagsContent = getBlockContent("tag_translated", xmlString);
+  console.log("[DEBUG] tagsContent:", tagsContent); // 添加日志
+  if (tagsContent) {
+    const tagsWrapper = document.createElement("div");
+    tagsWrapper.className = "mt-8"; // Add some margin top
+    aiResponseBox.appendChild(tagsWrapper);
+
+    const titleElement = document.createElement("h2");
+    titleElement.className = "text-2xl font-bold text-white mb-4";
+    titleElement.innerHTML = `Tag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`; // "Tag" followed by 8 spaces
+    tagsWrapper.appendChild(titleElement);
+
+    const tagsContainer = document.createElement("div");
+    tagsContainer.className = "flex flex-col space-y-2"; // Arrange tags vertically with spacing
+    tagsWrapper.appendChild(tagsContainer);
+
+    const renderTagLine = (tagXmlNamePrimary, tagXmlNameFallback, colorClass, isBold, isItalic, commaBoldWhite) => {
+      let tagValue = getPartialValue(tagXmlNamePrimary, tagsContent);
+      if (tagValue === null || tagValue.trim() === "") {
+        tagValue = getPartialValue(tagXmlNameFallback, tagsContent);
+      }
+      console.log(`[DEBUG] Tag ${tagXmlNamePrimary}/${tagXmlNameFallback} value:`, tagValue); // 添加日志
+      if (tagValue !== null && tagValue.trim() !== "") { // 增加对空字符串的检查
+        const tagsArray = tagValue.split(',').map(tag => tag.trim()).filter(tag => tag !== ""); // 过滤掉空标签
+        console.log(`[DEBUG] Tag ${tagXmlNamePrimary}/${tagXmlNameFallback} array:`, tagsArray); // 添加日志
+        if (tagsArray.length === 0) { // 如果过滤后没有有效标签，则不渲染
+          return;
+        }
+        const pElement = document.createElement("p");
+        // 添加8个空格
+        pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+        let formattedHtml = "";
+
+        tagsArray.forEach((tag, index) => {
+          if (index > 0) {
+            formattedHtml += `<span class="${commaBoldWhite ? 'font-bold text-white' : 'text-white'}">, </span>`;
+          }
+          let tagStyle = "";
+          if (isBold) tagStyle += "font-bold ";
+          // 确保所有tag文字都设置为斜体
+          tagStyle += "italic ";
+          formattedHtml += `<span class="${tagStyle}${colorClass}">${tag}</span>`;
+        });
+        pElement.innerHTML += formattedHtml;
+        tagsContainer.appendChild(pElement);
+      }
+    };
+
+    renderTagLine("tags1", "0", "text-red-500", true, true, true); // 粗体红色, 逗号白色粗体, 强制斜体
+    renderTagLine("tags2", "1", "text-orange-500", true, true, true); // 斜粗体橙色, 逗号白色粗体, 强制斜体
+    renderTagLine("tags3", "2", "text-green-500", true, true, false); // 普通字体绿色, 逗号普通白色, 强制斜体, 强制粗体
+    renderTagLine("tags4", "3", "text-blue-500", true, true, false); // 斜体蓝色, 逗号普通白色, 强制斜体, 强制粗体
+  }
+
+  // 3. Characters (原来的2. Characters变成了3.)
   const charactersContent = getBlockContent("characters_translated", xmlString);
   if (charactersContent) {
     const charactersWrapper = document.createElement("div");
-    charactersWrapper.className = "mt-12";
+    charactersWrapper.className = "mt-8";
     aiResponseBox.appendChild(charactersWrapper);
 
     const roleMap = {
@@ -353,7 +417,7 @@ function renderAiView(xmlString) {
     });
   }
 
-  // 3. Summary
+  // 4. Summary (原来的3. Summary变成了4.)
   const summaryContent = getBlockContent("summary_and_insight", xmlString);
   if (summaryContent) {
     const questionContent = getPartialValue("question", summaryContent);
@@ -767,10 +831,12 @@ async function handleSearchSubmit(e) {
                 vndbInfo = {
                   names: vndbResult.names, // Add the names array to vndbInfo
                   mainName: vndbResult.mainName,
+                  originalTitle: vndbResult.originalTitle, // Store the original title
                   mainImageUrl: vndbResult.mainImageUrl,
                   screenshotUrl: vndbResult.screenshotUrl,
                   description: vndbResult.description,
                   va: vndbResult.va,
+                  vntags: vndbResult.vntags, // Add vntags to vndbInfo
                   aiRawResponse: "", // Add a field to store the full AI response
                 };
                 console.log(
@@ -785,8 +851,8 @@ async function handleSearchSubmit(e) {
                 highlightBestMatches();
 
                 // --- Fetch External Links ---
-                if (vndbInfo.mainName) {
-                  await fetchVndbExtLinks(vndbInfo.mainName);
+                if (vndbInfo.originalTitle) {
+                  await fetchVndbExtLinks(vndbInfo.originalTitle);
                 }
 
                 // --- Trigger Animation (only if panel exists) ---
@@ -805,7 +871,8 @@ async function handleSearchSubmit(e) {
                     // New: Call the streaming translation function
                     translateAndStreamDescription(
                       vndbInfo.description,
-                      vndbInfo.va
+                      vndbInfo.va,
+                      vndbInfo.vntags
                     );
                   } else if (vndbDescription) {
                     vndbDescription.classList.add("hidden");
@@ -1240,7 +1307,7 @@ function createPlatformCard(result, withAnimation = true) {
             </div>
             ${
               result.error
-                ? `<div class="px-5 py-3 text-red-500 font-semibold flex items-center gap-2"><i class='fas fa-exclamation-circle'></i> ${result.error}</div>`
+                ? `<div class="px-5 py-3 text-red-500 font-semibold text-sm"><i class='fas fa-exclamation-circle mr-2'></i> ${result.error}</div>`
                 : ""
             }
             ${itemsHtml}
@@ -1532,7 +1599,7 @@ async function fetchVndbData(gameName) {
   const body = {
     filters: ["search", "=", gameName],
     fields:
-      "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description, va.character.name, va.character.description, va.character.original, va.character.image.url, va.character.image.sexual, va.character.image.violence, va.character.traits.name, va.character.traits.spoiler, va.character.vns.role, va.character.vns.spoiler",
+      "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description, va.character.name, va.character.description, va.character.original, va.character.image.url, va.character.image.sexual, va.character.image.violence, va.character.traits.name, va.character.traits.spoiler, va.character.vns.role, va.character.vns.spoiler, tags.spoiler, tags.name, tags.rating, tags.category",
   };
 
   try {
@@ -1577,12 +1644,13 @@ async function fetchVndbData(gameName) {
     }
 
     // Collect main title
-    if (result.title) {
-      names.push(result.title);
+    const originalTitle = result.title;
+    if (originalTitle) {
+      names.push(originalTitle);
     }
 
     // Collect all alternative titles
-    let mainName = result.title || ""; // Default main name
+    let mainName = originalTitle || ""; // Default main name
     let zhName = "";
     let jaName = "";
 
@@ -1707,13 +1775,42 @@ async function fetchVndbData(gameName) {
     }
     // --- End of VA Processing ---
 
+    // 处理标签
+    // 处理标签
+    let vntags = [];
+    if (result.tags) {
+      const filteredAndSortedTags = result.tags
+        .filter((tag) => tag.spoiler === 0 && tag.category !== 'ero')
+        .sort((a, b) => b.rating - a.rating);
+
+      const vntagsRating3 = [];
+      const vntagsRating2 = [];
+      const vntagsRating1 = [];
+      const vntagsRating0 = [];
+
+      filteredAndSortedTags.forEach(tag => {
+        if (tag.rating === 3) {
+          vntagsRating3.push(tag.name);
+        } else if (tag.rating < 3 && tag.rating >= 2) {
+          vntagsRating2.push(tag.name);
+        } else if (tag.rating < 2 && tag.rating >= 1) {
+          vntagsRating1.push(tag.name);
+        } else if (tag.rating < 1) {
+          vntagsRating0.push(tag.name);
+        }
+      });
+      vntags = [vntagsRating3, vntagsRating2, vntagsRating1, vntagsRating0];
+    }
+
     const finalResult = {
       names: [...new Set(names)], // Return unique names
       mainName,
+      originalTitle,
       mainImageUrl,
       screenshotUrl,
       description,
       va: result.va, // Pass processed character data
+      vntags: vntags,
     };
 
     console.log("[DEBUG] Extracted Names:", finalResult.names);
@@ -1818,8 +1915,8 @@ function debounce(func, delay) {
 async function fetchVndbExtLinks(mainName) {
   const url = `${VNDB_API_BASE_URL}/release`;
   const body = {
-    filters: ["search", "=", mainName],
-    fields: "title, extlinks.url",
+    filters: ["vn", "=", ["search", "=", mainName]],
+    fields: "title, official, extlinks.url",
   };
 
   try {
@@ -1841,10 +1938,8 @@ async function fetchVndbExtLinks(mainName) {
     console.log("[DEBUG] Received extlinks from VNDB:", data);
 
     if (data.results && data.results.length > 0) {
-      const allUrls = data.results.flatMap(
-        (result) => result.extlinks?.map((link) => link.url) || []
-      );
-      renderExtLinkButtons(allUrls);
+      // Pass the entire results array to the rendering function
+      renderExtLinkButtons(data.results);
     }
   } catch (error) {
     console.error("Error fetching VNDB external links:", error);
@@ -1852,32 +1947,53 @@ async function fetchVndbExtLinks(mainName) {
 }
 
 /**
- * Renders categorized external link buttons based on URLs.
- * @param {string[]} urls A list of all external URLs.
+ * Renders categorized external link buttons based on release data.
+ * @param {object[]} releases A list of release objects from VNDB.
  */
-function renderExtLinkButtons(urls) {
+function renderExtLinkButtons(releases) {
+  const allUrls = releases.flatMap(
+    (release) => release.extlinks?.map((link) => link.url) || []
+  );
+  console.log("获取到的所有VNDB链接:", allUrls);
+
   const container = document.getElementById("ext-links-container");
   if (!container) return;
   container.innerHTML = ""; // Clear previous buttons
 
-  const steamUrls = urls.filter((url) =>
-    url.includes("store.steampowered.com")
-  );
-  const dlsiteUrls = urls.filter((url) => url.includes("dlsite"));
-  const officialUrls = urls.filter(
-    (url) =>
-      url.includes("shiravune.com") ||
-      url.includes("mangagamer.com") ||
-      url.includes("yuzu-soft.com") ||
-      url.includes("hikarifield")
-  );
-  const otherUrls = urls.filter(
-    (url) =>
-      !steamUrls.includes(url) &&
-      !dlsiteUrls.includes(url) &&
-      !officialUrls.includes(url) &&
-      !url.includes("steamdb")
-  );
+  // --- URL Categorization & Deduplication ---
+  const steamUrls = [
+    ...new Set(
+      allUrls.filter((url) => url.includes("store.steampowered.com"))
+    ),
+  ];
+  const dlsiteUrls = [
+    ...new Set(allUrls.filter((url) => url.includes("dlsite"))),
+  ];
+
+  // Create a set of already categorized URLs for quick lookup
+  const categorizedUrls = new Set([...steamUrls, ...dlsiteUrls]);
+
+  // Find official URLs from releases marked as 'official'.
+  // This logic also prevents duplicates within the official list and against other lists.
+  const officialUrls = releases
+    .filter((release) => release.official)
+    .flatMap((release) => release.extlinks?.map((link) => link.url) || [])
+    .filter((url) => {
+      if (categorizedUrls.has(url)) {
+        return false; // Exclude if already in Steam or DLsite
+      }
+      categorizedUrls.add(url); // Add to the set to avoid duplicates in "Other"
+      return true;
+    });
+
+  // "Other" URLs are everything not yet categorized, with duplicates removed.
+  const otherUrls = [
+    ...new Set(
+      allUrls.filter(
+        (url) => !categorizedUrls.has(url) && !url.includes("steamdb")
+      )
+    ),
+  ];
 
   const categories = [
     {
@@ -1973,7 +2089,7 @@ function renderExtLinkButtons(urls) {
  * Fetches a translated version of the description from an AI service and streams it.
  * @param {string} description The original description text.
  */
-async function translateAndStreamDescription(description, characters) {
+async function translateAndStreamDescription(description, characters, vntags) {
   if (!vndbDescription) return;
 
   // Show the lock view button with a ripple effect when AI response starts
@@ -1994,7 +2110,7 @@ async function translateAndStreamDescription(description, characters) {
       const toastMessage = "按下空格键进入游戏详情视图";
       showToast(toastMessage);
       hasShownViewToggleToast = true;
-      hasShownViewToggleToast = true;
+      // hasShownViewToggleToast = true; // This line is redundant
     }
   }
 
@@ -2017,29 +2133,27 @@ async function translateAndStreamDescription(description, characters) {
         .join("\n");
     }
 
-    const response = await fetch(AI_TRANSLATE_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${AI_TRANSLATE_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: AI_TRANSLATE_MODEL,
-        messages: [
-          {
-            role: "system",
-            content: `
-作为专业的游戏内容翻译、格式化与主题分析专家，请将提供的游戏信息（游戏介绍与人物信息）精确翻译成'${userLanguage}'，按指定XML格式输出，并提出一个引人深思的总结问题。
+    const messages = [
+      {
+        role: "system",
+        content: `
+作为专业的视觉小说游戏内容翻译、格式化与主题分析专家，请将提供的视觉小说游戏信息（游戏介绍, 游戏标签, 人物信息）精确翻译成'${userLanguage}'，按指定XML格式输出，并提出一个引人深思的总结问题。
 
 输入处理要求：
 
 1.游戏介绍：
  翻译目标语言：'${userLanguage}'。
  格式化移除：翻译前，彻底移除所有非内容性格式代码/标签（HTML, Markdown, XML等），只保留纯文本内容。
- 人名校对：介绍中出现的人名，按2.人物信息规则翻译。
+ 人名校对：介绍中出现的人名，按3.人物信息规则翻译。
  来源移除：移除介绍末尾的来源引用（如“来源：XXX”）。
 
-2.人物信息：
+2.游戏标签：
+ 翻译目标语言：'${userLanguage}'。
+ 专业领域化：标签的解释局限于视觉小说游戏中
+ 简短且精确：翻译后的tag释义必须简短，避免冗长以及模糊不清的描述，但是不得翻译成设计剧透的内容
+ 唯一性：每个tag只需要给出唯一的翻译后释义
+
+3.人物信息：
  描述翻译：将每个人物描述翻译成'${userLanguage}'。为空时，根据角色的其他信息尝试生成该角色的人物介绍，严禁输出不雅内容。
  人名翻译：优先使用'中文名'或'日文名'作为'original_name'。如无，则翻译原始非中日名称。
  日译中直译：人名翻译（日译中）时，请直译日文名，而非英/罗马名。
@@ -2053,8 +2167,13 @@ async function translateAndStreamDescription(description, characters) {
 
 2.游戏介绍部分：
  \`<game_description_translated>\`：翻译后的游戏介绍。内部允许\`<p>\`分段，但禁止其他复杂HTML/样式标签。
+ 
+3.Tag列表：
+ \`<tag_translated>\`：包含\`<tags1>\`~\`<tags4>\`子元素。
+     \`<tags1>\`： 翻译用户输入的tags1里面的所有tag，tag之间必须使用\`, \`分隔。若tags1为空，则该标签为空标签。
+     \`<tags2>\`~\`<tags4>\`：同上，翻译输入的tags2~tags4里面的所有tag。
 
-3.人物信息列表：
+4.人物信息列表：
  \`<characters_translated>\`：包含所有\`<character>\`子元素。
  每个\`<character>\`包含以下子元素（严格按顺序）：
      \`<image_url>\`：若有则包含URL，否则输出\`<image_url/>\`空标签。
@@ -2063,22 +2182,40 @@ async function translateAndStreamDescription(description, characters) {
      \`<original_name>\`：原始姓名（优先中文/日文名）, 如无, 则输出未翻译的主姓名。
      \`<description>\`：人物描述。结合游戏介绍与角色'tag'（'tag'本身勿输出），灵活撰写以突出特点，严禁输出不雅内容。
 
-4.总结与思考：
+5.总结与思考：
  \`<summary_and_insight>\`：包含\`<question>\`子元素。
  \`<question>\`：基于翻译后的故事与人物，提出一个引人深思/好奇的问题。勿用总结性开场白（如“总体来说”）。
 
 最终输出约束：
  纯XML内容，严格遵循XML标准及结构，所有标签正确嵌套/闭合。勿含任何额外文字/评论。使用\`\`\`xml \`\`\`的代码块来包裹。`,
-          },
-          {
-            role: "user",
-            content: `Game Description:\n${description}\n\nCharacter Details:\n${JSON.stringify(
-              characters,
-              null,
-              2
-            )}`,
-          },
-        ],
+      },
+      {
+        role: "user",
+        content: `Game Description:\n${description}\n\nGame Tags:\n${(vntags || [])
+          .map((tags, index) => {
+            const tagContent =
+              tags && tags.length > 0 ? tags.join(", ") : "";
+            return `Tag${index + 1}: ${tagContent}`;
+          })
+          .join("\n")}\n\nCharacter Details:\n${JSON.stringify(
+          characters,
+          null,
+          2
+        )}`,
+      },
+    ];
+
+    console.log("Sending AI request with messages:", messages);
+
+    const response = await fetch(AI_TRANSLATE_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${AI_TRANSLATE_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: AI_TRANSLATE_MODEL,
+        messages: messages,
         stream: true,
       }),
     });
@@ -2094,6 +2231,7 @@ async function translateAndStreamDescription(description, characters) {
         const { done, value } = await reader.read();
         if (done) {
           console.log("Stream finished.");
+          console.log("AI响应原文:", vndbInfo.aiRawResponse);
           break;
         }
 
@@ -2143,6 +2281,12 @@ async function translateAndStreamDescription(description, characters) {
                       "<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                     );
                     vndbDescription.innerHTML = contentToRenderDesc;
+                    // Show the one-time toast notification here
+                    if (!hasShownViewToggleToast && !isMobileView) {
+                      const toastMessage = "按下空格键进入游戏详情视图";
+                      showToast(toastMessage);
+                      hasShownViewToggleToast = true;
+                    }
                   }
                 }
               } catch (e) {
@@ -2167,6 +2311,30 @@ async function translateAndStreamDescription(description, characters) {
       /\n/g,
       "</p><p>"
     )}</p></game_description_translated>`;
+
+    // Add tags to fallback XML
+    if (vntags) {
+      fallbackXml += "<tag_translated>";
+      const tagsXml = Object.entries(vntags)
+        .map(([key, value]) => `<${key}>${value}</${key}>`)
+        .join("");
+      fallbackXml += tagsXml;
+      fallbackXml += "</tag_translated>";
+    }
+
+    // Add tags to fallback XML
+    if (vntags && vntags.length > 0) {
+      fallbackXml += "<tag_translated>";
+      vntags.forEach((tagArray, index) => {
+        if (index < 4) { // Only process up to tags4
+          const tagName = `tags${index + 1}`;
+          const tagValue = tagArray.join(", ");
+          fallbackXml += `<${tagName}>${tagValue}</${tagName}>`;
+        }
+      });
+      fallbackXml += "</tag_translated>";
+    }
+
     if (characters && characters.length > 0) {
       fallbackXml += "<characters_translated>";
       characters.forEach((c) => {
