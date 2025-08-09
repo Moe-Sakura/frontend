@@ -281,7 +281,7 @@ function renderAiView(xmlString) {
 
   // 2. Tag列表
   const tagsContent = getBlockContent("tag_translated", xmlString);
-  console.log("[DEBUG] tagsContent:", tagsContent); // 添加日志
+  // console.log("[DEBUG] tagsContent:", tagsContent); // 添加日志
   if (tagsContent) {
     const tagsWrapper = document.createElement("div");
     tagsWrapper.className = "mt-8"; // Add some margin top
@@ -301,10 +301,10 @@ function renderAiView(xmlString) {
       if (tagValue === null || tagValue.trim() === "") {
         tagValue = getPartialValue(tagXmlNameFallback, tagsContent);
       }
-      console.log(`[DEBUG] Tag ${tagXmlNamePrimary}/${tagXmlNameFallback} value:`, tagValue); // 添加日志
+      // console.log(`[DEBUG] Tag ${tagXmlNamePrimary}/${tagXmlNameFallback} value:`, tagValue); // 添加日志
       if (tagValue !== null && tagValue.trim() !== "") { // 增加对空字符串的检查
         const tagsArray = tagValue.split(',').map(tag => tag.trim()).filter(tag => tag !== ""); // 过滤掉空标签
-        console.log(`[DEBUG] Tag ${tagXmlNamePrimary}/${tagXmlNameFallback} array:`, tagsArray); // 添加日志
+        // console.log(`[DEBUG] Tag ${tagXmlNamePrimary}/${tagXmlNameFallback} array:`, tagsArray); // 添加日志
         if (tagsArray.length === 0) { // 如果过滤后没有有效标签，则不渲染
           return;
         }
@@ -1598,6 +1598,7 @@ async function fetchVndbData(gameName) {
   const url = `${VNDB_API_BASE_URL}/vn`;
   const body = {
     filters: ["search", "=", gameName],
+    sort: "searchrank",
     fields:
       "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description, va.character.name, va.character.description, va.character.original, va.character.image.url, va.character.image.sexual, va.character.image.violence, va.character.traits.name, va.character.traits.spoiler, va.character.vns.role, va.character.vns.spoiler, tags.spoiler, tags.name, tags.rating, tags.category",
   };
