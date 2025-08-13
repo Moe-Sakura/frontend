@@ -264,6 +264,7 @@ function renderAiView(xmlString) {
     // Render all complete paragraphs
     getCompleteValues("p", descriptionContent).forEach((pText) => {
       const pElement = document.createElement("p");
+      pElement.classList.add("mt-1");
       pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${pText}`;
       descriptionWrapper.appendChild(pElement);
     });
@@ -277,9 +278,22 @@ function renderAiView(xmlString) {
       )}`;
       descriptionWrapper.appendChild(pElement);
     }
+
+    // Append play_time to description
+    const playTimeContent = getCompleteValues("play_time", descriptionContent)[0];
+    if (playTimeContent) {
+      const playTimeWrapper = document.createElement("div");
+      playTimeWrapper.className = "mt-8"; // Add some margin top
+      playTimeWrapper.id = "play-time-wrapper"; // Add a unique ID
+      aiResponseBox.appendChild(playTimeWrapper);
+
+      const pElement = document.createElement("p");
+      pElement.innerHTML = `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${playTimeContent}`;
+      playTimeWrapper.appendChild(pElement);
+    }
   }
 
-  // 2. Tag列表
+  // 3. Tag列表
   const tagsContent = getBlockContent("tag_translated", xmlString);
   // console.log("[DEBUG] tagsContent:", tagsContent); // 添加日志
   if (tagsContent) {
@@ -334,7 +348,7 @@ function renderAiView(xmlString) {
     renderTagLine("tags4", "3", "text-blue-500", true, true, false); // 斜体蓝色, 逗号普通白色, 强制斜体, 强制粗体
   }
 
-  // 3. Characters (原来的2. Characters变成了3.)
+  // 4. Characters
   const charactersContent = getBlockContent("characters_translated", xmlString);
   if (charactersContent) {
     const charactersWrapper = document.createElement("div");
@@ -417,7 +431,7 @@ function renderAiView(xmlString) {
     });
   }
 
-  // 4. Summary (原来的3. Summary变成了4.)
+  // 5. Summary
   const summaryContent = getBlockContent("summary_and_insight", xmlString);
   if (summaryContent) {
     const questionContent = getPartialValue("question", summaryContent);
@@ -837,6 +851,11 @@ async function handleSearchSubmit(e) {
                   description: vndbResult.description,
                   va: vndbResult.va,
                   vntags: vndbResult.vntags, // Add vntags to vndbInfo
+                  play_hours: vndbResult.play_hours,
+                  length_minute: vndbResult.length_minute,
+                  length_votes: vndbResult.length_votes,
+                  length_color: vndbResult.length_color,
+                  book_length: vndbResult.book_length,
                   aiRawResponse: "", // Add a field to store the full AI response
                 };
                 console.log(
@@ -872,7 +891,12 @@ async function handleSearchSubmit(e) {
                     translateAndStreamDescription(
                       vndbInfo.description,
                       vndbInfo.va,
-                      vndbInfo.vntags
+                      vndbInfo.vntags,
+                      vndbInfo.play_hours,
+                      vndbInfo.length_minute,
+                      vndbInfo.length_votes,
+                      vndbInfo.length_color,
+                      vndbInfo.book_length
                     );
                   } else if (vndbDescription) {
                     vndbDescription.classList.add("hidden");
@@ -1600,7 +1624,7 @@ async function fetchVndbData(gameName) {
     filters: ["search", "=", gameName],
     sort: "searchrank",
     fields:
-      "titles.title, titles.lang, aliases, title, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description, va.character.name, va.character.description, va.character.original, va.character.image.url, va.character.image.sexual, va.character.image.violence, va.character.traits.name, va.character.traits.spoiler, va.character.vns.role, va.character.vns.spoiler, tags.spoiler, tags.name, tags.rating, tags.category",
+      "titles.title, titles.lang, aliases, title, length_minutes, length_votes, image.url, image.sexual, image.violence, image.votecount, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, description, va.character.name, va.character.description, va.character.original, va.character.image.url, va.character.image.sexual, va.character.image.violence, va.character.traits.name, va.character.traits.spoiler, va.character.vns.role, va.character.vns.spoiler, tags.spoiler, tags.name, tags.rating, tags.category",
   };
 
   try {
@@ -1803,6 +1827,29 @@ async function fetchVndbData(gameName) {
       vntags = [vntagsRating3, vntagsRating2, vntagsRating1, vntagsRating0];
     }
 
+    const length_minutes = result.length_minutes || 0;
+    const length_votes = result.length_votes || 0;
+    const play_hours = Math.floor(length_minutes / 60);
+    const length_minute = length_minutes % 60;
+
+    let length_color = "red";
+    if (play_hours < 10) {
+      length_color = "green";
+    } else if (play_hours < 30) {
+      length_color = "blue";
+    } else if (play_hours < 40) {
+      length_color = "orange";
+    }
+
+    let book_length = "overlength";
+    if (play_hours < 10) {
+      book_length = "Short";
+    } else if (play_hours < 30) {
+      book_length = "Medium";
+    } else if (play_hours < 40) {
+      book_length = "Long";
+    }
+
     const finalResult = {
       names: [...new Set(names)], // Return unique names
       mainName,
@@ -1812,6 +1859,11 @@ async function fetchVndbData(gameName) {
       description,
       va: result.va, // Pass processed character data
       vntags: vntags,
+      play_hours,
+      length_minute,
+      length_votes,
+      length_color,
+      book_length,
     };
 
     console.log("[DEBUG] Extracted Names:", finalResult.names);
@@ -2090,7 +2142,16 @@ function renderExtLinkButtons(releases) {
  * Fetches a translated version of the description from an AI service and streams it.
  * @param {string} description The original description text.
  */
-async function translateAndStreamDescription(description, characters, vntags) {
+async function translateAndStreamDescription(
+  description,
+  characters,
+  vntags,
+  play_hours,
+  length_minute,
+  length_votes,
+  length_color,
+  book_length
+) {
   if (!vndbDescription) return;
 
   // Show the lock view button with a ripple effect when AI response starts
@@ -2143,18 +2204,19 @@ async function translateAndStreamDescription(description, characters, vntags) {
 输入处理要求：
 
 1.游戏介绍：
- 翻译目标语言：'${userLanguage}'。
  格式化移除：翻译前，彻底移除所有非内容性格式代码/标签（HTML, Markdown, XML等），只保留纯文本内容。
- 人名校对：介绍中出现的人名，按3.人物信息规则翻译。
+ 人名校对：介绍中出现的人名，按4.人物信息规则翻译。
  来源移除：移除介绍末尾的来源引用（如“来源：XXX”）。
+ 
+2.游玩时长：
+ 模板化：按照给定的模板给出翻译后相同格式的输出。
 
-2.游戏标签：
- 翻译目标语言：'${userLanguage}'。
+3.游戏标签：
  专业领域化：标签的解释局限于视觉小说游戏中
  简短且精确：翻译后的tag释义必须简短，避免冗长以及模糊不清的描述，但是不得翻译成设计剧透的内容
  唯一性：每个tag只需要给出唯一的翻译后释义
 
-3.人物信息：
+4.人物信息：
  描述翻译：将每个人物描述翻译成'${userLanguage}'。为空时，根据角色的其他信息尝试生成该角色的人物介绍，严禁输出不雅内容。
  人名翻译：优先使用'中文名'或'日文名'作为'original_name'。如无，则翻译原始非中日名称。
  日译中直译：人名翻译（日译中）时，请直译日文名，而非英/罗马名。
@@ -2167,7 +2229,13 @@ async function translateAndStreamDescription(description, characters, vntags) {
 1.根元素： \`<game_data>\`
 
 2.游戏介绍部分：
- \`<game_description_translated>\`：翻译后的游戏介绍。内部允许\`<p>\`分段，但禁止其他复杂HTML/样式标签。
+ \`<game_description_translated>\`：包括\`<p>\`与\`<play_time>\`。
+  \`<p>\`: 翻译后的游戏介绍，游戏介绍的每个段落用\`<p>\`分段，但禁止其他复杂HTML/样式标签。
+  \`<play_time>\`：包含翻译后的模板文本。模板如下: 
+    \`<i class="text-gray-400"><span class="font-bold text-{length_color}-500">{book_length}</span>, 平均游玩时长为 {play_hours}小时{length_minute}分钟, 共{length_votes}名玩家参与投票</i>\`
+    其中的标签与代码严禁翻译或改动。
+    以中文为例, {book_length}应该被根据响应的值翻译为: "短篇", "中篇", "长篇", "超长篇"。
+    如果length_minute=0, 模板则无需输出游玩分钟。
  
 3.Tag列表：
  \`<tag_translated>\`：包含\`<tags1>\`~\`<tags4>\`子元素。
@@ -2192,7 +2260,9 @@ async function translateAndStreamDescription(description, characters, vntags) {
       },
       {
         role: "user",
-        content: `Game Description:\n${description}\n\nGame Tags:\n${(vntags || [])
+        content: `Game Description:\n${description}\n\nPlay Time:\nplay_hours: ${play_hours}\nlength_minute: ${length_minute}\nlength_votes: ${length_votes}\nlength_color: ${length_color}\nbook_length: ${book_length}\n\nGame Tags:\n${(
+          vntags || []
+        )
           .map((tags, index) => {
             const tagContent =
               tags && tags.length > 0 ? tags.join(", ") : "";
@@ -2277,6 +2347,9 @@ async function translateAndStreamDescription(description, characters, vntags) {
                             startIndexDesc +
                               "<game_description_translated>".length
                           );
+                    // Remove <play_time> tag and its content from description
+                    const playTimeRegex = /<play_time>[\s\S]*?<\/play_time>/;
+                    contentToRenderDesc = contentToRenderDesc.replace(playTimeRegex, "");
                     contentToRenderDesc = contentToRenderDesc.replace(
                       /<p>/g,
                       "<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
@@ -2311,7 +2384,26 @@ async function translateAndStreamDescription(description, characters, vntags) {
     fallbackXml += `<game_description_translated><p>${description.replace(
       /\n/g,
       "</p><p>"
-    )}</p></game_description_translated>`;
+    )}</p>`;
+
+    // Construct fallback play_time content
+    let fallbackBookLength = "Overlength";
+    if (play_hours < 10) {
+      fallbackBookLength = "Short";
+    } else if (play_hours < 30) {
+      fallbackBookLength = "Medium";
+    } else if (play_hours < 40) {
+      fallbackBookLength = "Long";
+    }
+
+    let fallbackPlayTimeContent = `<i class="text-gray-400"><span class="font-bold text-${length_color}-500">${fallbackBookLength}</span>, Average play time is ${play_hours} hours`;
+    if (length_minute !== 0) {
+      fallbackPlayTimeContent += ` ${length_minute} minutes`;
+    }
+    fallbackPlayTimeContent += `, with ${length_votes} players voting</i>`;
+
+    fallbackXml += `<play_time>${fallbackPlayTimeContent}</play_time>`;
+    fallbackXml += `</game_description_translated>`;
 
     // Add tags to fallback XML
     if (vntags) {
