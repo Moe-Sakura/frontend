@@ -10,6 +10,13 @@ const AI_TRANSLATE_API_KEY =
   "sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e";
 const AI_TRANSLATE_MODEL = "Qwen/Qwen2.5-32B-Instruct";
 
+// -- VNDB 图片代理配置 --
+// 在代理vndb前会先发送请求到VNDB_IMAGE_PROXY_URL, 返回200才会进行代理
+const ENABLE_VNDB_IMAGE_PROXY = true; // 设置为 true 启用vndb图片代理, false 则不启用
+const VNDB_IMAGE_PROXY_URL = "https://rpx.searchgal.homes/";
+
+let isProxyAvailable = false;
+
 const ITEMS_PER_PAGE = 10;
 const platformResults = new Map();
 const SEARCH_COOLDOWN_MS = 30 * 1000; // 30 seconds cooldown
@@ -741,6 +748,12 @@ function updateNavigationLayout() {
  */
 async function handleSearchSubmit(e) {
   e.preventDefault();
+
+  // 让输入框失焦
+  const searchInput = searchForm.querySelector('input[name="game"]');
+  if (searchInput) {
+    searchInput.blur();
+  }
 
   if (lockViewBtn) {
     lockViewBtn.disabled = true; // Disable on new search
@@ -1873,10 +1886,74 @@ async function fetchVndbData(gameName) {
     console.log("[DEBUG] Extracted Description:", finalResult.description);
     console.log("[DEBUG] Final VNDB result object:", finalResult);
 
+    // Recursively replace all vndb URLs if proxy is enabled
+    // Recursively replace all vndb URLs if proxy is enabled and available
+    if (ENABLE_VNDB_IMAGE_PROXY) {
+      await checkProxyAvailability();
+      if (isProxyAvailable) {
+        replaceVndbUrls(finalResult);
+        console.log(
+          "[DEBUG] Final VNDB result object after URL replacement:",
+          finalResult
+        );
+      }
+    }
+
     return finalResult;
   } catch (error) {
     console.error("Failed to fetch or process VNDB data:", error);
     return null; // Return null on any error
+  }
+}
+
+/**
+ * Recursively traverses an object or array and replaces all instances of
+ * "https://t.vndb.org/" with a proxy URL in string values.
+ * @param {any} obj The object or array to process.
+ */
+/**
+ * Checks if the proxy server is available by sending a HEAD request.
+ * Updates the global `isProxyAvailable` state.
+ */
+async function checkProxyAvailability() {
+  try {
+    const response = await fetch(VNDB_IMAGE_PROXY_URL, { method: "HEAD" });
+    if (response.ok) {
+      isProxyAvailable = true;
+      console.log("[DEBUG] Proxy server is available.");
+    } else {
+      isProxyAvailable = false;
+      console.warn(
+        `[DEBUG] Proxy server check failed with status: ${response.status}`
+      );
+    }
+  } catch (error) {
+    isProxyAvailable = false;
+    console.error("[DEBUG] Proxy server check failed with error:", error);
+  }
+}
+
+function replaceVndbUrls(obj) {
+  if (
+    !ENABLE_VNDB_IMAGE_PROXY ||
+    !isProxyAvailable ||
+    obj === null ||
+    typeof obj !== "object"
+  ) {
+    return;
+  }
+
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = obj[key];
+      if (typeof value === "string") {
+        if (value.startsWith("https://t.vndb.org/")) {
+          obj[key] = VNDB_IMAGE_PROXY_URL + value;
+        }
+      } else if (typeof value === "object") {
+        replaceVndbUrls(value); // Recurse into nested objects/arrays
+      }
+    }
   }
 }
 
