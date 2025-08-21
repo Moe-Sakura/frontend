@@ -178,6 +178,7 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("scroll", debounce(handleScroll, 10));
 
   fetchAndDisplayVersion(); // Fetch and display version on page load
+  checkLlmStatus(); // Check and display LLM status
 
   const lockViewBtn = document.getElementById("lock-view-btn");
   if (lockViewBtn) {
@@ -1521,7 +1522,7 @@ async function searchGameStream(
   },
   { onTotal, onProgress, onResult, onDone, onError }
 ) {
-  const defaultSite = "api.searchgal.homes";
+  const defaultSite = "cfapi.searchgal.homes";
   const protocol = "https";
 
   let baseUrl = "";
@@ -2529,5 +2530,53 @@ async function translateAndStreamDescription(
     vndbInfo.aiRawResponse = fallbackXml;
     renderAiView(vndbInfo.aiRawResponse);
     if (lockViewBtn) lockViewBtn.disabled = false;
+  }
+}
+
+async function checkLlmStatus() {
+  const statusBtn = document.getElementById("llm-status-btn");
+  const statusText = document.getElementById("llm-status-text");
+
+  if (!statusBtn || !statusText) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://api.pulsetic.com/public/status/status.searchgal.homes",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: null }),
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    const llmMonitor = data.data.monitors.find(
+      (monitor) => monitor.name === "后端搜索 API (无实际搜索)"
+    );
+
+    if (llmMonitor) {
+      statusBtn.classList.remove("bg-white", "text-gray-500");
+      statusBtn.classList.add("text-white");
+      if (llmMonitor.status === "online") {
+        statusBtn.classList.add("bg-green-500");
+        statusText.textContent = "正常";
+      } else {
+        statusBtn.classList.add("bg-red-700");
+        statusText.textContent = "异常";
+      }
+    } else {
+      throw new Error("LLM monitor not found");
+    }
+  } catch (error) {
+    console.error("Error fetching LLM status:", error);
+    statusBtn.classList.remove("bg-white", "text-gray-500");
+    statusBtn.classList.add("bg-gray-500", "text-white");
+    statusText.textContent = "未知";
   }
 }
