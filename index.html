@@ -367,10 +367,12 @@
                       class="fas fa-wrench"></i>补丁</label>
                 </div>
                 <div>
-                  <input type="checkbox" id="magicAccess" name="magicAccess" class="hidden peer" />
-                  <label for="magicAccess"
-                    class="select-none cursor-pointer px-4 py-2 font-semibold text-xs flex items-center gap-1 transition-all duration-200 bg-white peer-checked:bg-yellow-400 peer-checked:text-white text-yellow-700 hover:bg-yellow-300 animate__animated animate__pulse animate__faster peer-checked:animate__tada border-l border-gray-100 rounded-r-[8px] shadow-sm"><i
-                      class="fas fa-hat-wizard"></i>魔搜</label>
+                  <a id="llm-status-btn" href="https://status.searchgal.homes" target="_blank"
+                    class="select-none cursor-pointer px-4 py-2 font-semibold text-xs flex items-center gap-1 transition-all duration-200 bg-white text-gray-500 border-l border-gray-100 rounded-r-[8px] shadow-sm"
+                    style="text-decoration: none;">
+                    <i class="fas fa-circle text-[0.6rem] mr-1"></i>
+                    <span id="llm-status-text">状态</span>
+                  </a>
                 </div>
               </div>
             </div>
