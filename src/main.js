@@ -1543,7 +1543,7 @@ async function searchGameStream(
 
   const formData = new FormData();
   formData.append("game", gameName);
-  formData.append("magic", String(magic));
+  formData.append("magic", true);
   if (zypassword) {
     formData.append("zypassword", zypassword);
   }
@@ -1967,7 +1967,7 @@ async function fetchAndDisplayVersion() {
   if (!versionElement || !versionContainer) return;
 
   const backendUrl =
-    "https://api.github.com/repos/Moe-Sakura/SearchGal/commits?per_page=1";
+    "https://api.github.com/repos/Moe-Sakura/Wrangler-API/commits?per_page=1";
   const frontendUrl =
     "https://api.github.com/repos/Moe-Sakura/frontend/commits?per_page=1";
 
