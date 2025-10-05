@@ -815,7 +815,6 @@ async function handleSearchSubmit(e) {
 
       const formData = new FormData(searchForm);
       const gameName = formData.get("game").trim();
-      const zypassword = formData.get("zypassword").trim();
       const searchMode = formData.get("searchMode");
       const magic = document.getElementById("magicAccess")?.checked || false;
       const customApi = customApiInput ? customApiInput.value.trim() : "";
@@ -833,7 +832,6 @@ async function handleSearchSubmit(e) {
 
       const searchParams = {
         gameName,
-        zypassword,
         magic,
         patchMode: searchMode === "patch",
         customApi,
@@ -1516,7 +1514,6 @@ async function searchGameStream(
   {
     gameName,
     magic = false,
-    zypassword = "",
     patchMode = false,
     customApi = "",
   },
@@ -1544,9 +1541,6 @@ async function searchGameStream(
   const formData = new FormData();
   formData.append("game", gameName);
   formData.append("magic", true);
-  if (zypassword) {
-    formData.append("zypassword", zypassword);
-  }
 
   try {
     const response = await fetch(url, {
