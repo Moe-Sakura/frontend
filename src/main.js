@@ -1245,16 +1245,81 @@ function createPlatformCard(result, withAnimation = true) {
     }
   }
 
-  const tags = {
+  const allTags = {
+    // 访问限制
+    NoReq: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-lime-400 text-white align-middle">无需登录</span>',
+    Rep: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-lime-400 text-white align-middle">需回复</span>',
+    Login: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-300 text-white align-middle">需登录</span>',
+    LoginRep: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-300 text-white align-middle">需登录+回复</span>',
+    LoginPay: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-red-400 text-white align-middle">需登录+投币</span>',
+
+    // 资源类型/网盘
+    SuDrive: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold text-white align-middle bg-gradient-to-r from-green-400 to-blue-500">自建盘</span>',
+    NoSplDrive: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-lime-400 text-white align-middle">不限速网盘</span>',
+    SplDrive: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-300 text-white align-middle">限速网盘</span>',
+    MixDrive: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-300 text-white align-middle">混合网盘</span>',
+    BTmag: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-yellow-400 text-white align-middle">BT磁力</span>',
+
+    // 特殊
+    magic: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-yellow-400 text-white align-middle">需要魔法</span>',
+    
+    // 旧版兼容
     gold: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-yellow-400 text-white align-middle">需要魔法</span>',
     lime: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-lime-400 text-white align-middle">无需登录</span>',
     red: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-red-400 text-white align-middle">错误</span>',
-    white:
-      '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-300 text-gray-700 align-middle">需要登录</span>',
+    white: '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-gray-300 text-white align-middle">需要登录</span>',
     default:
       '<span class="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-indigo-200 text-indigo-700 align-middle">综合</span>',
   };
-  const tag = tags[colorKey] || "";
+
+  const tagTooltips = {
+    NoReq: "该平台无需登录即可下载",
+    Login: "该平台需要注册/登录账户才能下载",
+    Rep: "该平台需要简单评论后才能下载，无需登录",
+    LoginRep: "该平台需要登录并回复帖子才能下载",
+    LoginPay: "该平台需要登录并投币(积分)帖子才能下载，币(积分)可通过免费途径获取(如签到等)，步骤较为繁琐",
+    SuDrive: "资源存储在自建的服务器或对象存储上，下载速度最快",
+    NoSplDrive: "资源存储在不会限制下载速度的第三方网盘，如Onedrive/Mega/123网盘等",
+    SplDrive: "资源存储在会限制非会员下载速度的第三方网盘，如百度网盘/夸克网盘/飞猫盘等，速度最慢",
+    MixDrive: "资源可能存储在限速或非限速的第三方网盘中，通常受限于普通用户发布的资源",
+    BTmag: "资源通过BT磁力链接或种子文件分享，需要第三方BT磁力下载工具(如qBittorrent/迅雷)，不推荐新手下载",
+    magic: "访问该平台需要使用网络代理服务，请确保已经启用魔法代理，否则无法进入该网站",
+    gold: "访问该网站需要使用网络代理服务。",
+    lime: "该资源无需登录即可访问。",
+    red: "搜索该平台时发生错误",
+    white: "该资源需要登录网站账户才能访问。",
+    default: "这是一个综合性平台或资源。",
+  };
+
+  const generateTagHtml = (tagName) => {
+    const html = allTags[tagName];
+    const tooltip = tagTooltips[tagName];
+    if (!html) return "";
+
+    // Create a temporary DOM element to safely add the title attribute
+    const tempEl = document.createElement('div');
+    tempEl.innerHTML = html.trim();
+    const span = tempEl.firstChild;
+
+    if (span) {
+      if (tooltip) {
+        span.setAttribute('title', tooltip);
+      }
+      // Add classes for vertical alignment adjustment
+      span.classList.add('inline-block', 'transform', '-translate-y-px');
+    }
+    
+    return span ? span.outerHTML : "";
+  };
+  
+  let tagHtml = "";
+  if (result.tags && Array.isArray(result.tags) && result.tags.length > 0 && colorKey != "red") {
+    tagHtml = result.tags
+      .map(generateTagHtml)
+      .join("");
+  } else {
+    tagHtml = generateTagHtml(colorKey);
+  }
 
   let itemsHtml = "";
   if (result.items && result.items.length > 0) {
@@ -1337,7 +1402,7 @@ function createPlatformCard(result, withAnimation = true) {
                       color.text
                     } group-hover/link:text-indigo-800">${
     result.name
-  }${tag}</span>
+  }${tagHtml}</span>
                     <span class="text-xs text-gray-400 group-hover/link:text-indigo-400 ml-2">${domain}</span>
                 </a>
             </div>
@@ -2169,7 +2234,7 @@ function renderExtLinkButtons(releases) {
           link.href = url;
           link.target = "_blank";
           link.className =
-            "flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 p-1 rounded";
+            "flex items-center gap-2 text-sm text-white hover:bg-gray-100 p-1 rounded";
           link.innerHTML = `<i class="fas fa-external-link-alt text-gray-400"></i> ${
             new URL(url).hostname
           }`;
