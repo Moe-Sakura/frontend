@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh" class="loading">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SearchGal - Galgame 聚合搜索</title>
+  
+  <!-- 防止 FOUC - 立即执行的脚本 -->
+  <script>
+    // 页面加载时添加 loading 类
+    document.documentElement.classList.add('loading');
+    // 页面完全加载后移除 loading 类并添加 loaded 类
+    window.addEventListener('DOMContentLoaded', function() {
+      document.documentElement.classList.remove('loading');
+      document.documentElement.classList.add('loaded');
+    });
+  </script>
+  
   <style>
     @import "tailwindcss";
 
@@ -245,19 +257,6 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Galgame 聚合搜索" />
   <link rel="shortcut icon" href="./gamepad-solid.svg" type="image/svg+xml" />
-  <link fetchpriority="low" href="https://registry.npmmirror.com/artalk/latest/files/dist/Artalk.css"
-    rel="stylesheet" />
-  <link fetchpriority="low" href="https://registry.npmmirror.com/lightgallery/latest/files/css/lightgallery.css"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="https://registry.npmmirror.com/animate.css/latest/files/animate.min.css"
-    fetchpriority="high" />
-  <link rel="stylesheet"
-    href="https://registry.npmmirror.com/@fortawesome/fontawesome-free/latest/files/css/all.min.css"
-    fetchpriority="high" />
-  <script importance="high" src="https://registry.npmmirror.com/quicklink/latest/files/dist/quicklink.umd.js"></script>
-  <script async importance="high" src="https://registry.npmmirror.com/pace-js/latest/files/pace.min.js"></script>
-  <link href="https://registry.npmmirror.com/pace-js/latest/files/themes/blue/pace-theme-flash.css" importance="high"
-    rel="stylesheet" />
 </head>
 
 <body class="group/body">
@@ -454,28 +453,22 @@
 
   <div class="fixed bottom-16 right-3 flex flex-col space-y-3 z-50">
     <button id="scrollToTopBtn"
-      class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-300 flex items-center justify-center translate-z-0 transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-300 flex items-center justify-center translate-z-0 transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none border-0"
       title="回到顶部">
       <i class="fas fa-arrow-up"></i>
     </button>
     <a href="#Comments" id="scrollToCommentsBtn"
-      class="bg-pink-500 hover:bg-pink-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-pink-300 flex items-center justify-center transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none"
+      class="bg-pink-500 hover:bg-pink-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-pink-300 flex items-center justify-center transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none border-0"
       title="直达评论">
       <i class="fas fa-comments"></i>
     </a>
     <button id="lock-view-btn"
-      class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-green-300 flex items-center justify-center max-md:hidden opacity-0 pointer-events-none"
+      class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-green-300 flex items-center justify-center max-md:hidden opacity-0 pointer-events-none border-0"
       title="显示游戏介绍">
       <i class="fas fa-eye"></i>
     </button>
   </div>
 
-  <script src="https://registry.npmmirror.com/instant.page/latest/files/instantpage.js" type="module"></script>
-  <script fetchpriority="low"
-    src="https://registry.npmmirror.com/lightgallery/latest/files/lightgallery.min.js"></script>
-  <script fetchpriority="low" src="https://registry.npmmirror.com/artalk/latest/files/dist/Artalk.js"></script>
-  <script fetchpriority="low"
-    src="https://registry.npmmirror.com/@artalk/plugin-lightbox/latest/files/dist/artalk-plugin-lightbox.js"></script>
   <script type="module" src="/src/main.js" fetchpriority="high"></script>
   <script async src="https://registry.npmmirror.com/js-asuna/latest/files/js/bsz.pure.mini.js"
     fetchpriority="low"></script>

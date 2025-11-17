@@ -1,3 +1,40 @@
+// TailwindCSS v4 (与线上版本一致)
+import "tailwindcss";
+
+// Pace.js 页面加载进度条
+import 'pace-js';
+import 'pace-js/themes/blue/pace-theme-flash.css';
+
+// Animate.css 动画库
+import 'animate.css';
+
+// Font Awesome 图标
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
+// Artalk 评论系统
+import Artalk from 'artalk';
+import 'artalk/dist/Artalk.css';
+
+// Artalk Lightbox 插件 (无需单独导入 CSS)
+import { ArtalkLightboxPlugin } from '@artalk/plugin-lightbox';
+
+// LightGallery
+import lightGallery from 'lightgallery';
+import 'lightgallery/css/lightgallery.css';
+
+// Quicklink 预加载
+import { listen } from 'quicklink';
+
+// Instant.page 预加载
+import 'instant.page';
+
+// Fancybox 样式和脚本
+import { Fancybox } from "@fancyapps/ui";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
+
+// Lozad.js 懒加载
+import lozad from 'lozad';
+
 // -- 全局常量与状态 --
 const VNDB_API_BASE_URL = "https://api.vndb.org/kana";
 
@@ -80,7 +117,7 @@ scrollToCommentsBtn.addEventListener("click", (e) => {
 /**
  * 页面加载后初始化
  */
-window.addEventListener("DOMContentLoaded", () => {
+function initializePage() {
   // Store the original background image
   // The original background is no longer set on load.
   if (backgroundLayer) {
@@ -101,13 +138,79 @@ window.addEventListener("DOMContentLoaded", () => {
     magicCheckbox.checked = true;
   }
 
-  quicklink.listen({ priority: true });
+  listen({ priority: true });
   Artalk.init({
     el: "#Comments",
     pageKey: "https://searchgal.homes", // Original domain from user's file
     server: "https://artalk.saop.cc",
     site: "Galgame 聚合搜索",
+    useBackendConf: false,
+    plugins: [ArtalkLightboxPlugin],
   });
+
+  // 初始化 Fancybox
+  Fancybox.bind("[data-fancybox]", {
+    // Fancybox 配置选项
+    Toolbar: {
+      display: {
+        left: ["infobar"],
+        middle: [
+          "zoomIn",
+          "zoomOut",
+          "toggle1to1",
+          "rotateCCW",
+          "rotateCW",
+          "flipX",
+          "flipY",
+        ],
+        right: ["slideshow", "thumbs", "close"],
+      },
+    },
+    Images: {
+      zoom: true,
+      Panzoom: {
+        maxScale: 3,
+      },
+    },
+    // 启用键盘导航
+    Keyboard: true,
+    // 启用滚轮缩放
+    wheel: "zoom",
+    // 中文本地化
+    l10n: {
+      CLOSE: "关闭",
+      NEXT: "下一个",
+      PREV: "上一个",
+      MODAL: "您可以使用键盘关闭此模态",
+      ERROR: "出错了，请稍后再试",
+      IMAGE_ERROR: "未找到图片",
+      ELEMENT_NOT_FOUND: "未找到 HTML 元素",
+      AJAX_NOT_FOUND: "加载 AJAX 时出错：未找到",
+      AJAX_FORBIDDEN: "加载 AJAX 时出错：禁止访问",
+      IFRAME_ERROR: "加载页面时出错",
+      TOGGLE_ZOOM: "切换缩放级别",
+      TOGGLE_THUMBS: "切换缩略图",
+      TOGGLE_SLIDESHOW: "切换幻灯片",
+      TOGGLE_FULLSCREEN: "切换全屏",
+      DOWNLOAD: "下载",
+    },
+  });
+
+  // 初始化 Lozad.js 懒加载
+  const observer = lozad('.lozad', {
+    rootMargin: '200px 0px', // 提前 200px 开始加载
+    threshold: 0.01,
+    enableAutoReload: true,
+    loaded: function(el) {
+      // 图片加载完成后添加淡入动画
+      el.classList.add('opacity-0');
+      setTimeout(() => {
+        el.classList.remove('opacity-0');
+        el.classList.add('transition-opacity', 'duration-300', 'opacity-100');
+      }, 10);
+    }
+  });
+  observer.observe();
 
   siteNavigationDiv = document.createElement("div");
   siteNavigationDiv.id = "siteNavigation";
@@ -197,7 +300,15 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
-});
+}
+
+// 立即调用初始化函数（支持已经加载完的情况）
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializePage);
+} else {
+  // 文档已经加载完成，立即执行
+  initializePage();
+}
 
 let isViewLocked = false;
 
