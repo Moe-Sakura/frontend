@@ -9,10 +9,29 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^7.0.3"
+    "@tailwindcss/vite": "^4.1.17",
+    "@types/node": "^24.10.1",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vite": "^7.0.3",
+    "vue-tsc": "^3.1.4"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.11",
-    "tailwindcss": "^4.1.11"
+    "@artalk/plugin-lightbox": "^0.2.4",
+    "@fancyapps/ui": "^6.1.5",
+    "@fortawesome/fontawesome-free": "^7.1.0",
+    "@material/web": "^2.4.1",
+    "@mdui/icons": "^1.0.3",
+    "artalk": "^2.9.1",
+    "gsap": "^3.13.0",
+    "instant.page": "^5.2.0",
+    "lightgallery": "^2.9.0",
+    "lozad": "^1.16.0",
+    "pace-js": "^1.2.4",
+    "pinia": "^3.0.4",
+    "quicklink": "^3.0.1",
+    "vue": "^3.5.24",
+    "vue-router": "^4.6.3"
   }
 }
