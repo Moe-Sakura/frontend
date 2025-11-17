@@ -110,42 +110,6 @@
       </div>
     </div>
     
-    <!-- VNDB Info Panel -->
-    <div
-      v-if="searchStore.vndbInfo"
-      class="vndb-panel mt-8 max-w-4xl mx-auto bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 animate-fade-in-up animation-delay-1000"
-    >
-      <div class="flex flex-col md:flex-row gap-6">
-        <div v-if="searchStore.vndbInfo.mainImageUrl" class="flex-shrink-0">
-          <img
-            :src="searchStore.vndbInfo.mainImageUrl"
-            :alt="searchStore.vndbInfo.mainName"
-            class="w-48 h-auto rounded-lg shadow-md"
-          />
-        </div>
-        <div class="flex-1">
-          <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-            <i class="fas fa-gamepad text-pink-500"></i>
-            {{ searchStore.vndbInfo.mainName }}
-          </h2>
-          <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 mb-4">
-            原名: {{ searchStore.vndbInfo.originalTitle }}
-          </p>
-          <div v-if="searchStore.vndbInfo.description" class="text-gray-700 whitespace-pre-line mb-4">
-            {{ searchStore.vndbInfo.description }}
-          </div>
-          <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-2">
-            <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm font-medium flex items-center gap-1">
-              <i class="fas fa-clock"></i>
-              {{ searchStore.vndbInfo.book_length }}
-            </span>
-            <span class="text-sm text-gray-500">
-              (约 {{ searchStore.vndbInfo.play_hours }} 小时)
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 

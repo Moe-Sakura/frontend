@@ -1,21 +1,21 @@
 <template>
-  <div class="container mx-auto w-full px-8 py-6">
-    <div class="flex flex-col items-center gap-6">
+  <div class="container mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <div class="flex flex-col items-center gap-4 sm:gap-6">
       <!-- Title with gamepad icon and status -->
       <div
-        class="header-title flex items-center justify-center gap-4 my-12 animate-fade-in-down"
+        class="header-title flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 my-6 sm:my-12 animate-fade-in-down"
       >
         <h1
-          class="text-5xl font-bold text-center text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] flex items-center gap-3"
+          class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] flex items-center gap-2 sm:gap-3"
         >
-          <i class="fas fa-gamepad text-pink-400" style="font-size: 48px"></i>
-          Galgame 聚合搜索
+          <i class="fas fa-gamepad text-pink-400 text-4xl sm:text-5xl lg:text-6xl"></i>
+          <span class="whitespace-nowrap">Galgame 聚合搜索</span>
         </h1>
         <a
           href="https://status.searchgal.homes"
           target="_blank"
           rel="noopener noreferrer"
-          class="status-link px-4 py-2 rounded-full bg-white/90 backdrop-blur-md flex items-center gap-2 text-green-600 font-semibold hover:scale-105 transition-transform shadow-lg"
+          class="status-link px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/90 backdrop-blur-md flex items-center gap-1.5 sm:gap-2 text-green-600 text-sm sm:text-base font-semibold hover:scale-105 transition-transform shadow-lg"
         >
           <i class="fas fa-check-circle"></i>
           <span>状态</span>
@@ -25,33 +25,33 @@
       <!-- Search Form -->
       <form
         @submit.prevent="handleSearch"
-        class="search-form w-full max-w-2xl animate-fade-in-up"
+        class="search-form w-full max-w-2xl px-2 sm:px-0 animate-fade-in-up"
       >
         <div class="flex flex-col gap-4">
           <!-- Search Input -->
           <div class="relative">
             <i
-              class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl"
+              class="fas fa-search absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg sm:text-xl pointer-events-none z-10"
             ></i>
             <input
               v-model="searchQuery"
               type="search"
               placeholder="游戏或补丁关键字词*"
               required
-              class="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/98 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500"
+              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/98 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500"
             />
           </div>
 
           <!-- Custom API Input -->
           <div class="relative">
             <i
-              class="fas fa-link absolute left-4 top-5 text-gray-400 text-xl"
+              class="fas fa-link absolute left-3 sm:left-4 top-3 sm:top-4 text-gray-400 text-lg sm:text-xl pointer-events-none z-10"
             ></i>
             <input
               v-model="customApi"
               type="url"
               placeholder="自定义 API 地址 (可选)"
-              class="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/98 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500"
+              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/98 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500"
             />
             <p class="text-xs text-white/90 drop-shadow-md mt-2 font-medium">
               例如: https://api.searchgal.homes 或 http://127.0.0.1:8898
@@ -63,7 +63,7 @@
             <button
               type="submit"
               :disabled="searchStore.searchDisabled"
-              class="search-button w-full py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-pink-600 text-white font-semibold text-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              class="search-button w-full py-3 sm:py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-pink-600 text-white font-semibold text-base sm:text-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <i class="fas fa-search"></i>
               <span v-if="!searchStore.isSearching">开始搜索</span>
@@ -74,7 +74,7 @@
             </button>
 
             <!-- Search Mode Selector -->
-            <div class="flex justify-center gap-3">
+            <div class="flex justify-center gap-2 sm:gap-3">
               <button
                 type="button"
                 @click="searchMode = 'game'"
@@ -118,7 +118,7 @@
             </div>
 
             <!-- Version and GitHub Info -->
-            <div class="flex items-center justify-center gap-3 mt-4">
+            <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-4">
               <div
                 class="px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-gray-600 font-medium shadow-md flex items-center gap-2 text-sm"
               >
@@ -163,17 +163,17 @@
       </Transition>
 
       <!-- Usage Notice -->
-      <div class="w-full max-w-4xl mt-8 animate-fade-in animation-delay-1000">
+      <div class="w-full max-w-4xl mt-6 sm:mt-8 px-2 sm:px-0 animate-fade-in animation-delay-1000">
         <div
-          class="usage-notice bg-white/75 backdrop-blur-md rounded-3xl shadow-xl p-8"
+          class="usage-notice bg-white/75 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8"
         >
           <h2
-            class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"
+            class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2"
           >
             <i class="fas fa-info-circle text-pink-500"></i>
             使用须知
           </h2>
-          <ul class="space-y-4 text-gray-700 leading-relaxed">
+          <ul class="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 leading-relaxed">
             <li>
               • 首先，衷心感谢
               <a

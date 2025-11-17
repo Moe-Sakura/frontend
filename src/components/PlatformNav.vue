@@ -1,20 +1,49 @@
 <template>
-  <Transition
-    enter-active-class="transition-all duration-500 ease-out"
-    enter-from-class="opacity-0 -translate-x-full"
-    enter-to-class="opacity-100 translate-x-0"
-    leave-active-class="transition-all duration-300 ease-in"
-    leave-from-class="opacity-100 translate-x-0"
-    leave-to-class="opacity-0 -translate-x-full"
-  >
-    <div
-      v-if="searchStore.hasResults"
-      class="platform-nav hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-30"
+  <div v-if="searchStore.hasResults" class="platform-nav-wrapper hidden md:block fixed left-2 lg:left-4 top-1/2 -translate-y-1/2 z-30">
+    <!-- 收起后的按钮 -->
+    <Transition
+      enter-active-class="transition-all duration-300 ease-out"
+      enter-from-class="opacity-0 -translate-x-full"
+      enter-to-class="opacity-100 translate-x-0"
+      leave-active-class="transition-all duration-300 ease-in"
+      leave-from-class="opacity-100 translate-x-0"
+      leave-to-class="opacity-0 -translate-x-full"
     >
-      <div class="nav-container bg-white/95 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden max-h-[80vh] flex flex-col">
-        <div class="nav-header p-4 flex items-center justify-center gap-2 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
-          <i class="fas fa-th text-pink-500"></i>
-          <span class="font-bold text-sm text-gray-800">站点导航</span>
+      <button
+        v-if="!isExpanded"
+        @click="toggleNav"
+        class="nav-toggle-btn bg-white/95 backdrop-blur-md rounded-xl lg:rounded-2xl shadow-xl p-3 lg:p-4 hover:scale-110 transition-all"
+        aria-label="展开导航"
+      >
+        <i class="fas fa-bars text-pink-500 text-lg lg:text-xl"></i>
+      </button>
+    </Transition>
+
+    <!-- 展开的导航 -->
+    <Transition
+      enter-active-class="transition-all duration-500 ease-out"
+      enter-from-class="opacity-0 -translate-x-full"
+      enter-to-class="opacity-100 translate-x-0"
+      leave-active-class="transition-all duration-300 ease-in"
+      leave-from-class="opacity-100 translate-x-0"
+      leave-to-class="opacity-0 -translate-x-full"
+    >
+      <div
+        v-if="isExpanded"
+        class="nav-container bg-white/95 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden max-h-[80vh] flex flex-col"
+      >
+        <div class="nav-header p-4 flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-th text-pink-500"></i>
+            <span class="font-bold text-sm text-gray-800">站点导航</span>
+          </div>
+          <button
+            @click="toggleNav"
+            class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/50 transition-colors"
+            aria-label="收起导航"
+          >
+            <i class="fas fa-chevron-left text-gray-500 text-sm"></i>
+          </button>
         </div>
         
         <div class="nav-list overflow-y-auto flex-1">
@@ -33,14 +62,20 @@
           </button>
         </div>
       </div>
-    </div>
-  </Transition>
+    </Transition>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useSearchStore } from '@/stores/search'
 
 const searchStore = useSearchStore()
+const isExpanded = ref(true)
+
+function toggleNav() {
+  isExpanded.value = !isExpanded.value
+}
 
 function scrollToPlatform(platformName: string) {
   const platformElements = document.querySelectorAll('[data-platform]')
@@ -77,8 +112,18 @@ function getIcon(color: string) {
 </script>
 
 <style scoped>
+.nav-toggle-btn {
+  cursor: pointer;
+}
+
 .nav-container {
-  max-width: 240px;
+  max-width: 200px;
+}
+
+@media (min-width: 1024px) {
+  .nav-container {
+    max-width: 240px;
+  }
 }
 
 .nav-list {

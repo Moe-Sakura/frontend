@@ -46,6 +46,7 @@ export const useSearchStore = defineStore('search', () => {
   const isFirstSearch = ref(true)
   const lastSearchTime = ref(0)
   const isCommentsModalOpen = ref(false)
+  const isVndbPanelOpen = ref(false)
 
   // 计算属性
   const hasResults = computed(() => platformResults.value.size > 0)
@@ -94,6 +95,10 @@ export const useSearchStore = defineStore('search', () => {
     isCommentsModalOpen.value = !isCommentsModalOpen.value
   }
 
+  function toggleVndbPanel() {
+    isVndbPanelOpen.value = !isVndbPanelOpen.value
+  }
+
   return {
     // 状态
     searchQuery,
@@ -107,6 +112,7 @@ export const useSearchStore = defineStore('search', () => {
     isFirstSearch,
     lastSearchTime,
     isCommentsModalOpen,
+    isVndbPanelOpen,
     // 计算属性
     hasResults,
     isVndbMode,
@@ -118,6 +124,7 @@ export const useSearchStore = defineStore('search', () => {
     setCustomApi,
     setPlatformResult,
     setPlatformPage,
-    toggleCommentsModal
+    toggleCommentsModal,
+    toggleVndbPanel
   }
 })

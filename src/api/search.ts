@@ -29,6 +29,7 @@ export interface VndbInfo {
   mainImageUrl: string | null
   screenshotUrl: string | null
   description: string | null
+  translatedDescription: string | null
   va: any[]
   vntags: any[]
   play_hours: number
@@ -238,6 +239,7 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
       mainImageUrl,
       screenshotUrl,
       description: result.description || null,
+      translatedDescription: null,
       va: result.va || [],
       vntags: [],
       play_hours,
@@ -256,6 +258,55 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
     }
 
     return finalResult
+  } catch (error) {
+    return null
+  }
+}
+
+/**
+ * AI 翻译文本
+ */
+export async function translateText(text: string): Promise<string | null> {
+  if (!text || text.trim().length === 0) {
+    return null
+  }
+
+  try {
+    const response = await fetch(AI_TRANSLATE_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${AI_TRANSLATE_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: AI_TRANSLATE_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: '你是一个专业的日英翻译助手。请将用户提供的文本翻译成简体中文。只返回翻译结果，不要添加任何解释或额外内容。'
+          },
+          {
+            role: 'user',
+            content: text
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000
+      })
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data = await response.json()
+    
+    if (data.choices && data.choices.length > 0) {
+      const translatedText = data.choices[0].message?.content?.trim()
+      return translatedText || null
+    }
+
+    return null
   } catch (error) {
     return null
   }

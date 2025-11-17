@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-buttons fixed bottom-6 right-6 flex flex-col gap-3 z-40">
+  <div class="floating-buttons fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col gap-2 sm:gap-3 z-40">
     <!-- 回到顶部按钮 -->
     <button
       v-show="showScrollToTop"
@@ -8,6 +8,21 @@
       class="fab-button scroll-top-btn"
     >
       <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- 作品介绍按钮 -->
+    <button
+      v-show="searchStore.vndbInfo"
+      @click="toggleVndbPanel"
+      :aria-label="searchStore.isVndbPanelOpen ? '关闭作品介绍' : '打开作品介绍'"
+      class="fab-button vndb-btn"
+      :class="{ 'vndb-open': searchStore.isVndbPanelOpen }"
+    >
+      <i
+        :class="
+          searchStore.isVndbPanelOpen ? 'fas fa-times' : 'fas fa-book'
+        "
+      ></i>
     </button>
 
     <!-- 评论按钮 -->
@@ -41,6 +56,10 @@ function toggleComments() {
   searchStore.toggleCommentsModal();
 }
 
+function toggleVndbPanel() {
+  searchStore.toggleVndbPanel();
+}
+
 function handleScroll() {
   showScrollToTop.value = window.scrollY > 200;
 }
@@ -57,19 +76,28 @@ onUnmounted(() => {
 
 <style scoped>
 .fab-button {
-  width: 56px;
-  height: 56px;
-  border-radius: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 20px;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 20px;
   box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 640px) {
+  .fab-button {
+    width: 56px;
+    height: 56px;
+    border-radius: 24px;
+    font-size: 24px;
+  }
 }
 
 .fab-button:hover {
@@ -93,6 +121,16 @@ onUnmounted(() => {
 }
 
 .comments-btn.comments-open {
+  background: linear-gradient(135deg, rgb(156, 163, 175), rgb(107, 114, 128));
+  color: white;
+}
+
+.vndb-btn {
+  background: linear-gradient(135deg, rgb(139, 92, 246), rgb(124, 58, 237));
+  color: white;
+}
+
+.vndb-btn.vndb-open {
   background: linear-gradient(135deg, rgb(156, 163, 175), rgb(107, 114, 128));
   color: white;
 }
