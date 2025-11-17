@@ -2,27 +2,37 @@
   <div class="container mx-auto w-full px-8 py-6">
     <div class="flex flex-col items-center gap-6">
       <!-- Title with gamepad icon and status -->
-      <div class="header-title flex items-center gap-4 my-12">
-        <h1 class="text-5xl font-bold text-center text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] flex items-center gap-3">
-          <i class="fas fa-gamepad text-pink-400" style="font-size: 48px;"></i>
+      <div
+        class="header-title flex items-center justify-center gap-4 my-12 animate-fade-in-down"
+      >
+        <h1
+          class="text-5xl font-bold text-center text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] flex items-center gap-3"
+        >
+          <i class="fas fa-gamepad text-pink-400" style="font-size: 48px"></i>
           Galgame 聚合搜索
         </h1>
-        <a 
-          href="https://status.searchgal.homes" 
+        <a
+          href="https://status.searchgal.homes"
           target="_blank"
-          class="status-chip px-4 py-2 rounded-full bg-white/90 backdrop-blur-md flex items-center gap-2 text-green-600 font-semibold hover:scale-105 transition-transform"
+          rel="noopener noreferrer"
+          class="status-link px-4 py-2 rounded-full bg-white/90 backdrop-blur-md flex items-center gap-2 text-green-600 font-semibold hover:scale-105 transition-transform shadow-lg"
         >
           <i class="fas fa-check-circle"></i>
-          <span>服务正常</span>
+          <span>状态</span>
         </a>
       </div>
-      
+
       <!-- Search Form -->
-      <form @submit.prevent="handleSearch" class="search-form w-full max-w-2xl">
+      <form
+        @submit.prevent="handleSearch"
+        class="search-form w-full max-w-2xl animate-fade-in-up"
+      >
         <div class="flex flex-col gap-4">
           <!-- Search Input -->
           <div class="relative">
-            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl"></i>
+            <i
+              class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl"
+            ></i>
             <input
               v-model="searchQuery"
               type="search"
@@ -31,10 +41,12 @@
               class="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/98 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500"
             />
           </div>
-          
+
           <!-- Custom API Input -->
           <div class="relative">
-            <i class="fas fa-link absolute left-4 top-5 text-gray-400 text-xl"></i>
+            <i
+              class="fas fa-link absolute left-4 top-5 text-gray-400 text-xl"
+            ></i>
             <input
               v-model="customApi"
               type="url"
@@ -45,7 +57,7 @@
               例如: https://api.searchgal.homes 或 http://127.0.0.1:8898
             </p>
           </div>
-          
+
           <!-- Search Button and Mode Selector -->
           <div class="flex flex-col gap-3">
             <button
@@ -55,183 +67,312 @@
             >
               <i class="fas fa-search"></i>
               <span v-if="!searchStore.isSearching">开始搜索</span>
-              <span v-else>进度: {{ searchStore.searchProgress.current }} / {{ searchStore.searchProgress.total }}</span>
+              <span v-else
+                >进度: {{ searchStore.searchProgress.current }} /
+                {{ searchStore.searchProgress.total }}</span
+              >
             </button>
-            
+
             <!-- Search Mode Selector -->
             <div class="flex justify-center gap-3">
               <button
+                type="button"
                 @click="searchMode = 'game'"
-                :class="['mode-chip px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2', 
-                  searchMode === 'game' ? 'bg-pink-500 text-white shadow-lg scale-105' : 'bg-white/90 text-gray-700 hover:bg-white']"
+                :class="[
+                  'mode-chip px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2',
+                  searchMode === 'game'
+                    ? 'bg-pink-500 text-white shadow-lg scale-105'
+                    : 'bg-white/90 text-gray-700 hover:bg-white',
+                ]"
               >
                 <i class="fas fa-gamepad"></i>
                 <span>游戏</span>
               </button>
               <button
+                type="button"
                 @click="searchMode = 'patch'"
-                :class="['mode-chip px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2',
-                  searchMode === 'patch' ? 'bg-pink-500 text-white shadow-lg scale-105' : 'bg-white/90 text-gray-700 hover:bg-white']"
+                :class="[
+                  'mode-chip px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2',
+                  searchMode === 'patch'
+                    ? 'bg-pink-500 text-white shadow-lg scale-105'
+                    : 'bg-white/90 text-gray-700 hover:bg-white',
+                ]"
               >
                 <i class="fas fa-tools"></i>
                 <span>补丁</span>
               </button>
             </div>
-            
+
             <!-- Busuanzi Statistics -->
-            <div class="flex justify-center gap-4 text-sm text-white/90 drop-shadow-md font-medium mt-2">
-              <span>访问：<span id="busuanzi_value_page_pv" class="font-semibold">-</span></span>
-              <span>访客：<span id="busuanzi_value_site_uv" class="font-semibold">-</span></span>
+            <div
+              class="flex justify-center items-center gap-6 text-sm text-white/90 drop-shadow-md font-medium mt-2"
+            >
+              <span class="flex items-center gap-1">
+                <i class="fas fa-eye"></i>
+                <span id="busuanzi_value_page_pv" class="font-semibold">-</span>
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="fas fa-user"></i>
+                <span id="busuanzi_value_site_uv" class="font-semibold">-</span>
+              </span>
+            </div>
+
+            <!-- Version and GitHub Info -->
+            <div class="flex items-center justify-center gap-3 mt-4">
+              <div
+                class="px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-gray-600 font-medium shadow-md flex items-center gap-2 text-sm"
+              >
+                <span>251007</span>
+              </div>
+              <a
+                href="https://github.com/Moe-Sakura/SearchGal"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-gray-700 hover:text-pink-500 font-medium hover:scale-105 transition-all shadow-md flex items-center gap-2 text-sm"
+              >
+                <i class="fab fa-github"></i>
+                <span>GitHub</span>
+              </a>
             </div>
           </div>
         </div>
       </form>
-      
+
       <!-- Error Message -->
-      <div v-if="searchStore.errorMessage" class="w-full max-w-2xl">
-        <md-elevated-card class="error-card">
-          <div class="flex items-center gap-2 p-4 text-red-700">
-            <md-icon class="text-red-700">error</md-icon>
-            <div>
-              <strong class="font-bold">错误: </strong>{{ searchStore.errorMessage }}
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out animate-shake"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="searchStore.errorMessage" class="w-full max-w-2xl">
+          <div
+            class="bg-red-50 border-2 border-red-200 rounded-2xl p-4 shadow-lg"
+          >
+            <div class="flex items-center gap-3 text-red-700">
+              <i class="fas fa-exclamation-circle text-2xl"></i>
+              <div>
+                <strong class="font-bold">错误: </strong
+                >{{ searchStore.errorMessage }}
+              </div>
             </div>
           </div>
-        </md-elevated-card>
-      </div>
-      
+        </div>
+      </Transition>
+
       <!-- Usage Notice -->
-      <div class="w-full max-w-4xl mt-8">
-        <md-elevated-card class="usage-notice">
-          <div class="p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">咱家的使用须知</h2>
-            <ul class="space-y-2 text-gray-800">
-              <li>• 首先，衷心感谢 <a href="https://saop.cc/" target="_blank" class="text-indigo-600 hover:underline font-semibold">@Asuna</a> 大佬提供的服务器和技术支持！没有大佬的魔法，咱可跑不起来！</li>
-              <li>• 本程序纯属 <strong>爱发电</strong>，仅供绅士们交流学习使用，务必请大家 <strong>支持正版 Galgame</strong>！入正不亏哦！</li>
-              <li>• 本站只做互联网内容的 <strong>聚合搬运工</strong>，搜索结果均来自第三方站点，下载前请各位自行判断 <strong>资源安全性</strong>，以免翻车。</li>
-              <li>• 搜索时请注意关键词长度！<strong>关键词太短</strong> 可能搜不全（部分站点只显示首批结果），<strong>太长</strong> 则可能无法精准匹配。建议尝试 <strong>适当的关键词</strong>，效果更佳~</li>
-              <li>• 本程序每次查询完毕即断开连接，<strong>严禁任何形式的爆破或恶意爬取</strong>，做个文明的绅士！</li>
-              <li>• 万一某个站点搜索挂了，先看看自己的魔法是否到位，也可能是站点维护了，或者咱这边的 <strong>爬虫失效</strong> 了。</li>
-              <li>• 为了支持各 Galgame 站点能长久运营，还请各位把浏览器的 <strong>广告屏蔽插件</strong> 关掉，或将这些站点加入白名单。大家建站不易，小小的支持也是大大的动力！</li>
-              <li>• 游戏介绍和人物信息数据由 <a href="https://vndb.org/" target="_blank" class="text-indigo-600 hover:underline font-semibold">VNDB</a> 提供，由AI大模型翻译，翻译结果不保证准确性，仅作为检索游戏时的参考！</li>
-              <li>• 郑重呼吁：请务必支持 Galgame 正版！让爱与梦想延续！</li>
-              <li>• 如果您觉得咱这小工具好用，请移步 <a href="https://github.com/Moe-Sakura/SearchGal" target="_blank" class="text-indigo-600 hover:underline font-semibold">GitHub</a> 给本项目点个免费的 <strong>Star</strong> 吧，秋梨膏！你的支持就是咱最大的动力，比心~</li>
-            </ul>
-          </div>
-        </md-elevated-card>
+      <div class="w-full max-w-4xl mt-8 animate-fade-in animation-delay-1000">
+        <div
+          class="usage-notice bg-white/75 backdrop-blur-md rounded-3xl shadow-xl p-8"
+        >
+          <h2
+            class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"
+          >
+            <i class="fas fa-info-circle text-pink-500"></i>
+            使用须知
+          </h2>
+          <ul class="space-y-4 text-gray-700 leading-relaxed">
+            <li>
+              • 首先，衷心感谢
+              <a
+                href="https://saop.cc/"
+                target="_blank"
+                class="text-indigo-600 hover:underline font-semibold"
+                >@Asuna</a
+              >
+              大佬提供的服务器和技术支持！没有大佬的魔法，咱可跑不起来！
+            </li>
+            <li>
+              • 本程序纯属
+              <strong>爱发电</strong>，仅供绅士们交流学习使用，务必请大家
+              <strong>支持正版 Galgame</strong>！入正不亏哦！
+            </li>
+            <li>
+              • 本站只做互联网内容的
+              <strong>聚合搬运工</strong
+              >，搜索结果均来自第三方站点，下载前请各位自行判断
+              <strong>资源安全性</strong>，以免翻车。
+            </li>
+            <li>
+              • 搜索时请注意关键词长度！<strong>关键词太短</strong>
+              可能搜不全（部分站点只显示首批结果），<strong>太长</strong>
+              则可能无法精准匹配。建议尝试
+              <strong>适当的关键词</strong>，效果更佳~
+            </li>
+            <li>
+              •
+              本程序每次查询完毕即断开连接，<strong>严禁任何形式的爆破或恶意爬取</strong>，做个文明的绅士！
+            </li>
+            <li>
+              •
+              万一某个站点搜索挂了，先看看自己的魔法是否到位，也可能是站点维护了，或者咱这边的
+              <strong>爬虫失效</strong> 了。
+            </li>
+            <li>
+              • 为了支持各 Galgame 站点能长久运营，还请各位把浏览器的
+              <strong>广告屏蔽插件</strong>
+              关掉，或将这些站点加入白名单。大家建站不易，小小的支持也是大大的动力！
+            </li>
+            <li>
+              • 游戏介绍和人物信息数据由
+              <a
+                href="https://vndb.org/"
+                target="_blank"
+                class="text-indigo-600 hover:underline font-semibold"
+                >VNDB</a
+              >
+              提供，由AI大模型翻译，翻译结果不保证准确性，仅作为检索游戏时的参考！
+            </li>
+            <li>• 郑重呼吁：请务必支持 Galgame 正版！让爱与梦想延续！</li>
+            <li>
+              • 如果您觉得咱这小工具好用，请移步
+              <a
+                href="https://github.com/Moe-Sakura/SearchGal"
+                target="_blank"
+                class="text-indigo-600 hover:underline font-semibold"
+                >GitHub</a
+              >
+              给本项目点个免费的
+              <strong>Star</strong> 吧，秋梨膏！你的支持就是咱最大的动力，比心~
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { useSearchStore } from '@/stores/search'
-import { searchGameStream, fetchVndbData } from '@/api/search'
-import gsap from 'gsap'
+import { ref } from "vue";
+import { useSearchStore } from "@/stores/search";
+import { searchGameStream, fetchVndbData } from "@/api/search";
 
-const searchStore = useSearchStore()
-const searchQuery = ref('')
-const customApi = ref('')
-const searchMode = ref<'game' | 'patch'>('game')
-
-const progressWidth = computed(() => {
-  if (searchStore.searchProgress.total === 0) return '0'
-  return ((searchStore.searchProgress.current / searchStore.searchProgress.total) * 100).toString()
-})
+const searchStore = useSearchStore();
+const searchQuery = ref("");
+const customApi = ref("");
+const searchMode = ref<"game" | "patch">("game");
 
 async function handleSearch() {
-  if (!searchQuery.value.trim()) return
-  
-  searchStore.clearResults()
-  searchStore.isSearching = true
-  searchStore.errorMessage = ''
-  
-  const searchParams = new URLSearchParams()
-  searchParams.set('game', searchQuery.value.trim())
-  searchParams.set('mode', searchMode.value)
+  if (!searchQuery.value.trim()) return;
+
+  searchStore.clearResults();
+  searchStore.isSearching = true;
+  searchStore.errorMessage = "";
+
+  const searchParams = new URLSearchParams();
+  searchParams.set("game", searchQuery.value.trim());
+  searchParams.set("mode", searchMode.value);
   if (customApi.value.trim()) {
-    searchParams.set('api', customApi.value.trim())
+    searchParams.set("api", customApi.value.trim());
   }
-  
+
   try {
     await searchGameStream(searchParams, {
       onTotal: (total) => {
-        searchStore.searchProgress = { current: 0, total }
+        searchStore.searchProgress = { current: 0, total };
       },
       onProgress: (current, total) => {
-        searchStore.searchProgress = { current, total }
+        searchStore.searchProgress = { current, total };
       },
       onPlatformResult: (data) => {
-        searchStore.setPlatformResult(data.name, data)
+        searchStore.setPlatformResult(data.name, data);
       },
       onComplete: () => {
-        searchStore.isSearching = false
+        searchStore.isSearching = false;
       },
       onError: (error) => {
-        searchStore.errorMessage = error
-        searchStore.isSearching = false
-      }
-    })
-    
+        searchStore.errorMessage = error;
+        searchStore.isSearching = false;
+      },
+    });
+
     // 获取 VNDB 数据
-    if (searchMode.value === 'game') {
-      const vndbData = await fetchVndbData(searchQuery.value.trim())
+    if (searchMode.value === "game") {
+      const vndbData = await fetchVndbData(searchQuery.value.trim());
       if (vndbData) {
-        searchStore.vndbInfo = vndbData
+        searchStore.vndbInfo = vndbData;
       }
     }
   } catch (error) {
-    console.error('Search error:', error)
-    searchStore.errorMessage = error instanceof Error ? error.message : '搜索失败'
-    searchStore.isSearching = false
+    searchStore.errorMessage =
+      error instanceof Error ? error.message : "搜索失败";
+    searchStore.isSearching = false;
   }
 }
-
-onMounted(() => {
-  // 移除 GSAP 动画，直接显示所有元素
-  // GSAP 动画在某些情况下会导致元素保持不可见状态
-})
 </script>
 
 <style scoped>
-.status-chip {
-  --md-assist-chip-container-color: rgba(255, 255, 255, 0.9);
-  --md-assist-chip-label-text-color: rgb(22, 163, 74);
-  --md-assist-chip-icon-color: rgb(22, 163, 74);
-  font-weight: 600;
+/* 动画 */
+.animate-fade-in-down {
+  animation: fadeInDown 0.6s ease-out;
 }
 
-.error-card {
-  --md-elevated-card-container-color: rgb(254, 242, 242);
-  border: 1px solid rgb(254, 202, 202);
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.usage-notice {
-  --md-elevated-card-container-color: rgba(255, 255, 255, 0.75);
-  width: 100%;
-  display: block;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
 }
 
-md-chip-set {
-  justify-content: center;
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
 }
 
-md-filter-chip {
-  --md-filter-chip-selected-container-color: var(--md-sys-color-primary);
-  --md-filter-chip-selected-label-text-color: var(--md-sys-color-on-primary);
+.animation-delay-1000 {
+  animation-delay: 1s;
 }
 
-/* 确保 Material 3 组件正确显示 */
-md-elevated-card {
-  display: block;
-  width: 100%;
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-md-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-10px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(10px);
+  }
 }
 </style>

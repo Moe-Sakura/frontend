@@ -70,17 +70,12 @@ export async function searchGameStream(
     // 根据搜索模式选择 API 端点
     const endpoint = searchMode === 'patch' ? '/patch' : '/gal'
     
-    console.log('[DEBUG] API URL:', `${apiUrl}${endpoint}`)
-    console.log('[DEBUG] Game:', gameName)
-    console.log('[DEBUG] Mode:', searchMode)
-    
     const response = await fetch(`${apiUrl}${endpoint}`, {
       method: 'POST',
       body: formData,
       mode: 'cors',
       credentials: 'omit',
-    }).catch(err => {
-      console.error('[DEBUG] Fetch error:', err)
+    }).catch(() => {
       throw new Error('网络连接失败，请检查网络或API地址')
     })
     
@@ -144,12 +139,12 @@ export async function searchGameStream(
             callbacks.onComplete?.()
           }
         } catch (e) {
-          console.error('解析 JSON 失败:', line, e)
+          // 忽略解析错误
         }
       }
     }
   } catch (error) {
-    console.error('搜索失败:', error)
+    // 搜索失败
     callbacks.onError?.(error instanceof Error ? error.message : '搜索失败')
   }
 }
@@ -159,14 +154,14 @@ export async function searchGameStream(
  */
 export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> {
   try {
-    console.log(`[DEBUG] Fetching VNDB data for: "${gameName}"`)
-    
-    const response = await fetch(VNDB_API_BASE_URL, {
+    // VNDB API v2 正确的请求格式
+    const response = await fetch(`${VNDB_API_BASE_URL}/vn`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         filters: ['search', '=', gameName],
-        fields: 'title, titles{lang,title}, description, image{url,sexual,violence}, screenshots{url,sexual,violence,votecount}, va{character{id,name,original,image{url,sexual,violence},description,traits{id,name,spoiler},vns{id,role,spoiler}}}, length_minutes, length_votes'
+        fields: 'title, titles.lang, titles.title, description, image.url, image.sexual, image.violence, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, length_minutes, length_votes',
+        results: 1
       })
     })
 
@@ -209,11 +204,7 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
       ? [...result.screenshots].sort((a: any, b: any) => (b.votecount || 0) - (a.votecount || 0))
       : []
     
-    console.log('[DEBUG] Screenshots:', sortedScreenshots.map((s: any) => ({ url: s.url, sexual: s.sexual, violence: s.violence, votecount: s.votecount })))
-    
     const screenshotUrl = sortedScreenshots.find((s: any) => s.sexual <= 1 && s.violence === 0)?.url || null
-    
-    console.log('[DEBUG] Selected screenshot URL:', screenshotUrl)
     
     // 计算游戏时长
     const length_minute = result.length_minutes || 0
@@ -259,21 +250,13 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
     // 检查代理并替换 URL
     if (ENABLE_VNDB_IMAGE_PROXY) {
       await checkProxyAvailability()
-      console.log('[DEBUG] Proxy available:', isProxyAvailable)
       if (isProxyAvailable) {
         replaceVndbUrls(finalResult)
-        console.log('[DEBUG] After proxy replacement:', {
-          screenshotUrl: finalResult.screenshotUrl,
-          mainImageUrl: finalResult.mainImageUrl
-        })
       }
     }
 
-    console.log('[DEBUG] Final VNDB result:', finalResult)
-
     return finalResult
   } catch (error) {
-    console.error('Failed to fetch VNDB data:', error)
     return null
   }
 }

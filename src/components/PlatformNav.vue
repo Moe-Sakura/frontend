@@ -1,68 +1,46 @@
 <template>
-  <Transition name="fade">
+  <Transition
+    enter-active-class="transition-all duration-500 ease-out"
+    enter-from-class="opacity-0 -translate-x-full"
+    enter-to-class="opacity-100 translate-x-0"
+    leave-active-class="transition-all duration-300 ease-in"
+    leave-from-class="opacity-100 translate-x-0"
+    leave-to-class="opacity-0 -translate-x-full"
+  >
     <div
       v-if="searchStore.hasResults"
       class="platform-nav hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-30"
     >
-      <md-elevated-card class="nav-container">
-        <div class="nav-header p-4 flex items-center justify-center gap-2 border-b border-gray-200">
-          <md-icon>apps</md-icon>
-          <span class="font-bold text-sm">站点导航</span>
+      <div class="nav-container bg-white/95 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden max-h-[80vh] flex flex-col">
+        <div class="nav-header p-4 flex items-center justify-center gap-2 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
+          <i class="fas fa-th text-pink-500"></i>
+          <span class="font-bold text-sm text-gray-800">站点导航</span>
         </div>
         
-        <md-list class="nav-list">
-          <md-list-item
+        <div class="nav-list overflow-y-auto flex-1">
+          <button
             v-for="[platformName, platformData] in searchStore.platformResults"
             :key="platformName"
             @click="scrollToPlatform(platformName)"
-            type="button"
-            class="nav-item"
+            class="nav-item w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 text-left"
             :class="getItemClass(platformData.color)"
           >
-            <md-icon slot="start">{{ getIcon(platformData.color) }}</md-icon>
-            <div slot="headline" class="platform-name">{{ platformName }}</div>
-            <md-icon slot="end" class="text-xs">
-              <md-assist-chip :label="platformData.items.length.toString()" class="count-badge" />
-            </md-icon>
-          </md-list-item>
-        </md-list>
-      </md-elevated-card>
+            <i :class="getIcon(platformData.color)" class="text-lg"></i>
+            <span class="platform-name flex-1 text-sm font-medium text-gray-700">{{ platformName }}</span>
+            <span class="count-badge px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
+              {{ platformData.items.length }}
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-import { watch, nextTick } from 'vue'
 import { useSearchStore } from '@/stores/search'
-import gsap from 'gsap'
 
 const searchStore = useSearchStore()
-
-// 监听搜索结果变化并触发动画
-watch(() => searchStore.hasResults, (hasResults: boolean) => {
-  if (hasResults) {
-    nextTick(() => {
-      // GSAP 动画：导航从左侧滑入
-      gsap.from('.platform-nav', {
-        duration: 0.8,
-        x: -100,
-        opacity: 0,
-        ease: 'back.out(1.7)',
-        delay: 0.5
-      })
-      
-      // 导航项逐个淡入
-      gsap.from('.nav-item', {
-        duration: 0.5,
-        x: -20,
-        opacity: 0,
-        stagger: 0.08,
-        ease: 'power2.out',
-        delay: 0.8
-      })
-    })
-  }
-})
 
 function scrollToPlatform(platformName: string) {
   const platformElements = document.querySelectorAll('[data-platform]')
@@ -73,13 +51,7 @@ function scrollToPlatform(platformName: string) {
   if (targetElement) {
     const yOffset = -80
     const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset
-    
-    // 使用 GSAP 实现更平滑的滚动动画
-    gsap.to(window, {
-      duration: 0.8,
-      scrollTo: { y, offsetY: 80 },
-      ease: 'power2.inOut'
-    })
+    window.scrollTo({ top: y, behavior: 'smooth' })
   }
 }
 
@@ -95,75 +67,42 @@ function getItemClass(color: string) {
 
 function getIcon(color: string) {
   const icons: Record<string, string> = {
-    lime: 'star',
-    white: 'circle',
-    gold: 'attach_money',
-    red: 'cancel'
+    lime: 'fas fa-star',
+    white: 'fas fa-circle',
+    gold: 'fas fa-dollar-sign',
+    red: 'fas fa-times-circle'
   }
-  return icons[color] || 'circle'
+  return icons[color] || 'fas fa-circle'
 }
 </script>
 
 <style scoped>
 .nav-container {
-  --md-elevated-card-container-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  max-height: 80vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  max-width: 240px;
 }
 
 .nav-list {
-  overflow-y: auto;
   max-height: calc(80vh - 60px);
 }
 
 .nav-item {
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.nav-item:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.nav-item.item-lime md-icon[slot="start"] {
+.nav-item.item-lime i {
   color: rgb(132, 204, 22);
 }
 
-.nav-item.item-white md-icon[slot="start"] {
+.nav-item.item-white i {
   color: rgb(156, 163, 175);
 }
 
-.nav-item.item-gold md-icon[slot="start"] {
+.nav-item.item-gold i {
   color: rgb(234, 179, 8);
 }
 
-.nav-item.item-red md-icon[slot="start"] {
+.nav-item.item-red i {
   color: rgb(239, 68, 68);
-}
-
-.count-badge {
-  --md-assist-chip-container-color: rgb(243, 244, 246);
-  --md-assist-chip-label-text-color: rgb(75, 85, 99);
-  font-size: 0.75rem;
-  height: 24px;
-}
-
-.platform-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 
 /* 自定义滚动条 */

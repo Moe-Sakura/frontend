@@ -27,9 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useSearchStore } from "@/stores/search";
-import gsap from "gsap";
 
 const searchStore = useSearchStore();
 const showScrollToTop = ref(false);
@@ -47,38 +46,8 @@ function handleScroll() {
 }
 
 onMounted(() => {
-  console.log("[DEBUG] FloatingButtons mounted");
   window.addEventListener("scroll", handleScroll);
   handleScroll();
-
-  // 移除入场动画，但保留悬停效果
-  nextTick(() => {
-    setTimeout(() => {
-      const fabs = document.querySelectorAll("md-fab");
-      console.log("[DEBUG] Found FAB buttons:", fabs.length);
-
-      // 添加悬停动画效果
-      if (fabs.length > 0) {
-        fabs.forEach((fab) => {
-          fab.addEventListener("mouseenter", () => {
-            gsap.to(fab, {
-              duration: 0.2,
-              scale: 1.1,
-              ease: "power2.out",
-            });
-          });
-
-          fab.addEventListener("mouseleave", () => {
-            gsap.to(fab, {
-              duration: 0.2,
-              scale: 1,
-              ease: "power2.out",
-            });
-          });
-        });
-      }
-    }, 100);
-  });
 });
 
 onUnmounted(() => {

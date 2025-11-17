@@ -45,87 +45,22 @@
       content="https://searchgal.homes/og-image.png"
     />
 
-    <!-- PWA -->
-    <meta name="theme-color" content="#ec4899" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="apple-mobile-web-app-title" content="SearchGal" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
 
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://searchgal.homes/" />
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://searchgal.homes/" />
 
-    <!-- Material Symbols - 本地字体（预加载） -->
-    <link
-      rel="preload"
-      href="/fonts/MaterialSymbolsOutlined.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-      fetchpriority="high"
-    />
-    <link
-      rel="stylesheet"
-      href="/fonts/material-symbols.css"
-      fetchpriority="high"
-    />
+    <!-- Priority Hints - 预加载关键资源 -->
+    <link rel="preconnect" href="https://api.illlights.com" fetchpriority="high" />
+    <link rel="preconnect" href="https://api.vndb.org" fetchpriority="high" />
+    <link rel="preconnect" href="https://registry.npmmirror.com" fetchpriority="low" />
+    <link rel="dns-prefetch" href="https://artalk.saop.cc" />
+    <link rel="dns-prefetch" href="https://status.searchgal.homes" />
 
     <style>
-      /* 修复 Material 3 图标显示 */
-      md-icon {
-        font-family: "Material Symbols Outlined", sans-serif !important;
-        font-weight: normal;
-        font-style: normal;
-        font-size: 24px;
-        line-height: 1;
-        letter-spacing: normal;
-        text-transform: none;
-        display: inline-block;
-        white-space: nowrap;
-        word-wrap: normal;
-        direction: ltr;
-        -webkit-font-feature-settings: "liga";
-        -webkit-font-smoothing: antialiased;
-        font-feature-settings: "liga";
-      }
-    </style>
-
-    <!-- Roboto 字体 - 优先使用系统字体，无需外部加载 -->
-
-    <style>
-      :root {
-        /* Material 3 主题色 - 粉色/紫色系 */
-        --md-sys-color-primary: rgb(236, 72, 153);
-        --md-sys-color-on-primary: rgb(255, 255, 255);
-        --md-sys-color-primary-container: rgb(252, 231, 243);
-        --md-sys-color-on-primary-container: rgb(139, 10, 80);
-
-        --md-sys-color-secondary: rgb(99, 102, 241);
-        --md-sys-color-on-secondary: rgb(255, 255, 255);
-        --md-sys-color-secondary-container: rgb(224, 231, 255);
-        --md-sys-color-on-secondary-container: rgb(26, 35, 126);
-
-        --md-sys-color-surface: rgba(255, 251, 254, 0.95);
-        --md-sys-color-on-surface: rgb(29, 27, 30);
-        --md-sys-color-surface-variant: rgba(243, 221, 235, 0.9);
-        --md-sys-color-on-surface-variant: rgb(81, 67, 79);
-
-        --md-sys-color-background: rgb(255, 251, 254);
-        --md-sys-color-on-background: rgb(29, 27, 30);
-
-        --md-sys-color-error: rgb(186, 26, 26);
-        --md-sys-color-on-error: rgb(255, 255, 255);
-      }
-
       body {
-        /* 优先使用系统字体，Roboto 作为备选 */
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
           "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB",
           "Noto Sans CJK SC", "Source Han Sans SC", "WenQuanYi Micro Hei",
@@ -135,10 +70,50 @@
         overflow-wrap: break-word;
         margin: 0;
         padding: 0;
-        background: var(--md-sys-color-background);
-        color: var(--md-sys-color-on-background);
-        /* 平滑滚动 */
+        background: rgb(255, 251, 254);
+        color: rgb(29, 27, 30);
         scroll-behavior: smooth;
+      }
+
+      /* 图片懒加载淡入动画 */
+      img[loading="lazy"] {
+        opacity: 0;
+        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      img[loading="lazy"].loaded {
+        opacity: 1;
+      }
+
+      /* Pace.js 自定义样式 */
+      .pace {
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .pace-inactive {
+        display: none;
+      }
+
+      .pace .pace-progress {
+        background: linear-gradient(90deg, #ec4899, #8b5cf6);
+        position: fixed;
+        z-index: 9999;
+        top: 0;
+        right: 100%;
+        width: 100%;
+        height: 3px;
+        box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+      }
+
+      /* Fancybox 自定义样式 */
+      .fancybox-custom .fancybox__backdrop {
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+      }
+
+      .fancybox-custom .fancybox__container {
+        --fancybox-accent-color: #ec4899;
       }
 
       #app {
@@ -226,293 +201,30 @@
         z-index: -1;
       }
 
-      /* Material 3 组件样式自定义 - 柔和优化 */
-      md-filled-text-field,
-      md-outlined-text-field {
-        width: 100%;
-        --md-filled-text-field-container-color: rgba(255, 255, 255, 0.98);
-        --md-filled-text-field-focus-active-indicator-color: var(
-          --md-sys-color-primary
-        );
-        --md-filled-text-field-container-shape: 20px;
-        border-radius: 20px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
-          0 2px 4px rgba(0, 0, 0, 0.04);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      md-filled-text-field:hover {
-        box-shadow: 0 8px 24px rgba(236, 72, 153, 0.15),
-          0 4px 8px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
-      }
-
-      md-filled-text-field:focus-within {
-        box-shadow: 0 12px 32px rgba(236, 72, 153, 0.2),
-          0 6px 12px rgba(0, 0, 0, 0.1);
-        transform: translateY(-3px) scale(1.01);
-      }
-
-      md-filled-button {
-        --md-filled-button-container-color: linear-gradient(
-          135deg,
-          rgb(236, 72, 153),
-          rgb(219, 39, 119)
-        );
-        --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
-        --md-filled-button-container-shape: 16px;
-        border-radius: 16px;
-        box-shadow: 0 6px 20px rgba(236, 72, 153, 0.35),
-          0 3px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-      }
-
-      md-filled-button::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.3),
-          transparent
-        );
-        transition: left 0.5s ease;
-      }
-
-      md-filled-button:hover::before {
-        left: 100%;
-      }
-
-      md-filled-button:hover {
-        box-shadow: 0 10px 32px rgba(236, 72, 153, 0.5),
-          0 6px 16px rgba(0, 0, 0, 0.15);
-        transform: translateY(-3px) scale(1.02);
-      }
-
-      md-filled-button:active {
-        transform: translateY(-1px) scale(0.98);
-        box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
-      }
-
-      md-fab {
-        --md-fab-container-color: var(--md-sys-color-primary);
-        --md-fab-icon-color: var(--md-sys-color-on-primary);
-        --md-fab-container-shape: 24px;
-        box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4),
-          0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-      }
-
-      md-fab:hover {
-        box-shadow: 0 12px 36px rgba(236, 72, 153, 0.5),
-          0 6px 20px rgba(0, 0, 0, 0.2);
-        transform: translateY(-4px) scale(1.08) rotate(5deg);
-      }
-
-      md-fab:active {
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
-      }
-
-      md-elevated-card,
-      md-filled-card,
-      md-outlined-card {
-        --md-elevated-card-container-color: rgba(255, 255, 255, 0.85);
-        --md-elevated-card-container-shape: 24px;
-        border-radius: 24px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
-          0 4px 16px rgba(0, 0, 0, 0.04);
-        backdrop-filter: blur(30px) saturate(150%);
-        -webkit-backdrop-filter: blur(30px) saturate(150%);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-      }
-
-      md-elevated-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(236, 72, 153, 0.1),
-          transparent
-        );
-        transition: left 0.6s ease;
-      }
-
-      md-elevated-card:hover::before {
-        left: 100%;
-      }
-
-      md-elevated-card:hover,
-      md-filled-card:hover,
-      md-outlined-card:hover {
-        box-shadow: 0 16px 48px rgba(236, 72, 153, 0.15),
-          0 8px 24px rgba(0, 0, 0, 0.1);
-        transform: translateY(-4px) scale(1.01);
-        border-color: rgba(236, 72, 153, 0.3);
-      }
-
-      md-assist-chip,
-      md-filter-chip {
-        --md-assist-chip-container-shape: 16px;
-        border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      md-assist-chip:hover,
-      md-filter-chip:hover {
-        transform: scale(1.08) translateY(-2px);
-        box-shadow: 0 4px 16px rgba(236, 72, 153, 0.2);
-      }
-
-      md-filter-chip[selected] {
-        box-shadow: 0 4px 16px rgba(236, 72, 153, 0.3);
-        animation: pulse 2s infinite;
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          box-shadow: 0 4px 16px rgba(236, 72, 153, 0.3);
-        }
-        50% {
-          box-shadow: 0 6px 24px rgba(236, 72, 153, 0.5);
-        }
-      }
-
-      md-list-item {
-        border-radius: 16px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        margin: 4px 0;
-      }
-
-      md-list-item:hover {
-        background-color: rgba(236, 72, 153, 0.08);
-        transform: translateX(4px);
-        box-shadow: 0 2px 8px rgba(236, 72, 153, 0.15);
-      }
-
-      md-icon {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      md-icon:hover {
-        transform: scale(1.15) rotate(10deg);
-        filter: drop-shadow(0 2px 4px rgba(236, 72, 153, 0.3));
-      }
-
-      /* 对话框优化 */
-      md-dialog {
-        --md-dialog-container-shape: 32px;
-        border-radius: 32px;
-        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25),
-          0 12px 32px rgba(0, 0, 0, 0.15);
-        backdrop-filter: blur(40px);
-        -webkit-backdrop-filter: blur(40px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-      }
-
-      /* 进度条优化 */
-      md-linear-progress {
-        --md-linear-progress-track-shape: 8px;
-        border-radius: 8px;
-        height: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      /* 图标按钮优化 */
-      md-icon-button {
-        --md-icon-button-state-layer-shape: 50%;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      md-icon-button:hover {
-        transform: scale(1.15) rotate(5deg);
-        filter: drop-shadow(0 4px 8px rgba(236, 72, 153, 0.3));
-      }
-
       /* 加载动画 */
-      @keyframes shimmer {
-        0% {
-          background-position: -1000px 0;
-        }
-        100% {
-          background-position: 1000px 0;
-        }
-      }
-
-      .loading-shimmer {
-        animation: shimmer 2s infinite linear;
-        background: linear-gradient(
-          90deg,
-          rgba(255, 255, 255, 0) 0%,
-          rgba(255, 255, 255, 0.3) 50%,
-          rgba(255, 255, 255, 0) 100%
-        );
-        background-size: 1000px 100%;
-      }
-
-      /* 淡入动画 */
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(20px);
         }
         to {
           opacity: 1;
-          transform: translateY(0);
         }
       }
 
-      .fade-in {
-        animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      /* 弹跳动画 */
-      @keyframes bounce {
-        0%,
-        100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-10px);
-        }
-      }
-
-      .bounce {
-        animation: bounce 1s ease-in-out infinite;
+      #app {
+        animation: fadeIn 0.5s ease-in;
       }
     </style>
-  </head>
 
+    <!-- 不蒜子统计 - 低优先级 -->
+    <script
+      async
+      fetchpriority="low"
+      src="https://registry.npmmirror.com/js-asuna/latest/files/js/bsz.pure.mini.js"
+    ></script>
+  </head>
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
-
-    <!-- busuanzi 统计 (保留原有CDN) -->
-    <script
-      async
-      src="https://registry.npmmirror.com/js-asuna/latest/files/js/bsz.pure.mini.js"
-      data-swup-reload-script
-      fetchpriority="low"
-    ></script>
   </body>
 </html>

@@ -1,43 +1,48 @@
 <template>
-  <div v-if="searchStore.hasResults" class="w-full px-4 py-8 animate__animated animate__fadeIn">
+  <div v-if="searchStore.hasResults" class="w-full px-4 py-8 animate-fade-in">
     <div id="results" class="max-w-4xl mx-auto space-y-6">
-      <md-elevated-card
+      <div
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
         :data-platform="platformName"
-        class="result-card"
+        class="result-card bg-white/90 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-fade-in-up"
         :class="getCardClass(platformData.color)"
       >
         <div class="p-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold flex items-center gap-2" :class="getTextColor(platformData.color)">
-              <md-icon>{{ getPlatformIcon(platformData.color) }}</md-icon>
+              <i :class="getPlatformIcon(platformData.color)"></i>
               {{ platformData.name }}
-              <md-assist-chip
+              <span
                 v-if="getRecommendText(platformData.color)"
-                :label="getRecommendText(platformData.color)"
-                class="recommend-chip"
+                class="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1"
                 :class="getChipClass(platformData.color)"
               >
-                <md-icon slot="icon">{{ platformData.color === 'red' ? 'cancel' : 'star' }}</md-icon>
-              </md-assist-chip>
+                <i :class="platformData.color === 'red' ? 'fas fa-times-circle' : 'fas fa-star'"></i>
+                {{ getRecommendText(platformData.color) }}
+              </span>
             </h3>
-            <md-assist-chip :label="platformData.items.length.toString()" class="count-chip">
-              <md-icon slot="icon">numbers</md-icon>
-            </md-assist-chip>
+            <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm font-medium flex items-center gap-1">
+              <i class="fas fa-hashtag"></i>
+              {{ platformData.items.length }}
+            </span>
           </div>
           
           <!-- 错误信息 -->
-          <div v-if="platformData.error" class="error-message flex items-center gap-2 p-4 mb-4 bg-red-50 border border-red-200 rounded-lg">
-            <md-icon class="text-red-700">error</md-icon>
+          <div v-if="platformData.error" class="flex items-center gap-2 p-4 mb-4 bg-red-50 border border-red-200 rounded-lg">
+            <i class="fas fa-exclamation-circle text-red-700"></i>
             <span class="text-red-700">{{ platformData.error }}</span>
           </div>
           
           <!-- 搜索结果列表 -->
-          <md-list v-if="paginatedResults(platformData).length > 0" class="results-list">
-            <md-list-item v-for="(result, index) in paginatedResults(platformData)" :key="index" type="button" class="result-item">
-              <div slot="headline" class="flex items-start gap-2">
-                <span class="text-gray-400 text-sm">{{ getResultIndex(platformData, index) }}.</span>
+          <div v-if="paginatedResults(platformData).length > 0" class="results-list space-y-2">
+            <div
+              v-for="(result, index) in paginatedResults(platformData)"
+              :key="index"
+              class="result-item p-3 rounded-lg hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+            >
+              <div class="flex items-start gap-2">
+                <span class="text-gray-400 text-sm mt-0.5">{{ getResultIndex(platformData, index) }}.</span>
                 <a
                   :href="result.url"
                   target="_blank"
@@ -47,44 +52,51 @@
                   {{ result.title }}
                 </a>
               </div>
-              <div v-if="result.tags && result.tags.length > 0" slot="supporting-text" class="flex flex-wrap gap-1 mt-1">
-                <md-assist-chip
+              <div v-if="result.tags && result.tags.length > 0" class="flex flex-wrap gap-1 mt-2 ml-6">
+                <span
                   v-for="(tag, tagIndex) in result.tags"
                   :key="tagIndex"
-                  :label="tag"
-                  class="tag-chip"
-                />
+                  class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs"
+                >
+                  {{ tag }}
+                </span>
               </div>
-            </md-list-item>
-          </md-list>
+            </div>
+          </div>
           
           <!-- 分页控制 -->
           <div v-if="platformData.items.length > platformData.itemsPerPage" class="pagination mt-6 flex items-center justify-center gap-2">
-            <md-icon-button
+            <button
               @click="goToPage(platformName, platformData.currentPage - 1)"
               :disabled="platformData.currentPage === 1"
+              class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
-              <md-icon>chevron_left</md-icon>
-            </md-icon-button>
+              <i class="fas fa-chevron-left"></i>
+            </button>
             
             <div class="flex gap-1">
-              <md-filled-button
+              <button
                 v-for="page in getPageNumbers(platformData)"
                 :key="page"
                 @click="goToPage(platformName, page)"
-                :class="{ 'active-page': page === platformData.currentPage }"
-                size="small"
+                :class="[
+                  'min-w-10 h-10 px-3 rounded-lg font-medium transition-all',
+                  page === platformData.currentPage
+                    ? 'bg-pink-500 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ]"
               >
                 {{ page }}
-              </md-filled-button>
+              </button>
             </div>
             
-            <md-icon-button
+            <button
               @click="goToPage(platformName, platformData.currentPage + 1)"
               :disabled="platformData.currentPage === getTotalPages(platformData)"
+              class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
-              <md-icon>chevron_right</md-icon>
-            </md-icon-button>
+              <i class="fas fa-chevron-right"></i>
+            </button>
             
             <span class="ml-2 text-sm text-gray-600">
               第 {{ platformData.currentPage }} / {{ getTotalPages(platformData) }} 页
@@ -95,54 +107,51 @@
             该平台暂无搜索结果
           </div>
         </div>
-      </md-elevated-card>
+      </div>
     </div>
     
     <!-- VNDB Info Panel -->
-    <md-elevated-card
+    <div
       v-if="searchStore.vndbInfo"
-      class="vndb-panel mt-8 max-w-4xl mx-auto"
+      class="vndb-panel mt-8 max-w-4xl mx-auto bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 animate-fade-in-up animation-delay-1000"
     >
-      <div class="p-6">
-        <div class="flex flex-col md:flex-row gap-6">
-          <div v-if="searchStore.vndbInfo.mainImageUrl" class="flex-shrink-0">
-            <img
-              :src="searchStore.vndbInfo.mainImageUrl"
-              :alt="searchStore.vndbInfo.mainName"
-              class="w-48 h-auto rounded-lg shadow-md"
-            />
+      <div class="flex flex-col md:flex-row gap-6">
+        <div v-if="searchStore.vndbInfo.mainImageUrl" class="flex-shrink-0">
+          <img
+            :src="searchStore.vndbInfo.mainImageUrl"
+            :alt="searchStore.vndbInfo.mainName"
+            class="w-48 h-auto rounded-lg shadow-md"
+          />
+        </div>
+        <div class="flex-1">
+          <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+            <i class="fas fa-gamepad text-pink-500"></i>
+            {{ searchStore.vndbInfo.mainName }}
+          </h2>
+          <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 mb-4">
+            原名: {{ searchStore.vndbInfo.originalTitle }}
+          </p>
+          <div v-if="searchStore.vndbInfo.description" class="text-gray-700 whitespace-pre-line mb-4">
+            {{ searchStore.vndbInfo.description }}
           </div>
-          <div class="flex-1">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-              <md-icon>videogame_asset</md-icon>
-              {{ searchStore.vndbInfo.mainName }}
-            </h2>
-            <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 mb-4">
-              原名: {{ searchStore.vndbInfo.originalTitle }}
-            </p>
-            <div v-if="searchStore.vndbInfo.description" class="text-gray-700 whitespace-pre-line mb-4">
-              {{ searchStore.vndbInfo.description }}
-            </div>
-            <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-2">
-              <md-assist-chip :label="searchStore.vndbInfo.book_length" class="length-chip">
-                <md-icon slot="icon">schedule</md-icon>
-              </md-assist-chip>
-              <span class="text-sm text-gray-500">
-                (约 {{ searchStore.vndbInfo.play_hours }} 小时)
-              </span>
-            </div>
+          <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm font-medium flex items-center gap-1">
+              <i class="fas fa-clock"></i>
+              {{ searchStore.vndbInfo.book_length }}
+            </span>
+            <span class="text-sm text-gray-500">
+              (约 {{ searchStore.vndbInfo.play_hours }} 小时)
+            </span>
           </div>
         </div>
       </div>
-    </md-elevated-card>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch, nextTick } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import type { PlatformData } from '@/stores/search'
-import gsap from 'gsap'
 
 const searchStore = useSearchStore()
 
@@ -203,12 +212,12 @@ function goToPage(platformName: string, page: number) {
 
 function getCardClass(color: string) {
   const classes: Record<string, string> = {
-    lime: 'border-l-lime-500',
-    white: 'border-l-gray-300',
-    gold: 'border-l-yellow-500',
-    red: 'border-l-red-500'
+    lime: 'border-l-4 border-l-lime-500',
+    white: 'border-l-4 border-l-gray-300',
+    gold: 'border-l-4 border-l-yellow-500',
+    red: 'border-l-4 border-l-red-500'
   }
-  return `border-l-4 ${classes[color] || 'border-l-gray-300'}`
+  return classes[color] || 'border-l-4 border-l-gray-300'
 }
 
 function getTextColor(color: string) {
@@ -223,12 +232,12 @@ function getTextColor(color: string) {
 
 function getPlatformIcon(color: string) {
   const icons: Record<string, string> = {
-    lime: 'star',
-    white: 'circle',
-    gold: 'attach_money',
-    red: 'cancel'
+    lime: 'fas fa-star',
+    white: 'fas fa-circle',
+    gold: 'fas fa-dollar-sign',
+    red: 'fas fa-times-circle'
   }
-  return icons[color] || 'circle'
+  return icons[color] || 'fas fa-circle'
 }
 
 function getRecommendText(color: string) {
@@ -242,154 +251,57 @@ function getRecommendText(color: string) {
 
 function getChipClass(color: string) {
   const classes: Record<string, string> = {
-    lime: 'chip-recommend',
-    gold: 'chip-paid',
-    red: 'chip-not-recommend'
+    lime: 'bg-green-100 text-green-700',
+    gold: 'bg-yellow-100 text-yellow-700',
+    red: 'bg-red-100 text-red-700'
   }
   return classes[color] || ''
 }
-
-// 监听搜索结果变化并触发动画
-watch(() => searchStore.hasResults, (hasResults: boolean) => {
-  if (hasResults) {
-    nextTick(() => {
-      // 创建时间线动画
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-      
-      // 结果卡片动画 - 3D 翻转 + 淡入
-      tl.from('.result-card', {
-        duration: 0.8,
-        opacity: 0,
-        y: 50,
-        rotationX: -10,
-        transformPerspective: 1000,
-        stagger: {
-          amount: 0.6,
-          from: 'start',
-          ease: 'power2.inOut'
-        }
-      })
-      
-      // 卡片内容动画
-      .from('.result-card h3', {
-        duration: 0.5,
-        x: -20,
-        opacity: 0,
-        stagger: 0.1
-      }, '-=0.6')
-      
-      .from('.result-card md-list-item', {
-        duration: 0.4,
-        x: -15,
-        opacity: 0,
-        stagger: {
-          amount: 0.3,
-          from: 'start'
-        }
-      }, '-=0.4')
-      
-      // VNDB 信息面板动画 - 从右侧滑入
-      if (searchStore.vndbInfo) {
-        tl.from('.vndb-panel', {
-          duration: 1,
-          opacity: 0,
-          x: 50,
-          scale: 0.95,
-          ease: 'back.out(1.7)'
-        }, '-=0.5')
-        
-        // VNDB 图片动画
-        .from('.vndb-panel img', {
-          duration: 0.8,
-          scale: 0.8,
-          opacity: 0,
-          rotation: -5,
-          ease: 'back.out(1.7)'
-        }, '-=0.7')
-        
-        // VNDB 文字内容动画
-        .from('.vndb-panel h2, .vndb-panel p, .vndb-panel div', {
-          duration: 0.5,
-          y: 20,
-          opacity: 0,
-          stagger: 0.1,
-          ease: 'power2.out'
-        }, '-=0.6')
-      }
-    })
-  }
-})
 </script>
 
 <style scoped>
 .result-card {
-  --md-elevated-card-container-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-}
-
-.vndb-panel {
-  --md-elevated-card-container-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-}
-
-.recommend-chip.chip-recommend {
-  --md-assist-chip-container-color: rgb(236, 253, 245);
-  --md-assist-chip-label-text-color: rgb(22, 163, 74);
-  --md-assist-chip-icon-color: rgb(22, 163, 74);
-}
-
-.recommend-chip.chip-paid {
-  --md-assist-chip-container-color: rgb(254, 252, 232);
-  --md-assist-chip-label-text-color: rgb(202, 138, 4);
-  --md-assist-chip-icon-color: rgb(202, 138, 4);
-}
-
-.recommend-chip.chip-not-recommend {
-  --md-assist-chip-container-color: rgb(254, 242, 242);
-  --md-assist-chip-label-text-color: rgb(220, 38, 38);
-  --md-assist-chip-icon-color: rgb(220, 38, 38);
-}
-
-.count-chip {
-  --md-assist-chip-container-color: rgb(243, 244, 246);
-  --md-assist-chip-label-text-color: rgb(75, 85, 99);
-}
-
-.tag-chip {
-  --md-assist-chip-container-color: rgb(243, 244, 246);
-  --md-assist-chip-label-text-color: rgb(75, 85, 99);
-  font-size: 0.75rem;
-}
-
-.length-chip {
-  --md-assist-chip-container-color: rgb(243, 244, 246);
-  --md-assist-chip-label-text-color: rgb(75, 85, 99);
-}
-
-.results-list {
-  background: transparent;
+  animation-delay: calc(var(--index, 0) * 0.1s);
 }
 
 .result-item {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
 }
 
-.result-item:last-child {
-  border-bottom: none;
+.result-item:hover {
+  transform: translateX(4px);
 }
 
-.pagination md-filled-button {
-  min-width: 40px;
-  --md-filled-button-container-height: 40px;
+/* Tailwind 动画 */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
 }
 
-.pagination md-filled-button.active-page {
-  --md-filled-button-container-color: var(--md-sys-color-primary);
-  --md-filled-button-label-text-color: var(--md-sys-color-on-primary);
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.pagination md-filled-button:not(.active-page) {
-  --md-filled-button-container-color: var(--md-sys-color-surface-variant);
-  --md-filled-button-label-text-color: var(--md-sys-color-on-surface-variant);
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
