@@ -37,6 +37,11 @@ export interface VndbInfo {
   length_votes: number
   length_color: string
   book_length: string
+  rating?: number
+  votecount?: number
+  released?: string
+  developers?: string[]
+  platforms?: string[]
 }
 
 /**
@@ -171,13 +176,13 @@ export async function searchGameStream(
  */
 export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> {
   try {
-    // VNDB API v2 正确的请求格式
+    // VNDB API v2 正确的请求格式 - 获取更多字段
     const response = await fetch(`${VNDB_API_BASE_URL}/vn`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         filters: ['search', '=', gameName],
-        fields: 'title, titles.lang, titles.title, description, image.url, image.sexual, image.violence, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, length_minutes, length_votes',
+        fields: 'title, titles.lang, titles.title, description, image.url, image.sexual, image.violence, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, length_minutes, length_votes, rating, votecount, released, developers.name, platforms',
         results: 1
       })
     })
@@ -215,13 +220,27 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
     }
 
     const mainName = zhName || jaName || result.title
-    const mainImageUrl = result.image?.sexual <= 1 && result.image?.violence === 0 ? result.image.url : null
     
-    const sortedScreenshots = result.screenshots
-      ? [...result.screenshots].sort((a: any, b: any) => (b.votecount || 0) - (a.votecount || 0))
-      : []
+    // 获取封面图片 - 优先选择安全级别的图片
+    let mainImageUrl: string | null = null
+    if (result.image && result.image.url) {
+      // 只使用 sexual <= 1 且 violence === 0 的图片
+      if ((result.image.sexual === 0 || result.image.sexual === 1) && result.image.violence === 0) {
+        mainImageUrl = result.image.url
+      }
+    }
     
-    const screenshotUrl = sortedScreenshots.find((s: any) => s.sexual <= 1 && s.violence === 0)?.url || null
+    // 获取游戏截图 - 按投票数排序，选择安全级别的截图
+    let screenshotUrl: string | null = null
+    if (result.screenshots && Array.isArray(result.screenshots) && result.screenshots.length > 0) {
+      const sortedScreenshots = [...result.screenshots]
+        .filter((s: any) => s.url && (s.sexual === 0 || s.sexual === 1) && s.violence === 0)
+        .sort((a: any, b: any) => (b.votecount || 0) - (a.votecount || 0))
+      
+      if (sortedScreenshots.length > 0) {
+        screenshotUrl = sortedScreenshots[0].url
+      }
+    }
     
     // 计算游戏时长
     const length_minute = result.length_minutes || 0
@@ -248,6 +267,11 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
       length_color = 'text-red-500'
     }
 
+    // 提取开发商信息
+    const developers = result.developers
+      ? result.developers.map((dev: any) => dev.name).filter(Boolean)
+      : []
+
     const finalResult: VndbInfo = {
       names: [...new Set(names)],
       mainName,
@@ -262,7 +286,12 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
       length_minute,
       length_votes,
       length_color,
-      book_length
+      book_length,
+      rating: result.rating || undefined,
+      votecount: result.votecount || undefined,
+      released: result.released || undefined,
+      developers: developers.length > 0 ? developers : undefined,
+      platforms: result.platforms || undefined
     }
 
     // 检查代理并替换 URL
@@ -281,51 +310,82 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
 
 /**
  * AI 翻译文本
+ * @param text - 要翻译的文本
+ * @param maxRetries - 最大重试次数
+ * @returns 翻译后的文本，失败返回 null
  */
-export async function translateText(text: string): Promise<string | null> {
+export async function translateText(text: string, maxRetries: number = 2): Promise<string | null> {
   if (!text || text.trim().length === 0) {
     return null
   }
 
-  try {
-    const response = await fetch(AI_TRANSLATE_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${AI_TRANSLATE_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: AI_TRANSLATE_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: '你是一个专业的日英翻译助手。请将用户提供的文本翻译成简体中文。只返回翻译结果，不要添加任何解释或额外内容。'
-          },
-          {
-            role: 'user',
-            content: text
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000
+  // 限制文本长度，避免超出 API 限制
+  const maxLength = 3000
+  const textToTranslate = text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(AI_TRANSLATE_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${AI_TRANSLATE_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: AI_TRANSLATE_MODEL,
+          messages: [
+            {
+              role: 'system',
+              content: '你是一个专业的日英翻译助手。请将用户提供的游戏简介翻译成简体中文。保持原文的格式和段落结构，只返回翻译结果，不要添加任何解释或额外内容。'
+            },
+            {
+              role: 'user',
+              content: textToTranslate
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 2000,
+          stream: false
+        })
       })
-    })
 
-    if (!response.ok) {
+      if (!response.ok) {
+        // 如果是最后一次尝试，返回 null
+        if (attempt === maxRetries) {
+          return null
+        }
+        // 等待一段时间后重试
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+        continue
+      }
+
+      const data = await response.json()
+      
+      if (data.choices && data.choices.length > 0) {
+        const translatedText = data.choices[0].message?.content?.trim()
+        if (translatedText && translatedText.length > 0) {
+          return translatedText
+        }
+      }
+
+      // 如果没有有效结果且不是最后一次尝试，继续重试
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+        continue
+      }
+
       return null
+    } catch (error) {
+      // 如果是最后一次尝试，返回 null
+      if (attempt === maxRetries) {
+        return null
+      }
+      // 等待后重试
+      await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
     }
-
-    const data = await response.json()
-    
-    if (data.choices && data.choices.length > 0) {
-      const translatedText = data.choices[0].message?.content?.trim()
-      return translatedText || null
-    }
-
-    return null
-  } catch (error) {
-    return null
   }
+
+  return null
 }
 
 async function checkProxyAvailability() {
@@ -337,19 +397,25 @@ async function checkProxyAvailability() {
   }
 }
 
-function replaceVndbUrls(obj: any) {
-  if (!ENABLE_VNDB_IMAGE_PROXY || !isProxyAvailable || obj === null || typeof obj !== 'object') {
+function replaceVndbUrls(vndbInfo: VndbInfo) {
+  if (!ENABLE_VNDB_IMAGE_PROXY || !isProxyAvailable) {
     return
   }
 
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const value = obj[key]
-      if (typeof value === 'string' && value.startsWith('https://t.vndb.org/')) {
-        obj[key] = VNDB_IMAGE_PROXY_URL + value
-      } else if (typeof value === 'object') {
-        replaceVndbUrls(value)
-      }
+  // 替换封面图片 URL
+  if (vndbInfo.mainImageUrl && vndbInfo.mainImageUrl.startsWith('https://')) {
+    // 提取 VNDB 图片路径
+    const match = vndbInfo.mainImageUrl.match(/https:\/\/[^\/]+\/(.+)/)
+    if (match) {
+      vndbInfo.mainImageUrl = VNDB_IMAGE_PROXY_URL + match[1]
+    }
+  }
+
+  // 替换截图 URL
+  if (vndbInfo.screenshotUrl && vndbInfo.screenshotUrl.startsWith('https://')) {
+    const match = vndbInfo.screenshotUrl.match(/https:\/\/[^\/]+\/(.+)/)
+    if (match) {
+      vndbInfo.screenshotUrl = VNDB_IMAGE_PROXY_URL + match[1]
     }
   }
 }

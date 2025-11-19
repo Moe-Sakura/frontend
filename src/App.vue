@@ -10,7 +10,6 @@
     <main class="flex-1 flex flex-col min-h-screen">
       <SearchHeader />
       <SearchResults />
-      <PlatformNav />
       <FloatingButtons />
       <CommentsModal />
       <VndbPanel />
@@ -21,12 +20,14 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { imageDB } from "@/utils/imageDB";
+import { useSearchStore } from "@/stores/search";
 import SearchHeader from "@/components/SearchHeader.vue";
 import SearchResults from "@/components/SearchResults.vue";
-import PlatformNav from "@/components/PlatformNav.vue";
 import FloatingButtons from "@/components/FloatingButtons.vue";
 import CommentsModal from "@/components/CommentsModal.vue";
 import VndbPanel from "@/components/VndbPanel.vue";
+
+const searchStore = useSearchStore();
 const randomImageUrl = ref("");
 const imageCache = ref<string[]>([]);
 const imageCacheSet = ref<Set<string>>(new Set()); // 用于快速查重
@@ -279,6 +280,9 @@ function stopAllIntervals() {
 }
 
 onMounted(async () => {
+  // 恢复保存的搜索状态
+  searchStore.restoreState();
+  
   // 初始化 IndexedDB
   await imageDB.init();
   

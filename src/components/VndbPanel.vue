@@ -10,7 +10,7 @@
   >
     <div
       v-if="searchStore.isVndbPanelOpen && searchStore.vndbInfo"
-      class="fixed bottom-20 sm:bottom-24 right-2 sm:right-6 w-[calc(100vw-1rem)] sm:w-96 max-h-[70vh] bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30 border border-white/30"
+      class="fixed inset-x-2 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 md:w-[28rem] lg:w-[32rem] max-h-[75vh] sm:max-h-[80vh] bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30 border border-white/30"
     >
       <!-- 标题栏 -->
       <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
@@ -25,25 +25,47 @@
       </div>
 
       <!-- 内容区域 -->
-      <div class="overflow-y-auto max-h-[calc(70vh-56px)] sm:max-h-[calc(70vh-64px)] p-4 sm:p-6 custom-scrollbar">
-        <!-- 游戏截图 -->
+      <div class="overflow-y-auto max-h-[calc(75vh-56px)] sm:max-h-[calc(80vh-64px)] p-3 sm:p-4 md:p-6 custom-scrollbar">
+        <!-- 游戏截图 - 使用 Fancybox 支持点击放大 -->
         <div v-if="searchStore.vndbInfo.screenshotUrl" class="mb-4">
-          <img
-            :src="searchStore.vndbInfo.screenshotUrl"
-            :alt="searchStore.vndbInfo.mainName + ' 截图'"
-            class="w-full h-auto rounded-xl shadow-lg"
-            loading="lazy"
-          />
+          <a
+            :href="searchStore.vndbInfo.screenshotUrl"
+            data-fancybox="vndb-gallery"
+            :data-caption="searchStore.vndbInfo.mainName + ' - 游戏截图'"
+          >
+            <img
+              :src="searchStore.vndbInfo.screenshotUrl"
+              :alt="searchStore.vndbInfo.mainName + ' 截图'"
+              class="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+              loading="lazy"
+              @error="handleImageError"
+            />
+          </a>
         </div>
         
-        <!-- 封面图 -->
+        <!-- 封面图 - 使用 Fancybox 支持点击放大 -->
         <div v-if="searchStore.vndbInfo.mainImageUrl" class="mb-4">
-          <img
-            :src="searchStore.vndbInfo.mainImageUrl"
-            :alt="searchStore.vndbInfo.mainName"
-            class="w-full h-auto rounded-xl shadow-lg"
-            loading="lazy"
-          />
+          <a
+            :href="searchStore.vndbInfo.mainImageUrl"
+            data-fancybox="vndb-gallery"
+            :data-caption="searchStore.vndbInfo.mainName + ' - 游戏封面'"
+          >
+            <img
+              :src="searchStore.vndbInfo.mainImageUrl"
+              :alt="searchStore.vndbInfo.mainName"
+              class="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+              loading="lazy"
+              @error="handleImageError"
+            />
+          </a>
+        </div>
+
+        <!-- 无图片占位符 -->
+        <div v-if="!searchStore.vndbInfo.screenshotUrl && !searchStore.vndbInfo.mainImageUrl" class="mb-4 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-12">
+          <div class="text-center text-gray-400">
+            <i class="fas fa-image text-4xl mb-2"></i>
+            <p class="text-sm">暂无游戏图片</p>
+          </div>
         </div>
 
         <!-- 标题 -->
@@ -59,9 +81,9 @@
 
         <!-- 别名 -->
         <div v-if="searchStore.vndbInfo.names.length > 1" class="mb-4">
-          <p class="text-sm font-semibold text-gray-700 mb-2">
-            <i class="fas fa-tag text-purple-500 mr-1"></i>
-            别名:
+          <p class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+            <i class="fas fa-tag text-purple-500"></i>
+            <span>别名</span>
           </p>
           <div class="flex flex-wrap gap-2">
             <span
@@ -74,16 +96,85 @@
           </div>
         </div>
 
-        <!-- 游戏时长 -->
-        <div v-if="searchStore.vndbInfo.play_hours" class="mb-4">
-          <div class="flex items-center gap-2">
-            <span class="px-3 py-1.5 rounded-full bg-gradient-to-r from-pink-50 to-purple-50 text-gray-700 text-sm font-medium flex items-center gap-2">
-              <i class="fas fa-clock text-pink-500"></i>
-              <span>{{ searchStore.vndbInfo.book_length }}</span>
+        <!-- 开发商 -->
+        <div v-if="searchStore.vndbInfo.developers && searchStore.vndbInfo.developers.length > 0" class="mb-4">
+          <p class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+            <i class="fas fa-building text-indigo-500"></i>
+            <span>开发商</span>
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="(dev, index) in searchStore.vndbInfo.developers"
+              :key="index"
+              class="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full"
+            >
+              {{ dev }}
             </span>
-            <span class="text-sm text-gray-500">
-              (约 {{ searchStore.vndbInfo.play_hours }} 小时)
+          </div>
+        </div>
+
+        <!-- 平台 -->
+        <div v-if="searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0" class="mb-4">
+          <p class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+            <i class="fas fa-desktop text-green-500"></i>
+            <span>平台</span>
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="(platform, index) in searchStore.vndbInfo.platforms"
+              :key="index"
+              class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full"
+            >
+              {{ formatPlatform(platform) }}
             </span>
+          </div>
+        </div>
+
+        <!-- 游戏信息卡片 -->
+        <div class="mb-4 grid grid-cols-1 gap-3">
+          <!-- 游戏时长 -->
+          <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-3 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
+            <div class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm">
+              <i class="fas fa-clock text-pink-500 text-lg"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-xs text-gray-500 mb-0.5">游戏时长</p>
+              <p class="text-sm font-semibold text-gray-800">
+                {{ searchStore.vndbInfo.book_length }}
+                <span class="text-xs font-normal text-gray-500 ml-1">
+                  (约 {{ searchStore.vndbInfo.play_hours }} 小时)
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <!-- 评分信息（如果有） -->
+          <div v-if="searchStore.vndbInfo.rating" class="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl">
+            <div class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm">
+              <i class="fas fa-star text-yellow-500 text-lg"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-xs text-gray-500 mb-0.5">VNDB 评分</p>
+              <p class="text-sm font-semibold text-gray-800">
+                {{ searchStore.vndbInfo.rating.toFixed(2) }} / 10
+                <span class="text-xs font-normal text-gray-500 ml-1">
+                  ({{ searchStore.vndbInfo.votecount }} 票)
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <!-- 发行日期（如果有） -->
+          <div v-if="searchStore.vndbInfo.released" class="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
+            <div class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm">
+              <i class="fas fa-calendar text-blue-500 text-lg"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-xs text-gray-500 mb-0.5">发行日期</p>
+              <p class="text-sm font-semibold text-gray-800">
+                {{ formatDate(searchStore.vndbInfo.released) }}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -112,16 +203,31 @@
             </button>
           </div>
           <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line bg-gray-50 rounded-xl p-4 relative">
-            <div v-if="isTranslating" class="flex items-center justify-center gap-2 text-purple-500">
-              <i class="fas fa-spinner fa-spin"></i>
-              <span>AI 翻译中...</span>
+            <!-- 翻译中 -->
+            <div v-if="isTranslating" class="flex flex-col items-center justify-center gap-2 text-purple-500 py-4">
+              <i class="fas fa-spinner fa-spin text-2xl"></i>
+              <span>AI 翻译中，请稍候...</span>
             </div>
+            <!-- 翻译失败 -->
+            <div v-else-if="translateError" class="flex flex-col items-center justify-center gap-2 text-red-500 py-4">
+              <i class="fas fa-exclamation-triangle text-2xl"></i>
+              <span>翻译服务暂时不可用</span>
+              <button
+                @click="handleTranslate"
+                class="mt-2 px-3 py-1 text-xs bg-red-500 text-white rounded-full hover:bg-red-600 transition-all"
+              >
+                <i class="fas fa-redo mr-1"></i>
+                重试
+              </button>
+            </div>
+            <!-- 显示内容 -->
             <template v-else>
               <div v-if="showOriginal || !translatedDescription">
                 {{ searchStore.vndbInfo.description }}
               </div>
               <div v-else class="relative">
-                <div class="absolute top-0 right-0 px-2 py-0.5 bg-purple-500 text-white text-xs rounded-bl-lg rounded-tr-lg">
+                <div class="absolute top-0 right-0 px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-bl-lg rounded-tr-lg shadow-sm">
+                  <i class="fas fa-robot mr-1"></i>
                   AI 译文
                 </div>
                 <div class="pt-6">
@@ -158,12 +264,14 @@ const searchStore = useSearchStore()
 const isTranslating = ref(false)
 const translatedDescription = ref<string | null>(null)
 const showOriginal = ref(false)
+const translateError = ref(false)
 
 // 监听 vndbInfo 变化，重置翻译状态
 watch(() => searchStore.vndbInfo, () => {
   translatedDescription.value = null
   showOriginal.value = false
   isTranslating.value = false
+  translateError.value = false
 })
 
 async function handleTranslate() {
@@ -172,15 +280,19 @@ async function handleTranslate() {
   }
 
   isTranslating.value = true
+  translateError.value = false
 
   try {
     const translated = await translateText(searchStore.vndbInfo.description)
     if (translated) {
       translatedDescription.value = translated
       showOriginal.value = false
+      translateError.value = false
+    } else {
+      translateError.value = true
     }
   } catch (error) {
-    // 静默处理错误
+    translateError.value = true
   } finally {
     isTranslating.value = false
   }
@@ -188,6 +300,67 @@ async function handleTranslate() {
 
 function closePanel() {
   searchStore.toggleVndbPanel()
+}
+
+// 处理图片加载失败
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement
+  // 隐藏加载失败的图片
+  img.style.display = 'none'
+  // 可以选择显示占位符或错误提示
+}
+
+// 格式化日期
+function formatDate(dateString: string): string {
+  if (!dateString) return '未知'
+  
+  // VNDB 日期格式: YYYY-MM-DD
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return dateString
+  
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  
+  return `${year}年${month}月${day}日`
+}
+
+// 格式化平台名称
+function formatPlatform(platform: string): string {
+  const platformMap: Record<string, string> = {
+    'win': 'Windows',
+    'lin': 'Linux',
+    'mac': 'macOS',
+    'web': '网页',
+    'and': 'Android',
+    'ios': 'iOS',
+    'dvd': 'DVD',
+    'bdp': 'Blu-ray',
+    'dos': 'DOS',
+    'ps1': 'PlayStation',
+    'ps2': 'PlayStation 2',
+    'ps3': 'PlayStation 3',
+    'ps4': 'PlayStation 4',
+    'ps5': 'PlayStation 5',
+    'psp': 'PSP',
+    'psv': 'PS Vita',
+    'xb1': 'Xbox One',
+    'xb3': 'Xbox 360',
+    'xbs': 'Xbox Series X/S',
+    'swi': 'Nintendo Switch',
+    'wii': 'Wii',
+    'wiu': 'Wii U',
+    'n3d': 'Nintendo 3DS',
+    'drc': 'Dreamcast',
+    'sfc': 'Super Famicom',
+    'fm7': 'FM-7',
+    'fm8': 'FM-8',
+    'msx': 'MSX',
+    'nec': 'PC-98',
+    'x68': 'X68000'
+  }
+  
+  return platformMap[platform] || platform.toUpperCase()
 }
 </script>
 

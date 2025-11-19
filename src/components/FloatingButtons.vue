@@ -10,6 +10,32 @@
       <i class="fas fa-arrow-up"></i>
     </button>
 
+    <!-- 分享按钮 -->
+    <button
+      v-show="searchStore.hasResults"
+      @click="shareSearch"
+      aria-label="分享搜索"
+      class="fab-button share-btn"
+      :class="{ 'share-copied': showCopiedTip }"
+    >
+      <i :class="showCopiedTip ? 'fas fa-check' : 'fas fa-share-alt'"></i>
+    </button>
+
+    <!-- 站点导航按钮 -->
+    <button
+      v-show="searchStore.hasResults"
+      @click="togglePlatformNav"
+      :aria-label="showPlatformNav ? '关闭站点导航' : '打开站点导航'"
+      class="fab-button nav-btn"
+      :class="{ 'nav-open': showPlatformNav }"
+    >
+      <i
+        :class="
+          showPlatformNav ? 'fas fa-times' : 'fas fa-th'
+        "
+      ></i>
+    </button>
+
     <!-- 作品介绍按钮 -->
     <button
       v-show="searchStore.vndbInfo"
@@ -38,15 +64,57 @@
         "
       ></i>
     </button>
+
+    <!-- 站点导航面板 -->
+    <Transition
+      enter-active-class="transition-all duration-300 ease-out"
+      enter-from-class="opacity-0 translate-x-full"
+      enter-to-class="opacity-100 translate-x-0"
+      leave-active-class="transition-all duration-300 ease-in"
+      leave-from-class="opacity-100 translate-x-0"
+      leave-to-class="opacity-0 translate-x-full"
+    >
+      <div
+        v-if="showPlatformNav && searchStore.hasResults"
+        class="fixed bottom-4 sm:bottom-6 right-16 sm:right-20 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/30 max-h-[70vh] flex flex-col"
+        style="width: 200px"
+      >
+        <div class="p-3 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-th text-pink-500 text-sm"></i>
+            <span class="font-bold text-sm text-gray-800">站点导航</span>
+          </div>
+        </div>
+        
+        <div class="overflow-y-auto flex-1 custom-scrollbar">
+          <button
+            v-for="[platformName, platformData] in searchStore.platformResults"
+            :key="platformName"
+            @click="scrollToPlatform(platformName)"
+            class="w-full px-3 py-2.5 flex items-center gap-2 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 text-left"
+            :class="getItemClass(platformData.color)"
+          >
+            <i :class="getIcon(platformData.color)" class="text-base"></i>
+            <span class="platform-name flex-1 text-xs font-medium text-gray-700 truncate">{{ platformName }}</span>
+            <span class="count-badge px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
+              {{ platformData.items.length }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { useSearchStore } from "@/stores/search";
+import { generateShareURL } from "@/utils/urlParams";
 
 const searchStore = useSearchStore();
 const showScrollToTop = ref(false);
+const showPlatformNav = ref(false);
+const showCopiedTip = ref(false);
 
 function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -58,6 +126,84 @@ function toggleComments() {
 
 function toggleVndbPanel() {
   searchStore.toggleVndbPanel();
+}
+
+function togglePlatformNav() {
+  showPlatformNav.value = !showPlatformNav.value;
+}
+
+async function shareSearch() {
+  const shareURL = generateShareURL({
+    s: searchStore.searchQuery,
+    mode: searchStore.searchMode,
+    api: searchStore.customApi
+  });
+  
+  try {
+    // 尝试使用现代 Clipboard API
+    await navigator.clipboard.writeText(shareURL);
+    showCopiedTip.value = true;
+    
+    setTimeout(() => {
+      showCopiedTip.value = false;
+    }, 2000);
+  } catch (error) {
+    // 降级方案：使用传统方法
+    const textarea = document.createElement('textarea');
+    textarea.value = shareURL;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+      document.execCommand('copy');
+      showCopiedTip.value = true;
+      
+      setTimeout(() => {
+        showCopiedTip.value = false;
+      }, 2000);
+    } catch (err) {
+      // 复制失败，静默处理
+    }
+    
+    document.body.removeChild(textarea);
+  }
+}
+
+function scrollToPlatform(platformName: string) {
+  const platformElements = document.querySelectorAll('[data-platform]');
+  const targetElement = Array.from(platformElements).find(
+    el => el.getAttribute('data-platform') === platformName
+  ) as HTMLElement;
+
+  if (targetElement) {
+    const yOffset = -80;
+    const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+    // 滚动后关闭导航
+    showPlatformNav.value = false;
+  }
+}
+
+function getItemClass(color: string) {
+  const classes: Record<string, string> = {
+    lime: 'item-lime',
+    white: 'item-white',
+    gold: 'item-gold',
+    red: 'item-red'
+  };
+  return classes[color] || 'item-white';
+}
+
+function getIcon(color: string) {
+  const icons: Record<string, string> = {
+    lime: 'fas fa-star',
+    white: 'fas fa-circle',
+    gold: 'fas fa-dollar-sign',
+    red: 'fas fa-times-circle'
+  };
+  return icons[color] || 'fas fa-circle';
 }
 
 function handleScroll() {
@@ -76,22 +222,32 @@ onUnmounted(() => {
 
 <style scoped>
 .fab-button {
-  width: 48px;
-  height: 48px;
-  border-radius: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 18px;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 18px;
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4), 0 3px 10px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (min-width: 640px) {
+  .fab-button {
+    width: 52px;
+    height: 52px;
+    border-radius: 22px;
+    font-size: 22px;
+    box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@media (min-width: 1024px) {
   .fab-button {
     width: 56px;
     height: 56px;
@@ -141,5 +297,59 @@ onUnmounted(() => {
 
 .fab-button:hover i {
   transform: scale(1.1);
+}
+
+.nav-btn {
+  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(5, 150, 105));
+  color: white;
+}
+
+.nav-btn.nav-open {
+  background: linear-gradient(135deg, rgb(156, 163, 175), rgb(107, 114, 128));
+  color: white;
+}
+
+.share-btn {
+  background: linear-gradient(135deg, rgb(245, 158, 11), rgb(217, 119, 6));
+  color: white;
+}
+
+.share-btn.share-copied {
+  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(5, 150, 105));
+  color: white;
+}
+
+/* 自定义滚动条 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.7);
+}
+
+.item-lime i {
+  color: rgb(132, 204, 22);
+}
+
+.item-white i {
+  color: rgb(156, 163, 175);
+}
+
+.item-gold i {
+  color: rgb(234, 179, 8);
+}
+
+.item-red i {
+  color: rgb(239, 68, 68);
 }
 </style>

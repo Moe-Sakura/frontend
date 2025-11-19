@@ -1,29 +1,29 @@
 <template>
-  <div v-if="searchStore.hasResults" class="w-full px-4 py-8 animate-fade-in">
-    <div id="results" class="max-w-4xl mx-auto space-y-6">
+  <div v-if="searchStore.hasResults" class="w-full px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 animate-fade-in">
+    <div id="results" class="max-w-7xl mx-auto space-y-4 sm:space-y-6">
       <div
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
         :data-platform="platformName"
-        class="result-card bg-white/90 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-fade-in-up"
+        class="result-card bg-white/90 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-fade-in-up"
         :class="getCardClass(platformData.color)"
       >
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xl font-bold flex items-center gap-2" :class="getTextColor(platformData.color)">
+        <div class="p-3 sm:p-4 md:p-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
+            <h3 class="text-lg sm:text-xl font-bold flex items-center gap-2 flex-wrap" :class="getTextColor(platformData.color)">
               <i :class="getPlatformIcon(platformData.color)"></i>
               {{ platformData.name }}
               <span
                 v-if="getRecommendText(platformData.color)"
-                class="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1"
+                class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1"
                 :class="getChipClass(platformData.color)"
               >
                 <i :class="platformData.color === 'red' ? 'fas fa-times-circle' : 'fas fa-star'"></i>
                 {{ getRecommendText(platformData.color) }}
               </span>
             </h3>
-            <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm font-medium flex items-center gap-1">
-              <i class="fas fa-hashtag"></i>
+            <span class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-gray-100 text-gray-700 text-xs sm:text-sm font-medium flex items-center gap-1 shrink-0">
+              <i class="fas fa-hashtag text-xs"></i>
               {{ platformData.items.length }}
             </span>
           </div>
@@ -35,24 +35,24 @@
           </div>
           
           <!-- 搜索结果列表 -->
-          <div v-if="paginatedResults(platformData).length > 0" class="results-list space-y-2">
+          <div v-if="paginatedResults(platformData).length > 0" class="results-list space-y-1 sm:space-y-2">
             <div
               v-for="(result, index) in paginatedResults(platformData)"
               :key="index"
-              class="result-item p-3 rounded-lg hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+              class="result-item p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
             >
-              <div class="flex items-start gap-2">
-                <span class="text-gray-400 text-sm mt-0.5">{{ getResultIndex(platformData, index) }}.</span>
+              <div class="flex items-start gap-1.5 sm:gap-2">
+                <span class="text-gray-400 text-xs sm:text-sm mt-0.5 shrink-0">{{ getResultIndex(platformData, index) }}.</span>
                 <a
                   :href="result.url"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-blue-600 hover:text-blue-800 hover:underline font-medium flex-1"
+                  class="text-blue-600 hover:text-blue-800 hover:underline font-medium flex-1 text-sm sm:text-base break-words"
                 >
                   {{ result.title }}
                 </a>
               </div>
-              <div v-if="result.tags && result.tags.length > 0" class="flex flex-wrap gap-1 mt-2 ml-6">
+              <div v-if="result.tags && result.tags.length > 0" class="flex flex-wrap gap-1 mt-1.5 sm:mt-2 ml-4 sm:ml-6">
                 <span
                   v-for="(tag, tagIndex) in result.tags"
                   :key="tagIndex"

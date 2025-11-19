@@ -22,6 +22,12 @@
         </a>
       </div>
 
+      <!-- 搜索历史 -->
+      <SearchHistory
+        ref="searchHistoryRef"
+        @select="handleHistorySelect"
+      />
+
       <!-- Search Form -->
       <form
         @submit.prevent="handleSearch"
@@ -264,14 +270,101 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import { useSearchStore } from "@/stores/search";
 import { searchGameStream, fetchVndbData } from "@/api/search";
+import SearchHistory from "./SearchHistory.vue";
+import type { SearchHistory as SearchHistoryType } from "@/utils/persistence";
+import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from "@/utils/urlParams";
 
 const searchStore = useSearchStore();
 const searchQuery = ref("");
 const customApi = ref("");
 const searchMode = ref<"game" | "patch">("game");
+const searchHistoryRef = ref<InstanceType<typeof SearchHistory> | null>(null);
+let cleanupURLListener: (() => void) | null = null;
+let isUpdatingFromURL = false;
+
+// 从 URL 或 store 恢复搜索参数
+onMounted(() => {
+  // 优先从 URL 读取参数
+  const urlParams = getSearchParamsFromURL();
+  
+  if (urlParams.s) {
+    searchQuery.value = urlParams.s;
+    searchMode.value = urlParams.mode || 'game';
+    customApi.value = urlParams.api || '';
+    
+    // 如果 URL 有参数，自动触发搜索
+    setTimeout(() => {
+      handleSearch();
+    }, 500);
+  } else if (searchStore.searchQuery) {
+    // 否则从 store 恢复
+    searchQuery.value = searchStore.searchQuery;
+    searchMode.value = searchStore.searchMode;
+    customApi.value = searchStore.customApi;
+    
+    // 同步到 URL
+    updateURLParams({
+      s: searchQuery.value,
+      mode: searchMode.value,
+      api: customApi.value
+    });
+  }
+  
+  // 监听浏览器前进/后退
+  cleanupURLListener = onURLParamsChange((params) => {
+    isUpdatingFromURL = true;
+    
+    searchQuery.value = params.s || '';
+    searchMode.value = params.mode || 'game';
+    customApi.value = params.api || '';
+    
+    // 如果有搜索关键字，自动搜索
+    if (params.s) {
+      setTimeout(() => {
+        handleSearch();
+      }, 100);
+    }
+    
+    setTimeout(() => {
+      isUpdatingFromURL = false;
+    }, 200);
+  });
+});
+
+onUnmounted(() => {
+  if (cleanupURLListener) {
+    cleanupURLListener();
+  }
+});
+
+// 同步到 store 和 URL
+watch([searchQuery, searchMode, customApi], () => {
+  searchStore.setSearchQuery(searchQuery.value);
+  searchStore.setSearchMode(searchMode.value);
+  searchStore.setCustomApi(customApi.value);
+  
+  // 更新 URL（防止循环更新）
+  if (!isUpdatingFromURL) {
+    updateURLParams({
+      s: searchQuery.value,
+      mode: searchMode.value,
+      api: customApi.value
+    });
+  }
+});
+
+// 处理历史记录选择
+function handleHistorySelect(history: SearchHistoryType) {
+  searchQuery.value = history.query;
+  searchMode.value = history.mode;
+  // 自动触发搜索
+  setTimeout(() => {
+    handleSearch();
+  }, 100);
+}
 
 async function handleSearch() {
   if (!searchQuery.value.trim()) return;
@@ -314,6 +407,9 @@ async function handleSearch() {
         searchStore.vndbInfo = vndbData;
       }
     }
+    
+    // 刷新搜索历史
+    searchHistoryRef.value?.loadHistory();
   } catch (error) {
     searchStore.errorMessage =
       error instanceof Error ? error.message : "搜索失败";
