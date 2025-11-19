@@ -1,500 +1,461 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
   <title>SearchGal - Galgame 聚合搜索</title>
+    <meta name="title" content="SearchGal - Galgame 聚合搜索" />
+    <meta
+      name="description"
+      content="Galgame 资源聚合搜索引擎，支持多站点搜索、游戏信息查询、补丁下载。一站式搜索体验，快速找到你想要的 Galgame 资源。"
+    />
+    <meta
+      name="keywords"
+      content="Galgame,美少女游戏,游戏搜索,补丁下载,VNDB,聚合搜索,SearchGal"
+    />
+    <meta name="author" content="SearchGal Team" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://searchgal.homes/" />
+    <meta property="og:title" content="SearchGal - Galgame 聚合搜索" />
+    <meta
+      property="og:description"
+      content="Galgame 资源聚合搜索引擎，支持多站点搜索、游戏信息查询、补丁下载。一站式搜索体验，快速找到你想要的 Galgame 资源。"
+    />
+    <meta property="og:image" content="https://searchgal.homes/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="SearchGal" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://searchgal.homes/" />
+    <meta property="twitter:title" content="SearchGal - Galgame 聚合搜索" />
+    <meta
+      property="twitter:description"
+      content="Galgame 资源聚合搜索引擎，支持多站点搜索、游戏信息查询、补丁下载。"
+    />
+    <meta
+      property="twitter:image"
+      content="https://searchgal.homes/og-image.png"
+    />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="alternate icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://searchgal.homes/" />
+
+    <!-- Priority Hints - 预加载关键资源 -->
+    <link rel="preconnect" href="https://api.illlights.com" fetchpriority="high" />
+    <link rel="preconnect" href="https://api.vndb.org" fetchpriority="high" />
+    <link rel="preconnect" href="https://registry.npmmirror.com" fetchpriority="low" />
+    <link rel="dns-prefetch" href="https://artalk.saop.cc" />
+    <link rel="dns-prefetch" href="https://status.searchgal.homes" />
+
   <style>
-    @import "tailwindcss";
+    /* 主题颜色变量 */
+    :root {
+      /* 白天模式 */
+      --bg-light: rgb(255, 251, 254);
+      --text-light: rgb(29, 27, 30);
+      --card-light: rgba(255, 255, 255, 0.9);
+      --border-light: rgba(236, 72, 153, 0.2);
+      
+      /* 黑夜模式 - 柔和的深色调 */
+      --bg-dark: rgb(15, 23, 42);
+      --text-dark: rgb(226, 232, 240);
+      --card-dark: rgba(30, 41, 59, 0.9);
+      --border-dark: rgba(139, 92, 246, 0.3);
+    }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-        "Segoe UI Symbol";
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB",
+          "Noto Sans CJK SC", "Source Han Sans SC", "WenQuanYi Micro Hei",
+          "Roboto", Helvetica, Arial, sans-serif;
       line-height: 1.6;
-      background: fixed #f0bbbb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Cpath fill='%23000000' fill-opacity='0.05' d='M192 15v2a11 11 0 0 0-11 11c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H145v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11 13 13 0 1 1 .02 26 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43a6.1 6.1 0 0 0-3.03 4.87V143h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 181 164a11 11 0 0 0 11 11v2a13 13 0 0 1-13-13 12 12 0 0 1 3.11-7.53l2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84a6.1 6.1 0 0 0-4.87-3.03H145v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 124 181a11 11 0 0 0-11 11h-2a13 13 0 0 1 13-13c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43a6.1 6.1 0 0 0 3.03-4.87V145h-35.02a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 107 124a11 11 0 0 0-22 0c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H49v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11A13 13 0 0 1 81 192h-2a11 11 0 0 0-11-11c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V145H11.98a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 0 1 0 177v-2a11 11 0 0 0 11-11c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H47v-35.02a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 28 109a13 13 0 1 1 0-26c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43A6.1 6.1 0 0 0 47 84.02V49H11.98a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 11 28 11 11 0 0 0 0 17v-2a13 13 0 0 1 13 13c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84A6.1 6.1 0 0 0 11.98 47H47V11.98a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 68 11 11 11 0 0 0 79 0h2a13 13 0 0 1-13 13 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43A6.1 6.1 0 0 0 49 11.98V47h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 85 68a11 11 0 0 0 22 0c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H143V11.98a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 124 13a13 13 0 0 1-13-13h2a11 11 0 0 0 11 11c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V47h35.02a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 179 28a13 13 0 0 1 13-13zM84.02 143a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 83 124a13 13 0 1 1 26 0c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84a6.1 6.1 0 0 0 4.87 3.03H143v-35.02a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 164 107a11 11 0 0 0 0-22c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V49h-35.02a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 1 1 83 68a12 12 0 0 1 3.11-7.53l2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84A6.1 6.1 0 0 0 84.02 49H49v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 28 85a11 11 0 0 0 0 22c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V143h35.02z'%3E%3C/path%3E%3C/svg%3E") center;
       min-height: 100vh;
       overflow-wrap: break-word;
       margin: 0;
       padding: 0;
-    }
-
-    /* Custom responsive variables */
-    :root {
-      /* 基准宽度为 2560px (2K) */
-      --base-width: 2560px;
-
-      /* 白色容器宽度：原 max-w-4xl (896px) */
-      --main-container-width: clamp(550px, 42vw, 896px);
-
-      /* 游戏标题大小 */
-      --game-title-font-size: clamp(22px, 1.8vw, 34px); /* 调整以放大 */
-      /* VNDB 标题大小 */
-      --vndb-title-font-size: clamp(20px, 1.5vw, 32px);
-      /* 游戏描述字体大小 */
-      --vndb-description-font-size: clamp(14px, 0.8vw, 18px); /* 调整以放大 */
-      /* AI 文本框字体大小 */
-      --ai-text-font-size: clamp(14px, 0.8vw, 18px);
-      /* 章节标题大小 */
-      --section-title-font-size: clamp(20px, 1.5vw, 26px); /* 调整以放大 */
-      /* 普通文字大小 (咱家的使用须知内容) */
-      --general-text-font-size: clamp(14px, 0.8vw, 18px);
-
-      /* VNDB 信息面板宽度：原 max-w-md (448px) */
-      --vndb-info-panel-width: clamp(300px, 18vw, 448px);
-      /* 游戏描述文本框最大高度 */
-      --vndb-description-max-height: clamp(120px, 15vh, 300px);
-      /* VNDB 信息面板顶部位置：原 top-32 (128px) */
-      --vndb-info-panel-top: clamp(100px, 10vh, 150px); /* 调整以根据分辨率向下调整 */
-      /* VNDB 标题底部外边距 */
-      --vndb-title-margin-bottom: clamp(20px, 3vw, 60px); /* 调整以随着分辨率变化更大 */
-      /* VNDB 标题底部外边距 */
-      --vndb-title-margin-bottom: clamp(20px, 2vw, 40px); /* 调整以减小间距 */
-
-      /* scrollable-content 宽度：原 max-w-4xl (896px) */
-      --scrollable-content-width: clamp(700px, 35vw, 896px);
-      /* scrollable-content 偏移：原 translate-x-[calc(16.666667%_+_4rem)] */
-      --scrollable-content-translate-x: calc(clamp(10%, 8.333333vw, 16.666667%) + clamp(2rem, 2vw, 4rem));
-    }
-
-    @media (max-width: 767px) { /* For mobile viewports */
-      :root {
-        --main-container-width: 100%;
-        --scrollable-content-translate-x: 0;
-      }
-    }
-
-    /* Custom animations and styles that are difficult to replicate with Tailwind */
-    @keyframes glowing-border {
-      0% {
-        background-position: 0% 50%;
+        background: var(--bg-light);
+        color: var(--text-light);
+        scroll-behavior: smooth;
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
 
-      50% {
-        background-position: 100% 50%;
+      /* 暗色主题 */
+      .dark body {
+        background: var(--bg-dark);
+        color: var(--text-dark);
       }
 
-      100% {
-        background-position: 0% 50%;
+      /* 图片懒加载淡入动画 */
+      img[loading="lazy"] {
+        opacity: 0;
+        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       }
-    }
 
-    .best-match-highlight {
-      background: linear-gradient(90deg, #ffc1f3, #e0b0ff, #d1c4e9, #ffc1f3);
-      background-size: 400% 400%;
-      animation: glowing-border 8s ease infinite;
-    }
-
-    #background-layer::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0);
-      transition: background-color 1s ease-in-out;
-    }
-
-    .group\/body.vndb-mode #background-layer::before {
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .group\/body.locked-mode #background-layer::before {
-      background-color: rgba(0, 0, 0, 0);
-    }
-
-    /* Custom scrollbar styles */
-    #vndb-description::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    #vndb-description::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    #vndb-description::-webkit-scrollbar-thumb {
-      background-color: rgba(255, 255, 255, 0.3);
-      border-radius: 20px;
-      border: transparent;
-    }
-
-    /* Transitions for complex animations */
-    #vndb-info-panel,
-    #ext-links-container,
-    #main-container,
-    #siteNavigation,
-    #scrollToTopBtn,
-    #scrollToCommentsBtn,
-    #lock-view-btn {
-      transition: opacity 0.5s ease-in-out, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    #vndb-description {
-      transition: opacity 0.5s ease-in-out;
-    }
-
-    /* Prevent body scroll when modal/overlay is active */
-    body.noscroll {
-      overflow: hidden;
-    }
-
-    /* Custom scrollbar hiding utility */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      /* IE and Edge */
-      scrollbar-width: none;
-      /* Firefox */
-    }
-
-    /* Lock View Button States */
-    #lock-view-btn.visible {
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: auto;
-      /* Interactive when visible */
-    }
-
-    /* Hover effect for lock view button in AI view */
-    .ai-view-active #lock-view-btn {
-      opacity: 0;
-      transform: scale(0.8);
-    }
-
-    .ai-view-active #lock-view-btn:hover {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    /* Ripple Animation */
-    @keyframes ripple-effect {
-      0% {
-        transform: scale(1);
+      img[loading="lazy"].loaded {
         opacity: 1;
       }
 
-      100% {
-        transform: scale(2.5);
-        opacity: 0;
+      /* Pace.js 自定义样式 */
+      .pace {
+        pointer-events: none;
+        user-select: none;
       }
+
+      .pace-inactive {
+        display: none;
+      }
+
+      .pace .pace-progress {
+        background: linear-gradient(90deg, #ec4899, #8b5cf6);
+        position: fixed;
+        z-index: 9999;
+        top: 0;
+        right: 100%;
+        width: 100%;
+        height: 3px;
+        box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+      }
+
+      /* Fancybox 自定义样式 */
+      .fancybox-custom .fancybox__backdrop {
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+      }
+
+      .fancybox-custom .fancybox__container {
+        --fancybox-accent-color: #ec4899;
+      }
+
+      #app {
+        min-height: 100vh;
+        position: relative;
+      }
+
+      /* 全局滚动条样式 */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+      }
+
+      .dark ::-webkit-scrollbar-track {
+        background: rgba(30, 41, 59, 0.3);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(
+          180deg,
+          rgb(236, 72, 153),
+          rgb(139, 92, 246)
+        );
+        border-radius: 10px;
+        transition: background 0.3s ease;
+      }
+
+      .dark ::-webkit-scrollbar-thumb {
+        background: linear-gradient(
+          180deg,
+          rgb(139, 92, 246),
+          rgb(99, 102, 241)
+        );
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(
+          180deg,
+          rgb(219, 39, 119),
+          rgb(124, 58, 237)
+        );
     }
 
-    .ripple {
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(
+          180deg,
+          rgb(124, 58, 237),
+          rgb(79, 70, 229)
+        );
+      }
+
+      /* 选中文本样式 */
+      ::selection {
+        background: rgba(236, 72, 153, 0.3);
+        color: inherit;
+      }
+
+      .dark ::selection {
+        background: rgba(139, 92, 246, 0.4);
+        color: inherit;
+      }
+
+      /* 背景图层样式 */
+      #background-layer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -2;
+        /* 默认淡入淡出过渡 */
+        transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        /* 持续的慢慢放大动画 */
+        animation: slowZoom 10s ease-out forwards;
+    }
+
+      /* 持续慢慢放大动画 */
+      @keyframes slowZoom {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.1);
+        }
+      }
+
+      /* 转场动画类 */
+      #background-layer.transition-fade {
+        animation: fadeTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-zoom {
+        animation: zoomTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-slide-left {
+        animation: slideLeftTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-slide-right {
+        animation: slideRightTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-blur {
+        animation: blurTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-rotate {
+        animation: rotateTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* 淡入淡出动画 */
+      @keyframes fadeTransition {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      /* 缩放动画 */
+      @keyframes zoomTransition {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0;
+          transform: scale(1.1);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* 左滑动画 */
+      @keyframes slideLeftTransition {
+        0% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        50% {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* 右滑动画 */
+      @keyframes slideRightTransition {
+        0% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        50% {
+          opacity: 0;
+          transform: translateX(30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* 模糊动画 */
+      @keyframes blurTransition {
+        0% {
+          opacity: 1;
+          filter: blur(0px);
+        }
+        50% {
+          opacity: 0.3;
+          filter: blur(10px);
+        }
+        100% {
+          opacity: 1;
+          filter: blur(0px);
+        }
+      }
+
+      /* 旋转动画 */
+      @keyframes rotateTransition {
+        0% {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+        }
+        50% {
+          opacity: 0;
+          transform: scale(0.95) rotate(5deg);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+        }
+      }
+
+      /* 默认背景纹理 - 白天模式 */
+    #background-layer::before {
+        content: "";
       position: absolute;
-      border-radius: 50%;
-      background-color: rgba(74, 222, 128, 0.7);
-      /* Green ripple */
-      width: 100%;
-      height: 100%;
       top: 0;
       left: 0;
-      animation: ripple-effect 1s ease-out;
+      width: 100%;
+      height: 100%;
+        background: #f0bbbb
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Cpath fill='%23000000' fill-opacity='0.05' d='M192 15v2a11 11 0 0 0-11 11c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H145v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11 13 13 0 1 1 .02 26 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43a6.1 6.1 0 0 0-3.03 4.87V143h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 181 164a11 11 0 0 0 11 11v2a13 13 0 0 1-13-13 12 12 0 0 1 3.11-7.53l-2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84a6.1 6.1 0 0 0-4.87-3.03H145v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 124 181a11 11 0 0 0-11 11h-2a13 13 0 0 1 13-13c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43a6.1 6.1 0 0 0 3.03-4.87V145h-35.02a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 107 124a11 11 0 0 0-22 0c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H49v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11A13 13 0 0 1 81 192h-2a11 11 0 0 0-11-11c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V145H11.98a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 0 1 0 177v-2a11 11 0 0 0 11-11c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H47v-35.02a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 28 109a13 13 0 1 1 0-26c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43A6.1 6.1 0 0 0 47 84.02V49H11.98a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 11 28 11 11 0 0 0 0 17v-2a13 13 0 0 1 13 13c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84A6.1 6.1 0 0 0 11.98 47H47V11.98a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 68 11 11 11 0 0 0 79 0h2a13 13 0 0 1-13 13 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43A6.1 6.1 0 0 0 49 11.98V47h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 85 68a11 11 0 0 0 22 0c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H143V11.98a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 124 13a13 13 0 0 1-13-13h2a11 11 0 0 0 11 11c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V47h35.02a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 179 28a13 13 0 0 1 13-13zM84.02 143a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 83 124a13 13 0 1 1 26 0c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84a6.1 6.1 0 0 0 4.87 3.03H143v-35.02a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 164 107a11 11 0 0 0 0-22c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V49h-35.02a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 1 1 83 68a12 12 0 0 1 3.11-7.53l2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84A6.1 6.1 0 0 0 84.02 49H49v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 28 85a11 11 0 0 0 0 22c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V143h35.02z'%3E%3C/path%3E%3C/svg%3E")
+          center;
+        z-index: -1;
+        transition: opacity 0.8s ease-in-out;
+      }
+
+      /* 默认背景纹理 - 黑夜模式 */
+      .dark #background-layer::before {
+        background: #1e293b
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Cpath fill='%23ffffff' fill-opacity='0.03' d='M192 15v2a11 11 0 0 0-11 11c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H145v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11 13 13 0 1 1 .02 26 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43a6.1 6.1 0 0 0-3.03 4.87V143h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 181 164a11 11 0 0 0 11 11v2a13 13 0 0 1-13-13 12 12 0 0 1 3.11-7.53l-2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84a6.1 6.1 0 0 0-4.87-3.03H145v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 124 181a11 11 0 0 0-11 11h-2a13 13 0 0 1 13-13c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43a6.1 6.1 0 0 0 3.03-4.87V145h-35.02a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 107 124a11 11 0 0 0-22 0c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H49v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11A13 13 0 0 1 81 192h-2a11 11 0 0 0-11-11c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V145H11.98a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 0 1 0 177v-2a11 11 0 0 0 11-11c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H47v-35.02a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 28 109a13 13 0 1 1 0-26c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43A6.1 6.1 0 0 0 47 84.02V49H11.98a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 11 28 11 11 0 0 0 0 17v-2a13 13 0 0 1 13 13c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84A6.1 6.1 0 0 0 11.98 47H47V11.98a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 68 11 11 11 0 0 0 79 0h2a13 13 0 0 1-13 13 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43A6.1 6.1 0 0 0 49 11.98V47h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 85 68a11 11 0 0 0 22 0c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H143V11.98a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 124 13a13 13 0 0 1-13-13h2a11 11 0 0 0 11 11c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V47h35.02a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 179 28a13 13 0 0 1 13-13zM84.02 143a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 83 124a13 13 0 1 1 26 0c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84a6.1 6.1 0 0 0 4.87 3.03H143v-35.02a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 164 107a11 11 0 0 0 0-22c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V49h-35.02a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 1 1 83 68a12 12 0 0 1 3.11-7.53l2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84A6.1 6.1 0 0 0 84.02 49H49v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 28 85a11 11 0 0 0 0 22c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V143h35.02z'%3E%3C/path%3E%3C/svg%3E")
+          center;
+      }
+
+      /* 当有随机图时，隐藏默认纹理 */
+      #background-layer.has-image::before {
+        opacity: 0;
+    }
+
+      /* 半透明遮罩层，让内容更清晰 */
+      #background-layer::after {
+        content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+        background: rgba(255, 255, 255, 0.15);
       z-index: -1;
     }
 
-    /* Toast Notification Animations */
-    @keyframes slide-in-left {
-      from {
-        transform: translateX(-100%);
-        opacity: 0;
+      /* 黑夜模式遮罩 */
+      .dark #background-layer::after {
+        background: rgba(15, 23, 42, 0.4);
       }
 
+      /* 暗色模式强制样式 */
+      .dark input[type="search"],
+      .dark input[type="url"],
+      .dark input[type="text"],
+      .dark textarea {
+        background-color: rgba(30, 41, 59, 0.95) !important;
+        color: rgb(226, 232, 240) !important;
+        border-color: rgba(71, 85, 105, 0.5) !important;
+      }
+
+      .dark input::placeholder,
+      .dark textarea::placeholder {
+        color: rgba(148, 163, 184, 0.7) !important;
+      }
+
+      .dark input:focus,
+      .dark textarea:focus {
+        border-color: rgb(139, 92, 246) !important;
+      }
+
+      /* 暗色模式下的卡片和容器 */
+      .dark .usage-notice {
+        background-color: rgba(30, 41, 59, 0.9) !important;
+        color: rgb(203, 213, 225) !important;
+      }
+
+      .dark .usage-notice h2 {
+        color: rgb(226, 232, 240) !important;
+      }
+
+      .dark .usage-notice strong {
+        color: rgb(226, 232, 240) !important;
+      }
+
+      .dark .usage-notice a {
+        color: rgb(147, 197, 253) !important;
+      }
+
+      /* 加载动画 */
+      @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
       to {
-        transform: translateX(0);
         opacity: 1;
       }
     }
 
-    @keyframes slide-out-left {
-      from {
-        transform: translateX(0);
-        opacity: 1;
-      }
-
-      to {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-    }
-
-    #toast-notification {
-      display: none;
-      /* Hidden by default */
-    }
-
-    #toast-notification.show {
-      display: flex;
-      /* Show with flexbox */
-      animation: slide-in-left 0.5s forwards;
-    }
-
-    #toast-notification.hide {
-      animation: slide-out-left 0.5s forwards;
+      #app {
+        animation: fadeIn 0.5s ease-in;
     }
   </style>
-  <meta name="description" content="SearchGal 是一个聚合搜索 Galgame 的网站，支持多平台搜索" />
-  <meta name="keywords" content="Galgame, 搜索, 聚合搜索, 游戏, SearchGal, Gal" />
-  <meta name="author" content="Moe-Sakura" />
-  <meta property="og:title" content="Galgame 聚合搜索" />
-  <meta property="og:description" content="SearchGal 是一个聚合搜索 Galgame 的网站，支持多平台搜索" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Galgame 聚合搜索" />
-  <link rel="shortcut icon" href="./gamepad-solid.svg" type="image/svg+xml" />
-  <link fetchpriority="low" href="https://registry.npmmirror.com/artalk/latest/files/dist/Artalk.css"
-    rel="stylesheet" />
-  <link fetchpriority="low" href="https://registry.npmmirror.com/lightgallery/latest/files/css/lightgallery.css"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="https://registry.npmmirror.com/animate.css/latest/files/animate.min.css"
-    fetchpriority="high" />
-  <link rel="stylesheet"
-    href="https://registry.npmmirror.com/@fortawesome/fontawesome-free/latest/files/css/all.min.css"
-    fetchpriority="high" />
-  <script importance="high" src="https://registry.npmmirror.com/quicklink/latest/files/dist/quicklink.umd.js"></script>
-  <script async importance="high" src="https://registry.npmmirror.com/pace-js/latest/files/pace.min.js"></script>
-  <link href="https://registry.npmmirror.com/pace-js/latest/files/themes/blue/pace-theme-flash.css" importance="high"
-    rel="stylesheet" />
+
+    <!-- 不蒜子统计 - 低优先级 -->
+    <script
+      async
+      fetchpriority="low"
+      src="https://registry.npmmirror.com/js-asuna/latest/files/js/bsz.pure.mini.js"
+    ></script>
 </head>
-
-<body class="group/body">
-  <div id="background-layer"
-    class="fixed top-0 left-0 w-full h-full bg-cover bg-center transition-[background-image] duration-1000 ease-in-out z-[-1]">
-  </div>
-  <main class="flex-1 flex flex-col min-h-screen">
-    <div id="content-wrapper"
-      class="flex justify-center w-full mx-auto gap-8 transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none">
-      <div id="vndb-info-panel"
-        class="hidden md:block w-0 p-0 flex-shrink-0 opacity-0 transition-opacity duration-800 ease-in-out transform transition-transform duration-800 ease-in-out group-[.vndb-mode]/body:w-[var(--vndb-info-panel-width)] group-[.vndb-mode]/body:opacity-100 group-[.vndb-mode]/body:p-2 group-[.vndb-mode]/body:sticky group-[.vndb-mode]/body:top-[var(--vndb-info-panel-top)] group-[.vndb-mode]/body:self-start group-[.vndb-mode]/body:max-md:hidden">
-        <div class="relative">
-          <div id="ext-links-container" class="absolute top-2 -left-14 flex flex-col gap-2"></div>
-          <img id="vndb-image" src="" alt="Game Art" class="rounded-lg shadow-lg w-full h-auto object-contain mb-4">
-        </div>
-        <h2 id="vndb-title" class="relative font-bold text-white text-center drop-shadow-lg"
-          style="font-size: var(--vndb-title-font-size); margin-bottom: var(--vndb-title-margin-bottom);">
-        </h2>
-
-        <div id="vndb-description" class="text-base text-gray-200 overflow-y-auto pr-2 no-scrollbar"
-          style="font-size: var(--vndb-description-font-size); max-height: var(--vndb-description-max-height);"></div>
-      </div>
-      <div id="scrollable-content"
-        class="relative w-full flex-shrink-0 transition-transform duration-800 ease-in-out group-[.vndb-mode]/body:translate-x-[var(--scrollable-content-translate-x)] group-[.vndb-mode]/body:max-md:translate-x-0"
-        style="max-width: var(--scrollable-content-width);">
-        <div id="main-container"
-          class="container mx-auto w-full bg-white/95 rounded-[8px] shadow-xl px-0 py-0 z-10 relative flex flex-col transition-all duration-300"
-          style="width: var(--main-container-width); margin-top: var(--main-container-margin-top);">
-          <div class="relative border-b border-gray-100 overflow-hidden"
-            style="padding-top: var(--cover-padding-y); padding-bottom: var(--cover-padding-y); height: var(--cover-image-height);">
-            <img src="https://api.illlights.com/v1/img" alt="随图"
-              class="w-full object-contain object-center transition-all duration-300 hover:scale-105 hover:brightness-95 draggable"
-              draggable="true" />
-          </div>
-          <div
-            class="px-12 pt-6 pb-5 bg-gradient-to-r from-indigo-50 via-pink-50 to-yellow-50 text-center flex items-center justify-center min-h-[56px] transition-all duration-300">
-            <h1
-              class="font-extrabold text-indigo-700 drop-shadow-lg inline-flex items-center gap-2 md:gap-3 whitespace-nowrap"
-              style="font-size: var(--game-title-font-size);">
-              <i class="fas fa-gamepad text-pink-400"></i>
-              Galgame 聚合搜索
-            </h1>
-          </div>
-          <form id="searchForm" class="flex flex-col gap-5 px-6 pt-6 pb-4 relative">
-            <div class="flex flex-col w-full rounded-[8px] focus-within:ring-2 focus-within:ring-indigo-400">
-              <div class="relative flex-1 min-w-0 flex items-center">
-                <span
-                  class="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400 pointer-events-none text-lg z-10"><i
-                    class="fas fa-keyboard"></i></span>
-                <input type="text" id="game" name="game" required placeholder="游戏或补丁关键字词"
-                  class="pl-10 pr-4 h-11 border border-gray-300 border-b-gray-200 rounded-t-[8px] focus:outline-none bg-gray-50 text-base shadow-sm transition w-full placeholder-gray-400 min-w-0 flex-1 rounded-b-none"
-                  autocomplete="off" spellcheck="false" />
-              </div>
-              <div class="relative flex items-center w-full">
-                <span
-                  class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none text-base z-10"><i
-                    class="fas fa-code"></i></span>
-                <input type="text" id="customApi" name="customApi" placeholder="自定义 API 地址 (可选)"
-                  class="pl-10 pr-4 sm:pr-48 h-11 border border-t-0 border-gray-300 rounded-b-[8px] focus:outline-none bg-gray-50 text-sm shadow-sm transition w-full placeholder-gray-400 rounded-t-none"
-                  autocomplete="off" spellcheck="false" aria-describedby="apiHint" />
-                <span id="apiHint"
-                  class="hidden sm:block absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-500 pointer-events-none z-10 transition-opacity duration-200"
-                  data-hint-desktop>
-                  例如: https://api.searchgal.homes 或 http://127.0.0.1:8898
-                </span>
-                <span id="apiHintMobile"
-                  class="sm:hidden absolute left-0 bottom-[-18px] text-[11px] text-gray-500 w-full text-center leading-none transition-opacity duration-200"
-                  data-hint-mobile>
-                  例如: https://api.searchgal.homes 或 http://127.0.0.1:8898
-                </span>
-              </div>
-            </div>
-            <div class="flex flex-col gap-2 w-full mt-4">
-              <button type="submit" id="searchBtn"
-                class="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold transition-all flex items-center justify-center gap-3 shadow-md relative overflow-hidden disabled:bg-indigo-300 disabled:opacity-80 rounded-[8px] text-lg border-0 focus:ring-2 focus:ring-indigo-300"
-                disabled>
-                <span id="progressBar"
-                  class="absolute left-0 top-0 h-full bg-pink-400/80 transition-all duration-300 z-0 opacity-0 w-0 rounded-[8px]"></span>
-                <span class="relative z-10 flex items-center gap-2">
-                  <i class="fas fa-search"></i>
-                  <span id="searchBtnText">开始搜索</span>
-                </span>
-              </button>
-              <div class="flex flex-row flex-wrap items-center gap-0 w-full justify-center select-none mt-2">
-                <div>
-                  <input type="radio" id="gameMode" name="searchMode" value="game" class="hidden peer" checked />
-                  <label for="gameMode"
-                    class="select-none cursor-pointer px-4 py-2 font-semibold text-xs flex items-center gap-1 transition-all duration-200 bg-white peer-checked:bg-indigo-600 peer-checked:text-white text-indigo-700 hover:bg-indigo-300 animate__animated animate__pulse animate__faster peer-checked:animate__tada rounded-l-[8px] border-0 shadow-sm">
-                    <i class="fas fa-gamepad"></i>游戏</label>
-                </div>
-                <div>
-                  <input type="radio" id="patchMode" name="searchMode" value="patch" class="hidden peer" />
-                  <label for="patchMode"
-                    class="select-none cursor-pointer px-4 py-2 font-semibold text-xs flex items-center gap-1 transition-all duration-200 bg-white peer-checked:bg-pink-500 peer-checked:text-white text-pink-700 hover:bg-pink-300 animate__animated animate__pulse animate__faster peer-checked:animate__tada border-l border-gray-100 rounded-none shadow-sm"><i
-                      class="fas fa-wrench"></i>补丁</label>
-                </div>
-                <div>
-                  <a id="llm-status-btn" href="https://status.searchgal.homes" target="_blank"
-                    class="select-none cursor-pointer px-4 py-2 font-semibold text-xs flex items-center gap-1 transition-all duration-200 bg-white text-gray-500 border-l border-gray-100 rounded-r-[8px] shadow-sm"
-                    style="text-decoration: none;">
-                    <i class="fas fa-circle text-[0.6rem] mr-1"></i>
-                    <span id="llm-status-text">状态</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </form>
-          <div class="error text-red-600 font-semibold px-12" id="error"></div>
-          <div class="results mt-2 px-6" id="results"></div>
-          <section class="w-full max-w-4xl mx-auto mt-8">
-            <div class="bg-white/95 rounded-[8px] p-6 text-gray-700">
-              <h2 class="font-bold text-indigo-700 mb-4 inline-flex items-center gap-2"
-                style="font-size: var(--section-title-font-size);">
-                <i class="fas fa-info-circle text-blue-500"></i> 咱家的使用须知
-              </h2>
-              <ul class="list-disc list-inside space-y-2" style="font-size: var(--general-text-font-size);">
-                <li>
-                  首先，衷心感谢
-                  <a href="https://saop.cc/" target="_blank"
-                    class="font-semibold text-indigo-600 hover:underline">@Asuna</a>
-                  大佬提供的服务器和技术支持！没有大佬的魔法，咱可跑不起来！
-                </li>
-                <li>
-                  本程序纯属<strong>爱发电</strong>，仅供绅士们交流学习使用，务必请大家<strong>支持正版 Galgame</strong>！入正不亏哦！
-                </li>
-                <li>
-                  本站只做互联网内容的<strong>聚合搬运工</strong>，搜索结果均来自第三方站点，下载前请各位自行判断<strong>资源安全性</strong>，以免翻车。
-                </li>
-                <li>
-                  搜索时请注意关键词长度！<strong>关键词太短</strong>可能搜不全（部分站点只显示首批结果），<strong>太长</strong>则可能无法精准匹配。建议尝试<strong>适当的关键词</strong>，效果更佳~
-                </li>
-                <li>
-                  本程序每次查询完毕即断开连接，<strong>严禁任何形式的爆破或恶意爬取</strong>，做个文明的绅士！
-                </li>
-                <li>
-                  万一某个站点搜索挂了，先看看自己的魔法是否到位，也可能是站点维护了，或者咱这边的<strong>爬虫失效</strong>了。
-                </li>
-                <li>
-                  为了支持各 Galgame
-                  站点能长久运营，还请各位把浏览器的<strong>广告屏蔽插件</strong>关掉，或将这些站点加入白名单。大家建站不易，小小的支持也是大大的动力！
-                </li>
-                <li>游戏介绍和人物信息数据由 <a href="https://vndb.org/" target="_blank" class="text-blue-600 hover:underline font-semibold">VNDB</a> 提供，由AI大模型翻译，翻译结果不保证准确性，仅作为检索游戏时的参考！</span>
-                </li>
-                <li>
-                  <span class="font-bold text-red-600">郑重呼吁：请务必支持 Galgame 正版！让爱与梦想延续！</span>
-                </li>
-                <li>
-                  如果您觉得咱这小工具好用，请移步
-                  <a href="https://github.com/Moe-Sakura" target="_blank"
-                    class="text-blue-600 hover:underline font-semibold">GitHub</a>
-                  给本项目点个免费的
-                  <strong>Star</strong>
-                  吧，秋梨膏！你的支持就是咱最大的动力，比心~
-                </li>
-              </ul>
-            </div>
-          </section>
-          <div
-            class="footer text-xs text-gray-500 mt-4 text-center border-t border-gray-100 pt-4 px-12 pb-4 rounded-b-lg">
-            <p>
-              <span class="inline-flex items-center gap-1 mr-2"><i class="fas fa-eye"></i>访问：<span
-                  id="busuanzi_value_site_pv">null</span></span>
-              <span class="inline-flex items-center gap-1"><i class="fas fa-user"></i>访客：<span
-                  id="busuanzi_value_site_uv">null</span></span>
-            </p>
-            <div class="mt-3 inline-flex items-center gap-3 justify-center">
-              <span id="version-container"
-                class="inline-flex items-center gap-1 text-xs text-gray-400 bg-gray-100 rounded-[8px] px-2 py-1 font-mono select-none transition-colors duration-500 ease-in-out">
-                <i class="fas fa-code-branch"></i>
-                <a id="version-display" href="https://github.com/Moe-Sakura/SearchGal/blob/main/version.md"
-                  target="_blank" class="text-gray-600 hover:underline">版本号加载中</a>
-              </span>
-              <a href="https://github.com/Moe-Sakura" target="_blank"
-                class="inline-flex items-center gap-1 text-black border border-black bg-white/80 rounded-[8px] px-3 py-1 shadow font-semibold no-underline text-sm transition-all duration-200 hover:text-white hover:bg-black hover:underline hover:underline-offset-2 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-black/40"
-                style="text-decoration: none">
-                <i class="fab fa-github"></i>
-                GitHub
-              </a>
-            </div>
-          </div>
-        </div>
-        <section class="mx-auto mt-8 mb-8" style="width: var(--main-container-width);">
-          <div id="Comments" class="bg-white/80 rounded-lg shadow p-4 md:p-6 transition-all duration-300"></div>
-        </section>
-      </div>
-    </div>
-  </main>
-
-  <div id="ai-response-container"
-    class="fixed top-1/2 -translate-y-1/2 z-40 opacity-0 transition-opacity duration-500 ease-in-out pointer-events-none">
-    <div id="ai-response-box" class="text-xl text-gray-200 h-full overflow-y-auto p-6 rounded-lg no-scrollbar"
-      style="font-size: var(--ai-text-font-size); line-height: 1.8;"></div>
-  </div>
-
-  <div class="fixed bottom-16 right-3 flex flex-col space-y-3 z-50">
-    <button id="scrollToTopBtn"
-      class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-indigo-300 flex items-center justify-center translate-z-0 transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none"
-      title="回到顶部">
-      <i class="fas fa-arrow-up"></i>
-    </button>
-    <a href="#Comments" id="scrollToCommentsBtn"
-      class="bg-pink-500 hover:bg-pink-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-pink-300 flex items-center justify-center transition-opacity duration-500 ease-in-out group-[.locked-mode]/body:opacity-0 group-[.locked-mode]/body:pointer-events-none"
-      title="直达评论">
-      <i class="fas fa-comments"></i>
-    </a>
-    <button id="lock-view-btn"
-      class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-green-300 flex items-center justify-center max-md:hidden opacity-0 pointer-events-none"
-      title="显示游戏介绍">
-      <i class="fas fa-eye"></i>
-    </button>
-  </div>
-
-  <script src="https://registry.npmmirror.com/instant.page/latest/files/instantpage.js" type="module"></script>
-  <script fetchpriority="low"
-    src="https://registry.npmmirror.com/lightgallery/latest/files/lightgallery.min.js"></script>
-  <script fetchpriority="low" src="https://registry.npmmirror.com/artalk/latest/files/dist/Artalk.js"></script>
-  <script fetchpriority="low"
-    src="https://registry.npmmirror.com/@artalk/plugin-lightbox/latest/files/dist/artalk-plugin-lightbox.js"></script>
-  <script type="module" src="/src/main.js" fetchpriority="high"></script>
-  <script async src="https://registry.npmmirror.com/js-asuna/latest/files/js/bsz.pure.mini.js"
-    fetchpriority="low"></script>
-  <!-- Tooltips moved to the end of the body for global positioning -->
-  <div id="alias-tooltip"
-    class="fixed w-max max-w-md bg-gray-800 text-white text-sm rounded-lg shadow-lg p-3 z-50 hidden opacity-0 transition-opacity duration-300">
-    <div class="flex items-center font-semibold mb-2">
-      <i class="fas fa-exclamation-circle text-orange-400 mr-2"></i>
-      <span>该游戏还具有以下名称或别名</span>
-    </div>
-    <ul id="alias-list" class="list-disc list-inside">
-      <!-- Aliases will be populated by JS -->
-    </ul>
-  </div>
-  <div id="toast-notification"
-    class="hidden fixed top-5 left-5 bg-white rounded-lg shadow-lg p-4 flex items-center gap-3 z-50">
-    <i class="fas fa-exclamation-circle text-orange-400 text-xl"></i>
-    <span class="text-gray-700 font-semibold"></span>
-  </div>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
 </body>
-
 </html>
