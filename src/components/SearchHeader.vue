@@ -7,9 +7,8 @@
         class="header-title flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 animate-fade-in-down"
       >
         <h1
-          class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] flex items-center gap-2 sm:gap-3"
+          class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]"
         >
-          <i class="fas fa-gamepad text-pink-400 text-4xl sm:text-5xl lg:text-6xl"></i>
           <span class="whitespace-nowrap">Galgame 聚合搜索</span>
         </h1>
         <a
