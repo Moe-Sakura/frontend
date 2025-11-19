@@ -1,9 +1,10 @@
 <template>
   <div class="container mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-    <div class="flex flex-col items-center gap-4 sm:gap-6">
+    <!-- 主内容区域 - 垂直居中布局 -->
+    <div class="flex flex-col items-center justify-center min-h-[60vh]">
       <!-- Title with gamepad icon and status -->
       <div
-        class="header-title flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 my-12 sm:my-12 animate-fade-in-down"
+        class="header-title flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 animate-fade-in-down"
       >
         <h1
           class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] flex items-center gap-2 sm:gap-3"
@@ -26,6 +27,7 @@
       <SearchHistory
         ref="searchHistoryRef"
         @select="handleHistorySelect"
+        class="w-full max-w-2xl px-2 sm:px-0 mb-4"
       />
 
       <!-- Search Form -->
@@ -48,22 +50,6 @@
             />
           </div>
 
-          <!-- Custom API Input -->
-          <div class="relative">
-            <i
-              class="fas fa-link absolute left-3 sm:left-4 top-3 sm:top-4 text-gray-400 text-lg sm:text-xl pointer-events-none z-10"
-            ></i>
-            <input
-              v-model="customApi"
-              type="url"
-              placeholder="自定义 API 地址 (可选)"
-              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/98 dark:bg-slate-800/95 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-400 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500 dark:focus:border-purple-500"
-            />
-            <p class="text-xs text-white/90 dark:text-slate-300 drop-shadow-md mt-2 font-medium">
-              例如: https://api.searchgal.homes 或 http://127.0.0.1:8898
-            </p>
-          </div>
-
           <!-- Search Button and Mode Selector -->
           <div class="flex flex-col gap-3">
             <button
@@ -79,67 +65,42 @@
               >
             </button>
 
-            <!-- Search Mode Selector -->
-            <div class="flex justify-center gap-2 sm:gap-3">
-              <button
-                type="button"
-                @click="searchMode = 'game'"
-                :class="[
-                  'mode-chip px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2',
-                  searchMode === 'game'
-                    ? 'bg-pink-500 dark:bg-purple-600 text-white shadow-lg scale-105'
-                    : 'bg-white/90 dark:bg-slate-700/90 text-gray-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-600',
-                ]"
-              >
-                <i class="fas fa-gamepad"></i>
-                <span>游戏</span>
-              </button>
-              <button
-                type="button"
-                @click="searchMode = 'patch'"
-                :class="[
-                  'mode-chip px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2',
-                  searchMode === 'patch'
-                    ? 'bg-pink-500 dark:bg-purple-600 text-white shadow-lg scale-105'
-                    : 'bg-white/90 dark:bg-slate-700/90 text-gray-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-600',
-                ]"
-              >
-                <i class="fas fa-tools"></i>
-                <span>补丁</span>
-              </button>
-            </div>
-
-            <!-- Busuanzi Statistics -->
-            <div
-              class="flex justify-center items-center gap-6 text-sm text-white/90 drop-shadow-md font-medium mt-2"
-            >
-              <span class="flex items-center gap-1">
-                <i class="fas fa-eye"></i>
-                <span id="busuanzi_value_page_pv" class="font-semibold">-</span>
-              </span>
-              <span class="flex items-center gap-1">
-                <i class="fas fa-user"></i>
-                <span id="busuanzi_value_site_uv" class="font-semibold">-</span>
-              </span>
-            </div>
-
-            <!-- Version and GitHub Info -->
-            <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-4">
-              <div
-                class="px-3 py-1.5 rounded-full bg-white/90 dark:bg-slate-700/90 backdrop-blur-md text-gray-600 dark:text-slate-300 font-medium shadow-md flex items-center gap-2 text-sm"
-              >
-                <span>251007</span>
+            <!-- Search Mode Selector - 胶囊开关 -->
+            <div class="flex justify-center">
+              <div class="mode-switch-container relative bg-white/90 dark:bg-slate-700/90 backdrop-blur-md rounded-full p-1 shadow-lg">
+                <!-- 滑动背景 -->
+                <div
+                  class="mode-slider absolute top-1 bottom-1 rounded-full bg-gradient-to-r from-pink-500 to-pink-600 dark:from-purple-600 dark:to-purple-700 shadow-md transition-all duration-300 ease-out"
+                  :style="{
+                    left: searchMode === 'game' ? '4px' : 'calc(50%)',
+                    width: 'calc(50% - 4px)'
+                  }"
+                />
+                
+                <!-- 游戏按钮 -->
+                <button
+                  type="button"
+                  @click="searchMode = 'game'"
+                  class="mode-option relative z-10 px-6 py-2 rounded-full font-medium transition-all duration-300 flex items-center gap-2"
+                  :class="searchMode === 'game' ? 'text-white' : 'text-gray-700 dark:text-slate-300'"
+                >
+                  <i class="fas fa-gamepad"></i>
+                  <span>游戏</span>
+                </button>
+                
+                <!-- 补丁按钮 -->
+                <button
+                  type="button"
+                  @click="searchMode = 'patch'"
+                  class="mode-option relative z-10 px-6 py-2 rounded-full font-medium transition-all duration-300 flex items-center gap-2"
+                  :class="searchMode === 'patch' ? 'text-white' : 'text-gray-700 dark:text-slate-300'"
+                >
+                  <i class="fas fa-tools"></i>
+                  <span>补丁</span>
+                </button>
               </div>
-              <a
-                href="https://github.com/Moe-Sakura/SearchGal"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="px-3 py-1.5 rounded-full bg-white/90 dark:bg-slate-700/90 backdrop-blur-md text-gray-700 dark:text-slate-200 hover:text-pink-500 dark:hover:text-purple-400 font-medium hover:scale-105 transition-all shadow-md flex items-center gap-2 text-sm"
-              >
-                <i class="fab fa-github"></i>
-                <span>GitHub</span>
-              </a>
             </div>
+
           </div>
         </div>
       </form>
@@ -153,7 +114,7 @@
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="searchStore.errorMessage" class="w-full max-w-2xl">
+        <div v-if="searchStore.errorMessage" class="w-full max-w-2xl px-2 sm:px-0 mt-4">
           <div
             class="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-800/50 rounded-2xl p-4 shadow-lg"
           >
@@ -167,12 +128,13 @@
           </div>
         </div>
       </Transition>
+    </div>
 
-      <!-- Usage Notice -->
-      <div class="w-full max-w-4xl mt-6 sm:mt-8 px-2 sm:px-0 animate-fade-in animation-delay-1000">
-        <div
-          class="usage-notice bg-white/75 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8"
-        >
+    <!-- Usage Notice - 独立于居中区域 -->
+    <div class="w-full max-w-4xl mx-auto mt-8 sm:mt-12 px-2 sm:px-0 animate-fade-in animation-delay-1000">
+      <div
+        class="usage-notice bg-white/75 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8"
+      >
           <h2
             class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center gap-2"
           >
@@ -264,7 +226,6 @@
             </li>
           </ul>
         </div>
-      </div>
     </div>
   </div>
 </template>
@@ -472,6 +433,30 @@ async function handleSearch() {
   60%,
   80% {
     transform: translateX(10px);
+  }
+}
+
+/* 胶囊开关样式 */
+.mode-switch-container {
+  display: inline-flex;
+  position: relative;
+}
+
+.mode-slider {
+  pointer-events: none;
+}
+
+.mode-option {
+  min-width: 100px;
+  justify-content: center;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .mode-option {
+    min-width: 80px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
   }
 }
 </style>

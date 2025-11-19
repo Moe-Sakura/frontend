@@ -22,6 +22,26 @@
       <i :class="showCopiedTip ? 'fas fa-check' : 'fas fa-share-alt'" class="text-lg sm:text-xl"></i>
     </button>
 
+    <!-- GitHub 按钮 -->
+    <a
+      href="https://github.com/Moe-Sakura/SearchGal"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="访问 GitHub 仓库"
+      class="toolbar-button github-button"
+    >
+      <i class="fab fa-github text-lg sm:text-xl"></i>
+    </a>
+
+    <!-- 设置按钮 -->
+    <button
+      @click="openSettings"
+      aria-label="设置"
+      class="toolbar-button settings-button"
+    >
+      <i class="fas fa-cog text-lg sm:text-xl"></i>
+    </button>
+
     <!-- 主题切换按钮 -->
     <button
       @click="cycleTheme"
@@ -94,6 +114,11 @@ const searchStore = useSearchStore()
 // Props
 const props = defineProps<{
   currentBackgroundUrl?: string
+}>()
+
+// Emits
+const emit = defineEmits<{
+  openSettings: []
 }>()
 
 // 状态
@@ -176,6 +201,11 @@ async function shareSearch() {
     
     document.body.removeChild(textarea)
   }
+}
+
+// 打开设置
+function openSettings() {
+  emit('openSettings')
 }
 
 // 保存背景图（使用源格式和文件名）
@@ -329,6 +359,24 @@ watch(themeMode, () => {
 
 .toolbar-button:active {
   transform: scale(0.95);
+}
+
+/* GitHub 按钮特殊样式 */
+.github-button {
+  color: rgb(31, 41, 55);
+  text-decoration: none;
+}
+
+.dark .github-button {
+  color: rgb(226, 232, 240);
+}
+
+.github-button:hover {
+  border-color: rgba(31, 41, 55, 0.5);
+}
+
+.dark .github-button:hover {
+  border-color: rgba(226, 232, 240, 0.5);
 }
 
 /* 主题按钮特殊样式 */

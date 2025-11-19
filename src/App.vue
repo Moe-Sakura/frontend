@@ -8,12 +8,19 @@
     />
 
     <main class="flex-1 flex flex-col min-h-screen">
-      <TopToolbar :current-background-url="randomImageUrl" />
-      <SearchHeader />
+      <StatsCorner />
+      <TopToolbar :current-background-url="randomImageUrl" @open-settings="openSettings" />
+      <SearchHeader ref="searchHeaderRef" />
       <SearchResults />
       <FloatingButtons />
       <CommentsModal />
       <VndbPanel />
+      <SettingsModal
+        :is-open="isSettingsOpen"
+        :custom-api="searchStore.customApi"
+        @close="closeSettings"
+        @save="saveSettings"
+      />
     </main>
   </div>
 </template>
@@ -22,12 +29,14 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { imageDB } from "@/utils/imageDB";
 import { useSearchStore } from "@/stores/search";
+import StatsCorner from "@/components/StatsCorner.vue";
 import TopToolbar from "@/components/TopToolbar.vue";
 import SearchHeader from "@/components/SearchHeader.vue";
 import SearchResults from "@/components/SearchResults.vue";
 import FloatingButtons from "@/components/FloatingButtons.vue";
 import CommentsModal from "@/components/CommentsModal.vue";
 import VndbPanel from "@/components/VndbPanel.vue";
+import SettingsModal from "@/components/SettingsModal.vue";
 
 const searchStore = useSearchStore();
 const randomImageUrl = ref("");
@@ -37,6 +46,9 @@ const imageBlobUrls = ref<Map<string, string>>(new Map()); // URL -> Blob URL �
 const shuffledQueue = ref<string[]>([]);
 let fetchInterval: number | null = null;
 let displayInterval: number | null = null;
+
+// 设置模态框
+const isSettingsOpen = ref(false);
 
 const MAX_CACHE_SIZE = 10000; // 最大缓存 10000 张图片
 const CLEANUP_BATCH_SIZE = 2000; // 每次清理 2000 张
@@ -368,6 +380,20 @@ onUnmounted(() => {
   // 关闭数据库连接
   imageDB.close();
 });
+
+// 设置相关函数
+function openSettings() {
+  isSettingsOpen.value = true;
+}
+
+function closeSettings() {
+  isSettingsOpen.value = false;
+}
+
+function saveSettings(customApi: string) {
+  // 保存自定义 API 到 store
+  searchStore.setCustomApi(customApi);
+}
 </script>
 
 <style>
