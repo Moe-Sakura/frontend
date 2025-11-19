@@ -41,7 +41,20 @@ export interface VndbInfo {
 
 /**
  * 搜索游戏（流式处理）
- * 根据 API 文档: https://github.com/Moe-Sakura/SearchGal/blob/main/docs/api.md
+ * 根据 Cloudflare Workers API 文档: https://github.com/Moe-Sakura/Wrangler-API
+ * 
+ * API 端点:
+ * - POST /gal - 搜索游戏资源
+ * - POST /patch - 搜索补丁资源
+ * 
+ * 请求格式: multipart/form-data
+ * 表单字段: game (string)
+ * 
+ * 响应格式: text/event-stream (SSE)
+ * - {"total": 33} - 总平台数
+ * - {"progress": {"completed": 1, "total": 33}} - 进度更新
+ * - {"progress": {...}, "result": {...}} - 平台结果
+ * - {"done": true} - 完成标记
  */
 export async function searchGameStream(
   searchParams: URLSearchParams,
@@ -54,8 +67,8 @@ export async function searchGameStream(
   }
 ) {
   try {
-    // 从 searchParams 中获取 API 地址
-    const apiUrl = searchParams.get('api') || 'https://api.searchgal.homes'
+    // 从 searchParams 中获取 API 地址，默认使用 Cloudflare Workers API
+    const apiUrl = searchParams.get('api') || 'https://cfapi.searchgal.homes'
     const gameName = searchParams.get('game')
     const searchMode = searchParams.get('mode') || 'game'
     
@@ -63,10 +76,9 @@ export async function searchGameStream(
       throw new Error('游戏名称不能为空')
     }
     
-    // 根据 API 文档，使用 FormData 构建请求体
+    // 根据 Cloudflare Workers API 文档，使用 FormData 构建请求体
     const formData = new FormData()
     formData.append('game', gameName)
-    formData.append('magic', 'true') // 启用魔法搜索以获取更多结果
     
     // 根据搜索模式选择 API 端点
     const endpoint = searchMode === 'patch' ? '/patch' : '/gal'
@@ -113,28 +125,32 @@ export async function searchGameStream(
         try {
           const data = JSON.parse(line)
           
-          // 根据 API 文档的响应格式处理数据
+          // 根据 Cloudflare Workers API 文档的响应格式处理数据
           if (data.total !== undefined) {
-            // 初始事件：{"total": 10}
+            // 初始事件：{"total": 33}
             totalCount = data.total
             callbacks.onTotal?.(totalCount)
           } else if (data.progress && data.result) {
-            // 进度事件：{"progress": {...}, "result": {...}}
+            // 进度事件：{"progress": {"completed": 1, "total": 33}, "result": {...}}
             callbacks.onProgress?.(data.progress.completed, data.progress.total)
             
-            // 转换为我们的格式，保留完整平台信息
+            // 转换为我们的格式，保留 tags 标签信息
             const platformResult: PlatformResult = {
               name: data.result.name,
               color: data.result.color || 'white',
               items: data.result.items.map((item: any) => ({
                 platform: data.result.name,
                 title: item.name,
-                url: item.url
+                url: item.url,
+                tags: data.result.tags || [] // 保留平台标签（NoReq, Login, BTmag 等）
               })),
               error: data.result.error || ''
             }
             
             callbacks.onPlatformResult?.(platformResult)
+          } else if (data.progress && !data.result) {
+            // 仅进度更新：{"progress": {"completed": 2, "total": 33}}
+            callbacks.onProgress?.(data.progress.completed, data.progress.total)
           } else if (data.done === true) {
             // 完成事件：{"done": true}
             callbacks.onComplete?.()

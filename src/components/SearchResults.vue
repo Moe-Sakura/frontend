@@ -56,9 +56,11 @@
                 <span
                   v-for="(tag, tagIndex) in result.tags"
                   :key="tagIndex"
-                  class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs"
+                  :class="getTagClass(tag)"
+                  class="px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1"
                 >
-                  {{ tag }}
+                  <i :class="getTagIcon(tag)" class="text-[10px]"></i>
+                  <span>{{ getTagLabel(tag) }}</span>
                 </span>
               </div>
             </div>
@@ -220,6 +222,60 @@ function getChipClass(color: string) {
     red: 'bg-red-100 text-red-700'
   }
   return classes[color] || ''
+}
+
+// 标签样式映射（根据 Cloudflare Workers API 文档）
+function getTagClass(tag: string) {
+  const classes: Record<string, string> = {
+    'NoReq': 'bg-green-100 text-green-700',           // 无需登录/回复
+    'Login': 'bg-blue-100 text-blue-700',             // 需登录
+    'LoginPay': 'bg-yellow-100 text-yellow-700',      // 需登录且支付
+    'LoginRep': 'bg-purple-100 text-purple-700',      // 需登录并回复
+    'Rep': 'bg-indigo-100 text-indigo-700',           // 需回复
+    'SuDrive': 'bg-pink-100 text-pink-700',           // 自建网盘
+    'NoSplDrive': 'bg-emerald-100 text-emerald-700',  // 不限速网盘
+    'SplDrive': 'bg-orange-100 text-orange-700',      // 限速网盘
+    'MixDrive': 'bg-cyan-100 text-cyan-700',          // 混合网盘
+    'BTmag': 'bg-violet-100 text-violet-700',         // BT/磁力
+    'magic': 'bg-red-100 text-red-700'                // 需代理
+  }
+  return classes[tag] || 'bg-gray-100 text-gray-600'
+}
+
+// 标签图标映射
+function getTagIcon(tag: string) {
+  const icons: Record<string, string> = {
+    'NoReq': 'fas fa-check-circle',
+    'Login': 'fas fa-user',
+    'LoginPay': 'fas fa-coins',
+    'LoginRep': 'fas fa-comment',
+    'Rep': 'fas fa-reply',
+    'SuDrive': 'fas fa-server',
+    'NoSplDrive': 'fas fa-rocket',
+    'SplDrive': 'fas fa-turtle',
+    'MixDrive': 'fas fa-layer-group',
+    'BTmag': 'fas fa-magnet',
+    'magic': 'fas fa-magic'
+  }
+  return icons[tag] || 'fas fa-tag'
+}
+
+// 标签文本映射
+function getTagLabel(tag: string) {
+  const labels: Record<string, string> = {
+    'NoReq': '直接下载',
+    'Login': '需登录',
+    'LoginPay': '需付费',
+    'LoginRep': '登录+回复',
+    'Rep': '需回复',
+    'SuDrive': '自建盘',
+    'NoSplDrive': '不限速',
+    'SplDrive': '限速盘',
+    'MixDrive': '混合盘',
+    'BTmag': 'BT/磁力',
+    'magic': '需代理'
+  }
+  return labels[tag] || tag
 }
 </script>
 

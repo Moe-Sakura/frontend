@@ -196,6 +196,25 @@
               <strong>资源安全性</strong>，以免翻车。
             </li>
             <li>
+              • 搜索结果会显示不同的<strong>标签</strong>，帮助你快速了解资源特性：
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium ml-1">
+                <i class="fas fa-check-circle text-[10px]"></i>直接下载
+              </span>
+              表示无需登录，
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+                <i class="fas fa-user text-[10px]"></i>需登录
+              </span>
+              表示需要账号，
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+                <i class="fas fa-rocket text-[10px]"></i>不限速
+              </span>
+              表示高速网盘，
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-xs font-medium">
+                <i class="fas fa-magnet text-[10px]"></i>BT/磁力
+              </span>
+              表示种子下载等。
+            </li>
+            <li>
               • 搜索时请注意关键词长度！<strong>关键词太短</strong>
               可能搜不全（部分站点只显示首批结果），<strong>太长</strong>
               则可能无法精准匹配。建议尝试
