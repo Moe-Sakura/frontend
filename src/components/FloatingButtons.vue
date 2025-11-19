@@ -10,17 +10,6 @@
       <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- 分享按钮 -->
-    <button
-      v-show="searchStore.hasResults"
-      @click="shareSearch"
-      aria-label="分享搜索"
-      class="fab-button share-btn"
-      :class="{ 'share-copied': showCopiedTip }"
-    >
-      <i :class="showCopiedTip ? 'fas fa-check' : 'fas fa-share-alt'"></i>
-    </button>
-
     <!-- 站点导航按钮 -->
     <button
       v-show="searchStore.hasResults"
@@ -109,12 +98,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import { useSearchStore } from "@/stores/search";
-import { generateShareURL } from "@/utils/urlParams";
 
 const searchStore = useSearchStore();
 const showScrollToTop = ref(false);
 const showPlatformNav = ref(false);
-const showCopiedTip = ref(false);
 
 function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -130,45 +117,6 @@ function toggleVndbPanel() {
 
 function togglePlatformNav() {
   showPlatformNav.value = !showPlatformNav.value;
-}
-
-async function shareSearch() {
-  const shareURL = generateShareURL({
-    s: searchStore.searchQuery,
-    mode: searchStore.searchMode,
-    api: searchStore.customApi
-  });
-  
-  try {
-    // 尝试使用现代 Clipboard API
-    await navigator.clipboard.writeText(shareURL);
-    showCopiedTip.value = true;
-    
-    setTimeout(() => {
-      showCopiedTip.value = false;
-    }, 2000);
-  } catch (error) {
-    // 降级方案：使用传统方法
-    const textarea = document.createElement('textarea');
-    textarea.value = shareURL;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-      document.execCommand('copy');
-      showCopiedTip.value = true;
-      
-      setTimeout(() => {
-        showCopiedTip.value = false;
-      }, 2000);
-    } catch (err) {
-      // 复制失败，静默处理
-    }
-    
-    document.body.removeChild(textarea);
-  }
 }
 
 function scrollToPlatform(platformName: string) {
@@ -306,16 +254,6 @@ onUnmounted(() => {
 
 .nav-btn.nav-open {
   background: linear-gradient(135deg, rgb(156, 163, 175), rgb(107, 114, 128));
-  color: white;
-}
-
-.share-btn {
-  background: linear-gradient(135deg, rgb(245, 158, 11), rgb(217, 119, 6));
-  color: white;
-}
-
-.share-btn.share-copied {
-  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(5, 150, 105));
   color: white;
 }
 

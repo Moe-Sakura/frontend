@@ -8,6 +8,7 @@
     />
 
     <main class="flex-1 flex flex-col min-h-screen">
+      <TopToolbar :current-background-url="randomImageUrl" />
       <SearchHeader />
       <SearchResults />
       <FloatingButtons />
@@ -21,6 +22,7 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { imageDB } from "@/utils/imageDB";
 import { useSearchStore } from "@/stores/search";
+import TopToolbar from "@/components/TopToolbar.vue";
 import SearchHeader from "@/components/SearchHeader.vue";
 import SearchResults from "@/components/SearchResults.vue";
 import FloatingButtons from "@/components/FloatingButtons.vue";
@@ -36,9 +38,10 @@ const shuffledQueue = ref<string[]>([]);
 let fetchInterval: number | null = null;
 let displayInterval: number | null = null;
 
-const MAX_CACHE_SIZE = 999999;
-const FETCH_INTERVAL = 5000; // 1秒获取一次
-const DISPLAY_INTERVAL = 10000; // 5秒切换一次
+const MAX_CACHE_SIZE = 10000; // 最大缓存 10000 张图片
+const CLEANUP_BATCH_SIZE = 2000; // 每次清理 2000 张
+const FETCH_INTERVAL = 3000; // 3秒获取一次
+const DISPLAY_INTERVAL = 5000; // 5秒切换一次
 
 const hasBackgroundImage = computed(
   () => !!randomImageUrl.value
@@ -154,18 +157,22 @@ async function fetchAndCacheImage() {
           imageCacheSet.value.add(finalUrl);
           imageBlobUrls.value.set(finalUrl, blobUrl);
           
-          // 限制缓存大小
+          // 限制缓存大小 - 大于 10000 张即清理最早的 2000 张
           const count = await imageDB.getCount();
           if (count > MAX_CACHE_SIZE) {
-            await imageDB.deleteOldest();
-            // 同步更新内存缓存
-            const removed = imageCache.value.shift();
-            if (removed) {
-              imageCacheSet.value.delete(removed);
-              const oldBlobUrl = imageBlobUrls.value.get(removed);
-              if (oldBlobUrl) {
-                URL.revokeObjectURL(oldBlobUrl);
-                imageBlobUrls.value.delete(removed);
+            // 批量删除最旧的 2000 张图片
+            const deletedCount = await imageDB.deleteOldestBatch(CLEANUP_BATCH_SIZE);
+            
+            // 同步更新内存缓存 - 移除前 deletedCount 张
+            for (let i = 0; i < deletedCount; i++) {
+              const removed = imageCache.value.shift();
+              if (removed) {
+                imageCacheSet.value.delete(removed);
+                const oldBlobUrl = imageBlobUrls.value.get(removed);
+                if (oldBlobUrl) {
+                  URL.revokeObjectURL(oldBlobUrl);
+                  imageBlobUrls.value.delete(removed);
+                }
               }
             }
           }

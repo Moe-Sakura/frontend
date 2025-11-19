@@ -225,6 +225,38 @@ class ImageDB {
   }
 
   /**
+   * 批量删除最旧的 N 张图片
+   * @param count 要删除的图片数量
+   */
+  async deleteOldestBatch(count: number): Promise<number> {
+    if (!this.db) await this.init();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([STORE_NAME], 'readwrite');
+      const objectStore = transaction.objectStore(STORE_NAME);
+      const index = objectStore.index('timestamp');
+      
+      let deletedCount = 0;
+      const request = index.openCursor();
+
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (cursor && deletedCount < count) {
+          cursor.delete();
+          deletedCount++;
+          cursor.continue();
+        } else {
+          resolve(deletedCount);
+        }
+      };
+
+      request.onerror = () => {
+        reject(new Error('批量删除失败'));
+      };
+    });
+  }
+
+  /**
    * 清空所有图片
    */
   async clear(): Promise<void> {

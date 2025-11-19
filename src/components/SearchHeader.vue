@@ -44,7 +44,7 @@
               type="search"
               placeholder="游戏或补丁关键字词*"
               required
-              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/98 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500"
+              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/98 dark:bg-slate-800/95 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-400 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500 dark:focus:border-purple-500"
             />
           </div>
 
@@ -57,9 +57,9 @@
               v-model="customApi"
               type="url"
               placeholder="自定义 API 地址 (可选)"
-              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/98 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500"
+              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/98 dark:bg-slate-800/95 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-400 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500 dark:focus:border-purple-500"
             />
-            <p class="text-xs text-white/90 drop-shadow-md mt-2 font-medium">
+            <p class="text-xs text-white/90 dark:text-slate-300 drop-shadow-md mt-2 font-medium">
               例如: https://api.searchgal.homes 或 http://127.0.0.1:8898
             </p>
           </div>
@@ -87,8 +87,8 @@
                 :class="[
                   'mode-chip px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2',
                   searchMode === 'game'
-                    ? 'bg-pink-500 text-white shadow-lg scale-105'
-                    : 'bg-white/90 text-gray-700 hover:bg-white',
+                    ? 'bg-pink-500 dark:bg-purple-600 text-white shadow-lg scale-105'
+                    : 'bg-white/90 dark:bg-slate-700/90 text-gray-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-600',
                 ]"
               >
                 <i class="fas fa-gamepad"></i>
@@ -100,8 +100,8 @@
                 :class="[
                   'mode-chip px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2',
                   searchMode === 'patch'
-                    ? 'bg-pink-500 text-white shadow-lg scale-105'
-                    : 'bg-white/90 text-gray-700 hover:bg-white',
+                    ? 'bg-pink-500 dark:bg-purple-600 text-white shadow-lg scale-105'
+                    : 'bg-white/90 dark:bg-slate-700/90 text-gray-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-600',
                 ]"
               >
                 <i class="fas fa-tools"></i>
@@ -126,7 +126,7 @@
             <!-- Version and GitHub Info -->
             <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-4">
               <div
-                class="px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-gray-600 font-medium shadow-md flex items-center gap-2 text-sm"
+                class="px-3 py-1.5 rounded-full bg-white/90 dark:bg-slate-700/90 backdrop-blur-md text-gray-600 dark:text-slate-300 font-medium shadow-md flex items-center gap-2 text-sm"
               >
                 <span>251007</span>
               </div>
@@ -134,7 +134,7 @@
                 href="https://github.com/Moe-Sakura/SearchGal"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-gray-700 hover:text-pink-500 font-medium hover:scale-105 transition-all shadow-md flex items-center gap-2 text-sm"
+                class="px-3 py-1.5 rounded-full bg-white/90 dark:bg-slate-700/90 backdrop-blur-md text-gray-700 dark:text-slate-200 hover:text-pink-500 dark:hover:text-purple-400 font-medium hover:scale-105 transition-all shadow-md flex items-center gap-2 text-sm"
               >
                 <i class="fab fa-github"></i>
                 <span>GitHub</span>
@@ -155,9 +155,9 @@
       >
         <div v-if="searchStore.errorMessage" class="w-full max-w-2xl">
           <div
-            class="bg-red-50 border-2 border-red-200 rounded-2xl p-4 shadow-lg"
+            class="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-800/50 rounded-2xl p-4 shadow-lg"
           >
-            <div class="flex items-center gap-3 text-red-700">
+            <div class="flex items-center gap-3 text-red-700 dark:text-red-300">
               <i class="fas fa-exclamation-circle text-2xl"></i>
               <div>
                 <strong class="font-bold">错误: </strong
@@ -171,15 +171,15 @@
       <!-- Usage Notice -->
       <div class="w-full max-w-4xl mt-6 sm:mt-8 px-2 sm:px-0 animate-fade-in animation-delay-1000">
         <div
-          class="usage-notice bg-white/75 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8"
+          class="usage-notice bg-white/75 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8"
         >
           <h2
-            class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2"
+            class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center gap-2"
           >
-            <i class="fas fa-info-circle text-pink-500"></i>
+            <i class="fas fa-info-circle text-pink-500 dark:text-purple-400"></i>
             使用须知
           </h2>
-          <ul class="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 leading-relaxed">
+          <ul class="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-slate-300 leading-relaxed">
             <li>
               • 首先，衷心感谢
               <a
@@ -294,11 +294,6 @@ onMounted(() => {
     searchQuery.value = urlParams.s;
     searchMode.value = urlParams.mode || 'game';
     customApi.value = urlParams.api || '';
-    
-    // 如果 URL 有参数，自动触发搜索
-    setTimeout(() => {
-      handleSearch();
-    }, 500);
   } else if (searchStore.searchQuery) {
     // 否则从 store 恢复
     searchQuery.value = searchStore.searchQuery;
@@ -320,13 +315,6 @@ onMounted(() => {
     searchQuery.value = params.s || '';
     searchMode.value = params.mode || 'game';
     customApi.value = params.api || '';
-    
-    // 如果有搜索关键字，自动搜索
-    if (params.s) {
-      setTimeout(() => {
-        handleSearch();
-      }, 100);
-    }
     
     setTimeout(() => {
       isUpdatingFromURL = false;
@@ -360,10 +348,6 @@ watch([searchQuery, searchMode, customApi], () => {
 function handleHistorySelect(history: SearchHistoryType) {
   searchQuery.value = history.query;
   searchMode.value = history.mode;
-  // 自动触发搜索
-  setTimeout(() => {
-    handleSearch();
-  }, 100);
 }
 
 async function handleSearch() {

@@ -10,7 +10,7 @@
   >
     <div
       v-if="searchStore.isVndbPanelOpen && searchStore.vndbInfo"
-      class="fixed inset-x-2 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 md:w-[28rem] lg:w-[32rem] max-h-[75vh] sm:max-h-[80vh] bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30 border border-white/30"
+      class="fixed inset-x-2 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 md:w-[28rem] lg:w-[32rem] max-h-[75vh] sm:max-h-[80vh] bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30 border border-white/30 dark:border-slate-700/50"
     >
       <!-- 标题栏 -->
       <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
@@ -69,19 +69,19 @@
         </div>
 
         <!-- 标题 -->
-        <h2 class="text-xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">
           <i class="fas fa-gamepad text-pink-500"></i>
           {{ searchStore.vndbInfo.mainName }}
         </h2>
 
         <!-- 原名 -->
-        <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 mb-4">
+        <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 dark:text-slate-400 mb-4">
           原名: {{ searchStore.vndbInfo.originalTitle }}
         </p>
 
         <!-- 别名 -->
         <div v-if="searchStore.vndbInfo.names.length > 1" class="mb-4">
-          <p class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+          <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
             <i class="fas fa-tag text-purple-500"></i>
             <span>别名</span>
           </p>
@@ -98,7 +98,7 @@
 
         <!-- 开发商 -->
         <div v-if="searchStore.vndbInfo.developers && searchStore.vndbInfo.developers.length > 0" class="mb-4">
-          <p class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+          <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
             <i class="fas fa-building text-indigo-500"></i>
             <span>开发商</span>
           </p>
@@ -115,7 +115,7 @@
 
         <!-- 平台 -->
         <div v-if="searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0" class="mb-4">
-          <p class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+          <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
             <i class="fas fa-desktop text-green-500"></i>
             <span>平台</span>
           </p>
@@ -134,14 +134,14 @@
         <div class="mb-4 grid grid-cols-1 gap-3">
           <!-- 游戏时长 -->
           <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-3 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
-            <div class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm">
+            <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
               <i class="fas fa-clock text-pink-500 text-lg"></i>
             </div>
             <div class="flex-1">
-              <p class="text-xs text-gray-500 mb-0.5">游戏时长</p>
-              <p class="text-sm font-semibold text-gray-800">
+              <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">游戏时长</p>
+              <p class="text-sm font-semibold text-gray-800 dark:text-slate-100">
                 {{ searchStore.vndbInfo.book_length }}
-                <span class="text-xs font-normal text-gray-500 ml-1">
+                <span class="text-xs font-normal text-gray-500 dark:text-slate-400 ml-1">
                   (约 {{ searchStore.vndbInfo.play_hours }} 小时)
                 </span>
               </p>
@@ -150,14 +150,14 @@
 
           <!-- 评分信息（如果有） -->
           <div v-if="searchStore.vndbInfo.rating" class="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl">
-            <div class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm">
+            <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
               <i class="fas fa-star text-yellow-500 text-lg"></i>
             </div>
             <div class="flex-1">
-              <p class="text-xs text-gray-500 mb-0.5">VNDB 评分</p>
-              <p class="text-sm font-semibold text-gray-800">
+              <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">VNDB 评分</p>
+              <p class="text-sm font-semibold text-gray-800 dark:text-slate-100">
                 {{ searchStore.vndbInfo.rating.toFixed(2) }} / 10
-                <span class="text-xs font-normal text-gray-500 ml-1">
+                <span class="text-xs font-normal text-gray-500 dark:text-slate-400 ml-1">
                   ({{ searchStore.vndbInfo.votecount }} 票)
                 </span>
               </p>
@@ -166,12 +166,12 @@
 
           <!-- 发行日期（如果有） -->
           <div v-if="searchStore.vndbInfo.released" class="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
-            <div class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm">
+            <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
               <i class="fas fa-calendar text-blue-500 text-lg"></i>
             </div>
             <div class="flex-1">
-              <p class="text-xs text-gray-500 mb-0.5">发行日期</p>
-              <p class="text-sm font-semibold text-gray-800">
+              <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">发行日期</p>
+              <p class="text-sm font-semibold text-gray-800 dark:text-slate-100">
                 {{ formatDate(searchStore.vndbInfo.released) }}
               </p>
             </div>
@@ -181,7 +181,7 @@
         <!-- 简介 -->
         <div v-if="searchStore.vndbInfo.description" class="mb-4">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-sm font-semibold text-gray-700">
+            <p class="text-sm font-semibold text-gray-700 dark:text-slate-200">
               <i class="fas fa-align-left text-pink-500 mr-1"></i>
               简介:
             </p>

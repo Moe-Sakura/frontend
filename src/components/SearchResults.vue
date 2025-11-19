@@ -5,7 +5,7 @@
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
         :data-platform="platformName"
-        class="result-card bg-white/90 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-fade-in-up"
+        class="result-card bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-fade-in-up"
         :class="getCardClass(platformData.color)"
       >
         <div class="p-3 sm:p-4 md:p-6">
@@ -22,16 +22,16 @@
                 {{ getRecommendText(platformData.color) }}
               </span>
             </h3>
-            <span class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-gray-100 text-gray-700 text-xs sm:text-sm font-medium flex items-center gap-1 shrink-0">
+            <span class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 text-xs sm:text-sm font-medium flex items-center gap-1 shrink-0">
               <i class="fas fa-hashtag text-xs"></i>
               {{ platformData.items.length }}
             </span>
           </div>
           
           <!-- 错误信息 -->
-          <div v-if="platformData.error" class="flex items-center gap-2 p-4 mb-4 bg-red-50 border border-red-200 rounded-lg">
-            <i class="fas fa-exclamation-circle text-red-700"></i>
-            <span class="text-red-700">{{ platformData.error }}</span>
+          <div v-if="platformData.error" class="flex items-center gap-2 p-4 mb-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 rounded-lg">
+            <i class="fas fa-exclamation-circle text-red-700 dark:text-red-300"></i>
+            <span class="text-red-700 dark:text-red-300">{{ platformData.error }}</span>
           </div>
           
           <!-- 搜索结果列表 -->
@@ -39,15 +39,15 @@
             <div
               v-for="(result, index) in paginatedResults(platformData)"
               :key="index"
-              class="result-item p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+              class="result-item p-2 sm:p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors border-b border-gray-100 dark:border-slate-700 last:border-0"
             >
               <div class="flex items-start gap-1.5 sm:gap-2">
-                <span class="text-gray-400 text-xs sm:text-sm mt-0.5 shrink-0">{{ getResultIndex(platformData, index) }}.</span>
+                <span class="text-gray-400 dark:text-slate-500 text-xs sm:text-sm mt-0.5 shrink-0">{{ getResultIndex(platformData, index) }}.</span>
                 <a
                   :href="result.url"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-blue-600 hover:text-blue-800 hover:underline font-medium flex-1 text-sm sm:text-base break-words"
+                  class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium flex-1 text-sm sm:text-base break-words"
                 >
                   {{ result.title }}
                 </a>
@@ -71,7 +71,7 @@
             <button
               @click="goToPage(platformName, platformData.currentPage - 1)"
               :disabled="platformData.currentPage === 1"
-              class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               <i class="fas fa-chevron-left"></i>
             </button>
@@ -84,8 +84,8 @@
                 :class="[
                   'min-w-10 h-10 px-3 rounded-lg font-medium transition-all',
                   page === platformData.currentPage
-                    ? 'bg-pink-500 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-pink-500 dark:bg-purple-600 text-white shadow-lg'
+                    : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600'
                 ]"
               >
                 {{ page }}
@@ -95,12 +95,12 @@
             <button
               @click="goToPage(platformName, platformData.currentPage + 1)"
               :disabled="platformData.currentPage === getTotalPages(platformData)"
-              class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               <i class="fas fa-chevron-right"></i>
             </button>
             
-            <span class="ml-2 text-sm text-gray-600">
+            <span class="ml-2 text-sm text-gray-600 dark:text-slate-400">
               第 {{ platformData.currentPage }} / {{ getTotalPages(platformData) }} 页
             </span>
           </div>
