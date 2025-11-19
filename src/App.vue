@@ -40,8 +40,8 @@ let displayInterval: number | null = null;
 
 const MAX_CACHE_SIZE = 10000; // 最大缓存 10000 张图片
 const CLEANUP_BATCH_SIZE = 2000; // 每次清理 2000 张
-const FETCH_INTERVAL = 3000; // 3秒获取一次
-const DISPLAY_INTERVAL = 5000; // 5秒切换一次
+const FETCH_INTERVAL = 5000; // 5秒获取一次
+const DISPLAY_INTERVAL = 10000; // 10秒切换一次
 
 const hasBackgroundImage = computed(
   () => !!randomImageUrl.value
@@ -202,6 +202,48 @@ async function fetchAndCacheImage() {
   }
 }
 
+// 转场动画类型
+const transitionTypes = [
+  'transition-fade',
+  'transition-zoom',
+  'transition-slide-left',
+  'transition-slide-right',
+  'transition-blur',
+  'transition-rotate'
+];
+
+// 随机选择转场动画
+function getRandomTransition(): string {
+  return transitionTypes[Math.floor(Math.random() * transitionTypes.length)];
+}
+
+// 应用转场动画
+function applyTransition() {
+  const bgLayer = document.getElementById('background-layer');
+  if (!bgLayer) return;
+  
+  const transitionClass = getRandomTransition();
+  bgLayer.classList.add(transitionClass);
+  
+  // 动画结束后移除类
+  setTimeout(() => {
+    bgLayer.classList.remove(transitionClass);
+  }, 1500); // 最长动画时间
+}
+
+// 重启慢慢放大动画
+function restartSlowZoom() {
+  const bgLayer = document.getElementById('background-layer');
+  if (!bgLayer) return;
+  
+  // 移除动画，触发重排
+  bgLayer.style.animation = 'none';
+  // 强制重排
+  void bgLayer.offsetHeight;
+  // 重新应用动画
+  bgLayer.style.animation = 'slowZoom 10s ease-out forwards';
+}
+
 // 从洗牌队列中取出下一张图片（预加载后再切换）
 async function displayNextImage() {
   // 如果队列为空，重新洗牌
@@ -232,8 +274,16 @@ async function displayNextImage() {
     // 预加载图片，确保加载完成后再切换
     const preloadImg = new Image();
     preloadImg.onload = () => {
+      // 应用随机转场动画
+      applyTransition();
+      
       // 图片加载完成，平滑切换
       randomImageUrl.value = nextImageUrl;
+      
+      // 重启慢慢放大动画
+      setTimeout(() => {
+        restartSlowZoom();
+      }, 100); // 等待图片切换完成
     };
     preloadImg.onerror = () => {
       // 加载失败，尝试下一张

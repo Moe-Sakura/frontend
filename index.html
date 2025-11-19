@@ -214,9 +214,139 @@
         background-position: center;
         background-repeat: no-repeat;
         z-index: -2;
-        /* 平滑过渡，避免闪白屏 */
-        transition: background-image 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        /* 默认淡入淡出过渡 */
+        transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        /* 持续的慢慢放大动画 */
+        animation: slowZoom 10s ease-out forwards;
     }
+
+      /* 持续慢慢放大动画 */
+      @keyframes slowZoom {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.1);
+        }
+      }
+
+      /* 转场动画类 */
+      #background-layer.transition-fade {
+        animation: fadeTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-zoom {
+        animation: zoomTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-slide-left {
+        animation: slideLeftTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-slide-right {
+        animation: slideRightTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-blur {
+        animation: blurTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #background-layer.transition-rotate {
+        animation: rotateTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* 淡入淡出动画 */
+      @keyframes fadeTransition {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      /* 缩放动画 */
+      @keyframes zoomTransition {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0;
+          transform: scale(1.1);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* 左滑动画 */
+      @keyframes slideLeftTransition {
+        0% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        50% {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* 右滑动画 */
+      @keyframes slideRightTransition {
+        0% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        50% {
+          opacity: 0;
+          transform: translateX(30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* 模糊动画 */
+      @keyframes blurTransition {
+        0% {
+          opacity: 1;
+          filter: blur(0px);
+        }
+        50% {
+          opacity: 0.3;
+          filter: blur(10px);
+        }
+        100% {
+          opacity: 1;
+          filter: blur(0px);
+        }
+      }
+
+      /* 旋转动画 */
+      @keyframes rotateTransition {
+        0% {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+        }
+        50% {
+          opacity: 0;
+          transform: scale(0.95) rotate(5deg);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+        }
+      }
 
       /* 默认背景纹理 - 白天模式 */
     #background-layer::before {
@@ -260,6 +390,44 @@
       /* 黑夜模式遮罩 */
       .dark #background-layer::after {
         background: rgba(15, 23, 42, 0.4);
+      }
+
+      /* 暗色模式强制样式 */
+      .dark input[type="search"],
+      .dark input[type="url"],
+      .dark input[type="text"],
+      .dark textarea {
+        background-color: rgba(30, 41, 59, 0.95) !important;
+        color: rgb(226, 232, 240) !important;
+        border-color: rgba(71, 85, 105, 0.5) !important;
+      }
+
+      .dark input::placeholder,
+      .dark textarea::placeholder {
+        color: rgba(148, 163, 184, 0.7) !important;
+      }
+
+      .dark input:focus,
+      .dark textarea:focus {
+        border-color: rgb(139, 92, 246) !important;
+      }
+
+      /* 暗色模式下的卡片和容器 */
+      .dark .usage-notice {
+        background-color: rgba(30, 41, 59, 0.9) !important;
+        color: rgb(203, 213, 225) !important;
+      }
+
+      .dark .usage-notice h2 {
+        color: rgb(226, 232, 240) !important;
+      }
+
+      .dark .usage-notice strong {
+        color: rgb(226, 232, 240) !important;
+      }
+
+      .dark .usage-notice a {
+        color: rgb(147, 197, 253) !important;
       }
 
       /* 加载动画 */
