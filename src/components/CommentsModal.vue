@@ -24,24 +24,24 @@
       >
         <div
           v-if="searchStore.isCommentsModalOpen"
-              class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] mx-4 flex flex-col overflow-hidden border border-white/30 dark:border-slate-700/50"
+          class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] mx-4 flex flex-col overflow-hidden border border-white/30 dark:border-slate-700/50"
           @click.stop
         >
           <!-- 标题栏 -->
-              <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-pink-100 dark:border-slate-700">
-                <i class="fas fa-comments text-pink-500 dark:text-purple-400 text-xl sm:text-2xl"></i>
-                <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-slate-100 flex-1">评论区</h2>
+          <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-pink-100 dark:border-slate-700">
+            <i class="fas fa-comments text-pink-500 dark:text-purple-400 text-xl sm:text-2xl" />
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-slate-100 flex-1">评论区</h2>
             <button
+              class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-pink-50 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-pink-500 dark:hover:text-purple-400 transition-all duration-200"
               @click="closeModal"
-                  class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-pink-50 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-pink-500 dark:hover:text-purple-400 transition-all duration-200"
             >
-              <i class="fas fa-times text-xl"></i>
+              <i class="fas fa-times text-xl" />
             </button>
           </div>
 
           <!-- 内容区域 -->
           <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
-            <div id="Comments"></div>
+            <div id="Comments" />
           </div>
         </div>
       </Transition>
@@ -59,7 +59,7 @@ let artalkInstance: any = null
 let isClosing = false
 
 function closeModal() {
-  if (isClosing) return
+  if (isClosing) {return}
   isClosing = true
   
   searchStore.toggleCommentsModal()

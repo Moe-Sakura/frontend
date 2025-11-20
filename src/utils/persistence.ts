@@ -38,7 +38,7 @@ export function saveSearchState(state: Omit<SearchState, 'version' | 'timestamp'
     const stateToSave: SearchState = {
       version: STORAGE_VERSION,
       timestamp: Date.now(),
-      ...state
+      ...state,
     }
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave))
@@ -53,7 +53,7 @@ export function saveSearchState(state: Omit<SearchState, 'version' | 'timestamp'
 export function loadSearchState(): SearchState | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (!stored) return null
+    if (!stored) {return null}
     
     const state: SearchState = JSON.parse(stored)
     
@@ -100,7 +100,7 @@ export function saveSearchHistory(history: SearchHistory): void {
     
     // 移除重复的搜索（相同 query 和 mode）
     historyList = historyList.filter(
-      item => !(item.query === history.query && item.mode === history.mode)
+      item => !(item.query === history.query && item.mode === history.mode),
     )
     
     // 添加新搜索到开头
@@ -124,7 +124,7 @@ export function loadSearchHistory(): SearchHistory[] {
   try {
     const HISTORY_KEY = 'searchgal_history'
     const stored = localStorage.getItem(HISTORY_KEY)
-    if (!stored) return []
+    if (!stored) {return []}
     
     const historyList: SearchHistory[] = JSON.parse(stored)
     
@@ -155,8 +155,8 @@ export function clearSearchHistory(): void {
 export function getStorageInfo(): { used: number; total: number; percentage: number } {
   try {
     let used = 0
-    for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+    for (const key in localStorage) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
         used += localStorage[key].length + key.length
       }
     }

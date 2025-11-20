@@ -29,13 +29,13 @@
         >
           <!-- 标题栏 -->
           <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-pink-100 dark:border-slate-700">
-            <i class="fas fa-cog text-pink-500 dark:text-purple-400 text-xl sm:text-2xl"></i>
+            <i class="fas fa-cog text-pink-500 dark:text-purple-400 text-xl sm:text-2xl" />
             <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-slate-100 flex-1">设置</h2>
             <button
-              @click="close"
               class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-pink-50 text-gray-500 hover:text-pink-500 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-purple-400 transition-all duration-200"
+              @click="close"
             >
-              <i class="fas fa-times text-xl"></i>
+              <i class="fas fa-times text-xl" />
             </button>
           </div>
 
@@ -45,7 +45,7 @@
               <!-- API 设置 -->
               <div class="setting-section">
                 <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-slate-100 mb-3 flex items-center gap-2">
-                  <i class="fas fa-server text-pink-500 dark:text-purple-400"></i>
+                  <i class="fas fa-server text-pink-500 dark:text-purple-400" />
                   <span>API 设置</span>
                 </h3>
                 
@@ -56,7 +56,7 @@
                       自定义 API 地址
                     </label>
                     <div class="relative">
-                      <i class="fas fa-link absolute left-3 sm:left-4 top-3 sm:top-4 text-gray-400 text-lg sm:text-xl pointer-events-none z-10"></i>
+                      <i class="fas fa-link absolute left-3 sm:left-4 top-3 sm:top-4 text-gray-400 text-lg sm:text-xl pointer-events-none z-10" />
                       <input
                         v-model="localCustomApi"
                         type="url"
@@ -72,7 +72,7 @@
                   <!-- API 状态 -->
                   <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4">
                     <div class="flex items-start gap-3">
-                      <i class="fas fa-info-circle text-blue-500 dark:text-blue-400 text-lg mt-0.5"></i>
+                      <i class="fas fa-info-circle text-blue-500 dark:text-blue-400 text-lg mt-0.5" />
                       <div class="flex-1 text-sm text-blue-700 dark:text-blue-300">
                         <p class="font-semibold mb-1">关于自定义 API</p>
                         <p>您可以使用自己部署的后端 API 进行搜索。API 需要兼容 SearchGal 的接口规范。</p>
@@ -89,17 +89,17 @@
           <!-- 底部操作栏 -->
           <div class="flex items-center justify-end gap-3 px-4 sm:px-6 py-4 border-t border-pink-100 dark:border-slate-700">
             <button
-              @click="reset"
               class="px-4 py-2 rounded-xl text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all font-medium"
+              @click="reset"
             >
-              <i class="fas fa-undo mr-2"></i>
+              <i class="fas fa-undo mr-2" />
               重置
             </button>
             <button
-              @click="save"
               class="px-6 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 dark:from-purple-600 dark:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+              @click="save"
             >
-              <i class="fas fa-check mr-2"></i>
+              <i class="fas fa-check mr-2" />
               保存
             </button>
           </div>

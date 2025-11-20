@@ -3,55 +3,55 @@
     <!-- 回到顶部按钮 -->
     <button
       v-show="showScrollToTop"
-      @click="scrollToTop"
       aria-label="回到顶部"
       class="fab-button scroll-top-btn"
+      @click="scrollToTop"
     >
-      <i class="fas fa-arrow-up"></i>
+      <i class="fas fa-arrow-up" />
     </button>
 
     <!-- 站点导航按钮 -->
     <button
       v-show="searchStore.hasResults"
-      @click="togglePlatformNav"
       :aria-label="showPlatformNav ? '关闭站点导航' : '打开站点导航'"
       class="fab-button nav-btn"
       :class="{ 'nav-open': showPlatformNav }"
+      @click="togglePlatformNav"
     >
       <i
         :class="
           showPlatformNav ? 'fas fa-times' : 'fas fa-th'
         "
-      ></i>
+      />
     </button>
 
     <!-- 作品介绍按钮 -->
     <button
       v-show="searchStore.vndbInfo"
-      @click="toggleVndbPanel"
       :aria-label="searchStore.isVndbPanelOpen ? '关闭作品介绍' : '打开作品介绍'"
       class="fab-button vndb-btn"
       :class="{ 'vndb-open': searchStore.isVndbPanelOpen }"
+      @click="toggleVndbPanel"
     >
       <i
         :class="
           searchStore.isVndbPanelOpen ? 'fas fa-times' : 'fas fa-book'
         "
-      ></i>
+      />
     </button>
 
     <!-- 评论按钮 -->
     <button
-      @click="toggleComments"
       :aria-label="searchStore.isCommentsModalOpen ? '关闭评论' : '打开评论'"
       class="fab-button comments-btn"
       :class="{ 'comments-open': searchStore.isCommentsModalOpen }"
+      @click="toggleComments"
     >
       <i
         :class="
           searchStore.isCommentsModalOpen ? 'fas fa-times' : 'fas fa-comment'
         "
-      ></i>
+      />
     </button>
 
     <!-- 站点导航面板 -->
@@ -70,7 +70,7 @@
       >
         <div class="p-3 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
           <div class="flex items-center gap-2">
-            <i class="fas fa-th text-pink-500 text-sm"></i>
+            <i class="fas fa-th text-pink-500 text-sm" />
             <span class="font-bold text-sm text-gray-800">站点导航</span>
           </div>
         </div>
@@ -79,11 +79,11 @@
           <button
             v-for="[platformName, platformData] in searchStore.platformResults"
             :key="platformName"
-            @click="scrollToPlatform(platformName)"
             class="w-full px-3 py-2.5 flex items-center gap-2 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 text-left"
             :class="getItemClass(platformData.color)"
+            @click="scrollToPlatform(platformName)"
           >
-            <i :class="getIcon(platformData.color)" class="text-base"></i>
+            <i :class="getIcon(platformData.color)" class="text-base" />
             <span class="platform-name flex-1 text-xs font-medium text-gray-700 truncate">{{ platformName }}</span>
             <span class="count-badge px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
               {{ platformData.items.length }}
@@ -96,41 +96,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
-import { useSearchStore } from "@/stores/search";
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useSearchStore } from '@/stores/search'
 
-const searchStore = useSearchStore();
-const showScrollToTop = ref(false);
-const showPlatformNav = ref(false);
+const searchStore = useSearchStore()
+const showScrollToTop = ref(false)
+const showPlatformNav = ref(false)
 
 function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function toggleComments() {
-  searchStore.toggleCommentsModal();
+  searchStore.toggleCommentsModal()
 }
 
 function toggleVndbPanel() {
-  searchStore.toggleVndbPanel();
+  searchStore.toggleVndbPanel()
 }
 
 function togglePlatformNav() {
-  showPlatformNav.value = !showPlatformNav.value;
+  showPlatformNav.value = !showPlatformNav.value
 }
 
 function scrollToPlatform(platformName: string) {
-  const platformElements = document.querySelectorAll('[data-platform]');
+  const platformElements = document.querySelectorAll('[data-platform]')
   const targetElement = Array.from(platformElements).find(
-    el => el.getAttribute('data-platform') === platformName
-  ) as HTMLElement;
+    el => el.getAttribute('data-platform') === platformName,
+  ) as HTMLElement
 
   if (targetElement) {
-    const yOffset = -80;
-    const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-    window.scrollTo({ top: y, behavior: 'smooth' });
+    const yOffset = -80
+    const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset
+    window.scrollTo({ top: y, behavior: 'smooth' })
     // 滚动后关闭导航
-    showPlatformNav.value = false;
+    showPlatformNav.value = false
   }
 }
 
@@ -139,9 +139,9 @@ function getItemClass(color: string) {
     lime: 'item-lime',
     white: 'item-white',
     gold: 'item-gold',
-    red: 'item-red'
-  };
-  return classes[color] || 'item-white';
+    red: 'item-red',
+  }
+  return classes[color] || 'item-white'
 }
 
 function getIcon(color: string) {
@@ -149,23 +149,23 @@ function getIcon(color: string) {
     lime: 'fas fa-star',
     white: 'fas fa-circle',
     gold: 'fas fa-dollar-sign',
-    red: 'fas fa-times-circle'
-  };
-  return icons[color] || 'fas fa-circle';
+    red: 'fas fa-times-circle',
+  }
+  return icons[color] || 'fas fa-circle'
 }
 
 function handleScroll() {
-  showScrollToTop.value = window.scrollY > 200;
+  showScrollToTop.value = window.scrollY > 200
 }
 
 onMounted(() => {
-  window.addEventListener("scroll", handleScroll);
-  handleScroll();
-});
+  window.addEventListener('scroll', handleScroll)
+  handleScroll()
+})
 
 onUnmounted(() => {
-  window.removeEventListener("scroll", handleScroll);
-});
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style scoped>

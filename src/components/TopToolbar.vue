@@ -3,23 +3,23 @@
     <!-- 保存背景图按钮 -->
     <button
       v-show="hasBackgroundImage"
-      @click="saveBackgroundImage"
       :aria-label="showSaveTip ? '保存成功' : '保存背景图'"
       class="toolbar-button"
       :class="{ 'save-success': showSaveTip }"
+      @click="saveBackgroundImage"
     >
-      <i :class="showSaveTip ? 'fas fa-check' : 'fas fa-download'" class="text-lg sm:text-xl"></i>
+      <i :class="showSaveTip ? 'fas fa-check' : 'fas fa-download'" class="text-lg sm:text-xl" />
     </button>
 
     <!-- 分享搜索按钮 -->
     <button
       v-show="hasSearchResults"
-      @click="shareSearch"
       :aria-label="showCopiedTip ? '已复制' : '分享搜索'"
       class="toolbar-button"
       :class="{ 'share-copied': showCopiedTip }"
+      @click="shareSearch"
     >
-      <i :class="showCopiedTip ? 'fas fa-check' : 'fas fa-share-alt'" class="text-lg sm:text-xl"></i>
+      <i :class="showCopiedTip ? 'fas fa-check' : 'fas fa-share-alt'" class="text-lg sm:text-xl" />
     </button>
 
     <!-- GitHub 按钮 -->
@@ -30,23 +30,23 @@
       aria-label="访问 GitHub 仓库"
       class="toolbar-button github-button"
     >
-      <i class="fab fa-github text-lg sm:text-xl"></i>
+      <i class="fab fa-github text-lg sm:text-xl" />
     </a>
 
     <!-- 设置按钮 -->
     <button
-      @click="openSettings"
       aria-label="设置"
       class="toolbar-button settings-button"
+      @click="openSettings"
     >
-      <i class="fas fa-cog text-lg sm:text-xl"></i>
+      <i class="fas fa-cog text-lg sm:text-xl" />
     </button>
 
     <!-- 主题切换按钮 -->
     <button
-      @click="cycleTheme"
       :aria-label="`切换主题: ${getThemeLabel(themeMode)}`"
       class="toolbar-button theme-button"
+      @click="cycleTheme"
     >
       <Transition
         mode="out-in"
@@ -61,17 +61,17 @@
           v-if="themeMode === 'light'"
           key="light"
           class="fas fa-sun text-yellow-500 text-lg sm:text-xl"
-        ></i>
+        />
         <i
           v-else-if="themeMode === 'dark'"
           key="dark"
           class="fas fa-moon text-indigo-500 text-lg sm:text-xl"
-        ></i>
+        />
         <i
           v-else
           key="auto"
           class="fas fa-circle-half-stroke text-gray-600 dark:text-gray-400 text-lg sm:text-xl"
-        ></i>
+        />
       </Transition>
     </button>
     
@@ -106,7 +106,7 @@ import {
   saveThemePreference,
   getEffectiveTheme,
   applyTheme,
-  watchSystemTheme
+  watchSystemTheme,
 } from '@/utils/theme'
 
 const searchStore = useSearchStore()
@@ -139,7 +139,7 @@ function getThemeLabel(mode: ThemeMode): string {
   const labels = {
     light: '白天模式',
     dark: '黑夜模式',
-    auto: '跟随系统'
+    auto: '跟随系统',
   }
   return labels[mode]
 }
@@ -170,7 +170,7 @@ async function shareSearch() {
   const shareURL = generateShareURL({
     s: searchStore.searchQuery,
     mode: searchStore.searchMode,
-    api: searchStore.customApi
+    api: searchStore.customApi,
   })
   
   try {
@@ -210,7 +210,7 @@ function openSettings() {
 
 // 保存背景图（使用源格式和文件名）
 async function saveBackgroundImage() {
-  if (!props.currentBackgroundUrl) return
+  if (!props.currentBackgroundUrl) {return}
   
   try {
     const response = await fetch(props.currentBackgroundUrl)
@@ -245,7 +245,7 @@ async function saveBackgroundImage() {
           'image/gif': 'gif',
           'image/webp': 'webp',
           'image/bmp': 'bmp',
-          'image/svg+xml': 'svg'
+          'image/svg+xml': 'svg',
         }
         extension = mimeToExt[blob.type] || extension
       }
