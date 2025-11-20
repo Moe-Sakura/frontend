@@ -14,7 +14,7 @@
       <div class="bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 border border-white/30">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
-            <i class="fas fa-history text-pink-500 text-sm" />
+            <i class="fas fa-history text-theme-primary text-sm" />
             <span class="text-sm font-semibold text-gray-700">搜索历史</span>
             <span class="text-xs text-gray-500">({{ history.length }})</span>
           </div>
@@ -31,14 +31,14 @@
           <button
             v-for="(item, index) in history"
             :key="index"
-            class="history-item px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-pink-50 border border-gray-200 hover:border-pink-300 transition-all text-sm flex items-center gap-2 group"
+            class="history-item px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-theme-primary/10 border border-gray-200 hover:border-pink-300 transition-all text-sm flex items-center gap-2 group"
             @click="selectHistory(item)"
           >
             <i
               :class="item.mode === 'game' ? 'fas fa-gamepad' : 'fas fa-tools'"
-              class="text-xs text-gray-400 group-hover:text-pink-500 transition-colors"
+              class="text-xs text-gray-400 group-hover:text-theme-primary transition-colors"
             />
-            <span class="text-gray-700 group-hover:text-pink-600 font-medium">{{ item.query }}</span>
+            <span class="text-gray-700 group-hover:text-theme-primary-dark font-medium">{{ item.query }}</span>
             <span class="text-xs text-gray-400 group-hover:text-pink-400">{{ item.resultCount }}</span>
           </button>
         </div>

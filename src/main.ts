@@ -2,6 +2,12 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 
+// 全局基础样式（Tailwind CSS @layer base）
+import './styles/base.css'
+
+// 主题色全局样式（CSS 变量）
+import './styles/theme.css'
+
 // Font Awesome - 高优先级
 import '@fortawesome/fontawesome-free/css/all.min.css'
 

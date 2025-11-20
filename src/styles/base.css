@@ -1,0 +1,52 @@
+/**
+ * 全局基础样式
+ * 使用 Tailwind CSS @layer base 指令，避免在 index.html 中使用全局样式
+ */
+
+@layer base {
+  /* body 基础样式 */
+  body {
+    /* 字体栈 - 优先使用系统字体，支持中文 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB",
+      "Noto Sans CJK SC", "Source Han Sans SC", "WenQuanYi Micro Hei",
+      "Roboto", Helvetica, Arial, sans-serif;
+    
+    /* 行高 */
+    line-height: 1.6;
+    
+    /* 最小高度 */
+    min-height: 100vh;
+    
+    /* 换行 */
+    overflow-wrap: break-word;
+    
+    /* 边距 */
+    margin: 0;
+    padding: 0;
+    
+    /* 背景色 - 白天模式（粉色调） */
+    background: rgb(255, 251, 254);
+    
+    /* 文字颜色 - 白天模式 */
+    color: rgb(29, 27, 30);
+    
+    /* 平滑滚动 */
+    scroll-behavior: smooth;
+    
+    /* 过渡动画 */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* 暗色模式 - 移除背景色，不遮挡随机图 */
+  .dark body {
+    background: transparent;
+    color: rgb(226, 232, 240);
+  }
+
+  /* 图片懒加载过渡动画 */
+  img[loading="lazy"] {
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+

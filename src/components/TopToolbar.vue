@@ -86,7 +86,7 @@
     >
       <div
         v-if="showThemeTip"
-        class="absolute top-1/2 -translate-y-1/2 right-full mr-3 px-3 py-1.5 rounded-lg bg-white/95 dark:bg-gray-800/95 backdrop-blur-md shadow-lg border border-gray-200 dark:border-gray-700 whitespace-nowrap"
+        class="absolute top-1/2 -translate-y-1/2 right-full mr-3 px-3 py-1.5 rounded-lg bg-white/75 dark:bg-gray-800/75 backdrop-blur-xl shadow-lg border border-gray-200 dark:border-gray-700 whitespace-nowrap"
       >
         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
           {{ getThemeLabel(themeMode) }}

@@ -68,9 +68,9 @@
         class="fixed bottom-4 sm:bottom-6 right-16 sm:right-20 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/30 max-h-[70vh] flex flex-col"
         style="width: 200px"
       >
-        <div class="p-3 border-b border-gray-200 bg-gradient-to-r from-pink-50 to-purple-50">
+        <div class="p-3 border-b border-gray-200 bg-gradient-to-r from-theme-primary/5 to-theme-accent/5">
           <div class="flex items-center gap-2">
-            <i class="fas fa-th text-pink-500 text-sm" />
+            <i class="fas fa-th text-theme-primary text-sm" />
             <span class="font-bold text-sm text-gray-800">站点导航</span>
           </div>
         </div>
