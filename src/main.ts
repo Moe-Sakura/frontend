@@ -20,10 +20,10 @@ Pace.options = {
   document: true,     // 监听文档加载
   eventLag: true,     // 监听事件延迟
   elements: {
-    selectors: ['img', 'link', 'script', 'iframe']  // 监听资源加载
+    selectors: ['img', 'link', 'script', 'iframe'],  // 监听资源加载
   },
   restartOnPushState: true,   // 路由切换时重启
-  restartOnRequestAfter: 500  // 请求后重启
+  restartOnRequestAfter: 500,  // 请求后重启
 }
 
 // Artalk 评论系统
@@ -31,7 +31,7 @@ import 'artalk/dist/Artalk.css'
 
 // Fancybox - 图片灯箱和内容预览
 import { Fancybox } from '@fancyapps/ui'
-import "@fancyapps/ui/dist/fancybox/fancybox.css"
+import '@fancyapps/ui/dist/fancybox/fancybox.css'
 
 const app = createApp(App)
 const pinia = createPinia()

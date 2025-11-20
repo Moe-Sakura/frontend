@@ -52,7 +52,7 @@ export const useSearchStore = defineStore('search', () => {
 
   // 尝试恢复保存的状态
   function restoreState() {
-    if (isStateRestored.value) return
+    if (isStateRestored.value) {return}
     
     const savedState = loadSearchState()
     if (savedState) {
@@ -85,7 +85,7 @@ export const useSearchStore = defineStore('search', () => {
           searchMode: searchMode.value,
           customApi: customApi.value,
           platformResults: Array.from(platformResults.value.entries()),
-          vndbInfo: vndbInfo.value
+          vndbInfo: vndbInfo.value,
         })
       }
     }, 1000) // 1秒防抖
@@ -128,8 +128,8 @@ export const useSearchStore = defineStore('search', () => {
 
   function setPlatformResult(name: string, data: PlatformData) {
     // 确保有分页信息
-    if (!data.currentPage) data.currentPage = 1
-    if (!data.itemsPerPage) data.itemsPerPage = 10
+    if (!data.currentPage) {data.currentPage = 1}
+    if (!data.itemsPerPage) {data.itemsPerPage = 10}
     platformResults.value.set(name, data)
     
     // 保存搜索历史
@@ -141,7 +141,7 @@ export const useSearchStore = defineStore('search', () => {
         query: searchQuery.value,
         mode: searchMode.value,
         timestamp: Date.now(),
-        resultCount
+        resultCount,
       })
     }
   }
@@ -190,6 +190,6 @@ export const useSearchStore = defineStore('search', () => {
     setPlatformPage,
     toggleCommentsModal,
     toggleVndbPanel,
-    restoreState
+    restoreState,
   }
 })
