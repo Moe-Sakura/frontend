@@ -15,7 +15,7 @@
           href="https://status.searchgal.homes"
           target="_blank"
           rel="noopener noreferrer"
-          class="status-link px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/90 backdrop-blur-md flex items-center gap-1.5 sm:gap-2 text-green-600 text-sm sm:text-base font-semibold hover:scale-105 transition-transform shadow-lg"
+          class="status-link px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/70 dark:bg-slate-800/70 backdrop-blur-md flex items-center gap-1.5 sm:gap-2 text-green-600 dark:text-green-400 text-sm sm:text-base font-semibold hover:scale-105 transition-transform shadow-lg"
         >
           <i class="fas fa-check-circle" />
           <span>状态</span>
@@ -45,7 +45,7 @@
               type="search"
               placeholder="游戏或补丁关键字词*"
               required
-              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/98 dark:bg-slate-800/95 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-400 backdrop-blur-md shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border-2 border-transparent focus:border-pink-500 dark:focus:border-purple-500"
+              class="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl bg-white/50 dark:bg-slate-800/50 text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-400 backdrop-blur-2xl backdrop-saturate-150 shadow-lg focus:shadow-2xl focus:scale-[1.01] transition-all outline-none border border-white/40 dark:border-slate-700/40 focus:border-theme-primary/60 dark:focus:border-theme-accent/60"
             />
           </div>
 
@@ -54,7 +54,7 @@
             <button
               type="submit"
               :disabled="searchStore.searchDisabled"
-              class="search-button w-full py-3 sm:py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-pink-600 text-white font-semibold text-base sm:text-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              class="search-button w-full py-3 sm:py-4 rounded-2xl bg-gradient-to-r from-theme-primary/70 to-theme-primary-dark/70 dark:from-theme-accent/70 dark:to-theme-accent-dark/70 backdrop-blur-2xl backdrop-saturate-150 text-white font-semibold text-base sm:text-lg shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-white/30"
             >
               <i class="fas fa-search" />
               <span v-if="!searchStore.isSearching">开始搜索</span>
@@ -64,10 +64,10 @@
 
             <!-- Search Mode Selector - 胶囊开关 -->
             <div class="flex justify-center">
-              <div class="mode-switch-container relative bg-white/90 dark:bg-slate-700/90 backdrop-blur-md rounded-full p-1 shadow-lg">
+              <div class="mode-switch-container relative bg-white/50 dark:bg-slate-700/50 backdrop-blur-2xl backdrop-saturate-150 rounded-full p-1 shadow-lg border border-white/40 dark:border-slate-600/40">
                 <!-- 滑动背景 -->
                 <div
-                  class="mode-slider absolute top-1 bottom-1 rounded-full bg-gradient-to-r from-pink-500 to-pink-600 dark:from-purple-600 dark:to-purple-700 shadow-md transition-all duration-300 ease-out"
+                  class="mode-slider absolute top-1 bottom-1 rounded-full bg-gradient-to-r from-theme-primary/90 to-theme-primary-dark/90 dark:from-theme-accent/90 dark:to-theme-accent-dark/90 backdrop-blur-md shadow-md transition-all duration-300 ease-out"
                   :style="{
                     left: searchMode === 'game' ? '4px' : 'calc(50%)',
                     width: 'calc(50% - 4px)'
@@ -128,12 +128,12 @@
     <!-- Usage Notice - 独立于居中区域 -->
     <div class="w-full max-w-4xl mx-auto mt-8 sm:mt-12 px-2 sm:px-0 animate-fade-in animation-delay-1000">
       <div
-        class="usage-notice bg-white/75 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8"
+        class="usage-notice bg-white/50 dark:bg-slate-800/50 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8 border border-white/30 dark:border-slate-700/30"
       >
         <h2
           class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-slate-100 mb-4 sm:mb-6 flex items-center gap-2"
         >
-          <i class="fas fa-info-circle text-pink-500 dark:text-purple-400" />
+          <i class="fas fa-info-circle text-theme-primary dark:text-theme-accent" />
           使用须知
         </h2>
         <ul class="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-slate-300 leading-relaxed">

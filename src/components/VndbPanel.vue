@@ -10,10 +10,10 @@
   >
     <div
       v-if="searchStore.isVndbPanelOpen && searchStore.vndbInfo"
-      class="fixed inset-x-2 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 md:w-[28rem] lg:w-[32rem] max-h-[75vh] sm:max-h-[80vh] bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30 border border-white/30 dark:border-slate-700/50"
+      class="fixed inset-x-2 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 md:w-[28rem] lg:w-[32rem] max-h-[75vh] sm:max-h-[80vh] bg-white/60 dark:bg-slate-800/60 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30 border border-white/40 dark:border-slate-700/40"
     >
       <!-- 标题栏 -->
-      <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+      <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-theme-accent to-theme-primary text-white">
         <i class="fas fa-book text-lg sm:text-xl" />
         <h3 class="text-base sm:text-lg font-bold flex-1">作品介绍</h3>
         <button
@@ -28,7 +28,7 @@
       <div class="overflow-y-auto max-h-[calc(75vh-56px)] sm:max-h-[calc(80vh-64px)] p-3 sm:p-4 md:p-6 custom-scrollbar">
         <!-- 标题 -->
         <h2 class="text-xl font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">
-          <i class="fas fa-gamepad text-pink-500" />
+          <i class="fas fa-gamepad text-theme-primary" />
           {{ searchStore.vndbInfo.mainName }}
         </h2>
 
@@ -57,14 +57,14 @@
         <!-- 别名 -->
         <div v-if="searchStore.vndbInfo.names.length > 1" class="mb-4">
           <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
-            <i class="fas fa-tag text-purple-500" />
+            <i class="fas fa-tag text-theme-accent dark:text-theme-accent" />
             <span>别名</span>
           </p>
           <div class="flex flex-wrap gap-2">
             <span
               v-for="(name, index) in searchStore.vndbInfo.names.slice(0, 5)"
               :key="index"
-              class="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-full"
+              class="px-2 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full"
             >
               {{ name }}
             </span>
@@ -74,14 +74,14 @@
         <!-- 开发商 -->
         <div v-if="searchStore.vndbInfo.developers && searchStore.vndbInfo.developers.length > 0" class="mb-4">
           <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
-            <i class="fas fa-building text-indigo-500" />
+            <i class="fas fa-building text-indigo-500 dark:text-indigo-400" />
             <span>开发商</span>
           </p>
           <div class="flex flex-wrap gap-2">
             <span
               v-for="(dev, index) in searchStore.vndbInfo.developers"
               :key="index"
-              class="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full"
+              class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs rounded-full"
             >
               {{ dev }}
             </span>
@@ -91,14 +91,14 @@
         <!-- 平台 -->
         <div v-if="searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0" class="mb-4">
           <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
-            <i class="fas fa-desktop text-green-500" />
+            <i class="fas fa-desktop text-green-500 dark:text-green-400" />
             <span>平台</span>
           </p>
           <div class="flex flex-wrap gap-2">
             <span
               v-for="(platform, index) in searchStore.vndbInfo.platforms"
               :key="index"
-              class="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full"
+              class="px-2 py-1 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full"
             >
               {{ formatPlatform(platform) }}
             </span>
@@ -108,9 +108,9 @@
         <!-- 游戏信息卡片 -->
         <div class="mb-4 grid grid-cols-1 gap-3">
           <!-- 游戏时长 -->
-          <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-3 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl">
+          <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-3 p-3 bg-gradient-to-r from-theme-primary/5 to-theme-accent/5 dark:from-pink-900/20 dark:to-purple-900/20 rounded-xl border border-theme-primary/20 dark:border-theme-primary/30">
             <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
-              <i class="fas fa-clock text-pink-500 text-lg" />
+              <i class="fas fa-clock text-theme-primary dark:text-pink-400 text-lg" />
             </div>
             <div class="flex-1">
               <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">游戏时长</p>
@@ -124,9 +124,9 @@
           </div>
 
           <!-- 评分信息（如果有） -->
-          <div v-if="searchStore.vndbInfo.rating" class="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl">
+          <div v-if="searchStore.vndbInfo.rating" class="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl border border-yellow-100 dark:border-yellow-800/30">
             <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
-              <i class="fas fa-star text-yellow-500 text-lg" />
+              <i class="fas fa-star text-yellow-500 dark:text-yellow-400 text-lg" />
             </div>
             <div class="flex-1">
               <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">VNDB 评分</p>
@@ -140,9 +140,9 @@
           </div>
 
           <!-- 发行日期（如果有） -->
-          <div v-if="searchStore.vndbInfo.released" class="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
+          <div v-if="searchStore.vndbInfo.released" class="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30">
             <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
-              <i class="fas fa-calendar text-blue-500 text-lg" />
+              <i class="fas fa-calendar text-blue-500 dark:text-blue-400 text-lg" />
             </div>
             <div class="flex-1">
               <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">发行日期</p>
@@ -157,12 +157,12 @@
         <div v-if="searchStore.vndbInfo.description" class="mb-4">
           <div class="flex items-center justify-between mb-2">
             <p class="text-sm font-semibold text-gray-700 dark:text-slate-200">
-              <i class="fas fa-align-left text-pink-500 mr-1" />
+              <i class="fas fa-align-left text-theme-primary dark:text-pink-400 mr-1" />
               简介:
             </p>
             <button
               v-if="!isTranslating && !translatedDescription"
-              class="px-3 py-1 text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:from-purple-600 hover:to-pink-600 transition-all shadow-sm hover:shadow-md flex items-center gap-1"
+              class="px-3 py-1 text-xs bg-gradient-to-r from-theme-accent to-theme-primary text-white rounded-full hover:from-theme-accent-dark hover:to-theme-primary-dark transition-all shadow-sm hover:shadow-md flex items-center gap-1"
               @click="handleTranslate"
             >
               <i class="fas fa-language" />
@@ -170,25 +170,25 @@
             </button>
             <button
               v-if="translatedDescription && !isTranslating"
-              class="px-3 py-1 text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-full hover:from-gray-600 hover:to-gray-700 transition-all shadow-sm hover:shadow-md flex items-center gap-1"
+              class="px-3 py-1 text-xs bg-gradient-to-r from-slate-500 to-slate-600 dark:from-slate-600 dark:to-slate-700 text-white rounded-full hover:from-slate-600 hover:to-slate-700 dark:hover:from-slate-700 dark:hover:to-slate-800 transition-all shadow-sm hover:shadow-md flex items-center gap-1"
               @click="showOriginal = !showOriginal"
             >
               <i class="fas fa-exchange-alt" />
               <span>{{ showOriginal ? '显示译文' : '显示原文' }}</span>
             </button>
           </div>
-          <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line bg-gray-50 rounded-xl p-4 relative">
+          <div class="text-sm text-gray-700 dark:text-slate-200 leading-relaxed whitespace-pre-line bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 relative border border-gray-200 dark:border-slate-700">
             <!-- 翻译中 -->
-            <div v-if="isTranslating" class="flex flex-col items-center justify-center gap-2 text-purple-500 py-4">
+            <div v-if="isTranslating" class="flex flex-col items-center justify-center gap-2 text-theme-accent dark:text-theme-accent py-4">
               <i class="fas fa-spinner fa-spin text-2xl" />
               <span>AI 翻译中，请稍候...</span>
             </div>
             <!-- 翻译失败 -->
-            <div v-else-if="translateError" class="flex flex-col items-center justify-center gap-2 text-red-500 py-4">
+            <div v-else-if="translateError" class="flex flex-col items-center justify-center gap-2 text-red-500 dark:text-red-400 py-4">
               <i class="fas fa-exclamation-triangle text-2xl" />
               <span>翻译服务暂时不可用</span>
               <button
-                class="mt-2 px-3 py-1 text-xs bg-red-500 text-white rounded-full hover:bg-red-600 transition-all"
+                class="mt-2 px-3 py-1 text-xs bg-red-500 dark:bg-red-600 text-white rounded-full hover:bg-red-600 dark:hover:bg-red-700 transition-all"
                 @click="handleTranslate"
               >
                 <i class="fas fa-redo mr-1" />
@@ -201,7 +201,7 @@
                 {{ searchStore.vndbInfo.description }}
               </div>
               <div v-else class="relative">
-                <div class="absolute top-0 right-0 px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-bl-lg rounded-tr-lg shadow-sm">
+                <div class="absolute top-0 right-0 px-2 py-0.5 bg-gradient-to-r from-theme-accent to-theme-primary text-white text-xs rounded-bl-lg rounded-tr-lg shadow-sm">
                   <i class="fas fa-robot mr-1" />
                   AI 译文
                 </div>
@@ -241,7 +241,7 @@
             :href="vndbUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
+            class="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-theme-accent to-theme-primary text-white rounded-xl hover:from-theme-accent-dark hover:to-theme-primary-dark transition-all shadow-md hover:shadow-lg"
           >
             <i class="fas fa-external-link-alt" />
             <span>在 VNDB 查看详情</span>
@@ -370,13 +370,13 @@ function formatPlatform(platform: string): string {
 </script>
 
 <style scoped>
-/* 自定义滚动条 */
+/* 自定义滚动条 - 亮色模式 */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 10px;
 }
 
@@ -388,6 +388,19 @@ function formatPlatform(platform: string): string {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, rgb(219, 39, 119), rgb(124, 58, 237));
+}
+
+/* 自定义滚动条 - 暗色模式 */
+:global(.dark) .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+:global(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgb(139, 92, 246), rgb(99, 102, 241));
+}
+
+:global(.dark) .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgb(124, 58, 237), rgb(79, 70, 229));
 }
 </style>
 

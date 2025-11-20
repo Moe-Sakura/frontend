@@ -5,7 +5,7 @@
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
         :data-platform="platformName"
-        class="result-card bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-fade-in-up"
+        class="result-card bg-white/50 dark:bg-slate-800/50 backdrop-blur-2xl backdrop-saturate-150 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-fade-in-up border border-white/30 dark:border-slate-700/30"
         :class="getCardClass(platformData.color)"
       >
         <div class="p-3 sm:p-4 md:p-6">

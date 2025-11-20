@@ -1,5 +1,14 @@
 <template>
-  <div id="app" class="group/body">
+  <!-- 
+    #app 样式说明：
+    - min-h-screen: 最小高度 100vh
+    - relative: 相对定位
+    - 字体、行高、换行等样式由 Tailwind 的 @layer base 处理
+  -->
+  <div 
+    id="app" 
+    class="min-h-screen relative"
+  >
     <!-- 背景层 -->
     <div
       id="background-layer"
@@ -29,6 +38,8 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
+import { initTheme } from '@/utils/themeColors'
+import type { ThemePresetKey } from '@/types/theme'
 import StatsCorner from '@/components/StatsCorner.vue'
 import TopToolbar from '@/components/TopToolbar.vue'
 import SearchHeader from '@/components/SearchHeader.vue'
@@ -349,6 +360,9 @@ function stopAllIntervals() {
 }
 
 onMounted(async () => {
+  // 初始化主题
+  initTheme()
+  
   // 恢复保存的搜索状态
   searchStore.restoreState()
   
@@ -390,9 +404,10 @@ function closeSettings() {
   isSettingsOpen.value = false
 }
 
-function saveSettings(customApi: string) {
+function saveSettings(customApi: string, theme: ThemePresetKey) {
   // 保存自定义 API 到 store
   searchStore.setCustomApi(customApi)
+  // 主题已经在 SettingsModal 中保存到 localStorage
 }
 </script>
 
