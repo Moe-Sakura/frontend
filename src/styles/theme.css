@@ -96,6 +96,14 @@
   background-color: color-mix(in srgb, var(--theme-primary) 60%, transparent);
 }
 
+.bg-theme-primary\/10 {
+  background-color: color-mix(in srgb, var(--theme-primary) 10%, transparent);
+}
+
+.bg-theme-primary\/5 {
+  background-color: color-mix(in srgb, var(--theme-primary) 5%, transparent);
+}
+
 .bg-theme-accent\/80 {
   background-color: color-mix(in srgb, var(--theme-accent) 80%, transparent);
 }
@@ -104,12 +112,53 @@
   background-color: color-mix(in srgb, var(--theme-accent) 70%, transparent);
 }
 
+.bg-theme-accent\/30 {
+  background-color: color-mix(in srgb, var(--theme-accent) 30%, transparent);
+}
+
+.bg-theme-accent\/10 {
+  background-color: color-mix(in srgb, var(--theme-accent) 10%, transparent);
+}
+
 .text-theme-primary\/80 {
   color: color-mix(in srgb, var(--theme-primary) 80%, transparent);
 }
 
+.text-theme-accent\/70 {
+  color: color-mix(in srgb, var(--theme-accent) 70%, transparent);
+}
+
 .border-theme-primary\/60 {
   border-color: color-mix(in srgb, var(--theme-primary) 60%, transparent);
+}
+
+.border-theme-primary\/30 {
+  border-color: color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+
+.border-theme-primary\/20 {
+  border-color: color-mix(in srgb, var(--theme-primary) 20%, transparent);
+}
+
+.border-theme-primary\/10 {
+  border-color: color-mix(in srgb, var(--theme-primary) 10%, transparent);
+}
+
+/* Hover 状态带透明度 */
+.hover\:bg-theme-primary\/10:hover {
+  background-color: color-mix(in srgb, var(--theme-primary) 10%, transparent);
+}
+
+.hover\:border-theme-primary\/30:hover {
+  border-color: color-mix(in srgb, var(--theme-primary) 30%, transparent);
+}
+
+.group:hover .group-hover\:text-theme-primary {
+  color: var(--theme-primary);
+}
+
+.group:hover .group-hover\:text-theme-primary\/40 {
+  color: color-mix(in srgb, var(--theme-primary) 40%, transparent);
 }
 
 /* 渐变背景（带透明度） */

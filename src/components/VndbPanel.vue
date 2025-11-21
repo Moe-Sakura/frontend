@@ -64,7 +64,7 @@
             <span
               v-for="(name, index) in searchStore.vndbInfo.names.slice(0, 5)"
               :key="index"
-              class="px-2 py-1 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full"
+              class="px-2 py-1 bg-theme-accent/10 dark:bg-theme-accent/30 text-theme-accent dark:text-theme-accent/70 text-xs rounded-full"
             >
               {{ name }}
             </span>
@@ -108,9 +108,9 @@
         <!-- 游戏信息卡片 -->
         <div class="mb-4 grid grid-cols-1 gap-3">
           <!-- 游戏时长 -->
-          <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-3 p-3 bg-gradient-to-r from-theme-primary/5 to-theme-accent/5 dark:from-pink-900/20 dark:to-purple-900/20 rounded-xl border border-theme-primary/20 dark:border-theme-primary/30">
+          <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-3 p-3 bg-gradient-to-r from-theme-primary/5 to-theme-accent/5 dark:from-theme-primary/10 dark:to-theme-accent/10 rounded-xl border border-theme-primary/20 dark:border-theme-primary/30">
             <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
-              <i class="fas fa-clock text-theme-primary dark:text-pink-400 text-lg" />
+              <i class="fas fa-clock text-theme-primary dark:text-theme-primary text-lg" />
             </div>
             <div class="flex-1">
               <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">游戏时长</p>
@@ -157,7 +157,7 @@
         <div v-if="searchStore.vndbInfo.description" class="mb-4">
           <div class="flex items-center justify-between mb-2">
             <p class="text-sm font-semibold text-gray-700 dark:text-slate-200">
-              <i class="fas fa-align-left text-theme-primary dark:text-pink-400 mr-1" />
+              <i class="fas fa-align-left text-theme-primary dark:text-theme-primary mr-1" />
               简介:
             </p>
             <button
@@ -381,7 +381,7 @@ function formatPlatform(platform: string): string {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgb(236, 72, 153), rgb(139, 92, 246));
+  background: linear-gradient(180deg, var(--theme-primary), var(--theme-accent));
   border-radius: 10px;
   transition: background 0.3s ease;
 }
@@ -396,7 +396,7 @@ function formatPlatform(platform: string): string {
 }
 
 :global(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgb(139, 92, 246), rgb(99, 102, 241));
+  background: linear-gradient(180deg, var(--theme-accent), var(--theme-accent-dark));
 }
 
 :global(.dark) .custom-scrollbar::-webkit-scrollbar-thumb:hover {
