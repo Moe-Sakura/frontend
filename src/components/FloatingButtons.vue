@@ -220,7 +220,7 @@ onUnmounted(() => {
 }
 
 .comments-btn {
-  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119));
+  background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-dark));
   color: white;
 }
 
@@ -230,7 +230,7 @@ onUnmounted(() => {
 }
 
 .vndb-btn {
-  background: linear-gradient(135deg, rgb(139, 92, 246), rgb(124, 58, 237));
+  background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-dark));
   color: white;
 }
 

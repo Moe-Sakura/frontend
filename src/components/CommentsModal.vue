@@ -28,7 +28,7 @@
           @click.stop
         >
           <!-- 标题栏 -->
-          <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-pink-100 dark:border-slate-700">
+          <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-theme-primary/20 dark:border-slate-700">
             <i class="fas fa-comments text-theme-primary dark:text-theme-accent text-xl sm:text-2xl" />
             <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-slate-100 flex-1">评论区</h2>
             <button
@@ -143,7 +143,7 @@ onUnmounted(() => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgb(236, 72, 153), rgb(139, 92, 246));
+  background: linear-gradient(180deg, var(--theme-primary), var(--theme-accent));
   border-radius: 10px;
   transition: background 0.3s ease;
 }

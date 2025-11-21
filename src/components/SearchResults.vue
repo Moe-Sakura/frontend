@@ -83,7 +83,7 @@
                 :class="[
                   'min-w-10 h-10 px-3 rounded-lg font-medium transition-all',
                   page === platformData.currentPage
-                    ? 'bg-pink-500 dark:bg-purple-600 text-white shadow-lg'
+                    ? 'bg-theme-primary dark:bg-theme-accent text-white shadow-lg'
                     : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600'
                 ]"
                 @click="goToPage(platformName, page)"

@@ -296,6 +296,14 @@ watch([searchQuery, searchMode, customApi], () => {
   }
 })
 
+// 监听 store 的 customApi 变化（从设置中更新）
+watch(() => searchStore.customApi, (newApi) => {
+  // 只在不是由本地更新触发时才同步
+  if (customApi.value !== newApi) {
+    customApi.value = newApi
+  }
+})
+
 // 处理历史记录选择
 function handleHistorySelect(history: SearchHistoryType) {
   searchQuery.value = history.query

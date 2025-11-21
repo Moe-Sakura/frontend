@@ -99,7 +99,7 @@
                   </div>
                   
                   <!-- 预览提示 -->
-                  <div class="bg-gradient-to-r from-theme-primary/5 to-theme-accent/5 dark:from-pink-950/20 dark:to-purple-950/20 border border-theme-primary/30 dark:border-theme-primary/50 rounded-xl p-4">
+                  <div class="bg-gradient-to-r from-theme-primary/5 to-theme-accent/5 dark:from-theme-primary/10 dark:to-theme-accent/10 border border-theme-primary/30 dark:border-theme-primary/50 rounded-xl p-4">
                     <div class="flex items-start gap-3">
                       <i class="fas fa-lightbulb" style="color: var(--theme-primary)" />
                       <div class="flex-1 text-sm text-gray-700 dark:text-slate-300">
@@ -230,10 +230,14 @@ function close() {
 }
 
 function save() {
-  // 保存主题
+  // 保存主题到 localStorage
   saveTheme(localTheme.value)
+  // 更新原始主题，避免关闭时恢复
+  originalTheme.value = localTheme.value
+  // 发出保存事件
   emit('save', localCustomApi.value, localTheme.value)
-  close()
+  // 关闭模态框（不会恢复主题，因为 originalTheme 已更新）
+  emit('close')
 }
 
 function reset() {
@@ -244,7 +248,7 @@ function reset() {
 </script>
 
 <style scoped>
-/* 自定义滚动条 - 粉色渐变 */
+/* 自定义滚动条 - 使用主题色 */
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
 }
@@ -255,13 +259,13 @@ function reset() {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgb(236, 72, 153), rgb(139, 92, 246));
+  background: linear-gradient(180deg, var(--theme-primary), var(--theme-accent));
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgb(219, 39, 119), rgb(124, 58, 237));
+  background: linear-gradient(180deg, var(--theme-primary-dark), var(--theme-accent-dark));
 }
 
 /* 暗色模式滚动条 */
@@ -270,11 +274,11 @@ function reset() {
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgb(139, 92, 246), rgb(99, 102, 241));
+  background: linear-gradient(180deg, var(--theme-accent), var(--theme-accent-dark));
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgb(124, 58, 237), rgb(79, 70, 229));
+  background: linear-gradient(180deg, var(--theme-accent-dark), var(--theme-accent));
 }
 
 /* 设置区块 */

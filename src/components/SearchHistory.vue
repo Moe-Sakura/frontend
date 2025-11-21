@@ -31,7 +31,7 @@
           <button
             v-for="(item, index) in history"
             :key="index"
-            class="history-item px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-theme-primary/10 border border-gray-200 hover:border-pink-300 transition-all text-sm flex items-center gap-2 group"
+            class="history-item px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-theme-primary/10 border border-gray-200 hover:border-theme-primary/30 transition-all text-sm flex items-center gap-2 group"
             @click="selectHistory(item)"
           >
             <i
@@ -39,7 +39,7 @@
               class="text-xs text-gray-400 group-hover:text-theme-primary transition-colors"
             />
             <span class="text-gray-700 group-hover:text-theme-primary-dark font-medium">{{ item.query }}</span>
-            <span class="text-xs text-gray-400 group-hover:text-pink-400">{{ item.resultCount }}</span>
+            <span class="text-xs text-gray-400 group-hover:text-theme-primary/40">{{ item.resultCount }}</span>
           </button>
         </div>
       </div>
