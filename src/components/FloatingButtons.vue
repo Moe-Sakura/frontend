@@ -173,15 +173,21 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 18px;
-  border: none;
+  border: 1.5px solid rgba(255, 20, 147, 0.3);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4), 0 3px 10px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  
+  /* 液态玻璃效果 + 艳粉阴影 */
+  backdrop-filter: blur(15px) saturate(180%);
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  box-shadow: 
+    0 6px 20px rgba(255, 20, 147, 0.3),
+    0 3px 10px rgba(255, 105, 180, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -191,7 +197,10 @@ onUnmounted(() => {
     height: 52px;
     border-radius: 22px;
     font-size: 22px;
-    box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 
+      0 8px 24px rgba(255, 20, 147, 0.35),
+      0 4px 12px rgba(255, 105, 180, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   }
 }
 
@@ -205,38 +214,59 @@ onUnmounted(() => {
 }
 
 .fab-button:hover {
-  box-shadow: 0 12px 36px rgba(236, 72, 153, 0.5), 0 6px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 
+    0 12px 36px rgba(255, 20, 147, 0.45),
+    0 6px 20px rgba(255, 105, 180, 0.35),
+    0 0 40px rgba(255, 20, 147, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
   transform: translateY(-4px) scale(1.08) rotate(5deg);
+  border-color: rgba(255, 20, 147, 0.5);
 }
 
 .fab-button:active {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+  box-shadow: 
+    0 6px 20px rgba(255, 20, 147, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
 }
 
+/* 各按钮特定颜色 - 艳粉主题 */
 .scroll-top-btn {
-  background: linear-gradient(135deg, rgb(99, 102, 241), rgb(79, 70, 229));
+  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119));
   color: white;
 }
 
 .comments-btn {
-  background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-dark));
+  background: linear-gradient(135deg, #ff1493, #c71585);
   color: white;
 }
 
 .comments-btn.comments-open {
-  background: linear-gradient(135deg, rgb(156, 163, 175), rgb(107, 114, 128));
+  background: linear-gradient(135deg, rgb(255, 105, 180), rgb(199, 21, 133));
   color: white;
+  border-color: rgba(255, 105, 180, 0.5);
 }
 
 .vndb-btn {
-  background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-dark));
+  background: linear-gradient(135deg, #d946ef, #c026d3);
   color: white;
 }
 
 .vndb-btn.vndb-open {
-  background: linear-gradient(135deg, rgb(156, 163, 175), rgb(107, 114, 128));
+  background: linear-gradient(135deg, rgb(232, 121, 249), rgb(217, 70, 239));
   color: white;
+  border-color: rgba(232, 121, 249, 0.5);
+}
+
+.nav-btn {
+  background: linear-gradient(135deg, rgb(255, 20, 147), rgb(217, 70, 239));
+  color: white;
+}
+
+.nav-btn.nav-open {
+  background: linear-gradient(135deg, rgb(255, 105, 180), rgb(232, 121, 249));
+  color: white;
+  border-color: rgba(255, 105, 180, 0.5);
 }
 
 .fab-button i {
@@ -247,17 +277,7 @@ onUnmounted(() => {
   transform: scale(1.1);
 }
 
-.nav-btn {
-  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(5, 150, 105));
-  color: white;
-}
-
-.nav-btn.nav-open {
-  background: linear-gradient(135deg, rgb(156, 163, 175), rgb(107, 114, 128));
-  color: white;
-}
-
-/* 自定义滚动条 */
+/* 自定义滚动条 - 艳粉主题 */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
@@ -267,14 +287,15 @@ onUnmounted(() => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
+  background: linear-gradient(180deg, rgba(255, 20, 147, 0.5), rgba(217, 70, 239, 0.5));
   border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(156, 163, 175, 0.7);
+  background: linear-gradient(180deg, rgba(255, 20, 147, 0.7), rgba(217, 70, 239, 0.7));
 }
 
+/* 站点导航项图标颜色 */
 .item-lime i {
   color: rgb(132, 204, 22);
 }

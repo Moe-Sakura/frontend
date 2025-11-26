@@ -27,6 +27,7 @@
       <SettingsModal
         :is-open="isSettingsOpen"
         :custom-api="searchStore.customApi"
+        :custom-c-s-s="customCSS"
         @close="closeSettings"
         @save="saveSettings"
       />
@@ -38,8 +39,13 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
-import { initTheme } from '@/utils/themeColors'
-import type { ThemePresetKey } from '@/types/theme'
+import { 
+  getSystemTheme,
+  applyTheme, 
+  watchSystemTheme,
+  loadCustomCSS,
+  applyCustomCSS,
+} from '@/utils/theme'
 import StatsCorner from '@/components/StatsCorner.vue'
 import TopToolbar from '@/components/TopToolbar.vue'
 import SearchHeader from '@/components/SearchHeader.vue'
@@ -57,9 +63,11 @@ const imageBlobUrls = ref<Map<string, string>>(new Map()) // URL -> Blob URL 映
 const shuffledQueue = ref<string[]>([])
 let fetchInterval: number | null = null
 let displayInterval: number | null = null
+let systemThemeCleanup: (() => void) | null = null
 
 // 设置模态框
 const isSettingsOpen = ref(false)
+const customCSS = ref('')
 
 const MAX_CACHE_SIZE = 10000 // 最大缓存 10000 张图片
 const CLEANUP_BATCH_SIZE = 2000 // 每次清理 2000 张
@@ -360,8 +368,18 @@ function stopAllIntervals() {
 }
 
 onMounted(async () => {
-  // 初始化主题
-  initTheme()
+  // 初始化主题 - 跟随系统
+  const systemTheme = getSystemTheme()
+  applyTheme(systemTheme)
+  
+  // 加载并应用自定义CSS
+  customCSS.value = loadCustomCSS()
+  applyCustomCSS(customCSS.value)
+  
+  // 监听系统主题变化
+  systemThemeCleanup = watchSystemTheme((theme) => {
+    applyTheme(theme)
+  })
   
   // 恢复保存的搜索状态
   searchStore.restoreState()
@@ -385,6 +403,12 @@ onMounted(async () => {
 onUnmounted(() => {
   stopAllIntervals()
   
+  // 清理系统主题监听
+  if (systemThemeCleanup) {
+    systemThemeCleanup()
+    systemThemeCleanup = null
+  }
+  
   // 清理所有 Blob URL
   imageBlobUrls.value.forEach(blobUrl => {
     URL.revokeObjectURL(blobUrl)
@@ -404,10 +428,12 @@ function closeSettings() {
   isSettingsOpen.value = false
 }
 
-function saveSettings(customApi: string, theme: ThemePresetKey) {
+function saveSettings(customApi: string, newCustomCSS: string) {
   // 保存自定义 API 到 store
   searchStore.setCustomApi(customApi)
-  // 主题已经在 SettingsModal 中保存到 localStorage
+  // 保存并应用自定义CSS
+  customCSS.value = newCustomCSS
+  applyCustomCSS(newCustomCSS)
 }
 </script>
 

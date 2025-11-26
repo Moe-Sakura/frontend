@@ -25,8 +25,8 @@
     margin: 0;
     padding: 0;
     
-    /* 背景色 - 白天模式（粉色调） */
-    background: rgb(255, 251, 254);
+    /* 透明背景 - 不遮挡背景图 */
+    background: transparent;
     
     /* 文字颜色 - 白天模式 */
     color: rgb(29, 27, 30);
@@ -35,10 +35,10 @@
     scroll-behavior: smooth;
     
     /* 过渡动画 */
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background 0.3s ease, color 0.3s ease;
   }
 
-  /* 暗色模式 - 移除背景色，不遮挡随机图 */
+  /* 暗色模式 - 透明背景 */
   .dark body {
     background: transparent;
     color: rgb(226, 232, 240);

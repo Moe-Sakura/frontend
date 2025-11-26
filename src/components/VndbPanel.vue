@@ -10,10 +10,10 @@
   >
     <div
       v-if="searchStore.isVndbPanelOpen && searchStore.vndbInfo"
-      class="fixed inset-x-2 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 md:w-[28rem] lg:w-[32rem] max-h-[75vh] sm:max-h-[80vh] bg-white/60 dark:bg-slate-800/60 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30 border border-white/40 dark:border-slate-700/40"
+      class="glassmorphism-panel fixed inset-x-2 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 md:w-[28rem] lg:w-[32rem] max-h-[75vh] sm:max-h-[80vh] rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30"
     >
       <!-- 标题栏 -->
-      <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-theme-accent to-theme-primary text-white">
+      <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-[#d946ef] to-[#ff1493] text-white">
         <i class="fas fa-book text-lg sm:text-xl" />
         <h3 class="text-base sm:text-lg font-bold flex-1">作品介绍</h3>
         <button
@@ -28,7 +28,7 @@
       <div class="overflow-y-auto max-h-[calc(75vh-56px)] sm:max-h-[calc(80vh-64px)] p-3 sm:p-4 md:p-6 custom-scrollbar">
         <!-- 标题 -->
         <h2 class="text-xl font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">
-          <i class="fas fa-gamepad text-theme-primary" />
+          <i class="fas fa-gamepad text-[#ff1493]" />
           {{ searchStore.vndbInfo.mainName }}
         </h2>
 
@@ -57,7 +57,7 @@
         <!-- 别名 -->
         <div v-if="searchStore.vndbInfo.names.length > 1" class="mb-4">
           <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
-            <i class="fas fa-tag text-theme-accent dark:text-theme-accent" />
+            <i class="fas fa-tag text-[#d946ef] dark:text-[#e879f9]" />
             <span>别名</span>
           </p>
           <div class="flex flex-wrap gap-2">
