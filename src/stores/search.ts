@@ -28,6 +28,7 @@ export interface SearchResult {
 export interface PlatformData {
   name: string
   color: 'lime' | 'white' | 'gold' | 'red'
+  url?: string
   items: SearchResult[]
   error: string
   currentPage: number

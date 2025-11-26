@@ -18,6 +18,7 @@ export interface SearchResult {
 export interface PlatformResult {
   name: string
   color: 'lime' | 'white' | 'gold' | 'red'
+  url?: string
   items: SearchResult[]
   error: string
 }
@@ -142,15 +143,31 @@ export async function searchGameStream(
             callbacks.onProgress?.(data.progress.completed, data.progress.total)
 
             // 转换为我们的格式，保留 tags 标签信息
+            const items = data.result.items.map((item: any) => ({
+              platform: data.result.name,
+              title: item.name,
+              url: item.url,
+              tags: data.result.tags || [], // 保留平台标签（NoReq, Login, BTmag 等）
+            }))
+
+            // 提取平台URL：优先使用API返回的url/website，否则从第一个结果的URL中提取域名
+            let platformUrl = data.result.url || data.result.website || ''
+            
+            if (!platformUrl && items.length > 0 && items[0].url) {
+              try {
+                const firstUrl = new URL(items[0].url)
+                platformUrl = `${firstUrl.protocol}//${firstUrl.host}`
+              } catch (e) {
+                // URL解析失败，保持为空
+                console.warn(`无法从 ${items[0].url} 提取平台URL`)
+              }
+            }
+
             const platformResult: PlatformResult = {
               name: data.result.name,
               color: data.result.color || 'white',
-              items: data.result.items.map((item: any) => ({
-                platform: data.result.name,
-                title: item.name,
-                url: item.url,
-                tags: data.result.tags || [], // 保留平台标签（NoReq, Login, BTmag 等）
-              })),
+              url: platformUrl,
+              items: items,
               error: data.result.error || '',
             }
 

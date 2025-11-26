@@ -5,6 +5,12 @@ import App from './App.vue'
 // 全局基础样式（Tailwind CSS @layer base）
 import './styles/base.css'
 
+// 艳粉主题配色系统
+import './styles/theme.css'
+
+// 苹果同款液态玻璃效果
+import './styles/glassmorphism.css'
+
 // Font Awesome - 高优先级
 import '@fortawesome/fontawesome-free/css/all.min.css'
 

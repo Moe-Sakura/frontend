@@ -1,0 +1,131 @@
+/**
+ * 艳粉主题配色方案
+ * Deep Pink Color Scheme
+ */
+
+:root {
+  /* ========== 主色调 - 艳粉色系 ========== */
+  --color-primary: #ff1493;           /* DeepPink - 主要色 */
+  --color-primary-light: #ff69b4;     /* HotPink - 浅色 */
+  --color-primary-lighter: #ffb3d9;   /* 更浅的粉色 */
+  --color-primary-dark: #c71585;      /* MediumVioletRed - 深色 */
+  --color-primary-darker: #8b0a50;    /* 更深的粉色 */
+  
+  /* ========== 渐变色 ========== */
+  --gradient-primary: linear-gradient(135deg, #ff1493 0%, #d946ef 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #ff69b4 0%, #e879f9 100%);
+  --gradient-primary-reverse: linear-gradient(135deg, #d946ef 0%, #ff1493 100%);
+  
+  /* ========== 辅助色 ========== */
+  --color-accent: #d946ef;            /* 紫色辅助色 */
+  --color-accent-light: #e879f9;
+  --color-accent-dark: #c026d3;
+  
+  /* ========== 背景色 ========== */
+  --bg-primary: #fff5fa;              /* 浅粉色背景 */
+  --bg-secondary: #ffe4f2;            /* 粉色背景 */
+  --bg-tertiary: #ffb3d9;             /* 更深的粉色背景 */
+  
+  /* ========== 文本色 ========== */
+  --text-primary: #1d1b1e;            /* 主要文本 */
+  --text-secondary: #6b7280;          /* 次要文本 */
+  --text-tertiary: #9ca3af;           /* 第三级文本 */
+  
+  /* ========== 阴影 ========== */
+  --shadow-sm: 0 1px 2px rgba(255, 20, 147, 0.1);
+  --shadow-md: 0 4px 6px rgba(255, 20, 147, 0.15);
+  --shadow-lg: 0 10px 15px rgba(255, 20, 147, 0.2);
+  --shadow-xl: 0 20px 25px rgba(255, 20, 147, 0.25);
+  --shadow-glow: 0 0 20px rgba(255, 20, 147, 0.4);
+  
+  /* ========== 玻璃态效果 ========== */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-shadow: 0 8px 32px rgba(255, 20, 147, 0.08);
+}
+
+/* 暗色模式 */
+.dark {
+  /* ========== 主色调 ========== */
+  --color-primary: #ff69b4;
+  --color-primary-light: #ffb3d9;
+  --color-primary-lighter: #ffc9e6;
+  --color-primary-dark: #ff1493;
+  --color-primary-darker: #c71585;
+  
+  /* ========== 渐变色 ========== */
+  --gradient-primary: linear-gradient(135deg, #ff69b4 0%, #e879f9 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #ffb3d9 0%, #f0abfc 100%);
+  --gradient-primary-reverse: linear-gradient(135deg, #e879f9 0%, #ff69b4 100%);
+  
+  /* ========== 辅助色 ========== */
+  --color-accent: #e879f9;
+  --color-accent-light: #f0abfc;
+  --color-accent-dark: #d946ef;
+  
+  /* ========== 背景色 ========== */
+  --bg-primary: #0f172a;              /* 深色背景 */
+  --bg-secondary: #1e293b;            /* 次要背景 */
+  --bg-tertiary: #334155;             /* 第三级背景 */
+  
+  /* ========== 文本色 ========== */
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  
+  /* ========== 阴影 ========== */
+  --shadow-sm: 0 1px 2px rgba(255, 105, 180, 0.15);
+  --shadow-md: 0 4px 6px rgba(255, 105, 180, 0.2);
+  --shadow-lg: 0 10px 15px rgba(255, 105, 180, 0.25);
+  --shadow-xl: 0 20px 25px rgba(255, 105, 180, 0.3);
+  --shadow-glow: 0 0 25px rgba(255, 105, 180, 0.5);
+  
+  /* ========== 玻璃态效果 ========== */
+  --glass-bg: rgba(30, 41, 59, 0.8);
+  --glass-border: rgba(255, 105, 180, 0.2);
+  --glass-shadow: 0 8px 32px rgba(255, 105, 180, 0.15);
+}
+
+/* ========== Tailwind CSS 主题颜色扩展 ========== */
+@layer utilities {
+  /* 文本渐变 */
+  .text-gradient-pink {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* 背景渐变 */
+  .bg-gradient-pink {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-gradient-pink-reverse {
+    background: var(--gradient-primary-reverse);
+  }
+  
+  /* 边框渐变 */
+  .border-gradient-pink {
+    border: 1px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                var(--gradient-primary) border-box;
+  }
+  
+  /* 阴影 */
+  .shadow-pink-sm { box-shadow: var(--shadow-sm); }
+  .shadow-pink-md { box-shadow: var(--shadow-md); }
+  .shadow-pink-lg { box-shadow: var(--shadow-lg); }
+  .shadow-pink-xl { box-shadow: var(--shadow-xl); }
+  .shadow-pink-glow { box-shadow: var(--shadow-glow); }
+  
+  /* 悬停效果 */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+

@@ -192,11 +192,24 @@ async function saveBackgroundImage() {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: white;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 2px solid transparent;
+  
+  /* 液态玻璃效果 - 艳粉主题 */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 228, 242, 0.7) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  
+  /* 艳粉边框和阴影 */
+  border: 1.5px solid rgba(255, 20, 147, 0.2);
+  box-shadow: 
+    0 8px 16px rgba(255, 20, 147, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+    0 1px 0 0 rgba(255, 255, 255, 1) inset;
+  
+  color: rgb(199, 21, 133);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -221,19 +234,50 @@ async function saveBackgroundImage() {
 
 /* 暗色主题 */
 .dark .toolbar-button {
-  background: rgba(31, 41, 55, 0.9);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(51, 65, 85, 0.85) 0%,
+    rgba(30, 41, 59, 0.75) 100%
+  );
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  
+  border: 1.5px solid rgba(255, 105, 180, 0.3);
+  box-shadow: 
+    0 8px 16px rgba(255, 105, 180, 0.2),
+    0 0 0 1px rgba(255, 105, 180, 0.1) inset,
+    0 1px 0 0 rgba(255, 255, 255, 0.1) inset;
+  
+  color: rgb(255, 179, 217);
 }
 
 .toolbar-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  border-color: rgba(236, 72, 153, 0.5);
+  transform: scale(1.05) translateY(-2px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 228, 242, 0.85) 100%
+  );
+  box-shadow: 
+    0 12px 24px rgba(255, 20, 147, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 1px 0 0 rgba(255, 255, 255, 1) inset,
+    0 0 30px rgba(255, 105, 180, 0.2);
+  border-color: rgba(255, 20, 147, 0.35);
 }
 
 .dark .toolbar-button:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-  border-color: rgba(168, 85, 247, 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(51, 65, 85, 0.95) 0%,
+    rgba(30, 41, 59, 0.85) 100%
+  );
+  box-shadow: 
+    0 12px 24px rgba(255, 105, 180, 0.3),
+    0 0 0 1px rgba(255, 105, 180, 0.2) inset,
+    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
+    0 0 35px rgba(255, 20, 147, 0.25);
+  border-color: rgba(255, 105, 180, 0.45);
 }
 
 .toolbar-button:active {
@@ -242,41 +286,31 @@ async function saveBackgroundImage() {
 
 /* GitHub 按钮特殊样式 */
 .github-button {
-  color: rgb(31, 41, 55);
   text-decoration: none;
 }
 
-.dark .github-button {
-  color: rgb(226, 232, 240);
-}
-
-.github-button:hover {
-  border-color: rgba(31, 41, 55, 0.5);
-}
-
-.dark .github-button:hover {
-  border-color: rgba(226, 232, 240, 0.5);
-}
-
-/* 主题按钮特殊样式 */
-.theme-button:hover {
-  border-color: rgba(245, 158, 11, 0.5);
-}
-
-/* 保存成功状态 */
+/* 保存成功状态 - 艳粉渐变 */
 .save-success {
-  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(5, 150, 105)) !important;
+  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119)) !important;
   color: white !important;
+  border-color: rgba(236, 72, 153, 0.5) !important;
+  box-shadow: 
+    0 8px 20px rgba(236, 72, 153, 0.4),
+    0 0 30px rgba(236, 72, 153, 0.3) !important;
 }
 
 .save-success i {
   color: white !important;
 }
 
-/* 分享已复制状态 */
+/* 分享已复制状态 - 艳粉渐变 */
 .share-copied {
-  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(5, 150, 105)) !important;
+  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119)) !important;
   color: white !important;
+  border-color: rgba(236, 72, 153, 0.5) !important;
+  box-shadow: 
+    0 8px 20px rgba(236, 72, 153, 0.4),
+    0 0 30px rgba(236, 72, 153, 0.3) !important;
 }
 
 .share-copied i {

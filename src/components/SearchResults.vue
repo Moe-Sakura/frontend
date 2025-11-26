@@ -9,20 +9,54 @@
         :class="getCardClass(platformData.color)"
       >
         <div class="p-3 sm:p-4 md:p-6">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
-            <h3 class="text-lg sm:text-xl font-bold flex items-center gap-2 flex-wrap" :class="getTextColor(platformData.color)">
+          <!-- 站点标题行：网站名称 + 推荐标签 + 资源标签 + 结果数 -->
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <!-- 网站名称（可点击） -->
+            <a
+              v-if="platformData.url"
+              :href="platformData.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-lg sm:text-xl font-bold flex items-center gap-2 hover:opacity-80 hover:underline transition-all cursor-pointer"
+              :class="getTextColor(platformData.color)"
+              :title="`访问 ${platformData.name}`"
+            >
               <i :class="getPlatformIcon(platformData.color)" />
               {{ platformData.name }}
+              <i class="fas fa-external-link-alt text-xs opacity-60" />
+            </a>
+            <div
+              v-else
+              class="text-lg sm:text-xl font-bold flex items-center gap-2"
+              :class="getTextColor(platformData.color)"
+            >
+              <i :class="getPlatformIcon(platformData.color)" />
+              {{ platformData.name }}
+            </div>
+            
+            <!-- 推荐/付费标签 -->
+            <span
+              v-if="getRecommendText(platformData.color)"
+              class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1"
+              :class="getChipClass(platformData.color)"
+            >
+              <i :class="platformData.color === 'red' ? 'fas fa-times-circle' : 'fas fa-star'" />
+              {{ getRecommendText(platformData.color) }}
+            </span>
+            
+            <!-- 站点的所有标签（去重） -->
+            <template v-for="tag in getUniqueTags(platformData)" :key="tag">
               <span
-                v-if="getRecommendText(platformData.color)"
-                class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1"
-                :class="getChipClass(platformData.color)"
+                :class="getTagClass(tag)"
+                class="px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1"
               >
-                <i :class="platformData.color === 'red' ? 'fas fa-times-circle' : 'fas fa-star'" />
-                {{ getRecommendText(platformData.color) }}
+                <i :class="getTagIcon(tag)" class="text-[10px]" />
+                <span>{{ getTagLabel(tag) }}</span>
               </span>
-            </h3>
-            <span class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 text-xs sm:text-sm font-medium flex items-center gap-1 shrink-0">
+            </template>
+            
+            <!-- 结果数量 -->
+            <span class="ml-auto px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 text-xs sm:text-sm font-medium flex items-center gap-1 shrink-0">
               <i class="fas fa-hashtag text-xs" />
               {{ platformData.items.length }}
             </span>
@@ -41,6 +75,7 @@
               :key="index"
               class="result-item p-2 sm:p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors border-b border-gray-100 dark:border-slate-700 last:border-0"
             >
+              <!-- 标题行 -->
               <div class="flex items-start gap-1.5 sm:gap-2">
                 <span class="text-gray-400 dark:text-slate-500 text-xs sm:text-sm mt-0.5 shrink-0">{{ getResultIndex(platformData, index) }}.</span>
                 <a
@@ -52,16 +87,11 @@
                   {{ result.title }}
                 </a>
               </div>
-              <div v-if="result.tags && result.tags.length > 0" class="flex flex-wrap gap-1 mt-1.5 sm:mt-2 ml-4 sm:ml-6">
-                <span
-                  v-for="(tag, tagIndex) in result.tags"
-                  :key="tagIndex"
-                  :class="getTagClass(tag)"
-                  class="px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1"
-                >
-                  <i :class="getTagIcon(tag)" class="text-[10px]" />
-                  <span>{{ getTagLabel(tag) }}</span>
-                </span>
+              
+              <!-- 资源相对路径（从URL中提取） -->
+              <div v-if="result.url" class="flex items-center gap-1.5 sm:gap-2 mt-1 ml-4 sm:ml-6">
+                <i class="fas fa-link text-gray-400 dark:text-slate-500 text-xs" />
+                <span class="text-xs text-gray-500 dark:text-slate-400 break-all">{{ extractPath(result.url) }}</span>
               </div>
             </div>
           </div>
@@ -119,6 +149,29 @@ import { useSearchStore } from '@/stores/search'
 import type { PlatformData } from '@/stores/search'
 
 const searchStore = useSearchStore()
+
+// 从URL中提取路径
+function extractPath(url: string): string {
+  try {
+    const urlObj = new URL(url)
+    // 返回路径部分（去掉域名）
+    return urlObj.pathname + urlObj.search + urlObj.hash
+  } catch {
+    // 如果URL解析失败，返回完整URL
+    return url
+  }
+}
+
+// 获取站点所有结果的唯一标签
+function getUniqueTags(platformData: PlatformData) {
+  const allTags = new Set<string>()
+  platformData.items.forEach(item => {
+    if (item.tags && item.tags.length > 0) {
+      item.tags.forEach(tag => allTags.add(tag))
+    }
+  })
+  return Array.from(allTags)
+}
 
 function paginatedResults(platformData: PlatformData) {
   const start = (platformData.currentPage - 1) * platformData.itemsPerPage

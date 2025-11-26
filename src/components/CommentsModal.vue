@@ -24,15 +24,15 @@
       >
         <div
           v-if="searchStore.isCommentsModalOpen"
-          class="bg-white/60 dark:bg-slate-800/60 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] mx-4 flex flex-col overflow-hidden border border-white/40 dark:border-slate-700/40"
+          class="glassmorphism-modal rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] mx-4 flex flex-col overflow-hidden"
           @click.stop
         >
           <!-- 标题栏 -->
-          <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-theme-primary/20 dark:border-slate-700">
-            <i class="fas fa-comments text-theme-primary dark:text-theme-accent text-xl sm:text-2xl" />
+          <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-[#ff1493]/20 dark:border-slate-700">
+            <i class="fas fa-comments text-[#ff1493] dark:text-[#ff69b4] text-xl sm:text-2xl" />
             <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-slate-100 flex-1">评论区</h2>
             <button
-              class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-theme-primary/10 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-theme-primary dark:hover:text-theme-accent transition-all duration-200"
+              class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#ff1493]/10 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4] transition-all duration-200"
               @click="closeModal"
             >
               <i class="fas fa-times text-xl" />
