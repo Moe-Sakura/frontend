@@ -208,7 +208,7 @@
           <li>
             • 如果您觉得咱这小工具好用，请移步
             <a
-              href="https://github.com/Moe-Sakura/SearchGal"
+              href="https://github.com/Moe-Sakura"
               target="_blank"
               class="text-indigo-600 hover:underline font-semibold"
             >GitHub</a>

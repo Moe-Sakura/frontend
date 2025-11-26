@@ -24,7 +24,7 @@
 
     <!-- GitHub 按钮 -->
     <a
-      href="https://github.com/Moe-Sakura/SearchGal"
+      href="https://github.com/Moe-Sakura"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="访问 GitHub 仓库"
@@ -41,73 +41,13 @@
     >
       <i class="fas fa-cog text-lg sm:text-xl" />
     </button>
-
-    <!-- 主题切换按钮 -->
-    <button
-      :aria-label="`切换主题: ${getThemeLabel(themeMode)}`"
-      class="toolbar-button theme-button"
-      @click="cycleTheme"
-    >
-      <Transition
-        mode="out-in"
-        enter-active-class="transition-all duration-200 ease-out"
-        enter-from-class="opacity-0 scale-50 rotate-90"
-        enter-to-class="opacity-100 scale-100 rotate-0"
-        leave-active-class="transition-all duration-200 ease-in"
-        leave-from-class="opacity-100 scale-100 rotate-0"
-        leave-to-class="opacity-0 scale-50 -rotate-90"
-      >
-        <i
-          v-if="themeMode === 'light'"
-          key="light"
-          class="fas fa-sun text-yellow-500 text-lg sm:text-xl"
-        />
-        <i
-          v-else-if="themeMode === 'dark'"
-          key="dark"
-          class="fas fa-moon text-indigo-500 text-lg sm:text-xl"
-        />
-        <i
-          v-else
-          key="auto"
-          class="fas fa-circle-half-stroke text-gray-600 dark:text-gray-400 text-lg sm:text-xl"
-        />
-      </Transition>
-    </button>
-    
-    <!-- 主题提示 -->
-    <Transition
-      enter-active-class="transition-all duration-200 ease-out"
-      enter-from-class="opacity-0 translate-x-2"
-      enter-to-class="opacity-100 translate-x-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-x-0"
-      leave-to-class="opacity-0 translate-x-2"
-    >
-      <div
-        v-if="showThemeTip"
-        class="absolute top-1/2 -translate-y-1/2 right-full mr-3 px-3 py-1.5 rounded-lg bg-white/75 dark:bg-gray-800/75 backdrop-blur-xl shadow-lg border border-gray-200 dark:border-gray-700 whitespace-nowrap"
-      >
-        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {{ getThemeLabel(themeMode) }}
-        </span>
-      </div>
-    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { generateShareURL } from '@/utils/urlParams'
-import {
-  type ThemeMode,
-  loadThemePreference,
-  saveThemePreference,
-  getEffectiveTheme,
-  applyTheme,
-  watchSystemTheme,
-} from '@/utils/theme'
 
 const searchStore = useSearchStore()
 
@@ -124,46 +64,10 @@ const emit = defineEmits<{
 // 状态
 const showSaveTip = ref(false)
 const showCopiedTip = ref(false)
-const showThemeTip = ref(false)
-const themeMode = ref<ThemeMode>('auto')
-
-let systemThemeCleanup: (() => void) | null = null
-let tipTimeout: number | null = null
 
 // 计算属性
 const hasBackgroundImage = computed(() => !!props.currentBackgroundUrl)
 const hasSearchResults = computed(() => searchStore.hasResults)
-
-// 主题相关函数
-function getThemeLabel(mode: ThemeMode): string {
-  const labels = {
-    light: '白天模式',
-    dark: '黑夜模式',
-    auto: '跟随系统',
-  }
-  return labels[mode]
-}
-
-function cycleTheme() {
-  const modes: ThemeMode[] = ['light', 'dark', 'auto']
-  const currentIndex = modes.indexOf(themeMode.value)
-  const nextIndex = (currentIndex + 1) % modes.length
-  themeMode.value = modes[nextIndex]
-  
-  showThemeTip.value = true
-  if (tipTimeout) {
-    clearTimeout(tipTimeout)
-  }
-  tipTimeout = window.setTimeout(() => {
-    showThemeTip.value = false
-  }, 1500)
-}
-
-function updateTheme() {
-  const effectiveTheme = getEffectiveTheme(themeMode.value)
-  applyTheme(effectiveTheme)
-  saveThemePreference(themeMode.value)
-}
 
 // 分享搜索
 async function shareSearch() {
@@ -281,31 +185,6 @@ async function saveBackgroundImage() {
     // 静默处理
   }
 }
-
-// 生命周期
-onMounted(() => {
-  themeMode.value = loadThemePreference()
-  updateTheme()
-  
-  systemThemeCleanup = watchSystemTheme(() => {
-    if (themeMode.value === 'auto') {
-      updateTheme()
-    }
-  })
-})
-
-onUnmounted(() => {
-  if (systemThemeCleanup) {
-    systemThemeCleanup()
-  }
-  if (tipTimeout) {
-    clearTimeout(tipTimeout)
-  }
-})
-
-watch(themeMode, () => {
-  updateTheme()
-})
 </script>
 
 <style scoped>

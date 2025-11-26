@@ -25,8 +25,8 @@
     margin: 0;
     padding: 0;
     
-    /* 背景色 - 白天模式（粉色调） */
-    background: rgb(255, 251, 254);
+    /* 背景色 - 白天模式（艳粉调） */
+    background: rgb(255, 245, 250);
     
     /* 文字颜色 - 白天模式 */
     color: rgb(29, 27, 30);
@@ -38,7 +38,7 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* 暗色模式 - 移除背景色，不遮挡随机图 */
+  /* 暗色模式 - 透明背景，不遮挡随机图 */
   .dark body {
     background: transparent;
     color: rgb(226, 232, 240);
