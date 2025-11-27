@@ -11,14 +11,14 @@
     >
       <!-- 访问量 -->
       <div class="flex items-center gap-2">
-        <i class="fas fa-eye text-theme-primary dark:text-theme-accent" />
+        <Eye :size="16" class="text-theme-primary dark:text-theme-accent" />
         <span id="busuanzi_value_site_pv" class="font-semibold text-gray-800 dark:text-slate-100">0</span>
       </div>
       <!-- 分隔线 -->
       <div class="h-px bg-gray-300 dark:bg-slate-600" />
       <!-- 访客数 -->
       <div class="flex items-center gap-2">
-        <i class="fas fa-user text-theme-primary dark:text-theme-accent" />
+        <Users :size="16" class="text-theme-primary dark:text-theme-accent" />
         <span id="busuanzi_value_site_uv" class="font-semibold text-gray-800 dark:text-slate-100">0</span>
       </div>
     </div>
@@ -27,6 +27,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { Eye, Users } from 'lucide-vue-next'
 
 const showStats = ref(false)
 let checkInterval: number | null = null

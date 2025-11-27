@@ -8,7 +8,7 @@
       :class="{ 'save-success': showSaveTip }"
       @click="saveBackgroundImage"
     >
-      <i :class="showSaveTip ? 'fas fa-check' : 'fas fa-download'" class="text-lg sm:text-xl" />
+      <component :is="showSaveTip ? Check : Download" :size="20" />
     </button>
 
     <!-- 分享搜索按钮 -->
@@ -19,7 +19,7 @@
       :class="{ 'share-copied': showCopiedTip }"
       @click="shareSearch"
     >
-      <i :class="showCopiedTip ? 'fas fa-check' : 'fas fa-share-alt'" class="text-lg sm:text-xl" />
+      <component :is="showCopiedTip ? Check : Share2" :size="20" />
     </button>
 
     <!-- GitHub 按钮 -->
@@ -30,7 +30,7 @@
       aria-label="访问 GitHub 仓库"
       class="toolbar-button github-button"
     >
-      <i class="fab fa-github text-lg sm:text-xl" />
+      <Github :size="20" />
     </a>
 
     <!-- 设置按钮 -->
@@ -39,7 +39,7 @@
       class="toolbar-button settings-button"
       @click="openSettings"
     >
-      <i class="fas fa-cog text-lg sm:text-xl" />
+      <Settings :size="20" />
     </button>
   </div>
 </template>
@@ -48,6 +48,7 @@
 import { ref, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { generateShareURL } from '@/utils/urlParams'
+import { Check, Download, Share2, Github, Settings } from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
 

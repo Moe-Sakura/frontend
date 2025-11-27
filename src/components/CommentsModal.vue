@@ -10,7 +10,7 @@
   >
     <div
       v-if="searchStore.isCommentsModalOpen"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
       @click.self="closeModal"
     >
       <!-- 对话框 -->
@@ -24,23 +24,23 @@
       >
         <div
           v-if="searchStore.isCommentsModalOpen"
-          class="glassmorphism-modal rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] mx-4 flex flex-col overflow-hidden"
+          class="glassmorphism-modal rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl max-h-[90vh] mx-1 sm:mx-4 flex flex-col overflow-hidden"
           @click.stop
         >
           <!-- 标题栏 -->
-          <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-[#ff1493]/20 dark:border-slate-700">
-            <i class="fas fa-comments text-[#ff1493] dark:text-[#ff69b4] text-xl sm:text-2xl" />
-            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-slate-100 flex-1">评论区</h2>
+          <div class="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 border-b border-[#ff1493]/20 dark:border-slate-700">
+            <MessageCircle :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
+            <h2 class="text-base sm:text-lg font-bold text-gray-800 dark:text-slate-100 flex-1">评论区</h2>
             <button
-              class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#ff1493]/10 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4] transition-all duration-200"
+              class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-[#ff1493]/10 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4] transition-all duration-200"
               @click="closeModal"
             >
-              <i class="fas fa-times text-xl" />
+              <X :size="20" />
             </button>
           </div>
 
           <!-- 内容区域 -->
-          <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+          <div class="flex-1 overflow-y-auto p-3 sm:p-6 custom-scrollbar">
             <div id="Comments" />
           </div>
         </div>
@@ -53,6 +53,7 @@
 import { watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import Artalk from 'artalk/dist/Artalk.mjs'
+import { MessageCircle, X } from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
 let artalkInstance: any = null

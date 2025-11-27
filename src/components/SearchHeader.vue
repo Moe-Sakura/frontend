@@ -28,7 +28,11 @@
                 : 'bg-red-500 hover:bg-red-600 shadow-red-500/20 hover:shadow-red-500/30 dark:bg-red-600 dark:hover:bg-red-700'
           ]"
         >
-          <i :class="statusOnline === null ? 'fas fa-spinner fa-spin' : statusOnline ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'" />
+          <component
+            :is="statusOnline === null ? Loader : statusOnline ? CheckCircle : AlertCircle"
+            :size="18"
+            :class="statusOnline === null ? 'animate-spin' : ''"
+          />
           <span>{{ statusOnline === null ? '检测中' : statusOnline ? '正常' : '异常' }}</span>
         </a>
       </div>
@@ -49,7 +53,10 @@
           <!-- Search Input with Button Inside - 使用 Tailwind -->
           <div class="relative">
             <!-- 搜索图标 -->
-            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-theme-primary/60 dark:text-theme-accent/70 text-xl pointer-events-none z-10" />
+            <Search
+              :size="20"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-theme-primary/60 dark:text-theme-accent/70 pointer-events-none z-10"
+            />
             
             <!-- 输入框 -->
             <input
@@ -88,7 +95,7 @@
                      flex items-center gap-2 z-10"
               @click.prevent="handleSearch"
             >
-              <i class="fas fa-search text-sm" />
+              <Search :size="16" />
               <span v-if="!searchStore.isSearching" class="hidden sm:inline">搜索</span>
               <span v-else class="hidden sm:inline">{{ searchStore.searchProgress.current }}/{{ searchStore.searchProgress.total }}</span>
             </button>
@@ -126,7 +133,7 @@
                   : 'text-gray-700 dark:text-slate-300 hover:text-theme-primary dark:hover:text-theme-accent'"
                 @click="searchMode = 'game'"
               >
-                <i class="fas fa-gamepad" />
+                <Gamepad2 :size="18" />
                 <span>游戏</span>
               </button>
               
@@ -141,7 +148,7 @@
                   : 'text-gray-700 dark:text-slate-300 hover:text-theme-primary dark:hover:text-theme-accent'"
                 @click="searchMode = 'patch'"
               >
-                <i class="fas fa-tools" />
+                <Wrench :size="18" />
                 <span>补丁</span>
               </button>
             </div>
@@ -163,7 +170,7 @@
             class="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-800/50 rounded-2xl p-4 shadow-lg"
           >
             <div class="flex items-center gap-3 text-red-700 dark:text-red-300">
-              <i class="fas fa-exclamation-circle text-2xl" />
+              <AlertCircle :size="24" />
               <div>
                 <strong class="font-bold">错误: </strong>{{ searchStore.errorMessage }}
               </div>
@@ -174,7 +181,7 @@
     </div>
 
     <!-- Usage Notice - 独立于居中区域 - 艳粉主题 -->
-    <div class="w-full max-w-4xl mx-auto mt-8 sm:mt-12 px-2 sm:px-0 animate-fade-in animation-delay-1000">
+    <div class="w-full max-w-5xl mx-auto mt-8 sm:mt-12 px-2 sm:px-0 animate-fade-in animation-delay-1000">
       <div
         class="usage-notice 
                bg-white/75 dark:bg-slate-800/75
@@ -189,7 +196,7 @@
                  text-theme-primary dark:text-theme-accent
                  mb-4 sm:mb-6 flex items-center gap-2"
         >
-          <i class="fas fa-info-circle" />
+          <Info :size="20" />
           使用须知
         </h2>
         <ul class="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-slate-300 leading-relaxed">
@@ -217,19 +224,19 @@
           <li>
             • 搜索结果会显示不同的<strong class="text-theme-primary dark:text-theme-accent font-bold">标签</strong>，帮助你快速了解资源特性：
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium ml-1">
-              <i class="fas fa-check-circle text-[10px]" />直接下载
+              <CheckCircle :size="10" />直接下载
             </span>
             表示无需登录，
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
-              <i class="fas fa-user text-[10px]" />需登录
+              <User :size="10" />需登录
             </span>
             表示需要账号，
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
-              <i class="fas fa-rocket text-[10px]" />不限速
+              <Rocket :size="10" />不限速
             </span>
             表示高速网盘，
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-medium">
-              <i class="fas fa-magnet text-[10px]" />BT/磁力
+              <Magnet :size="10" />BT/磁力
             </span>
             表示种子下载等。
           </li>
@@ -288,6 +295,18 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { searchGameStream, fetchVndbData } from '@/api/search'
 import SearchHistory from './SearchHistory.vue'
+import {
+  Search,
+  Loader,
+  CheckCircle,
+  AlertCircle,
+  Gamepad2,
+  Wrench,
+  Info,
+  User,
+  Rocket,
+  Magnet,
+} from 'lucide-vue-next'
 import type { SearchHistory as SearchHistoryType } from '@/utils/persistence'
 import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from '@/utils/urlParams'
 
