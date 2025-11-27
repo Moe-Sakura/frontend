@@ -1,46 +1,49 @@
 <template>
   <div v-if="searchStore.hasResults" class="w-full px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 animate-fade-in">
-    <div id="results" class="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+    <div id="results" class="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       <div
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
         :data-platform="platformName"
-        class="result-card bg-white/50 dark:bg-slate-800/50 backdrop-blur-2xl backdrop-saturate-150 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl transition-all animate-fade-in-up border border-white/30 dark:border-slate-700/30"
-        :class="getCardClass(platformData.color)"
+        class="result-card bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl backdrop-saturate-150 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in-up border-2"
+        :class="getBorderClass(platformData.color)"
       >
-        <div class="p-3 sm:p-4 md:p-6">
+        <div class="p-4 sm:p-5 md:p-6">
           <!-- 站点标题行：网站名称 + 推荐标签 + 资源标签 + 结果数 -->
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <div
+            class="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 pb-3 border-b"
+            :class="getBorderBottomClass(platformData.color)"
+          >
             <!-- 网站名称（可点击） -->
             <a
               v-if="platformData.url"
               :href="platformData.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-lg sm:text-xl font-bold flex items-center gap-2 hover:opacity-80 hover:underline transition-all cursor-pointer"
-              :class="getTextColor(platformData.color)"
+              class="text-xl sm:text-2xl font-bold flex items-center gap-2 hover:scale-105 transition-all cursor-pointer"
+              :class="getHeaderTextColor(platformData.color)"
               :title="`访问 ${platformData.name}`"
             >
-              <i :class="getPlatformIcon(platformData.color)" />
+              <component :is="getPlatformIconComponent(platformData.color)" :size="24" />
               {{ platformData.name }}
-              <i class="fas fa-external-link-alt text-xs opacity-60" />
+              <ExternalLink :size="16" class="opacity-70" />
             </a>
             <div
               v-else
-              class="text-lg sm:text-xl font-bold flex items-center gap-2"
-              :class="getTextColor(platformData.color)"
+              class="text-xl sm:text-2xl font-bold flex items-center gap-2"
+              :class="getHeaderTextColor(platformData.color)"
             >
-              <i :class="getPlatformIcon(platformData.color)" />
+              <component :is="getPlatformIconComponent(platformData.color)" :size="24" />
               {{ platformData.name }}
             </div>
             
             <!-- 推荐/付费标签 -->
             <span
               v-if="getRecommendText(platformData.color)"
-              class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1"
-              :class="getChipClass(platformData.color)"
+              class="px-3 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-1.5"
+              :class="getRecommendChipClass(platformData.color)"
             >
-              <i :class="platformData.color === 'red' ? 'fas fa-times-circle' : 'fas fa-star'" />
+              <component :is="platformData.color === 'red' ? AlertTriangle : Crown" :size="14" />
               {{ getRecommendText(platformData.color) }}
             </span>
             
@@ -48,90 +51,93 @@
             <template v-for="tag in getUniqueTags(platformData)" :key="tag">
               <span
                 :class="getTagClass(tag)"
-                class="px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 border"
               >
-                <i :class="getTagIcon(tag)" class="text-[10px]" />
+                <component :is="getTagIconComponent(tag)" :size="12" />
                 <span>{{ getTagLabel(tag) }}</span>
               </span>
             </template>
             
             <!-- 结果数量 -->
-            <span class="ml-auto px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 text-xs sm:text-sm font-medium flex items-center gap-1 shrink-0">
-              <i class="fas fa-hashtag text-xs" />
+            <span
+              class="ml-auto px-3 py-1.5 rounded-full font-bold text-sm shadow-md flex items-center gap-2 shrink-0"
+              :class="getCountBadgeClass(platformData.color)"
+            >
+              <List :size="16" />
               {{ platformData.items.length }}
             </span>
           </div>
           
           <!-- 错误信息 -->
-          <div v-if="platformData.error" class="flex items-center gap-2 p-4 mb-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800/50 rounded-lg">
-            <i class="fas fa-exclamation-circle text-red-700 dark:text-red-300" />
-            <span class="text-red-700 dark:text-red-300">{{ platformData.error }}</span>
+          <div v-if="platformData.error" class="flex items-center gap-3 p-4 mb-4 bg-red-50 dark:bg-red-900/40 border-2 border-red-300 dark:border-red-700 rounded-xl backdrop-blur-sm">
+            <AlertTriangle :size="20" class="text-red-600 dark:text-red-400" />
+            <span class="text-red-700 dark:text-red-300 font-medium">{{ platformData.error }}</span>
           </div>
           
           <!-- 搜索结果列表 -->
-          <div v-if="paginatedResults(platformData).length > 0" class="results-list space-y-1 sm:space-y-2">
+          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list space-y-2">
             <div
-              v-for="(result, index) in paginatedResults(platformData)"
+              v-for="(result, index) in getDisplayedResults(platformData)"
               :key="index"
-              class="result-item p-2 sm:p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors border-b border-gray-100 dark:border-slate-700 last:border-0"
+              class="result-item group p-3 sm:p-4 rounded-xl 
+                     bg-gradient-to-r from-white/60 to-white/40 dark:from-slate-700/60 dark:to-slate-700/40
+                     hover:from-white/90 hover:to-white/70 dark:hover:from-slate-700/90 dark:hover:to-slate-700/70
+                     backdrop-blur-sm
+                     border border-gray-200/50 dark:border-slate-600/50
+                     hover:border-theme-primary/40 dark:hover:border-theme-accent/40
+                     hover:shadow-lg hover:shadow-theme-primary/10 dark:hover:shadow-theme-accent/15
+                     transition-all duration-300"
             >
               <!-- 标题行 -->
-              <div class="flex items-start gap-1.5 sm:gap-2">
-                <span class="text-gray-400 dark:text-slate-500 text-xs sm:text-sm mt-0.5 shrink-0">{{ getResultIndex(platformData, index) }}.</span>
+              <div class="flex items-start gap-2 sm:gap-3">
+                <span class="text-theme-primary dark:text-theme-accent text-sm font-bold mt-0.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+                  {{ index + 1 }}.
+                </span>
                 <a
                   :href="result.url"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium flex-1 text-sm sm:text-base break-words"
+                  class="text-gray-800 dark:text-slate-200 group-hover:text-theme-primary dark:group-hover:text-theme-accent font-semibold flex-1 text-sm sm:text-base break-words transition-colors leading-relaxed"
                 >
                   {{ result.title }}
                 </a>
               </div>
               
               <!-- 资源相对路径（从URL中提取） -->
-              <div v-if="result.url" class="flex items-center gap-1.5 sm:gap-2 mt-1 ml-4 sm:ml-6">
-                <i class="fas fa-link text-gray-400 dark:text-slate-500 text-xs" />
-                <span class="text-xs text-gray-500 dark:text-slate-400 break-all">{{ extractPath(result.url) }}</span>
+              <div v-if="result.url" class="flex items-center gap-2 mt-2 ml-6 sm:ml-8">
+                <LinkIcon :size="12" class="text-theme-primary/50 dark:text-theme-accent/50" />
+                <span class="text-xs text-gray-500 dark:text-slate-400 break-all font-mono bg-gray-100/80 dark:bg-slate-800/80 px-2 py-1 rounded">
+                  {{ extractPath(result.url) }}
+                </span>
               </div>
             </div>
           </div>
           
-          <!-- 分页控制 -->
-          <div v-if="platformData.items.length > platformData.itemsPerPage" class="pagination mt-6 flex items-center justify-center gap-2">
+          <!-- 加载更多按钮 -->
+          <div v-if="platformData.items.length > platformData.displayedCount" class="load-more mt-6 flex justify-center">
             <button
-              :disabled="platformData.currentPage === 1"
-              class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-              @click="goToPage(platformName, platformData.currentPage - 1)"
+              class="px-6 py-3 rounded-xl
+                     bg-gradient-pink text-white font-bold
+                     backdrop-blur-md
+                     border border-white/30 dark:border-white/20
+                     shadow-lg shadow-theme-primary/20 dark:shadow-theme-accent/25
+                     hover:shadow-xl hover:shadow-theme-primary/30 dark:hover:shadow-theme-accent/35
+                     hover:scale-105
+                     active:scale-95
+                     transition-all duration-300
+                     flex items-center gap-2"
+              @click="loadMore(platformName)"
             >
-              <i class="fas fa-chevron-left" />
+              <ArrowDown :size="18" />
+              <span>加载更多 ({{ Math.min(20, platformData.items.length - platformData.displayedCount) }})</span>
             </button>
-            
-            <div class="flex gap-1">
-              <button
-                v-for="page in getPageNumbers(platformData)"
-                :key="page"
-                :class="[
-                  'min-w-10 h-10 px-3 rounded-lg font-medium transition-all',
-                  page === platformData.currentPage
-                    ? 'bg-theme-primary dark:bg-theme-accent text-white shadow-lg'
-                    : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600'
-                ]"
-                @click="goToPage(platformName, page)"
-              >
-                {{ page }}
-              </button>
-            </div>
-            
-            <button
-              :disabled="platformData.currentPage === getTotalPages(platformData)"
-              class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-              @click="goToPage(platformName, platformData.currentPage + 1)"
-            >
-              <i class="fas fa-chevron-right" />
-            </button>
-            
-            <span class="ml-2 text-sm text-gray-600 dark:text-slate-400">
-              第 {{ platformData.currentPage }} / {{ getTotalPages(platformData) }} 页
+          </div>
+          
+          <!-- 已加载全部提示 -->
+          <div v-else-if="platformData.items.length > 10" class="all-loaded mt-6 text-center">
+            <span class="text-sm text-gray-500 dark:text-slate-400 flex items-center justify-center gap-2">
+              <CheckCircle :size="16" class="text-theme-primary dark:text-theme-accent" />
+              <span>已加载全部 {{ platformData.items.length }} 条结果</span>
             </span>
           </div>
           
@@ -147,6 +153,30 @@
 <script setup lang="ts">
 import { useSearchStore } from '@/stores/search'
 import type { PlatformData } from '@/stores/search'
+import {
+  ExternalLink,
+  AlertTriangle,
+  Crown,
+  List,
+  Link as LinkIcon,
+  ArrowDown,
+  CheckCircle,
+  Star,
+  Circle,
+  DollarSign,
+  XCircle,
+  User,
+  Coins,
+  MessageCircle,
+  Reply,
+  Server,
+  Rocket,
+  Turtle,
+  Layers,
+  Magnet,
+  Wand2,
+  Tag as TagIcon,
+} from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
 
@@ -173,89 +203,97 @@ function getUniqueTags(platformData: PlatformData) {
   return Array.from(allTags)
 }
 
-function paginatedResults(platformData: PlatformData) {
-  const start = (platformData.currentPage - 1) * platformData.itemsPerPage
-  const end = start + platformData.itemsPerPage
-  return platformData.items.slice(start, end)
+// 获取要显示的结果（根据 displayedCount）
+function getDisplayedResults(platformData: PlatformData) {
+  return platformData.items.slice(0, platformData.displayedCount || 10)
 }
 
-function getTotalPages(platformData: PlatformData) {
-  return Math.ceil(platformData.items.length / platformData.itemsPerPage)
+// 加载更多
+function loadMore(platformName: string) {
+  searchStore.loadMoreResults(platformName, 20)
 }
 
-function getPageNumbers(platformData: PlatformData) {
-  const total = getTotalPages(platformData)
-  const current = platformData.currentPage
-  const pages: number[] = []
-  
-  if (total <= 7) {
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
-  } else {
-    if (current <= 4) {
-      for (let i = 1; i <= 5; i++) {pages.push(i)}
-      pages.push(total)
-    } else if (current >= total - 3) {
-      pages.push(1)
-      for (let i = total - 4; i <= total; i++) {pages.push(i)}
-    } else {
-      pages.push(1)
-      for (let i = current - 1; i <= current + 1; i++) {pages.push(i)}
-      pages.push(total)
-    }
-  }
-  
-  return pages
-}
-
-function getResultIndex(platformData: PlatformData, index: number) {
-  return (platformData.currentPage - 1) * platformData.itemsPerPage + index + 1
-}
-
-function goToPage(platformName: string, page: number) {
-  searchStore.setPlatformPage(platformName, page)
-  
-  const platformElements = document.querySelectorAll('[data-platform]')
-  const targetElement = Array.from(platformElements).find(
-    el => el.getAttribute('data-platform') === platformName,
-  ) as HTMLElement
-  
-  if (targetElement) {
-    const yOffset = -80
-    const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset
-    window.scrollTo({ top: y, behavior: 'smooth' })
-  }
-}
-
-function getCardClass(color: string) {
+// 新增：卡片边框颜色
+function getBorderClass(color: string) {
   const classes: Record<string, string> = {
-    lime: 'border-l-4 border-l-lime-500',
-    white: 'border-l-4 border-l-gray-300',
-    gold: 'border-l-4 border-l-yellow-500',
-    red: 'border-l-4 border-l-red-500',
+    lime: 'border-lime-300 dark:border-lime-700/50 hover:border-lime-400 dark:hover:border-lime-600',
+    white: 'border-gray-300 dark:border-slate-600 hover:border-gray-400 dark:hover:border-slate-500',
+    gold: 'border-yellow-300 dark:border-yellow-700/50 hover:border-yellow-400 dark:hover:border-yellow-600',
+    red: 'border-red-300 dark:border-red-700/50 hover:border-red-400 dark:hover:border-red-600',
   }
-  return classes[color] || 'border-l-4 border-l-gray-300'
+  return classes[color] || 'border-gray-300 dark:border-slate-600'
 }
 
-function getTextColor(color: string) {
+// 新增：标题区域底部边框
+function getBorderBottomClass(color: string) {
   const classes: Record<string, string> = {
-    lime: 'text-lime-600',
-    white: 'text-gray-600',
-    gold: 'text-yellow-600',
-    red: 'text-red-600',
+    lime: 'border-lime-200 dark:border-lime-800/30',
+    white: 'border-gray-200 dark:border-slate-700',
+    gold: 'border-yellow-200 dark:border-yellow-800/30',
+    red: 'border-red-200 dark:border-red-800/30',
   }
-  return classes[color] || 'text-gray-600'
+  return classes[color] || 'border-gray-200 dark:border-slate-700'
 }
 
-function getPlatformIcon(color: string) {
-  const icons: Record<string, string> = {
-    lime: 'fas fa-star',
-    white: 'fas fa-circle',
-    gold: 'fas fa-dollar-sign',
-    red: 'fas fa-times-circle',
+// 新增：标题文字颜色（更鲜艳）
+function getHeaderTextColor(color: string) {
+  const classes: Record<string, string> = {
+    lime: 'text-lime-600 dark:text-lime-400',
+    white: 'text-gray-700 dark:text-gray-300',
+    gold: 'text-yellow-600 dark:text-yellow-400',
+    red: 'text-red-600 dark:text-red-400',
   }
-  return icons[color] || 'fas fa-circle'
+  return classes[color] || 'text-gray-700 dark:text-gray-300'
+}
+
+// 新增：推荐标签样式（更醒目）
+function getRecommendChipClass(color: string) {
+  const classes: Record<string, string> = {
+    lime: 'bg-gradient-to-r from-lime-400 to-green-500 text-white border-lime-500',
+    gold: 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-500',
+    red: 'bg-gradient-to-r from-red-400 to-pink-500 text-white border-red-500',
+  }
+  return classes[color] || ''
+}
+
+// 新增：结果数量徽章（根据平台颜色）
+function getCountBadgeClass(color: string) {
+  const classes: Record<string, string> = {
+    lime: 'bg-lime-100 dark:bg-lime-900/40 text-lime-700 dark:text-lime-300 border border-lime-300 dark:border-lime-700',
+    white: 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 border border-gray-300 dark:border-slate-600',
+    gold: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700',
+    red: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700',
+  }
+  return classes[color] || 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
+}
+
+// 获取平台图标组件
+function getPlatformIconComponent(color: string): typeof Star | typeof Circle | typeof DollarSign | typeof XCircle {
+  const icons: Record<string, typeof Star | typeof Circle | typeof DollarSign | typeof XCircle> = {
+    lime: Star,
+    white: Circle,
+    gold: DollarSign,
+    red: XCircle,
+  }
+  return icons[color] || Circle
+}
+
+// 获取标签图标组件
+function getTagIconComponent(tag: string): typeof CheckCircle | typeof User | typeof Coins | typeof MessageCircle | typeof Reply | typeof Server | typeof Rocket | typeof Turtle | typeof Layers | typeof Magnet | typeof Wand2 | typeof TagIcon {
+  const icons: Record<string, typeof CheckCircle | typeof User | typeof Coins | typeof MessageCircle | typeof Reply | typeof Server | typeof Rocket | typeof Turtle | typeof Layers | typeof Magnet | typeof Wand2 | typeof TagIcon> = {
+    'NoReq': CheckCircle,
+    'Login': User,
+    'LoginPay': Coins,
+    'LoginRep': MessageCircle,
+    'Rep': Reply,
+    'SuDrive': Server,
+    'NoSplDrive': Rocket,
+    'SplDrive': Turtle,
+    'MixDrive': Layers,
+    'BTmag': Magnet,
+    'magic': Wand2,
+  }
+  return icons[tag] || TagIcon
 }
 
 function getRecommendText(color: string) {
@@ -267,51 +305,25 @@ function getRecommendText(color: string) {
   return texts[color] || ''
 }
 
-function getChipClass(color: string) {
-  const classes: Record<string, string> = {
-    lime: 'bg-green-100 text-green-700',
-    gold: 'bg-yellow-100 text-yellow-700',
-    red: 'bg-red-100 text-red-700',
-  }
-  return classes[color] || ''
-}
-
-// 标签样式映射（根据 Cloudflare Workers API 文档）
+// 标签样式映射（根据 Cloudflare Workers API 文档）- 优化配色
 function getTagClass(tag: string) {
   const classes: Record<string, string> = {
-    'NoReq': 'bg-green-100 text-green-700',           // 无需登录/回复
-    'Login': 'bg-blue-100 text-blue-700',             // 需登录
-    'LoginPay': 'bg-yellow-100 text-yellow-700',      // 需登录且支付
-    'LoginRep': 'bg-purple-100 text-purple-700',      // 需登录并回复
-    'Rep': 'bg-indigo-100 text-indigo-700',           // 需回复
-    'SuDrive': 'bg-pink-100 text-pink-700',           // 自建网盘
-    'NoSplDrive': 'bg-emerald-100 text-emerald-700',  // 不限速网盘
-    'SplDrive': 'bg-orange-100 text-orange-700',      // 限速网盘
-    'MixDrive': 'bg-cyan-100 text-cyan-700',          // 混合网盘
-    'BTmag': 'bg-violet-100 text-violet-700',         // BT/磁力
-    'magic': 'bg-red-100 text-red-700',                // 需代理
+    'NoReq': 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-400 dark:border-green-600',
+    'Login': 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-400 dark:border-blue-600',
+    'LoginPay': 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 border-yellow-400 dark:border-yellow-600',
+    'LoginRep': 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-400 dark:border-purple-600',
+    'Rep': 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-400 dark:border-indigo-600',
+    'SuDrive': 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 border-pink-400 dark:border-pink-600',
+    'NoSplDrive': 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-400 dark:border-emerald-600',
+    'SplDrive': 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 border-orange-400 dark:border-orange-600',
+    'MixDrive': 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 border-cyan-400 dark:border-cyan-600',
+    'BTmag': 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-400 dark:border-violet-600',
+    'magic': 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-400 dark:border-red-600',
   }
-  return classes[tag] || 'bg-gray-100 text-gray-600'
+  return classes[tag] || 'bg-gray-100 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 border-gray-400 dark:border-gray-600'
 }
 
 // 标签图标映射
-function getTagIcon(tag: string) {
-  const icons: Record<string, string> = {
-    'NoReq': 'fas fa-check-circle',
-    'Login': 'fas fa-user',
-    'LoginPay': 'fas fa-coins',
-    'LoginRep': 'fas fa-comment',
-    'Rep': 'fas fa-reply',
-    'SuDrive': 'fas fa-server',
-    'NoSplDrive': 'fas fa-rocket',
-    'SplDrive': 'fas fa-turtle',
-    'MixDrive': 'fas fa-layer-group',
-    'BTmag': 'fas fa-magnet',
-    'magic': 'fas fa-magic',
-  }
-  return icons[tag] || 'fas fa-tag'
-}
-
 // 标签文本映射
 function getTagLabel(tag: string) {
   const labels: Record<string, string> = {

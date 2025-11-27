@@ -31,8 +31,7 @@ export interface PlatformData {
   url?: string
   items: SearchResult[]
   error: string
-  currentPage: number
-  itemsPerPage: number
+  displayedCount: number // 当前显示的结果数量，默认 10
 }
 
 export const useSearchStore = defineStore('search', () => {
@@ -128,9 +127,10 @@ export const useSearchStore = defineStore('search', () => {
   }
 
   function setPlatformResult(name: string, data: PlatformData) {
-    // 确保有分页信息
-    if (!data.currentPage) {data.currentPage = 1}
-    if (!data.itemsPerPage) {data.itemsPerPage = 10}
+    // 确保有显示数量信息，默认显示 10 个
+    if (!data.displayedCount) {
+      data.displayedCount = 10
+    }
     platformResults.value.set(name, data)
     
     // 保存搜索历史
@@ -147,10 +147,13 @@ export const useSearchStore = defineStore('search', () => {
     }
   }
 
-  function setPlatformPage(platformName: string, page: number) {
+  function loadMoreResults(platformName: string, count: number) {
     const platform = platformResults.value.get(platformName)
     if (platform) {
-      platform.currentPage = page
+      platform.displayedCount = Math.min(
+        platform.items.length,
+        (platform.displayedCount || 10) + count
+      )
       platformResults.value.set(platformName, { ...platform })
     }
   }
@@ -188,7 +191,7 @@ export const useSearchStore = defineStore('search', () => {
     setSearchMode,
     setCustomApi,
     setPlatformResult,
-    setPlatformPage,
+    loadMoreResults,
     toggleCommentsModal,
     toggleVndbPanel,
     restoreState,

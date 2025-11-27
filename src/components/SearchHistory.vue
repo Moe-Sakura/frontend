@@ -14,7 +14,7 @@
       <div class="bg-white/95 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 border border-white/30">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
-            <i class="fas fa-history text-theme-primary text-sm" />
+            <History :size="16" class="text-theme-primary" />
             <span class="text-sm font-semibold text-gray-700">搜索历史</span>
             <span class="text-xs text-gray-500">({{ history.length }})</span>
           </div>
@@ -22,7 +22,7 @@
             class="text-xs text-gray-500 hover:text-red-500 transition-colors flex items-center gap-1"
             @click="clearHistory"
           >
-            <i class="fas fa-trash-alt" />
+            <Trash2 :size="14" />
             <span>清空</span>
           </button>
         </div>
@@ -34,9 +34,10 @@
             class="history-item px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-theme-primary/10 border border-gray-200 hover:border-theme-primary/30 transition-all text-sm flex items-center gap-2 group"
             @click="selectHistory(item)"
           >
-            <i
-              :class="item.mode === 'game' ? 'fas fa-gamepad' : 'fas fa-tools'"
-              class="text-xs text-gray-400 group-hover:text-theme-primary transition-colors"
+            <component
+              :is="item.mode === 'game' ? Gamepad2 : Wrench"
+              :size="14"
+              class="text-gray-400 group-hover:text-theme-primary transition-colors"
             />
             <span class="text-gray-700 group-hover:text-theme-primary-dark font-medium">{{ item.query }}</span>
             <span class="text-xs text-gray-400 group-hover:text-theme-primary/40">{{ item.resultCount }}</span>
@@ -50,6 +51,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { loadSearchHistory, clearSearchHistory as clearHistoryStorage, type SearchHistory } from '@/utils/persistence'
+import { History, Trash2, Gamepad2, Wrench } from 'lucide-vue-next'
 
 const history = ref<SearchHistory[]>([])
 const showHistory = ref(true)

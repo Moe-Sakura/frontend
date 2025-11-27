@@ -14,13 +14,13 @@
     >
       <!-- 标题栏 -->
       <div class="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-[#d946ef] to-[#ff1493] text-white">
-        <i class="fas fa-book text-lg sm:text-xl" />
+        <BookOpen :size="20" />
         <h3 class="text-base sm:text-lg font-bold flex-1">作品介绍</h3>
         <button
           class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors"
           @click="closePanel"
         >
-          <i class="fas fa-times" />
+          <X :size="18" />
         </button>
       </div>
 
@@ -28,7 +28,7 @@
       <div class="overflow-y-auto max-h-[calc(75vh-56px)] sm:max-h-[calc(80vh-64px)] p-3 sm:p-4 md:p-6 custom-scrollbar">
         <!-- 标题 -->
         <h2 class="text-xl font-bold text-gray-800 dark:text-slate-100 mb-2 flex items-center gap-2">
-          <i class="fas fa-gamepad text-[#ff1493]" />
+          <Gamepad2 :size="20" class="text-[#ff1493]" />
           {{ searchStore.vndbInfo.mainName }}
         </h2>
 
@@ -57,7 +57,7 @@
         <!-- 别名 -->
         <div v-if="searchStore.vndbInfo.names.length > 1" class="mb-4">
           <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
-            <i class="fas fa-tag text-[#d946ef] dark:text-[#e879f9]" />
+            <TagIcon :size="14" class="text-[#d946ef] dark:text-[#e879f9]" />
             <span>别名</span>
           </p>
           <div class="flex flex-wrap gap-2">
@@ -74,7 +74,7 @@
         <!-- 开发商 -->
         <div v-if="searchStore.vndbInfo.developers && searchStore.vndbInfo.developers.length > 0" class="mb-4">
           <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
-            <i class="fas fa-building text-indigo-500 dark:text-indigo-400" />
+            <Building :size="14" class="text-indigo-500 dark:text-indigo-400" />
             <span>开发商</span>
           </p>
           <div class="flex flex-wrap gap-2">
@@ -91,7 +91,7 @@
         <!-- 平台 -->
         <div v-if="searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0" class="mb-4">
           <p class="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2 flex items-center gap-1">
-            <i class="fas fa-desktop text-green-500 dark:text-green-400" />
+            <Monitor :size="14" class="text-green-500 dark:text-green-400" />
             <span>平台</span>
           </p>
           <div class="flex flex-wrap gap-2">
@@ -110,7 +110,7 @@
           <!-- 游戏时长 -->
           <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-3 p-3 bg-gradient-to-r from-theme-primary/5 to-theme-accent/5 dark:from-theme-primary/10 dark:to-theme-accent/10 rounded-xl border border-theme-primary/20 dark:border-theme-primary/30">
             <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
-              <i class="fas fa-clock text-theme-primary dark:text-theme-primary text-lg" />
+              <Clock :size="20" class="text-theme-primary dark:text-theme-primary" />
             </div>
             <div class="flex-1">
               <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">游戏时长</p>
@@ -126,7 +126,7 @@
           <!-- 评分信息（如果有） -->
           <div v-if="searchStore.vndbInfo.rating" class="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl border border-yellow-100 dark:border-yellow-800/30">
             <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
-              <i class="fas fa-star text-yellow-500 dark:text-yellow-400 text-lg" />
+              <Star :size="20" class="text-yellow-500 dark:text-yellow-400" />
             </div>
             <div class="flex-1">
               <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">VNDB 评分</p>
@@ -142,7 +142,7 @@
           <!-- 发行日期（如果有） -->
           <div v-if="searchStore.vndbInfo.released" class="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30">
             <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-lg shadow-sm">
-              <i class="fas fa-calendar text-blue-500 dark:text-blue-400 text-lg" />
+              <Calendar :size="20" class="text-blue-500 dark:text-blue-400" />
             </div>
             <div class="flex-1">
               <p class="text-xs text-gray-500 dark:text-slate-400 mb-0.5">发行日期</p>
@@ -157,7 +157,7 @@
         <div v-if="searchStore.vndbInfo.description" class="mb-4">
           <div class="flex items-center justify-between mb-2">
             <p class="text-sm font-semibold text-gray-700 dark:text-slate-200">
-              <i class="fas fa-align-left text-theme-primary dark:text-theme-primary mr-1" />
+              <AlignLeft :size="14" class="inline text-theme-primary dark:text-theme-primary mr-1" />
               简介:
             </p>
             <button
@@ -174,7 +174,7 @@
                      flex items-center gap-1.5"
               @click="handleTranslate"
             >
-              <i class="fas fa-language" />
+              <Languages :size="14" />
               <span>AI 翻译</span>
             </button>
             <button
@@ -192,19 +192,19 @@
                      flex items-center gap-1.5"
               @click="showOriginal = !showOriginal"
             >
-              <i class="fas fa-exchange-alt" />
+              <ArrowLeftRight :size="14" />
               <span>{{ showOriginal ? '显示译文' : '显示原文' }}</span>
             </button>
           </div>
           <div class="text-sm text-gray-700 dark:text-slate-200 leading-relaxed whitespace-pre-line bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 relative border border-gray-200 dark:border-slate-700">
             <!-- 翻译中 -->
             <div v-if="isTranslating" class="flex flex-col items-center justify-center gap-2 text-theme-accent dark:text-theme-accent py-4">
-              <i class="fas fa-spinner fa-spin text-2xl" />
+              <Loader :size="24" class="animate-spin" />
               <span>AI 翻译中，请稍候...</span>
             </div>
             <!-- 翻译失败 -->
             <div v-else-if="translateError" class="flex flex-col items-center justify-center gap-2 text-red-500 dark:text-red-400 py-4">
-              <i class="fas fa-exclamation-triangle text-2xl" />
+              <AlertTriangle :size="24" />
               <span>翻译服务暂时不可用</span>
               <button
                 class="mt-2 px-3 py-1 text-xs bg-red-500 dark:bg-red-600 text-white rounded-full hover:bg-red-600 dark:hover:bg-red-700 transition-all"
@@ -270,7 +270,7 @@
                    active:scale-95
                    transition-all duration-300"
           >
-            <i class="fas fa-external-link-alt" />
+            <ExternalLink :size="18" />
             <span>在 VNDB 查看详情</span>
           </a>
         </div>
@@ -283,6 +283,23 @@
 import { ref, watch, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { translateText } from '@/api/search'
+import {
+  BookOpen,
+  X,
+  Gamepad2,
+  Tag as TagIcon,
+  Building,
+  Monitor,
+  Clock,
+  Star,
+  Calendar,
+  AlignLeft,
+  Languages,
+  ArrowLeftRight,
+  Loader,
+  AlertTriangle,
+  ExternalLink,
+} from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
 const isTranslating = ref(false)

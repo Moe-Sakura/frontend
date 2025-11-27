@@ -72,7 +72,7 @@ export async function searchGameStream(
     onPlatformResult?: (data: PlatformResult) => void
     onComplete?: () => void
     onError?: (error: string) => void
-  },
+  }
 ) {
   try {
     // 从 searchParams 中获取 API 地址，默认使用 Cloudflare Workers API
@@ -121,14 +121,18 @@ export async function searchGameStream(
     while (true) {
       const { done, value } = await reader.read()
 
-      if (done) {break}
+      if (done) {
+        break
+      }
 
       buffer += decoder.decode(value, { stream: true })
       const lines = buffer.split('\n')
       buffer = lines.pop() || ''
 
       for (const line of lines) {
-        if (!line.trim()) {continue}
+        if (!line.trim()) {
+          continue
+        }
 
         try {
           const data = JSON.parse(line)
@@ -152,7 +156,7 @@ export async function searchGameStream(
 
             // 提取平台URL：优先使用API返回的url/website，否则从第一个结果的URL中提取域名
             let platformUrl = data.result.url || data.result.website || ''
-            
+
             if (!platformUrl && items.length > 0 && items[0].url) {
               try {
                 const firstUrl = new URL(items[0].url)
@@ -224,7 +228,9 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
     let jaName = ''
     const names: string[] = []
 
-    if (result.title) {names.push(result.title)}
+    if (result.title) {
+      names.push(result.title)
+    }
 
     if (result.titles && Array.isArray(result.titles)) {
       result.titles.forEach((titleEntry: any) => {
@@ -363,23 +369,27 @@ export async function translateText(text: string, maxRetries: number = 2): Promi
           messages: [
             {
               role: 'system',
-              content: `作为专业的视觉小说游戏内容翻译专家，请将提供的视觉小说游戏简介精确翻译成简体中文。
+              content: `你是一名专业的视觉小说游戏本地化专家，请将提供的游戏简介精准翻译为简体中文。
 
-翻译要求：
+【翻译规范】
 
-1. 格式化移除：翻译前，彻底移除所有非内容性格式代码/标签（HTML, Markdown, XML等），只保留纯文本内容。
+1. 格式净化：翻译前完全清除所有HTML、Markdown、XML等非内容格式标记，仅保留原始文本内容
 
-2. 来源移除：移除介绍末尾的来源引用（如"来源：XXX"、"[From XXX]"等）。
+2. 结构保留：完整保持原文段落划分，段落间以自然换行分隔
 
-3. 保持结构：保持原文的段落结构，每个段落之间用换行分隔。
+3. 术语统一：准确处理视觉小说领域的专业术语，确保表述一致
 
-4. 专业术语：正确翻译视觉小说游戏相关的专业术语。
+4. 人名规范：
+   - 保留原名拼写
+   - 或采用中文圈广泛接受的译名
+   - 同一作品内译名保持统一
 
-5. 人名处理：保持人名的原始形式，或使用常见的中文译名。
+5. 内容控制：
+   - 严禁添加原文未包含的剧透信息
+   - 禁止插入解释性文字或主观评价
+   - 杜绝文化偏见性表述
 
-6. 纯净输出：只返回翻译后的纯文本内容，不要添加任何解释、评论或额外内容。
-
-7. 避免剧透：翻译时注意不要增加原文中没有的剧透信息。`,
+6. 输出要求：仅输出翻译后的纯文本内容，无需任何说明性文字`,
             },
             {
               role: 'user',

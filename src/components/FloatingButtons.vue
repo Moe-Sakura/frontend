@@ -7,7 +7,7 @@
       class="fab-button scroll-top-btn"
       @click="scrollToTop"
     >
-      <i class="fas fa-arrow-up" />
+      <ArrowUp :size="20" />
     </button>
 
     <!-- 站点导航按钮 -->
@@ -18,11 +18,7 @@
       :class="{ 'nav-open': showPlatformNav }"
       @click="togglePlatformNav"
     >
-      <i
-        :class="
-          showPlatformNav ? 'fas fa-times' : 'fas fa-th'
-        "
-      />
+      <component :is="showPlatformNav ? X : Grid3x3" :size="20" />
     </button>
 
     <!-- 作品介绍按钮 -->
@@ -33,11 +29,7 @@
       :class="{ 'vndb-open': searchStore.isVndbPanelOpen }"
       @click="toggleVndbPanel"
     >
-      <i
-        :class="
-          searchStore.isVndbPanelOpen ? 'fas fa-times' : 'fas fa-book'
-        "
-      />
+      <component :is="searchStore.isVndbPanelOpen ? X : BookOpen" :size="20" />
     </button>
 
     <!-- 评论按钮 -->
@@ -47,11 +39,7 @@
       :class="{ 'comments-open': searchStore.isCommentsModalOpen }"
       @click="toggleComments"
     >
-      <i
-        :class="
-          searchStore.isCommentsModalOpen ? 'fas fa-times' : 'fas fa-comment'
-        "
-      />
+      <component :is="searchStore.isCommentsModalOpen ? X : MessageSquare" :size="20" />
     </button>
 
     <!-- 站点导航面板 -->
@@ -70,7 +58,7 @@
       >
         <div class="p-3 border-b border-gray-200 bg-gradient-to-r from-theme-primary/5 to-theme-accent/5">
           <div class="flex items-center gap-2">
-            <i class="fas fa-th text-theme-primary text-sm" />
+            <Grid3x3 :size="16" class="text-theme-primary" />
             <span class="font-bold text-sm text-gray-800">站点导航</span>
           </div>
         </div>
@@ -98,6 +86,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
+import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare } from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
 const showScrollToTop = ref(false)
