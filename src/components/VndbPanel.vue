@@ -153,7 +153,7 @@
           </div>
         </div>
 
-        <!-- 简介 -->
+        <!-- 简介 - 艳粉主题 -->
         <div v-if="searchStore.vndbInfo.description" class="mb-4">
           <div class="flex items-center justify-between mb-2">
             <p class="text-sm font-semibold text-gray-700 dark:text-slate-200">
@@ -162,7 +162,16 @@
             </p>
             <button
               v-if="!isTranslating && !translatedDescription"
-              class="px-3 py-1 text-xs bg-gradient-to-r from-theme-accent to-theme-primary text-white rounded-full hover:from-theme-accent-dark hover:to-theme-primary-dark transition-all shadow-sm hover:shadow-md flex items-center gap-1"
+              class="px-3 py-1.5 text-xs
+                     bg-gradient-pink text-white font-bold rounded-full
+                     backdrop-blur-sm
+                     border border-white/30 dark:border-white/20
+                     shadow-md shadow-theme-primary/20 dark:shadow-theme-accent/25
+                     hover:shadow-lg hover:shadow-theme-primary/30 dark:hover:shadow-theme-accent/35
+                     hover:scale-105
+                     active:scale-95
+                     transition-all duration-300
+                     flex items-center gap-1.5"
               @click="handleTranslate"
             >
               <i class="fas fa-language" />
@@ -170,7 +179,17 @@
             </button>
             <button
               v-if="translatedDescription && !isTranslating"
-              class="px-3 py-1 text-xs bg-gradient-to-r from-slate-500 to-slate-600 dark:from-slate-600 dark:to-slate-700 text-white rounded-full hover:from-slate-600 hover:to-slate-700 dark:hover:from-slate-700 dark:hover:to-slate-800 transition-all shadow-sm hover:shadow-md flex items-center gap-1"
+              class="px-3 py-1.5 text-xs
+                     bg-white/70 dark:bg-slate-700/70 
+                     text-theme-primary dark:text-theme-accent font-bold rounded-full
+                     backdrop-blur-sm
+                     border border-white/40 dark:border-white/30
+                     shadow-md shadow-theme-primary/10 dark:shadow-theme-accent/15
+                     hover:shadow-lg hover:shadow-theme-primary/20 dark:hover:shadow-theme-accent/25
+                     hover:scale-105
+                     active:scale-95
+                     transition-all duration-300
+                     flex items-center gap-1.5"
               @click="showOriginal = !showOriginal"
             >
               <i class="fas fa-exchange-alt" />
@@ -235,13 +254,21 @@
           </div>
         </div>
 
-        <!-- VNDB 链接 -->
+        <!-- VNDB 链接 - 艳粉主题 -->
         <div class="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
           <a
             :href="vndbUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-theme-accent to-theme-primary text-white rounded-xl hover:from-theme-accent-dark hover:to-theme-primary-dark transition-all shadow-md hover:shadow-lg"
+            class="flex items-center justify-center gap-2 px-4 py-3
+                   bg-gradient-pink text-white font-bold rounded-xl
+                   backdrop-blur-md
+                   border border-white/30 dark:border-white/20
+                   shadow-lg shadow-theme-primary/20 dark:shadow-theme-accent/25
+                   hover:shadow-xl hover:shadow-theme-primary/30 dark:hover:shadow-theme-accent/35
+                   hover:scale-105
+                   active:scale-95
+                   transition-all duration-300"
           >
             <i class="fas fa-external-link-alt" />
             <span>在 VNDB 查看详情</span>

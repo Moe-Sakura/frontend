@@ -91,7 +91,7 @@ function initArtalk() {
           pageTitle: 'Galgame 聚合搜索',
           server: 'https://artalk.saop.cc',
           site: 'Galgame 聚合搜索',
-          darkMode: "auto",
+          darkMode: 'auto',
         } as any)
       } catch (error) {
         // 静默处理错误

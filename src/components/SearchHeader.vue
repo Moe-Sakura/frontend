@@ -96,12 +96,13 @@
 
           <!-- Search Mode Selector - 使用 Tailwind 胶囊开关 -->
           <div class="flex justify-center">
-            <div class="relative flex p-1.5 rounded-full
+            <div
+              class="relative flex p-1.5 rounded-full
                         bg-white/60 dark:bg-slate-700/60
                         backdrop-blur-xl backdrop-saturate-150
                         border border-white/40 dark:border-slate-600/30
-                        shadow-lg shadow-theme-primary/10 dark:shadow-theme-accent/15">
-              
+                        shadow-lg shadow-theme-primary/10 dark:shadow-theme-accent/15"
+            >
               <!-- 滑动背景指示器 -->
               <div
                 class="absolute top-1.5 bottom-1.5 rounded-full 
@@ -200,7 +201,7 @@
               class="text-theme-primary dark:text-theme-accent hover:underline font-bold
                      hover:text-theme-primary-dark dark:hover:text-theme-accent-light
                      transition-colors duration-200"
-            >@Asuna</a>
+            >Asuna</a>
             大佬提供的服务器和技术支持！没有大佬的魔法，咱可跑不起来！
           </li>
           <li>
@@ -303,10 +304,10 @@ let statusCheckInterval: number | null = null
 // 检查状态页面是否在线
 async function checkStatus() {
   try {
-    const controller = new AbortController()
+    const controller = new window.AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000) // 5秒超时
     
-    const response = await fetch('https://status.searchgal.homes', {
+    await fetch('https://status.searchgal.homes', {
       method: 'HEAD',
       mode: 'no-cors', // 避免CORS问题
       signal: controller.signal,
@@ -315,7 +316,7 @@ async function checkStatus() {
     clearTimeout(timeoutId)
     // no-cors模式下，只要请求不报错就认为是在线
     statusOnline.value = true
-  } catch (error) {
+  } catch (_error) {
     statusOnline.value = false
   }
 }
