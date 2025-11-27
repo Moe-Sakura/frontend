@@ -72,7 +72,7 @@ export async function searchGameStream(
     onPlatformResult?: (data: PlatformResult) => void
     onComplete?: () => void
     onError?: (error: string) => void
-  }
+  },
 ) {
   try {
     // 从 searchParams 中获取 API 地址，默认使用 Cloudflare Workers API

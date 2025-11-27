@@ -1,8 +1,10 @@
-// 简单的 Service Worker - 只缓存静态资源
-const CACHE_NAME = 'searchgal-cache-v1';
+// Service Worker - PWA 支持
+const CACHE_NAME = 'searchgal-cache-v2';
 const STATIC_CACHE = [
   '/',
   '/index.html',
+  '/manifest.json',
+  '/favicon.svg',
 ];
 
 // 安装事件

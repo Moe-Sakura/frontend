@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { saveSearchState, loadSearchState, saveSearchHistory } from '@/utils/persistence'
+import { saveSearchState, loadSearchState } from '@/utils/persistence'
+import { useHistoryStore } from './history'
+import { useCacheStore } from './cache'
 
 export interface VndbInfo {
   names: string[]
@@ -46,9 +48,11 @@ export const useSearchStore = defineStore('search', () => {
   const errorMessage = ref('')
   const isFirstSearch = ref(true)
   const lastSearchTime = ref(0)
-  const isCommentsModalOpen = ref(false)
-  const isVndbPanelOpen = ref(false)
   const isStateRestored = ref(false)
+  
+  // 获取其他 stores
+  const historyStore = useHistoryStore()
+  const cacheStore = useCacheStore()
 
   // 尝试恢复保存的状态
   function restoreState() {
@@ -125,6 +129,39 @@ export const useSearchStore = defineStore('search', () => {
   function setCustomApi(api: string) {
     customApi.value = api
   }
+  
+  function setVndbInfo(info: VndbInfo | null) {
+    vndbInfo.value = info
+    
+    // 缓存 VNDB 信息
+    if (info && searchQuery.value) {
+      cacheStore.cacheVndbInfo(searchQuery.value, info)
+    }
+  }
+  
+  function startSearch() {
+    isSearching.value = true
+    errorMessage.value = ''
+    clearResults()
+  }
+  
+  function endSearch(success: boolean = true) {
+    isSearching.value = false
+    lastSearchTime.value = Date.now()
+    
+    if (success && isFirstSearch.value) {
+      isFirstSearch.value = false
+    }
+  }
+  
+  function setSearchError(error: string) {
+    errorMessage.value = error
+    isSearching.value = false
+  }
+  
+  function setSearchProgress(current: number, total: number) {
+    searchProgress.value = { current, total }
+  }
 
   function setPlatformResult(name: string, data: PlatformData) {
     // 确保有显示数量信息，默认显示 10 个
@@ -133,15 +170,14 @@ export const useSearchStore = defineStore('search', () => {
     }
     platformResults.value.set(name, data)
     
-    // 保存搜索历史
+    // 保存搜索历史到 historyStore
     if (searchQuery.value && !isSearching.value) {
       const resultCount = Array.from(platformResults.value.values())
         .reduce((sum, platform) => sum + platform.items.length, 0)
       
-      saveSearchHistory({
+      historyStore.addHistory({
         query: searchQuery.value,
         mode: searchMode.value,
-        timestamp: Date.now(),
         resultCount,
       })
     }
@@ -152,18 +188,10 @@ export const useSearchStore = defineStore('search', () => {
     if (platform) {
       platform.displayedCount = Math.min(
         platform.items.length,
-        (platform.displayedCount || 10) + count
+        (platform.displayedCount || 10) + count,
       )
       platformResults.value.set(platformName, { ...platform })
     }
-  }
-
-  function toggleCommentsModal() {
-    isCommentsModalOpen.value = !isCommentsModalOpen.value
-  }
-
-  function toggleVndbPanel() {
-    isVndbPanelOpen.value = !isVndbPanelOpen.value
   }
 
   return {
@@ -178,8 +206,6 @@ export const useSearchStore = defineStore('search', () => {
     errorMessage,
     isFirstSearch,
     lastSearchTime,
-    isCommentsModalOpen,
-    isVndbPanelOpen,
     isStateRestored,
     // 计算属性
     hasResults,
@@ -190,10 +216,13 @@ export const useSearchStore = defineStore('search', () => {
     setSearchQuery,
     setSearchMode,
     setCustomApi,
+    setVndbInfo,
+    startSearch,
+    endSearch,
+    setSearchError,
+    setSearchProgress,
     setPlatformResult,
     loadMoreResults,
-    toggleCommentsModal,
-    toggleVndbPanel,
     restoreState,
   }
 })

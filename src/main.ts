@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
+import { piniaLogger, piniaPerformance, piniaErrorHandler } from './stores/plugins'
 
 // 全局基础样式（Tailwind CSS @layer base）
 import './styles/base.css'
@@ -11,8 +12,10 @@ import './styles/theme.css'
 // 苹果同款液态玻璃效果
 import './styles/glassmorphism.css'
 
-// Font Awesome - 高优先级
-import '@fortawesome/fontawesome-free/css/all.min.css'
+// lazysizes - 高性能图片懒加载
+import 'lazysizes'
+import 'lazysizes/plugins/parent-fit/ls.parent-fit'
+import 'lazysizes/plugins/attrchange/ls.attrchange'
 
 // 预加载随机图片 API
 const preloadImage = new Image()
@@ -44,6 +47,13 @@ import '@fancyapps/ui/dist/fancybox/fancybox.css'
 
 const app = createApp(App)
 const pinia = createPinia()
+
+// 配置 Pinia 插件
+if (import.meta.env.DEV) {
+  pinia.use(piniaLogger) // 开发环境日志
+}
+pinia.use(piniaPerformance) // 性能监控
+pinia.use(piniaErrorHandler) // 错误处理
 
 app.use(pinia)
 app.mount('#app')
@@ -108,7 +118,7 @@ Fancybox.bind('[data-fancybox]', {
   mainClass: 'fancybox-custom',
 })
 
-// 注册 Service Worker
+// 注册 Service Worker (PWA 支持)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
@@ -120,3 +130,25 @@ if ('serviceWorker' in navigator) {
       })
   })
 }
+
+// Quicklink - 智能预加载可见链接
+import { listen } from 'quicklink'
+
+// 在页面加载完成后启用 Quicklink
+window.addEventListener('load', () => {
+  listen({
+    // 延迟启动（毫秒）
+    delay: 500,
+    // 预加载限制
+    limit: 10,
+    // 忽略的 URL 模式
+    ignores: [
+      // 忽略外部 API 链接
+      /\/api\//,
+      // 忽略评论系统
+      /artalk/,
+      // 忽略图片 API
+      /illlights\.com/,
+    ],
+  })
+})
