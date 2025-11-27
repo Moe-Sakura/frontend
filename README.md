@@ -57,30 +57,24 @@ cd frontend
 
 ### 安装依赖
 ```bash
-# 使用 pnpm (推荐)
 pnpm install
-
-# 或使用 npm
-npm install
 ```
 
 ## 🚀 开发
 
 ### 启动开发服务器
 ```bash
-pnpm run dev
+pnpm dev
 ```
-
-访问 `http://localhost:5500`
 
 ### 构建生产版本
 ```bash
-pnpm run build
+pnpm build
 ```
 
 ### 预览生产构建
 ```bash
-pnpm run preview
+pnpm preview
 ```
 
 ## 📁 项目结构
@@ -234,7 +228,7 @@ pnpm run build
 
 ## 🙏 致谢
 
-- [@Asuna](https://saop.cc/) - 提供服务器和技术支持
+- [Asuna](https://saop.cc/) - 提供服务器和技术支持
 - [VNDB](https://vndb.org/) - 游戏数据库
 - [Artalk](https://artalk.js.org/) - 评论系统
 - 所有 Galgame 资源站点

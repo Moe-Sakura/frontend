@@ -56,7 +56,7 @@ export function saveCustomCSS(css: string): void {
   try {
     localStorage.setItem(CUSTOM_CSS_STORAGE_KEY, css)
   } catch (error) {
-    // 静默处理
+    console.error('保存自定义 CSS 失败:', error)
   }
 }
 
@@ -67,6 +67,7 @@ export function loadCustomCSS(): string {
   try {
     return localStorage.getItem(CUSTOM_CSS_STORAGE_KEY) || ''
   } catch (error) {
+    console.error('加载自定义 CSS 失败:', error)
     return ''
   }
 }

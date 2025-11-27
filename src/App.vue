@@ -44,6 +44,7 @@ import {
   applyTheme, 
   watchSystemTheme,
   loadCustomCSS,
+  saveCustomCSS,
   applyCustomCSS,
 } from '@/utils/theme'
 import StatsCorner from '@/components/StatsCorner.vue'
@@ -433,7 +434,8 @@ function saveSettings(customApi: string, newCustomCSS: string) {
   searchStore.setCustomApi(customApi)
   // 保存并应用自定义CSS
   customCSS.value = newCustomCSS
-  applyCustomCSS(newCustomCSS)
+  saveCustomCSS(newCustomCSS) // 保存到 localStorage
+  applyCustomCSS(newCustomCSS) // 应用到页面
 }
 </script>
 
