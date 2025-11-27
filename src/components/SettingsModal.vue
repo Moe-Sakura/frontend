@@ -90,7 +90,7 @@
                 <h3
                   class="text-base sm:text-lg font-semibold text-gray-800 dark:text-slate-100 mb-3 flex items-center gap-2"
                 >
-                  <i class="fas fa-server text-[#ff1493] dark:text-[#ff69b4]" />
+                  <Server :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
                   <span>API 设置</span>
                 </h3>
 

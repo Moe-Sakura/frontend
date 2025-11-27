@@ -19,7 +19,9 @@
 - 💬 **评论系统** - 基于 Artalk 的评论功能
 - 🖼️ **随机背景** - IndexedDB 缓存的随机背景图片系统
 - 📱 **响应式设计** - 完美适配桌面和移动设备
-- ⚡ **性能优化** - Pace.js 加载进度、Fancybox 图片预览、懒加载等
+- ⚡ **性能优化** - Pace.js 加载进度、Fancybox 图片预览、Lazysizes 懒加载、Quicklink 预加载
+- 📲 **PWA 支持** - 可安装为桌面/移动应用，支持离线访问
+- 📡 **RSS 订阅** - 订阅更新动态
 
 ## 🛠️ 技术栈
 
@@ -31,12 +33,14 @@
 
 ### UI 框架
 - **Tailwind CSS 4.1** - 实用优先的 CSS 框架
-- **Font Awesome 7** - 图标库
+- **Lucide Icons** - 现代化 SVG 图标库
 
 ### 功能库
 - **Artalk 2.9** - 评论系统
 - **Fancybox 6** - 图片和内容预览
 - **Pace.js 1.2** - 页面加载进度条
+- **Lazysizes 5.3** - 高性能图片懒加载
+- **Quicklink 2.3** - 智能预加载
 
 ### API 集成
 - **Cloudflare Workers API** - 搜索聚合后端
@@ -53,6 +57,15 @@
 ```bash
 git clone https://github.com/Moe-Sakura/frontend.git
 cd frontend
+```
+
+### 配置环境变量
+```bash
+# 复制环境变量模板
+cp .env.example .env
+
+# 根据需要修改 .env 文件中的配置
+# 详见 docs/ENV_GUIDE.md
 ```
 
 ### 安装依赖
@@ -205,6 +218,13 @@ pnpm run build
 
 项目不需要环境变量配置，所有 API 端点都在代码中硬编码或支持用户自定义。
 
+## 🤖 LLM 友好
+
+本项目遵循 [llms.txt](https://llmstxt.org/) 规范，为 AI 助手和大语言模型提供了结构化的项目文档。
+
+- 📄 访问 `/llms.txt` 获取项目的 LLM 友好文档
+- 🔗 在线地址: [searchgal.homes/llms.txt](https://searchgal.homes/llms.txt)
+
 ## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request！
@@ -221,6 +241,31 @@ pnpm run build
 - 遵循 Vue 3 Composition API 风格
 - 使用 Tailwind CSS 进行样式编写
 - 保持代码简洁和可读性
+
+## 📝 环境变量
+
+项目使用环境变量进行配置管理，所有配置项都可以通过 `.env` 文件进行自定义。
+
+### 快速配置
+
+```bash
+# 复制模板文件
+cp .env.example .env
+
+# 编辑配置（可选）
+vim .env
+```
+
+### 主要配置项
+
+- **API 地址**：`VITE_API_BASE_URL`
+- **功能开关**：`VITE_ENABLE_COMMENTS`、`VITE_ENABLE_VNDB` 等
+- **主题颜色**：`VITE_THEME_PRIMARY`、`VITE_THEME_ACCENT`
+- **性能配置**：缓存时长、搜索冷却时间等
+
+详细配置说明请查看：
+- 📘 [环境变量配置指南](./docs/ENV_GUIDE.md)
+- 📘 [环境变量使用示例](./docs/ENV_USAGE_EXAMPLES.md)
 
 ## 📄 许可证
 

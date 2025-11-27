@@ -24,22 +24,22 @@
     <!-- 作品介绍按钮 -->
     <button
       v-show="searchStore.vndbInfo"
-      :aria-label="searchStore.isVndbPanelOpen ? '关闭作品介绍' : '打开作品介绍'"
+      :aria-label="uiStore.isVndbPanelOpen ? '关闭作品介绍' : '打开作品介绍'"
       class="fab-button vndb-btn"
-      :class="{ 'vndb-open': searchStore.isVndbPanelOpen }"
+      :class="{ 'vndb-open': uiStore.isVndbPanelOpen }"
       @click="toggleVndbPanel"
     >
-      <component :is="searchStore.isVndbPanelOpen ? X : BookOpen" :size="20" />
+      <component :is="uiStore.isVndbPanelOpen ? X : BookOpen" :size="20" />
     </button>
 
     <!-- 评论按钮 -->
     <button
-      :aria-label="searchStore.isCommentsModalOpen ? '关闭评论' : '打开评论'"
+      :aria-label="uiStore.isCommentsModalOpen ? '关闭评论' : '打开评论'"
       class="fab-button comments-btn"
-      :class="{ 'comments-open': searchStore.isCommentsModalOpen }"
+      :class="{ 'comments-open': uiStore.isCommentsModalOpen }"
       @click="toggleComments"
     >
-      <component :is="searchStore.isCommentsModalOpen ? X : MessageSquare" :size="20" />
+      <component :is="uiStore.isCommentsModalOpen ? X : MessageSquare" :size="20" />
     </button>
 
     <!-- 站点导航面板 -->
@@ -68,10 +68,13 @@
             v-for="[platformName, platformData] in searchStore.platformResults"
             :key="platformName"
             class="w-full px-3 py-2.5 flex items-center gap-2 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 text-left"
-            :class="getItemClass(platformData.color)"
             @click="scrollToPlatform(platformName)"
           >
-            <i :class="getIcon(platformData.color)" class="text-base" />
+            <component 
+              :is="getPlatformIcon(platformData.color)" 
+              :size="16"
+              :class="getPlatformIconColor(platformData.color)"
+            />
             <span class="platform-name flex-1 text-xs font-medium text-gray-700 truncate">{{ platformName }}</span>
             <span class="count-badge px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">
               {{ platformData.items.length }}
@@ -86,22 +89,47 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
-import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare } from 'lucide-vue-next'
+import { useUIStore } from '@/stores/ui'
+import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare, Star, Circle, DollarSign, XCircle } from 'lucide-vue-next'
+import type { FunctionalComponent } from 'vue'
 
 const searchStore = useSearchStore()
+const uiStore = useUIStore()
 const showScrollToTop = ref(false)
 const showPlatformNav = ref(false)
+
+// 根据颜色获取对应的图标组件
+function getPlatformIcon(color: string): FunctionalComponent {
+  const icons: Record<string, FunctionalComponent> = {
+    lime: Star,
+    white: Circle,
+    gold: DollarSign,
+    red: XCircle,
+  }
+  return icons[color] || Circle
+}
+
+// 根据颜色获取对应的图标颜色类
+function getPlatformIconColor(color: string): string {
+  const colors: Record<string, string> = {
+    lime: 'text-lime-600',
+    white: 'text-gray-400',
+    gold: 'text-yellow-600',
+    red: 'text-red-600',
+  }
+  return colors[color] || 'text-gray-400'
+}
 
 function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function toggleComments() {
-  searchStore.toggleCommentsModal()
+  uiStore.toggleCommentsModal()
 }
 
 function toggleVndbPanel() {
-  searchStore.toggleVndbPanel()
+  uiStore.toggleVndbPanel()
 }
 
 function togglePlatformNav() {
@@ -118,29 +146,10 @@ function scrollToPlatform(platformName: string) {
     const yOffset = -80
     const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset
     window.scrollTo({ top: y, behavior: 'smooth' })
-    // 滚动后关闭导航
+    
+    // 滚动后关闭导航（如果不想自动关闭，可以注释掉下面这行）
     showPlatformNav.value = false
   }
-}
-
-function getItemClass(color: string) {
-  const classes: Record<string, string> = {
-    lime: 'item-lime',
-    white: 'item-white',
-    gold: 'item-gold',
-    red: 'item-red',
-  }
-  return classes[color] || 'item-white'
-}
-
-function getIcon(color: string) {
-  const icons: Record<string, string> = {
-    lime: 'fas fa-star',
-    white: 'fas fa-circle',
-    gold: 'fas fa-dollar-sign',
-    red: 'fas fa-times-circle',
-  }
-  return icons[color] || 'fas fa-circle'
 }
 
 function handleScroll() {
@@ -282,22 +291,5 @@ onUnmounted(() => {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, rgba(255, 20, 147, 0.7), rgba(217, 70, 239, 0.7));
-}
-
-/* 站点导航项图标颜色 */
-.item-lime i {
-  color: rgb(132, 204, 22);
-}
-
-.item-white i {
-  color: rgb(156, 163, 175);
-}
-
-.item-gold i {
-  color: rgb(234, 179, 8);
-}
-
-.item-red i {
-  color: rgb(239, 68, 68);
 }
 </style>

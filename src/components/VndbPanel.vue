@@ -9,7 +9,7 @@
     leave-to-class="opacity-0 translate-x-full"
   >
     <div
-      v-if="searchStore.isVndbPanelOpen && searchStore.vndbInfo"
+      v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
       class="glassmorphism-panel fixed inset-x-2 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 md:w-[28rem] lg:w-[32rem] max-h-[75vh] sm:max-h-[80vh] rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden z-30"
     >
       <!-- 标题栏 -->
@@ -210,7 +210,7 @@
                 class="mt-2 px-3 py-1 text-xs bg-red-500 dark:bg-red-600 text-white rounded-full hover:bg-red-600 dark:hover:bg-red-700 transition-all"
                 @click="handleTranslate"
               >
-                <i class="fas fa-redo mr-1" />
+                <RotateCcw :size="12" class="mr-1 inline" />
                 重试
               </button>
             </div>
@@ -221,7 +221,7 @@
               </div>
               <div v-else class="relative">
                 <div class="absolute top-0 right-0 px-2 py-0.5 bg-gradient-to-r from-theme-accent to-theme-primary text-white text-xs rounded-bl-lg rounded-tr-lg shadow-sm">
-                  <i class="fas fa-robot mr-1" />
+                  <Bot :size="12" class="mr-1 inline" />
                   AI 译文
                 </div>
                 <div class="pt-6">
@@ -282,6 +282,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
+import { useUIStore } from '@/stores/ui'
 import { translateText } from '@/api/search'
 import {
   BookOpen,
@@ -299,9 +300,12 @@ import {
   Loader,
   AlertTriangle,
   ExternalLink,
+  RotateCcw,
+  Bot,
 } from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
+const uiStore = useUIStore()
 const isTranslating = ref(false)
 const translatedDescription = ref<string | null>(null)
 const showOriginal = ref(false)
@@ -348,7 +352,7 @@ async function handleTranslate() {
 }
 
 function closePanel() {
-  searchStore.toggleVndbPanel()
+  uiStore.toggleVndbPanel()
 }
 
 // 处理图片加载失败

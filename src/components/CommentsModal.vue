@@ -9,7 +9,7 @@
     leave-to-class="opacity-0"
   >
     <div
-      v-if="searchStore.isCommentsModalOpen"
+      v-if="uiStore.isCommentsModalOpen"
       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
       @click.self="closeModal"
     >
@@ -23,7 +23,7 @@
         leave-to-class="opacity-0 scale-95"
       >
         <div
-          v-if="searchStore.isCommentsModalOpen"
+          v-if="uiStore.isCommentsModalOpen"
           class="glassmorphism-modal rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl max-h-[90vh] mx-1 sm:mx-4 flex flex-col overflow-hidden"
           @click.stop
         >
@@ -51,11 +51,11 @@
 
 <script setup lang="ts">
 import { watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useSearchStore } from '@/stores/search'
+import { useUIStore } from '@/stores/ui'
 import Artalk from 'artalk/dist/Artalk.mjs'
 import { MessageCircle, X } from 'lucide-vue-next'
 
-const searchStore = useSearchStore()
+const uiStore = useUIStore()
 let artalkInstance: any = null
 let isClosing = false
 
@@ -63,7 +63,7 @@ function closeModal() {
   if (isClosing) {return}
   isClosing = true
   
-  searchStore.toggleCommentsModal()
+  uiStore.toggleCommentsModal()
   
   setTimeout(() => {
     isClosing = false
@@ -102,7 +102,7 @@ function initArtalk() {
 }
 
 // 监听模态框打开状态
-watch(() => searchStore.isCommentsModalOpen, (isOpen: boolean) => {
+watch(() => uiStore.isCommentsModalOpen, (isOpen: boolean) => {
   if (isOpen) {
     // 延迟初始化，确保 DOM 已渲染
     setTimeout(() => {
@@ -113,7 +113,7 @@ watch(() => searchStore.isCommentsModalOpen, (isOpen: boolean) => {
 
 onMounted(() => {
   // 如果挂载时模态框就是打开的，初始化 Artalk
-  if (searchStore.isCommentsModalOpen) {
+  if (uiStore.isCommentsModalOpen) {
     setTimeout(() => {
       initArtalk()
     }, 200)

@@ -26,3 +26,8 @@ dist-ssr
 .history
 .pnpm-store
 .pnpm-lock.yaml
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
