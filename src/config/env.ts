@@ -5,9 +5,9 @@
 
 // API 配置
 export const API_CONFIG = {
-  defaultApiUrl: import.meta.env.VITE_DEFAULT_API_URL || 'https://cfapi.searchgal.homes',
+  defaultApiUrl: import.meta.env.VITE_DEFAULT_API_URL || 'https://cf.api.searchgal.homes',
   vndbApiUrl: import.meta.env.VITE_VNDB_API_URL || 'https://api.vndb.org/kana/vn',
-  translateApiUrl: import.meta.env.VITE_TRANSLATE_API_URL || 'https://cfapi.searchgal.homes/translate',
+  translateApiUrl: import.meta.env.VITE_TRANSLATE_API_URL || 'https://cf.api.searchgal.homes/translate',
   statusApiUrl: import.meta.env.VITE_STATUS_API_URL || 'https://status.searchgal.homes',
   randomImageApi: import.meta.env.VITE_RANDOM_IMAGE_API || 'https://api.illlights.com/v1/img',
 } as const

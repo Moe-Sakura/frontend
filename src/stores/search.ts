@@ -4,6 +4,18 @@ import { saveSearchState, loadSearchState } from '@/utils/persistence'
 import { useHistoryStore } from './history'
 import { useCacheStore } from './cache'
 
+export interface VndbVoiceActor {
+  id: string
+  name: string
+  character?: string
+}
+
+export interface VndbTag {
+  id: string
+  name: string
+  rating?: number
+}
+
 export interface VndbInfo {
   names: string[]
   mainName: string
@@ -11,8 +23,8 @@ export interface VndbInfo {
   mainImageUrl: string | null
   screenshotUrl: string | null
   description: string | null
-  va: any[]
-  vntags: any[]
+  va: VndbVoiceActor[]
+  vntags: VndbTag[]
   play_hours: number
   length_minute: number
   length_votes: number

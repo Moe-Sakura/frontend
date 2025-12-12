@@ -172,7 +172,7 @@ frontend/
 默认使用 Cloudflare Workers API：
 ```typescript
 // src/api/search.ts
-const apiUrl = 'https://cfapi.searchgal.homes'
+const apiUrl = 'https://cf.api.searchgal.homes'
 ```
 
 支持自定义 API 地址，在搜索页面输入框中填写即可。

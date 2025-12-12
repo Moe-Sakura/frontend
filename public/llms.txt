@@ -56,6 +56,6 @@
 - [Tailwind CSS 文档](https://tailwindcss.com/docs): Tailwind CSS 官方文档
 - [Pinia 文档](https://pinia.vuejs.org/): Pinia 状态管理文档
 - [Lucide Icons](https://lucide.dev/icons/): Lucide 图标库参考
-- [Lazysizes](https://github.com/aFarkas/lazysizes): 高性能图片懒加载库
+- [Lozad.js](https://github.com/ApoorvSaxena/lozad.js): 基于 IntersectionObserver 的高性能图片懒加载库
 - [Quicklink](https://getquick.link/): 智能预加载库
 

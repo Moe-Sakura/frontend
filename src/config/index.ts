@@ -80,10 +80,12 @@ interface AppConfig {
   }
 }
 
+type EnvValue = string | number | boolean
+
 /**
  * 获取环境变量值，支持类型转换
  */
-function getEnv(key: string, defaultValue: any = ''): any {
+function getEnv<T extends EnvValue>(key: string, defaultValue: T): T {
   const value = import.meta.env[key]
   
   if (value === undefined || value === '') {
@@ -91,15 +93,19 @@ function getEnv(key: string, defaultValue: any = ''): any {
   }
   
   // 布尔值转换
-  if (value === 'true') return true
-  if (value === 'false') return false
+  if (value === 'true') {
+    return true as T
+  }
+  if (value === 'false') {
+    return false as T
+  }
   
   // 数字转换
   if (!isNaN(Number(value)) && value !== '') {
-    return Number(value)
+    return Number(value) as T
   }
   
-  return value
+  return value as T
 }
 
 /**
@@ -113,7 +119,7 @@ export const config: AppConfig = {
   },
   
   api: {
-    baseUrl: getEnv('VITE_API_BASE_URL', 'https://cfapi.searchgal.homes'),
+    baseUrl: getEnv('VITE_API_BASE_URL', 'https://cf.api.searchgal.homes'),
     timeout: getEnv('VITE_API_TIMEOUT', 30000),
     translateUrl: getEnv('VITE_TRANSLATE_API_URL', 'https://translate.searchgal.homes'),
     vndbUrl: getEnv('VITE_VNDB_API_URL', 'https://api.vndb.org/kana/v1'),
@@ -190,7 +196,7 @@ export const mode = import.meta.env.MODE
 /**
  * 开发环境日志
  */
-export function devLog(...args: any[]) {
+export function devLog(...args: unknown[]) {
   if (config.dev.debug && isDev) {
     console.log('[Dev]', ...args)
   }
@@ -199,7 +205,7 @@ export function devLog(...args: any[]) {
 /**
  * 开发环境警告
  */
-export function devWarn(...args: any[]) {
+export function devWarn(...args: unknown[]) {
   if (config.dev.debug && isDev) {
     console.warn('[Dev]', ...args)
   }
@@ -208,7 +214,7 @@ export function devWarn(...args: any[]) {
 /**
  * 开发环境错误
  */
-export function devError(...args: any[]) {
+export function devError(...args: unknown[]) {
   if (config.dev.debug && isDev) {
     console.error('[Dev]', ...args)
   }

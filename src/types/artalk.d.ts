@@ -5,14 +5,47 @@ declare module 'artalk/dist/Artalk.mjs' {
     pageTitle?: string
     server: string
     site: string
-    [key: string]: any
+    darkMode?: 'auto' | boolean
+    locale?: string
+    placeholder?: string
+    noComment?: string
+    sendBtn?: string
+    emoticons?: string | boolean | object
+    vote?: boolean
+    voteDown?: boolean
+    uaBadge?: boolean
+    listSort?: boolean
+    preview?: boolean
+    countEl?: string | boolean
+    pvEl?: string | boolean
+    statPageKeyAttr?: string
+    heightLimit?: {
+      content?: number
+      children?: number
+      scrollable?: boolean
+    }
+    imgUpload?: boolean
+    reqTimeout?: number
+    flatMode?: boolean | 'auto'
+    nestMax?: number
+    nestSort?: 'DATE_ASC' | 'DATE_DESC'
+    marked?: boolean
+    imgLazyLoad?: boolean | 'native' | 'data-src'
+    dateFormatter?: (date: Date) => string
+    avatarURLBuilder?: (comment: unknown) => string
+    useBackendConf?: boolean
   }
 
   interface ArtalkInstance {
     destroy(): void
     update(config?: Partial<ArtalkConfig>): void
     reload(): void
-    [key: string]: any
+    on(event: string, callback: (...args: unknown[]) => void): void
+    off(event: string, callback?: (...args: unknown[]) => void): void
+    trigger(event: string, ...args: unknown[]): void
+    setDarkMode(darkMode: boolean | 'auto'): void
+    getCommentCount(): number
+    getComments(): unknown[]
   }
 
   class Artalk {

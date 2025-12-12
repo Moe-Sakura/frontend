@@ -12,10 +12,8 @@ import './styles/theme.css'
 // 苹果同款液态玻璃效果
 import './styles/glassmorphism.css'
 
-// lazysizes - 高性能图片懒加载
-import 'lazysizes'
-import 'lazysizes/plugins/parent-fit/ls.parent-fit'
-import 'lazysizes/plugins/attrchange/ls.attrchange'
+// lozad.js - 高性能图片懒加载（基于 IntersectionObserver）
+import lozad from 'lozad'
 
 // 预加载随机图片 API
 const preloadImage = new Image()
@@ -134,8 +132,9 @@ if ('serviceWorker' in navigator) {
 // Quicklink - 智能预加载可见链接
 import { listen } from 'quicklink'
 
-// 在页面加载完成后启用 Quicklink
+// 在页面加载完成后启用 Quicklink 和 Lozad
 window.addEventListener('load', () => {
+  // Quicklink 智能预加载
   listen({
     // 延迟启动（毫秒）
     delay: 500,
@@ -151,4 +150,19 @@ window.addEventListener('load', () => {
       /illlights\.com/,
     ],
   })
+
+  // Lozad 图片懒加载 - 使用 IntersectionObserver API
+  const observer = lozad('.lozad', {
+    rootMargin: '100px 0px', // 提前 100px 开始加载
+    threshold: 0.1,
+    enableAutoReload: true, // 支持动态内容
+    loaded: (el) => {
+      // 加载完成后添加淡入效果
+      el.classList.add('lozad-loaded')
+    },
+  })
+  observer.observe()
+
+  // 导出 observer 供动态内容使用
+  ;(window as Window & { lozadObserver?: ReturnType<typeof lozad> }).lozadObserver = observer
 })

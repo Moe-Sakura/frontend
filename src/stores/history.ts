@@ -4,7 +4,7 @@ import type { SearchHistory } from '@/utils/persistence'
 import { 
   loadSearchHistory, 
   saveSearchHistory as persistSearchHistory,
-  clearSearchHistory as clearPersistedSearchHistory 
+  clearSearchHistory as clearPersistedSearchHistory, 
 } from '@/utils/persistence'
 
 export const useHistoryStore = defineStore('history', () => {
@@ -14,7 +14,7 @@ export const useHistoryStore = defineStore('history', () => {
   
   // 计算属性
   const recentHistory = computed(() => 
-    searchHistory.value.slice(0, 10)
+    searchHistory.value.slice(0, 10),
   )
   
   const historyByMode = computed(() => ({
@@ -51,7 +51,7 @@ export const useHistoryStore = defineStore('history', () => {
     
     // 移除重复项（相同查询和模式）
     searchHistory.value = searchHistory.value.filter(
-      h => !(h.query === newItem.query && h.mode === newItem.mode)
+      h => !(h.query === newItem.query && h.mode === newItem.mode),
     )
     
     // 添加到开头
@@ -101,7 +101,7 @@ export const useHistoryStore = defineStore('history', () => {
     const avgResultCount = searchHistory.value.length > 0
       ? Math.round(
           searchHistory.value.reduce((sum, h) => sum + h.resultCount, 0) / 
-          searchHistory.value.length
+          searchHistory.value.length,
         )
       : 0
     
@@ -121,7 +121,7 @@ export const useHistoryStore = defineStore('history', () => {
   function searchInHistory(keyword: string) {
     const lowerKeyword = keyword.toLowerCase()
     return searchHistory.value.filter(h => 
-      h.query.toLowerCase().includes(lowerKeyword)
+      h.query.toLowerCase().includes(lowerKeyword),
     )
   }
   

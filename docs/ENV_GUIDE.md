@@ -37,7 +37,7 @@ pnpm dev
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `VITE_API_BASE_URL` | 搜索 API 地址 | https://cfapi.searchgal.homes |
+| `VITE_API_BASE_URL` | 搜索 API 地址 | https://cf.api.searchgal.homes |
 | `VITE_API_TIMEOUT` | API 超时时间（毫秒） | 30000 |
 | `VITE_TRANSLATE_API_URL` | 翻译 API 地址 | https://translate.searchgal.homes |
 | `VITE_VNDB_API_URL` | VNDB API 地址 | https://api.vndb.org/kana/v1 |

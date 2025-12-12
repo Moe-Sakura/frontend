@@ -4,7 +4,7 @@ export const AI_TRANSLATE_API_URL = 'https://ai.searchgal.homes/v1/chat/completi
 export const AI_TRANSLATE_API_KEY = 'sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e'
 export const AI_TRANSLATE_MODEL = 'Qwen/Qwen2.5-32B-Instruct'
 export const ENABLE_VNDB_IMAGE_PROXY = true
-export const VNDB_IMAGE_PROXY_URL = 'https://rpx.searchgal.homes/'
+export const VNDB_IMAGE_PROXY_URL = 'https://rp.searchgal.homes/'
 
 let isProxyAvailable = false
 
@@ -23,6 +23,39 @@ export interface PlatformResult {
   error: string
 }
 
+export interface VndbVoiceActor {
+  id: string
+  name: string
+  character?: string
+}
+
+export interface VndbTag {
+  id: string
+  name: string
+  rating?: number
+}
+
+export interface VndbTitleEntry {
+  lang: string
+  title: string
+}
+
+export interface VndbScreenshot {
+  url: string
+  sexual: number
+  violence: number
+  votecount?: number
+}
+
+export interface VndbDeveloper {
+  name: string
+}
+
+export interface VndbApiItem {
+  name: string
+  url: string
+}
+
 export interface VndbInfo {
   id?: string
   names: string[]
@@ -33,8 +66,8 @@ export interface VndbInfo {
   screenshots: string[]
   description: string | null
   translatedDescription: string | null
-  va: any[]
-  vntags: any[]
+  va: VndbVoiceActor[]
+  vntags: VndbTag[]
   play_hours: number
   length_minute: number
   length_votes: number
@@ -76,7 +109,7 @@ export async function searchGameStream(
 ) {
   try {
     // 从 searchParams 中获取 API 地址，默认使用 Cloudflare Workers API
-    const apiUrl = searchParams.get('api') || 'https://cfapi.searchgal.homes'
+    const apiUrl = searchParams.get('api') || 'https://cf.api.searchgal.homes'
     const gameName = searchParams.get('game')
     const searchMode = searchParams.get('mode') || 'game'
 
@@ -147,7 +180,7 @@ export async function searchGameStream(
             callbacks.onProgress?.(data.progress.completed, data.progress.total)
 
             // 转换为我们的格式，保留 tags 标签信息
-            const items = data.result.items.map((item: any) => ({
+            const items = data.result.items.map((item: VndbApiItem) => ({
               platform: data.result.name,
               title: item.name,
               url: item.url,
@@ -233,7 +266,7 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
     }
 
     if (result.titles && Array.isArray(result.titles)) {
-      result.titles.forEach((titleEntry: any) => {
+      result.titles.forEach((titleEntry: VndbTitleEntry) => {
         if (titleEntry.title) {
           names.push(titleEntry.title)
           if (titleEntry.lang === 'zh-Hans' || titleEntry.lang === 'zh-Hant') {
@@ -263,13 +296,13 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
     if (result.screenshots && Array.isArray(result.screenshots) && result.screenshots.length > 0) {
       // 过滤并排序截图：只保留 sexual <= 1 且 violence === 0 的截图
       const sortedScreenshots = [...result.screenshots]
-        .filter((s: any) => s.url && (s.sexual === 0 || s.sexual === 1) && s.violence === 0)
-        .sort((a: any, b: any) => (b.votecount || 0) - (a.votecount || 0))
+        .filter((s: VndbScreenshot) => s.url && (s.sexual === 0 || s.sexual === 1) && s.violence === 0)
+        .sort((a: VndbScreenshot, b: VndbScreenshot) => (b.votecount || 0) - (a.votecount || 0))
 
       if (sortedScreenshots.length > 0) {
         screenshotUrl = sortedScreenshots[0].url
         // 保存所有安全截图的 URL
-        screenshots.push(...sortedScreenshots.map((s: any) => s.url))
+        screenshots.push(...sortedScreenshots.map((s: VndbScreenshot) => s.url))
       }
     }
 
@@ -300,7 +333,7 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
 
     // 提取开发商信息
     const developers = result.developers
-      ? result.developers.map((dev: any) => dev.name).filter(Boolean)
+      ? result.developers.map((dev: VndbDeveloper) => dev.name).filter(Boolean)
       : []
 
     const finalResult: VndbInfo = {

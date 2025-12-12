@@ -38,14 +38,14 @@ export const useUIStore = defineStore('ui', () => {
   const hasOpenModal = computed(() => 
     isCommentsModalOpen.value || 
     isVndbPanelOpen.value || 
-    isSettingsModalOpen.value
+    isSettingsModalOpen.value,
   )
   
   const activeModalsCount = computed(() => {
     let count = 0
-    if (isCommentsModalOpen.value) count++
-    if (isVndbPanelOpen.value) count++
-    if (isSettingsModalOpen.value) count++
+    if (isCommentsModalOpen.value) {count++}
+    if (isVndbPanelOpen.value) {count++}
+    if (isSettingsModalOpen.value) {count++}
     return count
   })
   
@@ -122,7 +122,7 @@ export const useUIStore = defineStore('ui', () => {
   function showToast(
     type: 'success' | 'error' | 'info' | 'warning',
     message: string,
-    duration = 3000
+    duration = 3000,
   ) {
     const id = `toast-${Date.now()}-${Math.random()}`
     toasts.value.push({ id, type, message, duration })

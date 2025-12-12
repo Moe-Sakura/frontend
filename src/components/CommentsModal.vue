@@ -55,8 +55,12 @@ import { useUIStore } from '@/stores/ui'
 import Artalk from 'artalk/dist/Artalk.mjs'
 import { MessageCircle, X } from 'lucide-vue-next'
 
+interface ArtalkInstance {
+  destroy(): void
+}
+
 const uiStore = useUIStore()
-let artalkInstance: any = null
+let artalkInstance: ArtalkInstance | null = null
 let isClosing = false
 
 function closeModal() {
@@ -93,7 +97,7 @@ function initArtalk() {
           server: 'https://artalk.saop.cc',
           site: 'Galgame 聚合搜索',
           darkMode: 'auto',
-        } as any)
+        })
       } catch (error) {
         // 静默处理错误
       }
