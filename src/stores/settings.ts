@@ -54,7 +54,7 @@ export const useSettingsStore = defineStore('settings', () => {
   // 更新单个设置
   function updateSetting<K extends keyof UserSettings>(
     key: K,
-    value: UserSettings[K]
+    value: UserSettings[K],
   ) {
     settings.value[key] = value
     saveSettings()
@@ -98,7 +98,7 @@ export const useSettingsStore = defineStore('settings', () => {
         saveSettings()
       }
     },
-    { deep: true }
+    { deep: true },
   )
   
   return {

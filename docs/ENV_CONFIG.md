@@ -28,7 +28,7 @@ import { CONFIG } from '@/config'
 
 // 使用 API 配置
 const apiUrl = CONFIG.api.defaultApiUrl
-console.log(apiUrl) // https://cfapi.searchgal.homes
+console.log(apiUrl) // https://cf.api.searchgal.homes
 
 // 使用功能开关
 if (CONFIG.features.enableComments) {

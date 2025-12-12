@@ -7,7 +7,7 @@ export function piniaPersistedState(context: PiniaPluginContext) {
   const { store, options } = context
   
   // 只对配置了 persist 选项的 store 进行持久化
-  if (!options.persist) return
+  if (!options.persist) {return}
   
   const storageKey = `pinia-${store.$id}`
   
@@ -37,7 +37,7 @@ export function piniaPersistedState(context: PiniaPluginContext) {
  */
 export function piniaLogger(context: PiniaPluginContext) {
   // 仅在开发环境启用
-  if (import.meta.env.PROD) return
+  if (import.meta.env.PROD) {return}
   
   const { store } = context
   
@@ -99,9 +99,15 @@ export function piniaPerformance(context: PiniaPluginContext) {
     })
   })
   
+  interface PerformanceStatEntry {
+    calls: number
+    avgDuration: string
+    totalDuration: string
+  }
+
   // 添加获取统计信息的方法
   store.getPerformanceStats = () => {
-    const result: Record<string, any> = {}
+    const result: Record<string, PerformanceStatEntry> = {}
     
     for (const [action, calls] of stats.actionCalls.entries()) {
       const durations = stats.actionDurations.get(action) || []

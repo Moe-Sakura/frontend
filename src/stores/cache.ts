@@ -9,10 +9,15 @@ interface CachedVndbInfo {
   expiresAt: number
 }
 
+interface SearchResultData {
+  platforms: Map<string, unknown>
+  vndbInfo?: unknown
+}
+
 interface CachedSearchResults {
   query: string
   mode: 'game' | 'patch'
-  data: any
+  data: SearchResultData
   timestamp: number
   expiresAt: number
 }
@@ -34,7 +39,7 @@ export const useCacheStore = defineStore('cache', () => {
   const searchCacheSize = computed(() => searchResultsCache.value.size)
   const imageCacheSize = computed(() => imageCache.value.size)
   const totalCacheSize = computed(() => 
-    vndbCacheSize.value + searchCacheSize.value + imageCacheSize.value
+    vndbCacheSize.value + searchCacheSize.value + imageCacheSize.value,
   )
   
   // VNDB 缓存方法
@@ -59,7 +64,7 @@ export const useCacheStore = defineStore('cache', () => {
   
   function getVndbInfo(query: string): VndbInfo | null {
     const cached = vndbCache.value.get(query.toLowerCase())
-    if (!cached) return null
+    if (!cached) {return null}
     
     // 检查是否过期
     if (Date.now() > cached.expiresAt) {
@@ -72,7 +77,7 @@ export const useCacheStore = defineStore('cache', () => {
   
   function hasVndbCache(query: string): boolean {
     const cached = vndbCache.value.get(query.toLowerCase())
-    if (!cached) return false
+    if (!cached) {return false}
     
     if (Date.now() > cached.expiresAt) {
       vndbCache.value.delete(query.toLowerCase())
@@ -87,7 +92,7 @@ export const useCacheStore = defineStore('cache', () => {
   }
   
   // 搜索结果缓存方法
-  function cacheSearchResults(query: string, mode: 'game' | 'patch', data: any) {
+  function cacheSearchResults(query: string, mode: 'game' | 'patch', data: SearchResultData) {
     const now = Date.now()
     const key = `${mode}:${query.toLowerCase()}`
     
@@ -109,10 +114,10 @@ export const useCacheStore = defineStore('cache', () => {
     }
   }
   
-  function getSearchResults(query: string, mode: 'game' | 'patch'): any | null {
+  function getSearchResults(query: string, mode: 'game' | 'patch'): SearchResultData | null {
     const key = `${mode}:${query.toLowerCase()}`
     const cached = searchResultsCache.value.get(key)
-    if (!cached) return null
+    if (!cached) {return null}
     
     // 检查是否过期
     if (Date.now() > cached.expiresAt) {
@@ -126,7 +131,7 @@ export const useCacheStore = defineStore('cache', () => {
   function hasSearchCache(query: string, mode: 'game' | 'patch'): boolean {
     const key = `${mode}:${query.toLowerCase()}`
     const cached = searchResultsCache.value.get(key)
-    if (!cached) return false
+    if (!cached) {return false}
     
     if (Date.now() > cached.expiresAt) {
       searchResultsCache.value.delete(key)
