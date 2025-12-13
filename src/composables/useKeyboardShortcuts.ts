@@ -140,16 +140,36 @@ export function useKeyboardShortcuts() {
     )
   }
 
+  // 导航到 UI 面板（使用查询参数）
+  function navigateToPanel(panel: string | null) {
+    const newQuery = { ...route.query }
+    if (panel) {
+      newQuery.ui = panel
+    } else {
+      delete newQuery.ui
+    }
+    router.push({ path: '/', query: newQuery })
+  }
+
+  // 切换面板
+  function togglePanel(panel: string) {
+    if (route.query.ui === panel) {
+      navigateToPanel(null)
+    } else {
+      navigateToPanel(panel)
+    }
+  }
+
   // 键盘事件处理
   function handleKeyDown(event: KeyboardEvent) {
     const key = event.key.toLowerCase()
     
     // Escape 键 - 总是处理（关闭面板）
     if (event.key === 'Escape') {
-      if (route.path !== '/') {
+      if (route.query.ui) {
         event.preventDefault()
         playPop()
-        router.push('/')
+        navigateToPanel(null)
       }
       return
     }
@@ -169,22 +189,14 @@ export function useKeyboardShortcuts() {
         // 打开/关闭设置
         event.preventDefault()
         playPop()
-        if (route.path === '/settings') {
-          router.push('/')
-        } else {
-          router.push('/settings')
-        }
+        togglePanel('settings')
         break
 
       case 'c':
         // 打开/关闭评论
         event.preventDefault()
         playPop()
-        if (route.path === '/comments') {
-          router.push('/')
-        } else {
-          router.push('/comments')
-        }
+        togglePanel('comments')
         break
 
       case 'v':
@@ -192,11 +204,7 @@ export function useKeyboardShortcuts() {
         if (searchStore.vndbInfo) {
           event.preventDefault()
           playPop()
-          if (uiStore.isVndbPanelOpen) {
-            uiStore.isVndbPanelOpen = false
-          } else {
-            uiStore.isVndbPanelOpen = true
-          }
+          togglePanel('vndb')
         }
         break
 
@@ -204,18 +212,14 @@ export function useKeyboardShortcuts() {
         // 打开/关闭搜索历史
         event.preventDefault()
         playPop()
-        if (route.path === '/history') {
-          router.push('/')
-        } else {
-          router.push('/history')
-        }
+        togglePanel('history')
         break
 
       case 'h':
-        // 返回首页
+        // 返回首页（关闭所有面板）
         event.preventDefault()
         playClick()
-        router.push('/')
+        navigateToPanel(null)
         break
 
       case 'n':

@@ -156,7 +156,7 @@
     >
       <div
         v-if="showPlatformNav && searchStore.hasResults"
-        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 sm:hidden"
+        class="fixed inset-0 bg-black/35 z-40 sm:hidden glassmorphism-overlay"
         @click="togglePlatformNav"
       />
     </Transition>
@@ -215,23 +215,37 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-function toggleComments() {
-  if (uiStore.isCommentsModalOpen || route.path === '/comments') {
-    router.push('/')
+function navigateToPanel(panel: string | null) {
+  const newQuery = { ...route.query }
+  if (panel) {
+    newQuery.ui = panel
   } else {
-    router.push('/comments')
+    delete newQuery.ui
+  }
+  router.push({ path: '/', query: newQuery })
+}
+
+function toggleComments() {
+  if (uiStore.isCommentsModalOpen || route.query.ui === 'comments') {
+    navigateToPanel(null)
+  } else {
+    navigateToPanel('comments')
   }
 }
 
 function toggleVndbPanel() {
-  uiStore.isVndbPanelOpen = !uiStore.isVndbPanelOpen
+  if (uiStore.isVndbPanelOpen || route.query.ui === 'vndb') {
+    navigateToPanel(null)
+  } else {
+    navigateToPanel('vndb')
+  }
 }
 
 function toggleHistory() {
-  if (uiStore.isHistoryModalOpen || route.path === '/history') {
-    router.push('/')
+  if (uiStore.isHistoryModalOpen || route.query.ui === 'history') {
+    navigateToPanel(null)
   } else {
-    router.push('/history')
+    navigateToPanel('history')
   }
 }
 

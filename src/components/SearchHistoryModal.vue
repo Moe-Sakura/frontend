@@ -11,7 +11,7 @@
     >
       <div
         v-if="uiStore.isHistoryModalOpen"
-        class="fixed inset-0 z-[99] bg-black/50 backdrop-blur-sm hidden sm:block"
+        class="fixed inset-0 z-[99] hidden sm:block glassmorphism-overlay"
         @click="closeModal"
       />
     </Transition>
@@ -190,8 +190,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useUIStore } from '@/stores/ui'
 import { loadSearchHistory, clearSearchHistory as clearHistoryStorage, type SearchHistory } from '@/utils/persistence'
 import { playClick, playPop } from '@/composables/useSound'
@@ -199,6 +199,7 @@ import { lockScroll, unlockScroll, forceUnlockScroll } from '@/composables/useSc
 import { ChevronLeft, History, Trash2, Gamepad2, Wrench, X, ChevronRight } from 'lucide-vue-next'
 
 const router = useRouter()
+const route = useRoute()
 const uiStore = useUIStore()
 const history = ref<SearchHistory[]>([])
 
@@ -213,16 +214,14 @@ function loadHistory() {
 
 // 选择历史记录
 function handleSelectHistory(item: SearchHistory) {
-  // 关闭模态框
+  playClick()
+  
+  // 先发送事件（让父组件更新 URL）
+  emit('select', item)
+  
+  // 然后关闭模态框（不使用 router.push 避免覆盖 URL 参数）
   uiStore.isHistoryModalOpen = false
   unlockScroll()
-  
-  // 使用 nextTick 确保 DOM 更新后再发送事件
-  nextTick(() => {
-    playClick()
-    emit('select', item)
-    router.push('/')
-  })
 }
 
 // 清空历史
@@ -249,7 +248,10 @@ function handleRemoveItem(index: number) {
 // 关闭模态框
 function closeModal() {
   playPop()
-  router.push('/')
+  // 移除 ui 参数，保留其他参数
+  const newQuery = { ...route.query }
+  delete newQuery.ui
+  router.push({ path: '/', query: newQuery })
 }
 
 // 键盘事件

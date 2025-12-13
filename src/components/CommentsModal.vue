@@ -11,7 +11,7 @@
     >
       <div
         v-if="uiStore.isCommentsModalOpen"
-        class="fixed inset-0 z-[99] bg-black/50 backdrop-blur-sm hidden sm:block"
+        class="fixed inset-0 z-[99] hidden sm:block glassmorphism-overlay"
         @click="closeModal"
       />
     </Transition>
@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import { watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useUIStore } from '@/stores/ui'
 import { playPop } from '@/composables/useSound'
 import { lockScroll, unlockScroll, forceUnlockScroll } from '@/composables/useScrollLock'
@@ -91,6 +91,7 @@ interface ArtalkInstance {
 }
 
 const router = useRouter()
+const route = useRoute()
 const uiStore = useUIStore()
 let artalkInstance: ArtalkInstance | null = null
 let isClosing = false
@@ -102,8 +103,10 @@ function closeModal() {
   playPop()
   // 恢复 body 滚动
   unlockScroll()
-  // 通过路由返回首页
-  router.push('/')
+  // 通过路由返回（移除 ui 参数，保留其他参数）
+  const newQuery = { ...route.query }
+  delete newQuery.ui
+  router.push({ path: '/', query: newQuery })
   
   setTimeout(() => {
     isClosing = false

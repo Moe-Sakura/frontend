@@ -20,7 +20,7 @@
           target="_blank"
           rel="noopener noreferrer"
           :class="[
-            'status-link px-3 sm:px-4 py-1.5 sm:py-2 rounded-full backdrop-blur-md border border-white/30 dark:border-white/20 flex items-center gap-1.5 sm:gap-2 text-white text-sm sm:text-base font-bold hover:scale-105 transition-all duration-300 shadow-md',
+            'status-link px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/30 dark:border-white/20 flex items-center gap-1.5 sm:gap-2 text-white text-sm sm:text-base font-bold hover:scale-105 transition-all duration-300 shadow-md glass-gpu',
             statusOnline === null 
               ? 'bg-gray-500 hover:bg-gray-600 shadow-gray-500/20 hover:shadow-gray-500/30 dark:bg-gray-600 dark:hover:bg-gray-700' 
               : statusOnline
@@ -58,11 +58,9 @@
               placeholder="游戏或补丁关键字词*"
               required
               class="w-full pl-12 pr-32 py-4 text-base rounded-2xl 
-                     bg-white/70 dark:bg-slate-800/70
                      text-gray-900 dark:text-slate-100 
                      placeholder:text-gray-400 dark:placeholder:text-slate-400 
-                     backdrop-blur-xl backdrop-saturate-150
-                     border border-white/40 dark:border-slate-700/30
+                     glassmorphism-input
                      shadow-lg shadow-theme-primary/10 dark:shadow-theme-accent/15
                      hover:shadow-xl hover:shadow-theme-primary/15 dark:hover:shadow-theme-accent/20
                      focus:shadow-2xl focus:shadow-theme-primary/20 dark:focus:shadow-theme-accent/25
@@ -78,14 +76,13 @@
               class="absolute right-2 top-1/2 -translate-y-1/2 
                      px-6 py-2.5 rounded-xl
                      bg-gradient-pink text-white font-bold text-sm
-                     backdrop-blur-md
                      border border-white/30 dark:border-white/20
                      shadow-md shadow-theme-primary/20
                      hover:shadow-lg hover:shadow-theme-primary/30 hover:scale-105
                      active:scale-95
                      disabled:opacity-50 disabled:cursor-not-allowed
                      transition-all duration-200
-                     flex items-center gap-2 z-10"
+                     flex items-center gap-2 z-10 glass-gpu"
               @click.prevent="triggerSearch"
             >
               <Search :size="16" />
@@ -98,11 +95,7 @@
           <!-- Search Mode Selector - 使用 Tailwind 胶囊开关 -->
           <div class="flex justify-center items-center gap-3">
             <div
-              class="relative flex p-1.5 rounded-full
-                        bg-white/60 dark:bg-slate-700/60
-                        backdrop-blur-xl backdrop-saturate-150
-                        border border-white/40 dark:border-slate-600/30
-                        shadow-lg shadow-theme-primary/10 dark:shadow-theme-accent/15"
+              class="relative flex p-1.5 rounded-full glassmorphism-mode-switch"
             >
               <!-- 滑动背景指示器 -->
               <div
@@ -257,12 +250,10 @@
     <div class="w-full max-w-5xl mx-auto mt-8 sm:mt-12 px-2 sm:px-0 animate-fade-in animation-delay-1000">
       <div
         class="usage-notice 
-               bg-white/75 dark:bg-slate-800/75
-               backdrop-blur-xl backdrop-saturate-150 
+               glassmorphism-card
                rounded-2xl sm:rounded-3xl 
                shadow-xl shadow-theme-primary/10 dark:shadow-theme-accent/20
-               p-4 sm:p-6 lg:p-8 
-               border border-white/50 dark:border-slate-700/30"
+               p-4 sm:p-6 lg:p-8"
       >
         <h2
           class="text-xl sm:text-2xl font-bold 
@@ -604,12 +595,23 @@ async function handleSearch() {
         
         // 第一个结果出现时滚动到结果区域
         if (isFirstResult) {
-          setTimeout(() => {
-            const resultsEl = document.getElementById('results')
-            if (resultsEl) {
-              resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }
-          }, 100)
+          // 使用 requestAnimationFrame + setTimeout 确保 DOM 已更新
+          window.requestAnimationFrame(() => {
+            setTimeout(() => {
+              const resultsEl = document.getElementById('results')
+              if (resultsEl) {
+                // 计算目标位置：结果区域顶部向上偏移一些，留出空间
+                const headerOffset = 80
+                const elementPosition = resultsEl.getBoundingClientRect().top
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+                
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: 'smooth',
+                })
+              }
+            }, 50)
+          })
         }
       },
       onComplete: () => {
@@ -856,9 +858,13 @@ onUnmounted(() => {
 function searchWithParams(query: string, mode: 'game' | 'patch') {
   searchQuery.value = query
   searchMode.value = mode
-  setTimeout(() => {
-    triggerSearch()
-  }, 50)
+  
+  // 手动更新 URL（确保双向绑定）
+  updateURLParams({
+    s: query,
+    mode: mode,
+    api: customApi.value,
+  })
 }
 
 defineExpose({

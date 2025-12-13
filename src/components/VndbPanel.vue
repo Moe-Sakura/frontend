@@ -13,7 +13,7 @@
       class="fixed inset-0 z-50 flex flex-col vndb-page"
     >
       <!-- 顶部导航栏 -->
-      <div class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/80">
+      <div class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar">
         <!-- 返回按钮 -->
         <button
           class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors hover:opacity-80"
@@ -252,6 +252,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { translateText } from '@/api/search'
@@ -276,6 +277,8 @@ import {
   Image,
 } from 'lucide-vue-next'
 
+const router = useRouter()
+const route = useRoute()
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
 const isTranslating = ref(false)
@@ -340,8 +343,10 @@ async function handleTranslate() {
 function closePanel() {
   playPop()
   unlockScroll()
-  // 直接关闭面板
-  uiStore.isVndbPanelOpen = false
+  // 通过路由返回（移除 ui 参数，保留其他参数）
+  const newQuery = { ...route.query }
+  delete newQuery.ui
+  router.push({ path: '/', query: newQuery })
 }
 
 // 处理图片加载失败

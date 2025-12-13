@@ -1,118 +1,163 @@
 /**
- * 苹果同款液态玻璃效果 - 艳粉主题
- * Apple-style Glassmorphism with Deep Pink Theme
+ * 苹果液态玻璃效果 - 高性能版
+ * Apple-style Liquid Glass Effect - Performance Optimized
+ * 
+ * 优化策略：
+ * 1. 使用较低的 blur 值 (8-16px) 替代高模糊 (30-40px)
+ * 2. 通过 saturate + brightness + contrast 增强视觉效果
+ * 3. 使用 CSS 变量统一管理，方便调整
+ * 4. 简化阴影层数，减少重绘开销
+ * 5. 使用 will-change 提示浏览器优化
  */
+
+:root {
+  /* 液态玻璃核心参数 */
+  --glass-blur: 12px;
+  --glass-blur-sm: 8px;
+  --glass-blur-lg: 16px;
+  --glass-saturate: 180%;
+  --glass-brightness: 1.05;
+  --glass-contrast: 1.02;
+  
+  /* 主题色 - 艳粉 */
+  --glass-pink: 255, 20, 147;
+  --glass-pink-light: 255, 105, 180;
+  --glass-pink-pale: 255, 228, 242;
+  
+  /* 亮色模式背景 */
+  --glass-bg-light: rgba(255, 255, 255, 0.72);
+  --glass-bg-light-hover: rgba(255, 255, 255, 0.82);
+  --glass-border-light: rgba(var(--glass-pink), 0.12);
+  --glass-border-light-hover: rgba(var(--glass-pink), 0.22);
+  
+  /* 暗色模式背景 */
+  --glass-bg-dark: rgba(30, 41, 59, 0.78);
+  --glass-bg-dark-hover: rgba(30, 41, 59, 0.88);
+  --glass-border-dark: rgba(var(--glass-pink-light), 0.18);
+  --glass-border-dark-hover: rgba(var(--glass-pink-light), 0.28);
+}
+
+/* ========== 基础液态玻璃效果 ========== */
+.glass {
+  background: var(--glass-bg-light);
+  backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate)) 
+    brightness(var(--glass-brightness));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate)) 
+    brightness(var(--glass-brightness));
+  border: 1px solid var(--glass-border-light);
+  will-change: backdrop-filter;
+}
+
+.dark .glass {
+  background: var(--glass-bg-dark);
+  border-color: var(--glass-border-dark);
+}
 
 /* ========== 搜索输入框玻璃效果 ========== */
 .glassmorphism-input {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 228, 242, 0.5) 100%
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(var(--glass-pink-pale), 0.55) 100%
   );
-  
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  
-  border: 1.5px solid rgba(255, 20, 147, 0.15);
+  backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate)) 
+    brightness(var(--glass-brightness));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate)) 
+    brightness(var(--glass-brightness));
+  border: 1.5px solid var(--glass-border-light);
   box-shadow: 
-    0 8px 24px rgba(255, 20, 147, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.95) inset;
-  
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    0 4px 16px rgba(var(--glass-pink), 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.25s ease-out;
+  will-change: transform, box-shadow;
 }
 
 .glassmorphism-input:hover {
-  border-color: rgba(255, 20, 147, 0.25);
+  border-color: var(--glass-border-light-hover);
   box-shadow: 
-    0 10px 28px rgba(255, 20, 147, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset,
-    0 0 30px rgba(255, 105, 180, 0.1);
+    0 6px 20px rgba(var(--glass-pink), 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .glassmorphism-input:focus {
-  border-color: rgba(255, 20, 147, 0.4);
+  border-color: rgba(var(--glass-pink), 0.35);
   box-shadow: 
-    0 12px 32px rgba(255, 20, 147, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset,
-    0 0 40px rgba(255, 20, 147, 0.15);
-  transform: scale(1.01);
+    0 8px 24px rgba(var(--glass-pink), 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 0 0 3px rgba(var(--glass-pink), 0.08);
+  transform: scale(1.005);
 }
 
 .dark .glassmorphism-input {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.8) 0%,
-    rgba(51, 65, 85, 0.7) 100%
+    rgba(30, 41, 59, 0.82) 0%,
+    rgba(51, 65, 85, 0.72) 100%
   );
-  
-  backdrop-filter: blur(30px) saturate(150%);
-  -webkit-backdrop-filter: blur(30px) saturate(150%);
-  
-  border: 1.5px solid rgba(255, 105, 180, 0.25);
+  border-color: var(--glass-border-dark);
   box-shadow: 
-    0 8px 24px rgba(255, 105, 180, 0.15),
-    0 0 0 1px rgba(255, 105, 180, 0.08) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.1) inset;
+    0 4px 16px rgba(var(--glass-pink-light), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dark .glassmorphism-input:hover {
-  border-color: rgba(255, 105, 180, 0.35);
+  border-color: var(--glass-border-dark-hover);
   box-shadow: 
-    0 10px 28px rgba(255, 105, 180, 0.22),
-    0 0 0 1px rgba(255, 105, 180, 0.12) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.12) inset,
-    0 0 35px rgba(255, 20, 147, 0.18);
+    0 6px 20px rgba(var(--glass-pink-light), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .dark .glassmorphism-input:focus {
-  border-color: rgba(255, 105, 180, 0.5);
+  border-color: rgba(var(--glass-pink-light), 0.45);
   box-shadow: 
-    0 12px 32px rgba(255, 105, 180, 0.3),
-    0 0 0 1px rgba(255, 105, 180, 0.18) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
-    0 0 45px rgba(255, 20, 147, 0.25);
-  transform: scale(1.01);
+    0 8px 24px rgba(var(--glass-pink-light), 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 3px rgba(var(--glass-pink-light), 0.12);
+  transform: scale(1.005);
 }
 
 /* ========== 搜索按钮玻璃效果 ========== */
 .glassmorphism-button {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(255, 228, 242, 0.2) 100%
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(var(--glass-pink-pale), 0.25) 100%
   );
-  
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  
-  border: 1.5px solid rgba(255, 20, 147, 0.3);
+  backdrop-filter: 
+    blur(var(--glass-blur-sm)) 
+    saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur-sm)) 
+    saturate(var(--glass-saturate));
+  border: 1.5px solid rgba(var(--glass-pink), 0.25);
   box-shadow: 
-    0 10px 30px rgba(255, 20, 147, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.8) inset;
-  
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    0 4px 16px rgba(var(--glass-pink), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease-out;
+  will-change: transform, box-shadow;
 }
 
 .glassmorphism-button:hover:not(:disabled) {
-  border-color: rgba(255, 20, 147, 0.5);
+  border-color: rgba(var(--glass-pink), 0.4);
   box-shadow: 
-    0 14px 40px rgba(255, 20, 147, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset,
-    0 0 50px rgba(255, 105, 180, 0.3);
-  transform: scale(1.02) translateY(-1px);
+    0 6px 24px rgba(var(--glass-pink), 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px) scale(1.02);
 }
 
 .glassmorphism-button:active:not(:disabled) {
   transform: scale(0.98);
   box-shadow: 
-    0 6px 20px rgba(255, 20, 147, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    0 2px 8px rgba(var(--glass-pink), 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .glassmorphism-button:disabled {
@@ -123,70 +168,61 @@
 .dark .glassmorphism-button {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.5) 0%,
-    rgba(51, 65, 85, 0.4) 100%
+    rgba(30, 41, 59, 0.55) 0%,
+    rgba(51, 65, 85, 0.45) 100%
   );
-  
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  
-  border: 1.5px solid rgba(255, 105, 180, 0.35);
+  border-color: rgba(var(--glass-pink-light), 0.3);
   box-shadow: 
-    0 10px 30px rgba(255, 105, 180, 0.3),
-    0 0 0 1px rgba(255, 105, 180, 0.1) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.12) inset;
+    0 4px 16px rgba(var(--glass-pink-light), 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dark .glassmorphism-button:hover:not(:disabled) {
-  border-color: rgba(255, 105, 180, 0.5);
+  border-color: rgba(var(--glass-pink-light), 0.45);
   box-shadow: 
-    0 14px 40px rgba(255, 105, 180, 0.4),
-    0 0 0 1px rgba(255, 105, 180, 0.15) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
-    0 0 55px rgba(255, 20, 147, 0.35);
-  transform: scale(1.02) translateY(-1px);
+    0 6px 24px rgba(var(--glass-pink-light), 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px) scale(1.02);
 }
 
 .dark .glassmorphism-button:active:not(:disabled) {
   transform: scale(0.98);
   box-shadow: 
-    0 6px 20px rgba(255, 105, 180, 0.25),
-    0 0 0 1px rgba(255, 105, 180, 0.08) inset;
+    0 2px 8px rgba(var(--glass-pink-light), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* ========== 内嵌搜索按钮（输入框内部）========== */
+/* ========== 内嵌搜索按钮 ========== */
 .glassmorphism-search-button {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 228, 242, 0.1) 100%
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(var(--glass-pink-pale), 0.12) 100%
   );
-  
-  backdrop-filter: blur(15px) saturate(180%);
-  -webkit-backdrop-filter: blur(15px) saturate(180%);
-  
-  border: 1px solid rgba(255, 20, 147, 0.25);
+  backdrop-filter: 
+    blur(var(--glass-blur-sm)) 
+    saturate(160%);
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur-sm)) 
+    saturate(160%);
+  border: 1px solid rgba(var(--glass-pink), 0.2);
   box-shadow: 
-    0 4px 12px rgba(255, 20, 147, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
-  
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    0 2px 8px rgba(var(--glass-pink), 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.2s ease-out;
+  will-change: transform;
 }
 
 .glassmorphism-search-button:hover:not(:disabled) {
-  border-color: rgba(255, 20, 147, 0.4);
+  border-color: rgba(var(--glass-pink), 0.35);
   box-shadow: 
-    0 6px 16px rgba(255, 20, 147, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
-    0 0 20px rgba(255, 105, 180, 0.2);
+    0 4px 12px rgba(var(--glass-pink), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transform: translateY(-1px) scale(1.02);
 }
 
 .glassmorphism-search-button:active:not(:disabled) {
   transform: scale(0.96);
-  box-shadow: 
-    0 2px 8px rgba(255, 20, 147, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
 .glassmorphism-search-button:disabled {
@@ -197,216 +233,168 @@
 .dark .glassmorphism-search-button {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.3) 0%,
-    rgba(51, 65, 85, 0.2) 100%
+    rgba(30, 41, 59, 0.35) 0%,
+    rgba(51, 65, 85, 0.25) 100%
   );
-  
-  backdrop-filter: blur(15px) saturate(150%);
-  -webkit-backdrop-filter: blur(15px) saturate(150%);
-  
-  border: 1px solid rgba(255, 105, 180, 0.3);
+  border-color: rgba(var(--glass-pink-light), 0.25);
   box-shadow: 
-    0 4px 12px rgba(255, 105, 180, 0.2),
-    0 0 0 1px rgba(255, 105, 180, 0.08) inset;
+    0 2px 8px rgba(var(--glass-pink-light), 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .dark .glassmorphism-search-button:hover:not(:disabled) {
-  border-color: rgba(255, 105, 180, 0.45);
+  border-color: rgba(var(--glass-pink-light), 0.4);
   box-shadow: 
-    0 6px 16px rgba(255, 105, 180, 0.3),
-    0 0 0 1px rgba(255, 105, 180, 0.12) inset,
-    0 0 25px rgba(255, 20, 147, 0.25);
+    0 4px 12px rgba(var(--glass-pink-light), 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transform: translateY(-1px) scale(1.02);
-}
-
-.dark .glassmorphism-search-button:active:not(:disabled) {
-  transform: scale(0.96);
-  box-shadow: 
-    0 2px 8px rgba(255, 105, 180, 0.18),
-    0 0 0 1px rgba(255, 105, 180, 0.06) inset;
 }
 
 /* ========== 模式切换器玻璃效果 ========== */
 .glassmorphism-mode-switch {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.6) 0%,
-    rgba(255, 228, 242, 0.45) 100%
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(var(--glass-pink-pale), 0.5) 100%
   );
-  
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  
-  border: 1.5px solid rgba(255, 20, 147, 0.2);
+  backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate));
+  border: 1.5px solid var(--glass-border-light);
   box-shadow: 
-    0 8px 24px rgba(255, 20, 147, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.9) inset;
-  
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    0 4px 16px rgba(var(--glass-pink), 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: all 0.25s ease-out;
 }
 
 .glassmorphism-mode-switch:hover {
-  border-color: rgba(255, 20, 147, 0.3);
+  border-color: var(--glass-border-light-hover);
   box-shadow: 
-    0 10px 28px rgba(255, 20, 147, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset,
-    0 0 35px rgba(255, 105, 180, 0.15);
+    0 6px 20px rgba(var(--glass-pink), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .dark .glassmorphism-mode-switch {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.75) 0%,
-    rgba(51, 65, 85, 0.65) 100%
+    rgba(30, 41, 59, 0.78) 0%,
+    rgba(51, 65, 85, 0.68) 100%
   );
-  
-  backdrop-filter: blur(25px) saturate(150%);
-  -webkit-backdrop-filter: blur(25px) saturate(150%);
-  
-  border: 1.5px solid rgba(255, 105, 180, 0.28);
+  border-color: var(--glass-border-dark);
   box-shadow: 
-    0 8px 24px rgba(255, 105, 180, 0.18),
-    0 0 0 1px rgba(255, 105, 180, 0.1) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.12) inset;
+    0 4px 16px rgba(var(--glass-pink-light), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dark .glassmorphism-mode-switch:hover {
-  border-color: rgba(255, 105, 180, 0.38);
+  border-color: var(--glass-border-dark-hover);
   box-shadow: 
-    0 10px 28px rgba(255, 105, 180, 0.25),
-    0 0 0 1px rgba(255, 105, 180, 0.15) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
-    0 0 40px rgba(255, 20, 147, 0.22);
+    0 6px 20px rgba(var(--glass-pink-light), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* ========== 模态框液态玻璃效果 ========== */
 .glassmorphism-modal {
-  /* 半透明背景 - 使用粉色渐变增强层次感 */
   background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.75) 0%,
-    rgba(255, 228, 242, 0.6) 50%,
-    rgba(255, 179, 217, 0.5) 100%
+    145deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(var(--glass-pink-pale), 0.62) 100%
   );
-  
-  /* 背景模糊 - 苹果级别的模糊效果 */
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  
-  /* 边框 - 粉色高光效果 */
-  border: 1.5px solid rgba(255, 20, 147, 0.15);
+  backdrop-filter: 
+    blur(var(--glass-blur-lg)) 
+    saturate(var(--glass-saturate))
+    brightness(var(--glass-brightness));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur-lg)) 
+    saturate(var(--glass-saturate))
+    brightness(var(--glass-brightness));
+  border: 1.5px solid var(--glass-border-light);
   box-shadow: 
-    0 8px 32px rgba(255, 20, 147, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.95) inset,
-    0 0 40px rgba(255, 105, 180, 0.08);
-  
-  /* 圆角 */
+    0 8px 32px rgba(var(--glass-pink), 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
   border-radius: 24px;
-  
-  /* 过渡动画 */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease-out;
+  will-change: transform, box-shadow;
 }
 
 .glassmorphism-modal:hover {
-  border-color: rgba(255, 20, 147, 0.25);
+  border-color: var(--glass-border-light-hover);
   box-shadow: 
-    0 12px 40px rgba(255, 20, 147, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset,
-    0 0 50px rgba(255, 105, 180, 0.15);
+    0 12px 40px rgba(var(--glass-pink), 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
-/* 暗色模式的液态玻璃 */
 .dark .glassmorphism-modal {
   background: linear-gradient(
-    135deg,
-    rgba(30, 41, 59, 0.85) 0%,
-    rgba(51, 65, 85, 0.75) 50%,
-    rgba(15, 23, 42, 0.8) 100%
+    145deg,
+    rgba(30, 41, 59, 0.88) 0%,
+    rgba(51, 65, 85, 0.78) 100%
   );
-  
-  backdrop-filter: blur(40px) saturate(150%);
-  -webkit-backdrop-filter: blur(40px) saturate(150%);
-  
-  border: 1.5px solid rgba(255, 105, 180, 0.25);
+  border-color: var(--glass-border-dark);
   box-shadow: 
-    0 8px 32px rgba(255, 105, 180, 0.2),
-    0 0 0 1px rgba(255, 105, 180, 0.1) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.12) inset,
-    0 0 50px rgba(255, 20, 147, 0.15);
+    0 8px 32px rgba(var(--glass-pink-light), 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dark .glassmorphism-modal:hover {
-  border-color: rgba(255, 105, 180, 0.35);
+  border-color: var(--glass-border-dark-hover);
   box-shadow: 
-    0 12px 40px rgba(255, 105, 180, 0.3),
-    0 0 0 1px rgba(255, 105, 180, 0.15) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
-    0 0 60px rgba(255, 20, 147, 0.25);
+    0 12px 40px rgba(var(--glass-pink-light), 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* ========== 面板液态玻璃效果 ========== */
 .glassmorphism-panel {
   background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 228, 242, 0.65) 50%,
-    rgba(255, 179, 217, 0.55) 100%
+    145deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(var(--glass-pink-pale), 0.68) 100%
   );
-  
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  
-  border: 1.5px solid rgba(255, 20, 147, 0.18);
+  backdrop-filter: 
+    blur(var(--glass-blur-lg)) 
+    saturate(var(--glass-saturate))
+    brightness(var(--glass-brightness));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur-lg)) 
+    saturate(var(--glass-saturate))
+    brightness(var(--glass-brightness));
+  border: 1.5px solid var(--glass-border-light);
   box-shadow: 
-    0 12px 40px rgba(255, 20, 147, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset,
-    0 0 50px rgba(255, 105, 180, 0.1);
-  
+    0 8px 32px rgba(var(--glass-pink), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
   border-radius: 20px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease-out;
+  will-change: transform;
 }
 
 .glassmorphism-panel:hover {
-  border-color: rgba(255, 20, 147, 0.3);
+  border-color: var(--glass-border-light-hover);
   box-shadow: 
-    0 16px 48px rgba(255, 20, 147, 0.22),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset,
-    0 0 60px rgba(255, 105, 180, 0.18);
+    0 12px 40px rgba(var(--glass-pink), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
   transform: translateY(-2px);
 }
 
 .dark .glassmorphism-panel {
   background: linear-gradient(
-    135deg,
-    rgba(30, 41, 59, 0.9) 0%,
-    rgba(51, 65, 85, 0.8) 50%,
-    rgba(15, 23, 42, 0.85) 100%
+    145deg,
+    rgba(30, 41, 59, 0.92) 0%,
+    rgba(51, 65, 85, 0.82) 100%
   );
-  
-  backdrop-filter: blur(40px) saturate(150%);
-  -webkit-backdrop-filter: blur(40px) saturate(150%);
-  
-  border: 1.5px solid rgba(255, 105, 180, 0.3);
+  border-color: var(--glass-border-dark);
   box-shadow: 
-    0 12px 40px rgba(255, 105, 180, 0.25),
-    0 0 0 1px rgba(255, 105, 180, 0.12) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
-    0 0 50px rgba(255, 20, 147, 0.2);
+    0 8px 32px rgba(var(--glass-pink-light), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .dark .glassmorphism-panel:hover {
-  border-color: rgba(255, 105, 180, 0.4);
+  border-color: var(--glass-border-dark-hover);
   box-shadow: 
-    0 16px 48px rgba(255, 105, 180, 0.35),
-    0 0 0 1px rgba(255, 105, 180, 0.18) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.18) inset,
-    0 0 60px rgba(255, 20, 147, 0.3);
+    0 12px 40px rgba(var(--glass-pink-light), 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
 }
 
@@ -414,132 +402,233 @@
 .glassmorphism-toolbar-button {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 228, 242, 0.3) 100%
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(var(--glass-pink-pale), 0.35) 100%
   );
-  
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  
-  border: 1px solid rgba(255, 20, 147, 0.15);
+  backdrop-filter: 
+    blur(var(--glass-blur-sm)) 
+    saturate(160%);
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur-sm)) 
+    saturate(160%);
+  border: 1px solid var(--glass-border-light);
   box-shadow: 
-    0 4px 12px rgba(255, 20, 147, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-  
+    0 2px 8px rgba(var(--glass-pink), 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease-out;
+  will-change: transform;
 }
 
 .glassmorphism-toolbar-button:hover {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.6) 0%,
-    rgba(255, 228, 242, 0.5) 100%
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(var(--glass-pink-pale), 0.55) 100%
   );
-  border-color: rgba(255, 20, 147, 0.25);
+  border-color: var(--glass-border-light-hover);
   box-shadow: 
-    0 6px 16px rgba(255, 20, 147, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
-    0 0 20px rgba(255, 105, 180, 0.1);
+    0 4px 12px rgba(var(--glass-pink), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transform: translateY(-1px);
 }
 
 .glassmorphism-toolbar-button:active {
   transform: translateY(0);
   box-shadow: 
-    0 2px 8px rgba(255, 20, 147, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    0 1px 4px rgba(var(--glass-pink), 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .dark .glassmorphism-toolbar-button {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.6) 0%,
-    rgba(51, 65, 85, 0.5) 100%
+    rgba(30, 41, 59, 0.65) 0%,
+    rgba(51, 65, 85, 0.55) 100%
   );
-  
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  
-  border: 1px solid rgba(255, 105, 180, 0.2);
+  border-color: var(--glass-border-dark);
   box-shadow: 
-    0 4px 12px rgba(255, 105, 180, 0.15),
-    0 0 0 1px rgba(255, 105, 180, 0.08) inset;
+    0 2px 8px rgba(var(--glass-pink-light), 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .dark .glassmorphism-toolbar-button:hover {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.8) 0%,
-    rgba(51, 65, 85, 0.7) 100%
+    rgba(30, 41, 59, 0.85) 0%,
+    rgba(51, 65, 85, 0.75) 100%
   );
-  border-color: rgba(255, 105, 180, 0.35);
+  border-color: var(--glass-border-dark-hover);
   box-shadow: 
-    0 6px 16px rgba(255, 105, 180, 0.25),
-    0 0 0 1px rgba(255, 105, 180, 0.15) inset,
-    0 0 25px rgba(255, 20, 147, 0.2);
+    0 4px 12px rgba(var(--glass-pink-light), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transform: translateY(-1px);
 }
 
 .dark .glassmorphism-toolbar-button:active {
   transform: translateY(0);
   box-shadow: 
-    0 2px 8px rgba(255, 105, 180, 0.18),
-    0 0 0 1px rgba(255, 105, 180, 0.1) inset;
+    0 1px 4px rgba(var(--glass-pink-light), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 /* ========== 卡片玻璃效果 ========== */
 .glassmorphism-card {
   background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.65) 0%,
-    rgba(255, 228, 242, 0.5) 50%,
-    rgba(255, 179, 217, 0.45) 100%
+    145deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(var(--glass-pink-pale), 0.55) 100%
   );
-  
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  
-  border: 1px solid rgba(255, 20, 147, 0.12);
+  backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border-light);
   box-shadow: 
-    0 8px 24px rgba(255, 20, 147, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-  
+    0 4px 16px rgba(var(--glass-pink), 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   border-radius: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s ease-out;
+  will-change: transform;
 }
 
 .glassmorphism-card:hover {
-  border-color: rgba(255, 20, 147, 0.2);
+  border-color: var(--glass-border-light-hover);
   box-shadow: 
-    0 12px 32px rgba(255, 20, 147, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
-    0 0 30px rgba(255, 105, 180, 0.12);
+    0 8px 24px rgba(var(--glass-pink), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transform: translateY(-2px);
 }
 
 .dark .glassmorphism-card {
   background: linear-gradient(
-    135deg,
-    rgba(30, 41, 59, 0.75) 0%,
-    rgba(51, 65, 85, 0.65) 50%,
-    rgba(15, 23, 42, 0.7) 100%
+    145deg,
+    rgba(30, 41, 59, 0.78) 0%,
+    rgba(51, 65, 85, 0.68) 100%
   );
-  
-  backdrop-filter: blur(30px) saturate(150%);
-  -webkit-backdrop-filter: blur(30px) saturate(150%);
-  
-  border: 1px solid rgba(255, 105, 180, 0.22);
+  border-color: var(--glass-border-dark);
   box-shadow: 
-    0 8px 24px rgba(255, 105, 180, 0.18),
-    0 0 0 1px rgba(255, 105, 180, 0.08) inset;
+    0 4px 16px rgba(var(--glass-pink-light), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .dark .glassmorphism-card:hover {
-  border-color: rgba(255, 105, 180, 0.32);
+  border-color: var(--glass-border-dark-hover);
   box-shadow: 
-    0 12px 32px rgba(255, 105, 180, 0.28),
-    0 0 0 1px rgba(255, 105, 180, 0.15) inset,
-    0 0 35px rgba(255, 20, 147, 0.22);
+    0 8px 24px rgba(var(--glass-pink-light), 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transform: translateY(-2px);
+}
+
+/* ========== 悬浮按钮玻璃效果 ========== */
+.glassmorphism-fab {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(var(--glass-pink-pale), 0.55) 100%
+  );
+  backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border-light);
+  box-shadow: 
+    0 4px 16px rgba(var(--glass-pink), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease-out;
+  will-change: transform, box-shadow;
+}
+
+.glassmorphism-fab:hover {
+  border-color: var(--glass-border-light-hover);
+  box-shadow: 
+    0 6px 24px rgba(var(--glass-pink), 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.glassmorphism-fab:active {
+  transform: scale(0.95);
+}
+
+.dark .glassmorphism-fab {
+  background: linear-gradient(
+    145deg,
+    rgba(30, 41, 59, 0.8) 0%,
+    rgba(51, 65, 85, 0.7) 100%
+  );
+  border-color: var(--glass-border-dark);
+  box-shadow: 
+    0 4px 16px rgba(var(--glass-pink-light), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.dark .glassmorphism-fab:hover {
+  border-color: var(--glass-border-dark-hover);
+  box-shadow: 
+    0 6px 24px rgba(var(--glass-pink-light), 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* ========== 遮罩层玻璃效果（轻量版） ========== */
+.glassmorphism-overlay {
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px) saturate(120%);
+  -webkit-backdrop-filter: blur(4px) saturate(120%);
+}
+
+.dark .glassmorphism-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* ========== 导航栏玻璃效果 ========== */
+.glassmorphism-navbar {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.75) 100%
+  );
+  backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: 
+    blur(var(--glass-blur)) 
+    saturate(var(--glass-saturate));
+  border-bottom: 1px solid rgba(var(--glass-pink), 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dark .glassmorphism-navbar {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.92) 0%,
+    rgba(15, 23, 42, 0.85) 100%
+  );
+  border-bottom-color: rgba(var(--glass-pink-light), 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ========== 性能优化工具类 ========== */
+/* 为频繁交互的元素使用 GPU 加速 */
+.glass-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 禁用模糊的降级方案（低性能设备） */
+@media (prefers-reduced-motion: reduce) {
+  .glass,
+  .glassmorphism-input,
+  .glassmorphism-button,
+  .glassmorphism-modal,
+  .glassmorphism-panel,
+  .glassmorphism-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }

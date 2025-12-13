@@ -84,41 +84,60 @@ const searchStore = useSearchStore()
 const uiStore = useUIStore()
 const searchHeaderRef = ref<InstanceType<typeof SearchHeader> | null>(null)
 
-// 路由导航函数
+// 路由导航函数 - 使用 ?ui=xxx 查询参数
 function navigateToSettings() {
-  router.push('/settings')
+  router.push({ path: '/', query: { ...route.query, ui: 'settings' } })
 }
 
 function navigateToHome() {
-  router.push('/')
+  // 移除 ui 参数，保留其他参数（如 s, mode）
+  const newQuery = { ...route.query }
+  delete newQuery.ui
+  router.push({ path: '/', query: newQuery })
 }
 
-// 监听模态框状态，关闭时返回首页
+// 监听模态框状态，关闭时移除 ui 参数
 watch(() => uiStore.isSettingsModalOpen, (isOpen) => {
-  if (!isOpen && route.path === '/settings') {
-    router.push('/')
+  if (!isOpen && route.query.ui === 'settings') {
+    navigateToHome()
   }
 })
 
 watch(() => uiStore.isCommentsModalOpen, (isOpen) => {
-  if (!isOpen && route.path === '/comments') {
-    router.push('/')
+  if (!isOpen && route.query.ui === 'comments') {
+    navigateToHome()
   }
 })
 
+watch(() => uiStore.isVndbPanelOpen, (isOpen) => {
+  if (!isOpen && route.query.ui === 'vndb') {
+    navigateToHome()
+  }
+})
+
+// 标记是否是从历史记录选择触发的关闭
+let isHistorySelection = false
+
 watch(() => uiStore.isHistoryModalOpen, (isOpen) => {
-  if (!isOpen && route.path === '/history') {
-    router.push('/')
+  if (!isOpen && route.query.ui === 'history' && !isHistorySelection) {
+    navigateToHome()
+  }
+  // 重置标记
+  if (!isOpen) {
+    isHistorySelection = false
   }
 })
 
 // 处理历史记录选择
 function handleHistorySelect(item: { query: string; mode: 'game' | 'patch' }) {
+  // 标记为历史记录选择，避免 watch 覆盖 URL
+  isHistorySelection = true
+  
   // 同步设置 store（用于其他地方读取）
   searchStore.setSearchQuery(item.query)
   searchStore.setSearchMode(item.mode)
   
-  // 直接调用 SearchHeader 的搜索方法
+  // 直接调用 SearchHeader 的搜索方法（会更新 URL 参数）
   searchHeaderRef.value?.searchWithParams(item.query, item.mode)
 }
 
