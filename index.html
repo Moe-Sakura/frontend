@@ -1,8 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh" class="no-fouc">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 防止 FOUC: 在 CSS 加载前隐藏内容，并同步检测主题 -->
+  <script>
+    // 同步检测暗色模式，防止主题闪烁
+    (function() {
+      try {
+        var saved = localStorage.getItem('ui-state');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var isDark = saved ? JSON.parse(saved).isDarkMode : prefersDark;
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {
+        // 静默处理
+      }
+      // 移除 no-fouc 类以显示内容
+      document.documentElement.classList.remove('no-fouc');
+    })();
+  </script>
+  <style>
+    /* 防止 FOUC: 初始隐藏 */
+    html.no-fouc { visibility: hidden; }
+  </style>
 
     <!-- Primary Meta Tags -->
   <title>SearchGal - Galgame 聚合搜索</title>
@@ -81,30 +104,6 @@
     /* ============================================
        第三方库样式覆盖
        ============================================ */
-    
-    /* Pace.js 加载进度条 - 艳粉主色调 */
-    .pace {
-      pointer-events: none;
-      user-select: none;
-    }
-    .pace-inactive {
-      display: none;
-    }
-    .pace .pace-progress {
-      background: linear-gradient(90deg, #ff1493, #ff69b4, #d946ef);
-      position: fixed;
-      z-index: 9999;
-      top: 0;
-      right: 100%;
-      width: 100%;
-      height: 4px;
-      box-shadow: 0 0 15px rgba(255, 20, 147, 0.6), 0 0 30px rgba(217, 70, 239, 0.4);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
-    }
 
     /* Fancybox 图片查看器 - 艳粉主色调 */
     .fancybox-custom .fancybox__backdrop {
@@ -278,6 +277,136 @@
     ></script>
 </head>
   <body>
+    <!-- 禁止无 JavaScript 用户访问 -->
+    <noscript>
+      <style>
+        #app { display: none !important; }
+        .noscript-warning {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+          color: white;
+          font-family: system-ui, -apple-system, sans-serif;
+          text-align: center;
+          padding: 2rem;
+          z-index: 99999;
+        }
+        .noscript-warning svg {
+          width: 80px;
+          height: 80px;
+          margin-bottom: 1.5rem;
+          color: #ff1493;
+        }
+        .noscript-warning h1 {
+          font-size: 1.75rem;
+          font-weight: 700;
+          margin-bottom: 1rem;
+          background: linear-gradient(135deg, #ff1493, #d946ef);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .noscript-warning p {
+          color: #94a3b8;
+          max-width: 400px;
+          line-height: 1.6;
+          margin-bottom: 0.5rem;
+        }
+        .noscript-warning .hint {
+          font-size: 0.875rem;
+          color: #64748b;
+          margin-top: 1.5rem;
+          padding: 1rem;
+          background: rgba(255, 20, 147, 0.1);
+          border-radius: 0.75rem;
+          border: 1px solid rgba(255, 20, 147, 0.2);
+        }
+      </style>
+      <div class="noscript-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m4.9 4.9 14.2 14.2"/>
+        </svg>
+        <h1>请启用 JavaScript</h1>
+        <p>SearchGal 需要 JavaScript 才能正常运行。</p>
+        <p>请在浏览器设置中启用 JavaScript 后刷新页面。</p>
+        <div class="hint">
+          💡 大多数浏览器默认启用 JavaScript。<br>
+          如果您使用了广告拦截器，请将本站加入白名单。
+        </div>
+      </div>
+    </noscript>
+
+    <!-- 禁止 IE 浏览器访问 -->
+    <script>
+      (function() {
+        // 检测 IE 浏览器
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        // 检测 IE 11 及更早版本
+        var isOldIE = typeof window.MSInputMethodContext !== 'undefined' && typeof document.documentMode !== 'undefined';
+        // 检测 Edge Legacy (EdgeHTML)
+        var isEdgeLegacy = !isIE && !!window.StyleMedia;
+        
+        if (isIE || isOldIE || isEdgeLegacy) {
+          document.body.innerHTML = '\
+            <div style="\
+              position: fixed;\
+              inset: 0;\
+              display: flex;\
+              flex-direction: column;\
+              align-items: center;\
+              justify-content: center;\
+              background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);\
+              color: white;\
+              font-family: system-ui, -apple-system, sans-serif;\
+              text-align: center;\
+              padding: 2rem;\
+              z-index: 99999;\
+            ">\
+              <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff1493" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1.5rem;">\
+                <circle cx="12" cy="12" r="10"/>\
+                <path d="m4.9 4.9 14.2 14.2"/>\
+              </svg>\
+              <h1 style="\
+                font-size: 1.75rem;\
+                font-weight: 700;\
+                margin-bottom: 1rem;\
+                background: linear-gradient(135deg, #ff1493, #d946ef);\
+                -webkit-background-clip: text;\
+                -webkit-text-fill-color: transparent;\
+              ">不支持的浏览器</h1>\
+              <p style="color: #94a3b8; max-width: 400px; line-height: 1.6; margin-bottom: 0.5rem;">\
+                您正在使用 Internet Explorer 或旧版 Edge 浏览器。\
+              </p>\
+              <p style="color: #94a3b8; max-width: 400px; line-height: 1.6;">\
+                SearchGal 使用了现代 Web 技术，不支持这些旧版浏览器。\
+              </p>\
+              <div style="\
+                font-size: 0.875rem;\
+                color: #64748b;\
+                margin-top: 1.5rem;\
+                padding: 1rem;\
+                background: rgba(255, 20, 147, 0.1);\
+                border-radius: 0.75rem;\
+                border: 1px solid rgba(255, 20, 147, 0.2);\
+              ">\
+                🌐 推荐使用以下现代浏览器：<br>\
+                <a href="https://www.google.com/chrome/" style="color: #ff69b4; text-decoration: underline;">Chrome</a> · \
+                <a href="https://www.mozilla.org/firefox/" style="color: #ff69b4; text-decoration: underline;">Firefox</a> · \
+                <a href="https://www.microsoft.com/edge" style="color: #ff69b4; text-decoration: underline;">Edge (Chromium)</a> · \
+                <a href="https://www.apple.com/safari/" style="color: #ff69b4; text-decoration: underline;">Safari</a>\
+              </div>\
+            </div>\
+          ';
+          throw new Error('不支持的浏览器');
+        }
+      })();
+    </script>
+
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
 </body>

@@ -129,16 +129,41 @@ export async function searchGameStream(
       body: formData,
       mode: 'cors',
       credentials: 'omit',
-    }).catch(() => {
-      throw new Error('网络连接失败，请检查网络或API地址')
+    }).catch((err) => {
+      // 提取更详细的网络错误信息
+      const errorName = err?.name || 'NetworkError'
+      const errorMessage = err?.message || ''
+      
+      if (errorMessage.includes('Failed to fetch') || errorName === 'TypeError') {
+        throw new Error(`[ERR_NETWORK] 无法连接到服务器 (${apiUrl})`)
+      }
+      if (errorMessage.includes('timeout') || errorName === 'TimeoutError') {
+        throw new Error('[ERR_TIMEOUT] 请求超时，服务器响应过慢')
+      }
+      if (errorMessage.includes('abort') || errorName === 'AbortError') {
+        throw new Error('[ERR_ABORTED] 请求已取消')
+      }
+      
+      throw new Error(`[ERR_NETWORK] 网络连接失败: ${errorMessage || '未知错误'}`)
     })
 
     if (!response.ok) {
-      if (response.status === 429) {
-        throw new Error('请求过于频繁，请稍后再试')
-      }
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+      const statusMessages: Record<number, string> = {
+        400: '请求格式错误',
+        401: '未授权访问',
+        403: '访问被拒绝',
+        404: 'API 端点不存在',
+        405: '请求方法不被允许',
+        408: '请求超时',
+        429: '请求过于频繁，请稍后再试',
+        500: '服务器内部错误',
+        502: '网关错误，后端服务不可用',
+        503: '服务暂时不可用',
+        504: '网关超时',
+      }
+      const message = errorData.error || statusMessages[response.status] || '请求失败'
+      throw new Error(`[${response.status}] ${message}`)
     }
 
     const reader = response.body?.getReader()

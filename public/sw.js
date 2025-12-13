@@ -1,5 +1,6 @@
 // Service Worker - PWA 支持
-const CACHE_NAME = 'searchgal-cache-v2';
+const SW_VERSION = '2.1.0';
+const CACHE_NAME = `searchgal-cache-v${SW_VERSION}`;
 const STATIC_CACHE = [
   '/',
   '/index.html',
@@ -14,6 +15,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll(STATIC_CACHE);
     })
   );
+  // 立即激活新版本
   self.skipWaiting();
 });
 
@@ -30,7 +32,19 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  // 立即接管所有客户端
   self.clients.claim();
+});
+
+// 监听消息 - 用于版本检查
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports[0].postMessage({ version: SW_VERSION });
+  }
+  
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // 拦截请求

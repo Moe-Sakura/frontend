@@ -18,32 +18,40 @@
 
     <main class="flex-1 flex flex-col min-h-screen">
       <StatsCorner />
-      <TopToolbar :current-background-url="randomImageUrl" @open-settings="openSettings" />
+      <TopToolbar :current-background-url="randomImageUrl" @open-settings="navigateToSettings" />
       <SearchHeader ref="searchHeaderRef" />
       <SearchResults />
       <FloatingButtons />
       <CommentsModal />
       <VndbPanel />
+      <SearchHistoryModal @select="handleHistorySelect" />
       <SettingsModal
-        :is-open="isSettingsOpen"
+        :is-open="uiStore.isSettingsModalOpen"
         :custom-api="searchStore.customApi"
-        :custom-c-s-s="customCSS"
-        @close="closeSettings"
+        :custom-c-s-s="uiStore.customCSS"
+        @close="navigateToHome"
         @save="saveSettings"
+      />
+
+      <!-- SW 更新提示 -->
+      <UpdateToast
+        :is-visible="uiStore.showUpdateToast"
+        :on-update="handleSwUpdate"
       />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
+import { useUIStore } from '@/stores/ui'
 import { 
   getSystemTheme,
   applyTheme, 
   watchSystemTheme,
-  loadCustomCSS,
   saveCustomCSS,
   applyCustomCSS,
 } from '@/utils/theme'
@@ -55,8 +63,81 @@ import FloatingButtons from '@/components/FloatingButtons.vue'
 import CommentsModal from '@/components/CommentsModal.vue'
 import VndbPanel from '@/components/VndbPanel.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
+import SearchHistoryModal from '@/components/SearchHistoryModal.vue'
+import UpdateToast from '@/components/UpdateToast.vue'
+import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
+import { useClickEffect } from '@/composables/useClickEffect'
 
+// 启用全局快捷键
+useKeyboardShortcuts()
+
+// 启用全局点击特效
+useClickEffect({
+  color: 'rgba(255, 20, 147, 0.35)',
+  size: 80,
+  duration: 500,
+})
+
+const router = useRouter()
+const route = useRoute()
 const searchStore = useSearchStore()
+const uiStore = useUIStore()
+const searchHeaderRef = ref<InstanceType<typeof SearchHeader> | null>(null)
+
+// 路由导航函数
+function navigateToSettings() {
+  router.push('/settings')
+}
+
+function navigateToHome() {
+  router.push('/')
+}
+
+// 监听模态框状态，关闭时返回首页
+watch(() => uiStore.isSettingsModalOpen, (isOpen) => {
+  if (!isOpen && route.path === '/settings') {
+    router.push('/')
+  }
+})
+
+watch(() => uiStore.isCommentsModalOpen, (isOpen) => {
+  if (!isOpen && route.path === '/comments') {
+    router.push('/')
+  }
+})
+
+watch(() => uiStore.isHistoryModalOpen, (isOpen) => {
+  if (!isOpen && route.path === '/history') {
+    router.push('/')
+  }
+})
+
+// 处理历史记录选择
+function handleHistorySelect(item: { query: string; mode: 'game' | 'patch' }) {
+  // 同步设置 store（用于其他地方读取）
+  searchStore.setSearchQuery(item.query)
+  searchStore.setSearchMode(item.mode)
+  
+  // 直接调用 SearchHeader 的搜索方法
+  searchHeaderRef.value?.searchWithParams(item.query, item.mode)
+}
+
+// SW 更新相关
+let swRegistration: globalThis.ServiceWorkerRegistration | null = null
+
+function handleSwUpdate() {
+  if (swRegistration) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const triggerUpdate = (window as any).triggerSwUpdate
+    if (triggerUpdate) {
+      triggerUpdate(swRegistration)
+    } else {
+      window.location.reload()
+    }
+  } else {
+    window.location.reload()
+  }
+}
 const randomImageUrl = ref('')
 const imageCache = ref<string[]>([])
 const imageCacheSet = ref<Set<string>>(new Set()) // 用于快速查重
@@ -65,10 +146,6 @@ const shuffledQueue = ref<string[]>([])
 let fetchInterval: number | null = null
 let displayInterval: number | null = null
 let systemThemeCleanup: (() => void) | null = null
-
-// 设置模态框
-const isSettingsOpen = ref(false)
-const customCSS = ref('')
 
 const MAX_CACHE_SIZE = 10000 // 最大缓存 10000 张图片
 const CLEANUP_BATCH_SIZE = 2000 // 每次清理 2000 张
@@ -369,17 +446,29 @@ function stopAllIntervals() {
 }
 
 onMounted(async () => {
+  // 初始化 UI Store（恢复持久化状态）
+  uiStore.init()
+
   // 初始化主题 - 跟随系统
   const systemTheme = getSystemTheme()
   applyTheme(systemTheme)
   
-  // 加载并应用自定义CSS
-  customCSS.value = loadCustomCSS()
-  applyCustomCSS(customCSS.value)
+  // 应用自定义 CSS
+  if (uiStore.customCSS) {
+    applyCustomCSS(uiStore.customCSS)
+  }
   
   // 监听系统主题变化
   systemThemeCleanup = watchSystemTheme((theme) => {
     applyTheme(theme)
+  })
+
+  // 监听 SW 更新事件
+  window.addEventListener('sw-update-available', (event) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const customEvent = event as any
+    swRegistration = customEvent.detail?.registration || null
+    uiStore.setShowUpdateToast(true)
   })
   
   // 恢复保存的搜索状态
@@ -421,21 +510,15 @@ onUnmounted(() => {
 })
 
 // 设置相关函数
-function openSettings() {
-  isSettingsOpen.value = true
-}
-
-function closeSettings() {
-  isSettingsOpen.value = false
-}
-
 function saveSettings(customApi: string, newCustomCSS: string) {
-  // 保存自定义 API 到 store
+  // 保存自定义 API 到 search store
   searchStore.setCustomApi(customApi)
-  // 保存并应用自定义CSS
-  customCSS.value = newCustomCSS
-  saveCustomCSS(newCustomCSS) // 保存到 localStorage
-  applyCustomCSS(newCustomCSS) // 应用到页面
+  // 保存自定义 CSS 到 UI store（会自动持久化）
+  uiStore.setCustomCSS(newCustomCSS)
+  // 同时保存到旧的 localStorage key（兼容性）
+  saveCustomCSS(newCustomCSS)
+  // 应用到页面
+  applyCustomCSS(newCustomCSS)
 }
 </script>
 

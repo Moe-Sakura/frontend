@@ -49,6 +49,7 @@ import { ref, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { generateShareURL } from '@/utils/urlParams'
 import { Check, Download, Share2, Github, Settings } from 'lucide-vue-next'
+import { playClick, playSuccess } from '@/composables/useSound'
 
 const searchStore = useSearchStore()
 
@@ -72,6 +73,7 @@ const hasSearchResults = computed(() => searchStore.hasResults)
 
 // 分享搜索
 async function shareSearch() {
+  playClick()
   const shareURL = generateShareURL({
     s: searchStore.searchQuery,
     mode: searchStore.searchMode,
@@ -80,6 +82,7 @@ async function shareSearch() {
   
   try {
     await navigator.clipboard.writeText(shareURL)
+    playSuccess()
     showCopiedTip.value = true
     
     setTimeout(() => {
@@ -110,12 +113,14 @@ async function shareSearch() {
 
 // 打开设置
 function openSettings() {
+  playClick()
   emit('openSettings')
 }
 
 // 保存背景图（使用源格式和文件名）
 async function saveBackgroundImage() {
   if (!props.currentBackgroundUrl) {return}
+  playClick()
   
   try {
     const response = await fetch(props.currentBackgroundUrl)
@@ -178,6 +183,7 @@ async function saveBackgroundImage() {
       URL.revokeObjectURL(url)
     }, 100)
     
+    playSuccess()
     showSaveTip.value = true
     setTimeout(() => {
       showSaveTip.value = false

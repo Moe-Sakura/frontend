@@ -23,9 +23,9 @@ importers:
       motion-v:
         specifier: ^1.7.4
         version: 1.7.4(@vueuse/core@14.1.0(vue@3.5.25(typescript@5.9.3)))(vue@3.5.25(typescript@5.9.3))
-      pace-js:
-        specifier: ^1.2.4
-        version: 1.2.4
+      nprogress:
+        specifier: ^0.2.0
+        version: 0.2.0
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.25(typescript@5.9.3))
@@ -35,6 +35,9 @@ importers:
       vue:
         specifier: ^3.5.25
         version: 3.5.25(typescript@5.9.3)
+      vue-router:
+        specifier: ^4.6.4
+        version: 4.6.4(vue@3.5.25(typescript@5.9.3))
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.2
@@ -45,6 +48,9 @@ importers:
       '@types/node':
         specifier: ^25.0.1
         version: 25.0.1
+      '@types/nprogress':
+        specifier: ^0.2.3
+        version: 0.2.3
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.49.0
         version: 8.49.0(@typescript-eslint/parser@8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
@@ -539,6 +545,9 @@ packages:
   '@types/node@25.0.1':
     resolution: {integrity: sha512-czWPzKIAXucn9PtsttxmumiQ9N0ok9FrBwgRWrwmVLlp86BrMExzvXRLFYRJ+Ex3g6yqj+KuaxfX1JTgV2lpfg==}
 
+  '@types/nprogress@0.2.3':
+    resolution: {integrity: sha512-k7kRA033QNtC+gLc4VPlfnue58CM1iQLgn1IMAU8VPHGOj7oIHPp9UlhedEnD/Gl8evoCjwkZjlBORtZ3JByUA==}
+
   '@types/web-bluetooth@0.0.21':
     resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
 
@@ -634,6 +643,9 @@ packages:
 
   '@vue/compiler-ssr@3.5.25':
     resolution: {integrity: sha512-ritPSKLBcParnsKYi+GNtbdbrIE1mtuFEJ4U1sWeuOMlIziK5GtOL85t5RhsNy4uWIXPgk+OUdpnXiTdzn8o3A==}
+
+  '@vue/devtools-api@6.6.4':
+    resolution: {integrity: sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g==}
 
   '@vue/devtools-api@7.7.8':
     resolution: {integrity: sha512-BtFcAmDbtXGwurWUFf8ogIbgZyR+rcVES1TSNEI8Em80fD8Anu+qTRN1Fc3J6vdRHlVM3fzPV1qIo+B4AiqGzw==}
@@ -1117,6 +1129,9 @@ packages:
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
+  nprogress@0.2.0:
+    resolution: {integrity: sha512-I19aIingLgR1fmhftnbWWO3dXc0hSxqHQHQb3H8m+K3TnEn/iSeTZZOyvKXWqQESMwuUVnatlCnZdLBZZt2VSA==}
+
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
@@ -1131,9 +1146,6 @@ packages:
   p-locate@5.0.0:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
-
-  pace-js@1.2.4:
-    resolution: {integrity: sha512-qnCxtvUoY9yHId0AwMQCVmWltb698GiuVArmDbQzonTu9QCo0SgWUVnX9jB9mi+/FUSWvQULBPxUAAo/kLrh1A==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -1358,6 +1370,11 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
+
+  vue-router@4.6.4:
+    resolution: {integrity: sha512-Hz9q5sa33Yhduglwz6g9skT8OBPii+4bFn88w6J+J4MfEo4KRRpmiNG/hHHkdbRFlLBOqxN8y8gf2Fb0MTUgVg==}
+    peerDependencies:
+      vue: ^3.5.0
 
   vue-tsc@3.1.8:
     resolution: {integrity: sha512-deKgwx6exIHeZwF601P1ktZKNF0bepaSN4jBU3AsbldPx9gylUc1JDxYppl82yxgkAgaz0Y0LCLOi+cXe9HMYA==}
@@ -1711,6 +1728,8 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
+  '@types/nprogress@0.2.3': {}
+
   '@types/web-bluetooth@0.0.21': {}
 
   '@typescript-eslint/eslint-plugin@8.49.0(@typescript-eslint/parser@8.49.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)':
@@ -1864,6 +1883,8 @@ snapshots:
     dependencies:
       '@vue/compiler-dom': 3.5.25
       '@vue/shared': 3.5.25
+
+  '@vue/devtools-api@6.6.4': {}
 
   '@vue/devtools-api@7.7.8':
     dependencies:
@@ -2332,6 +2353,8 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
+  nprogress@0.2.0: {}
+
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
@@ -2352,8 +2375,6 @@ snapshots:
   p-locate@5.0.0:
     dependencies:
       p-limit: 3.1.0
-
-  pace-js@1.2.4: {}
 
   parent-module@1.0.1:
     dependencies:
@@ -2545,6 +2566,11 @@ snapshots:
       semver: 7.7.3
     transitivePeerDependencies:
       - supports-color
+
+  vue-router@4.6.4(vue@3.5.25(typescript@5.9.3)):
+    dependencies:
+      '@vue/devtools-api': 6.6.4
+      vue: 3.5.25(typescript@5.9.3)
 
   vue-tsc@3.1.8(typescript@5.9.3):
     dependencies:
