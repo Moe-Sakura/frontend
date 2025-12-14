@@ -57,6 +57,12 @@ function updateNow() {
 }
 
 function startCountdown() {
+  // 先清除可能存在的旧定时器，避免创建多个并发定时器
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+  
   playPop()
   countdown.value = 3
   timer = window.setInterval(() => {

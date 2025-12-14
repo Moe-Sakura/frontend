@@ -1,19 +1,38 @@
 <template>
-  <!-- 全屏 VNDB 信息页面 -->
+  <!-- VNDB 信息面板 - macOS 风格 -->
+  <!-- 背景遮罩 -->
   <Transition
-    enter-active-class="transition-all duration-300 ease-out"
-    enter-from-class="opacity-0 translate-y-full"
-    enter-to-class="opacity-100 translate-y-0"
-    leave-active-class="transition-all duration-300 ease-in"
-    leave-from-class="opacity-100 translate-y-0"
-    leave-to-class="opacity-0 translate-y-full"
+    enter-active-class="transition-opacity duration-200"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-active-class="transition-opacity duration-200"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
   >
     <div
       v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
-      class="fixed inset-0 z-50 flex flex-col vndb-page"
+      class="fixed inset-0 z-40 bg-black/30"
+      @click="closePanel"
+    />
+  </Transition>
+  <Transition
+    enter-active-class="transition-all duration-300 ease-out"
+    enter-from-class="opacity-0 translate-y-10 scale-[0.98]"
+    enter-to-class="opacity-100 translate-y-0 scale-100"
+    leave-active-class="transition-all duration-200 ease-in"
+    leave-from-class="opacity-100 translate-y-0 scale-100"
+    leave-to-class="opacity-0 translate-y-10 scale-[0.98]"
+  >
+    <div
+      v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
+      class="fixed z-50 flex flex-col vndb-page
+             top-3 left-2 right-2 bottom-0
+             sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
+             rounded-t-2xl sm:rounded-t-3xl
+             shadow-2xl shadow-black/20"
     >
       <!-- 顶部导航栏 -->
-      <div class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar">
+      <div class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 rounded-t-2xl sm:rounded-t-3xl glassmorphism-navbar">
         <!-- 返回按钮 -->
         <button
           class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors hover:opacity-80"
@@ -252,7 +271,6 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { translateText } from '@/api/search'
@@ -277,8 +295,6 @@ import {
   Image,
 } from 'lucide-vue-next'
 
-const router = useRouter()
-const route = useRoute()
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
 const isTranslating = ref(false)
@@ -343,10 +359,8 @@ async function handleTranslate() {
 function closePanel() {
   playPop()
   unlockScroll()
-  // 通过路由返回（移除 ui 参数，保留其他参数）
-  const newQuery = { ...route.query }
-  delete newQuery.ui
-  router.push({ path: '/', query: newQuery })
+  // 关闭面板
+  uiStore.isVndbPanelOpen = false
 }
 
 // 处理图片加载失败
@@ -409,22 +423,30 @@ function formatPlatform(platform: string): string {
 </script>
 
 <style>
-/* 全屏 VNDB 页面背景 - 亮色模式 */
+/* VNDB 面板 - macOS 风格 (亮色模式) */
 .vndb-page {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(248, 250, 252, 0.98) 100%
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 250, 252, 0.96) 100%
   );
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: none;
 }
 
-/* 全屏 VNDB 页面背景 - 暗色模式 */
+/* VNDB 面板 - macOS 风格 (暗色模式) */
 .dark .vndb-page {
   background: linear-gradient(
     180deg,
-    rgb(15, 23, 42) 0%,
-    rgb(2, 6, 23) 100%
+    rgba(30, 41, 59, 0.92) 0%,
+    rgba(15, 23, 42, 0.96) 100%
   ) !important;
+  backdrop-filter: blur(40px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: none !important;
 }
 
 /* VNDB 卡片 - 亮色模式 */

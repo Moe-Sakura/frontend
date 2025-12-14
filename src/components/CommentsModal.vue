@@ -1,8 +1,8 @@
 <template>
   <Teleport to="body">
-    <!-- 背景遮罩 - 仅桌面端 -->
+    <!-- 背景遮罩 -->
     <Transition
-      enter-active-class="transition-opacity duration-300 ease-out"
+      enter-active-class="transition-opacity duration-200 ease-out"
       enter-from-class="opacity-0"
       enter-to-class="opacity-100"
       leave-active-class="transition-opacity duration-200 ease-in"
@@ -11,30 +11,30 @@
     >
       <div
         v-if="uiStore.isCommentsModalOpen"
-        class="fixed inset-0 z-[99] hidden sm:block glassmorphism-overlay"
+        class="fixed inset-0 z-[99] bg-black/30"
         @click="closeModal"
       />
     </Transition>
 
-    <!-- 评论面板 -->
+    <!-- 评论面板 - macOS 风格 -->
     <Transition
       enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 max-sm:translate-y-full sm:scale-95 sm:opacity-0"
-      enter-to-class="opacity-100 max-sm:translate-y-0 sm:scale-100 sm:opacity-100"
+      enter-from-class="opacity-0 translate-y-10 scale-[0.98]"
+      enter-to-class="opacity-100 translate-y-0 scale-100"
       leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 max-sm:translate-y-0 sm:scale-100 sm:opacity-100"
-      leave-to-class="opacity-0 max-sm:translate-y-full sm:scale-95 sm:opacity-0"
+      leave-from-class="opacity-100 translate-y-0 scale-100"
+      leave-to-class="opacity-0 translate-y-10 scale-[0.98]"
     >
       <div
         v-if="uiStore.isCommentsModalOpen"
         class="comments-modal fixed z-[100] flex flex-col
-               inset-0 
-               sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2
-               sm:w-[90vw] sm:max-w-2xl sm:h-auto sm:max-h-[85vh]
-               sm:rounded-2xl sm:shadow-2xl sm:shadow-pink-500/20"
+               top-3 left-2 right-2 bottom-0
+               sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
+               rounded-t-2xl sm:rounded-t-3xl
+               shadow-2xl shadow-black/20"
       >
         <!-- 顶部导航栏 -->
-        <div class="comments-header flex-shrink-0 flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50">
+        <div class="comments-header flex-shrink-0 flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 rounded-t-2xl sm:rounded-t-3xl">
           <!-- 返回按钮 -->
           <button
             v-ripple
@@ -79,7 +79,6 @@
 
 <script setup lang="ts">
 import { watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { useUIStore } from '@/stores/ui'
 import { playPop } from '@/composables/useSound'
 import { lockScroll, unlockScroll, forceUnlockScroll } from '@/composables/useScrollLock'
@@ -90,8 +89,6 @@ interface ArtalkInstance {
   destroy(): void
 }
 
-const router = useRouter()
-const route = useRoute()
 const uiStore = useUIStore()
 let artalkInstance: ArtalkInstance | null = null
 let isClosing = false
@@ -103,10 +100,8 @@ function closeModal() {
   playPop()
   // 恢复 body 滚动
   unlockScroll()
-  // 通过路由返回（移除 ui 参数，保留其他参数）
-  const newQuery = { ...route.query }
-  delete newQuery.ui
-  router.push({ path: '/', query: newQuery })
+  // 关闭模态框
+  uiStore.isCommentsModalOpen = false
   
   setTimeout(() => {
     isClosing = false
@@ -198,39 +193,30 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* 评论模态框 - 移动端全屏 */
+/* 评论面板 - macOS 风格 (亮色模式) */
 .comments-modal {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(248, 250, 252, 0.98) 100%
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 250, 252, 0.96) 100%
   );
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: none;
 }
 
-/* 桌面端模态框 */
-@media (min-width: 640px) {
-  .comments-modal {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-  }
-}
-
-/* 暗色模式 */
+/* 评论面板 - macOS 风格 (暗色模式) */
 .dark .comments-modal {
   background: linear-gradient(
     180deg,
-    rgb(15, 23, 42) 0%,
-    rgb(2, 6, 23) 100%
+    rgba(30, 41, 59, 0.92) 0%,
+    rgba(15, 23, 42, 0.96) 100%
   ) !important;
-}
-
-@media (min-width: 640px) {
-  .dark .comments-modal {
-    background: rgba(30, 41, 59, 0.95) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  }
+  backdrop-filter: blur(40px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: none !important;
 }
 
 /* 头部样式 */

@@ -1,20 +1,34 @@
 <template>
-  <!-- 全屏设置页面 -->
+  <!-- 设置面板 - macOS 风格 -->
   <AnimatePresence>
+    <!-- 背景遮罩 -->
     <Motion
       v-if="isOpen"
-      :initial="{ opacity: 0, y: '100%' }"
-      :animate="{ opacity: 1, y: 0 }"
-      :exit="{ opacity: 0, y: '100%' }"
-      :transition="{ type: 'spring', stiffness: 300, damping: 30 }"
-      class="fixed inset-0 z-50 flex flex-col settings-page"
+      :initial="{ opacity: 0 }"
+      :animate="{ opacity: 1 }"
+      :exit="{ opacity: 0 }"
+      :transition="{ duration: 0.2 }"
+      class="fixed inset-0 z-40 bg-black/30"
+      @click="close"
+    />
+    <Motion
+      v-if="isOpen"
+      :initial="{ opacity: 0, y: 40, scale: 0.98 }"
+      :animate="{ opacity: 1, y: 0, scale: 1 }"
+      :exit="{ opacity: 0, y: 40, scale: 0.98 }"
+      :transition="{ type: 'spring', stiffness: 400, damping: 35 }"
+      class="fixed z-50 flex flex-col settings-page
+             top-3 left-2 right-2 bottom-0
+             sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
+             rounded-t-2xl sm:rounded-t-3xl
+             shadow-2xl shadow-black/20"
     >
       <!-- 顶部导航栏 -->
       <Motion
         :initial="{ opacity: 0, y: -20 }"
         :animate="{ opacity: 1, y: 0 }"
         :transition="{ delay: 0.1, duration: 0.3 }"
-        class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar"
+        class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 rounded-t-2xl sm:rounded-t-3xl glassmorphism-navbar"
       >
         <!-- 返回按钮 -->
         <Motion
@@ -246,6 +260,7 @@ import {
   Link as LinkIcon,
   RotateCcw,
   Check,
+  Github,
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -360,22 +375,30 @@ function reset() {
 </script>
 
 <style>
-/* 全屏设置页面背景 - 亮色模式 */
+/* 设置面板 - macOS 风格 (亮色模式) */
 .settings-page {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(248, 250, 252, 0.98) 100%
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 250, 252, 0.96) 100%
   );
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: none;
 }
 
-/* 全屏设置页面背景 - 暗色模式 */
+/* 设置面板 - macOS 风格 (暗色模式) */
 .dark .settings-page {
   background: linear-gradient(
     180deg,
-    rgb(15, 23, 42) 0%,
-    rgb(2, 6, 23) 100%
+    rgba(30, 41, 59, 0.92) 0%,
+    rgba(15, 23, 42, 0.96) 100%
   ) !important;
+  backdrop-filter: blur(40px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: none !important;
 }
 
 /* 设置卡片 - 亮色模式 */

@@ -57,115 +57,85 @@
       <component :is="uiStore.isHistoryModalOpen ? X : History" :size="20" />
     </button>
 
-    <!-- 站点导航面板 - 移动端全屏 / 桌面端左上角 -->
+    <!-- 站点导航面板 - 右下角弹出 -->
     <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 max-sm:translate-y-full sm:scale-95 sm:-translate-x-4"
-      enter-to-class="opacity-100 max-sm:translate-y-0 sm:scale-100 sm:translate-x-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 max-sm:translate-y-0 sm:scale-100 sm:translate-x-0"
-      leave-to-class="opacity-0 max-sm:translate-y-full sm:scale-95 sm:-translate-x-4"
+      enter-active-class="transition-all duration-200 ease-out"
+      enter-from-class="opacity-0 scale-90 translate-y-2"
+      enter-to-class="opacity-100 scale-100 translate-y-0"
+      leave-active-class="transition-all duration-150 ease-in"
+      leave-from-class="opacity-100 scale-100 translate-y-0"
+      leave-to-class="opacity-0 scale-90 translate-y-2"
     >
       <div
         v-if="showPlatformNav && searchStore.hasResults"
-        class="nav-panel fixed inset-0 sm:inset-auto sm:top-4 sm:left-4 sm:w-56 sm:max-h-[80vh] sm:rounded-2xl flex flex-col z-50"
+        class="nav-panel fixed z-50 flex flex-col
+               bottom-20 right-4 w-72 max-h-[60vh]
+               rounded-2xl shadow-2xl shadow-black/20"
       >
         <!-- 标题栏 -->
-        <div class="nav-header flex items-center justify-between px-4 sm:px-4 py-4 sm:py-3">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 sm:w-8 sm:h-8 rounded-xl sm:rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-lg shadow-pink-500/30">
-              <Grid3x3 :size="20" class="text-white sm:hidden" />
-              <Grid3x3 :size="16" class="text-white hidden sm:block" />
+        <div class="nav-header flex items-center justify-between px-4 py-3 rounded-t-2xl">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-md shadow-pink-500/30">
+              <Grid3x3 :size="16" class="text-white" />
             </div>
             <div>
-              <h3 class="font-bold text-base sm:text-sm text-gray-800 dark:text-white">站点导航</h3>
-              <p class="text-sm sm:text-xs text-gray-500 dark:text-slate-400">{{ totalResults }} 个结果</p>
+              <h3 class="font-bold text-sm text-gray-800 dark:text-white">站点导航</h3>
+              <p class="text-xs text-gray-500 dark:text-slate-400">{{ totalResults }} 个结果</p>
             </div>
           </div>
-          <button
-            class="w-10 h-10 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-[#ff1493] hover:bg-pink-50 dark:hover:bg-pink-900/30 transition-colors"
-            @click="togglePlatformNav"
-          >
-            <X :size="24" class="sm:hidden" />
-            <X :size="16" class="hidden sm:block" />
-          </button>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 dark:text-slate-500">
+              {{ searchStore.platformResults.size }} 站点
+            </span>
+            <button
+              class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-[#ff1493] hover:bg-pink-50 dark:hover:bg-pink-900/30 transition-colors"
+              @click="togglePlatformNav"
+            >
+              <X :size="16" />
+            </button>
+          </div>
         </div>
         
         <!-- 平台列表 -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar px-3 sm:px-2 py-2">
+        <div class="flex-1 overflow-y-auto custom-scrollbar px-2 py-2">
           <button
             v-for="([platformName, platformData], index) in searchStore.platformResults"
             :key="platformName"
             v-ripple
-            class="nav-item w-full px-4 sm:px-3 py-3.5 sm:py-2.5 mb-2 sm:mb-1 last:mb-0 flex items-center gap-4 sm:gap-3 rounded-2xl sm:rounded-xl transition-all duration-200"
+            class="nav-item w-full px-3 py-2.5 mb-1 last:mb-0 flex items-center gap-3 rounded-xl transition-all duration-200"
             :style="{ animationDelay: `${index * 30}ms` }"
             @click="handleScrollToPlatform(platformName)"
           >
             <!-- 平台图标 -->
             <div
-              class="w-12 h-12 sm:w-8 sm:h-8 rounded-xl sm:rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg"
+              class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md"
               :class="getPlatformIconBg(platformData.color)"
             >
               <component 
                 :is="getPlatformIcon(platformData.color)" 
-                :size="20"
-                class="text-white sm:hidden"
-              />
-              <component 
-                :is="getPlatformIcon(platformData.color)" 
                 :size="14"
-                class="text-white hidden sm:block"
+                class="text-white"
               />
             </div>
             
             <!-- 平台名称 -->
-            <span class="flex-1 text-base sm:text-sm font-medium text-gray-700 dark:text-slate-200 truncate text-left">
+            <span class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 truncate text-left">
               {{ platformName }}
             </span>
             
             <!-- 结果数量 -->
-            <span class="count-badge text-sm sm:text-xs px-3 sm:px-2 py-1.5 sm:py-1">
+            <span class="count-badge text-xs px-2 py-1">
               {{ platformData.items.length }}
             </span>
           </button>
         </div>
-
-        <!-- 底部统计 -->
-        <div class="nav-footer px-4 py-3 sm:py-2 flex items-center justify-between">
-          <span class="text-sm sm:text-xs text-gray-400 dark:text-slate-500">
-            {{ searchStore.platformResults.size }} 个站点
-          </span>
-          <button
-            class="text-sm sm:text-xs text-[#ff1493] dark:text-[#ff69b4] hover:underline font-medium"
-            @click="scrollToTop(); togglePlatformNav()"
-          >
-            回到顶部
-          </button>
-        </div>
       </div>
-    </Transition>
-
-    <!-- 移动端背景遮罩 -->
-    <Transition
-      enter-active-class="transition-opacity duration-300"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-200"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="showPlatformNav && searchStore.hasResults"
-        class="fixed inset-0 bg-black/35 z-40 sm:hidden glassmorphism-overlay"
-        @click="togglePlatformNav"
-      />
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { playClick, playPop } from '@/composables/useSound'
@@ -173,8 +143,6 @@ import { throttle } from '@/composables/useDebounce'
 import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare, History, Star, Circle, DollarSign, XCircle } from 'lucide-vue-next'
 import type { FunctionalComponent } from 'vue'
 
-const router = useRouter()
-const route = useRoute()
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
 const showScrollToTop = ref(false)
@@ -215,38 +183,16 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-function navigateToPanel(panel: string | null) {
-  const newQuery = { ...route.query }
-  if (panel) {
-    newQuery.ui = panel
-  } else {
-    delete newQuery.ui
-  }
-  router.push({ path: '/', query: newQuery })
-}
-
 function toggleComments() {
-  if (uiStore.isCommentsModalOpen || route.query.ui === 'comments') {
-    navigateToPanel(null)
-  } else {
-    navigateToPanel('comments')
-  }
+  uiStore.isCommentsModalOpen = !uiStore.isCommentsModalOpen
 }
 
 function toggleVndbPanel() {
-  if (uiStore.isVndbPanelOpen || route.query.ui === 'vndb') {
-    navigateToPanel(null)
-  } else {
-    navigateToPanel('vndb')
-  }
+  uiStore.isVndbPanelOpen = !uiStore.isVndbPanelOpen
 }
 
 function toggleHistory() {
-  if (uiStore.isHistoryModalOpen || route.query.ui === 'history') {
-    navigateToPanel(null)
-  } else {
-    navigateToPanel('history')
-  }
+  uiStore.isHistoryModalOpen = !uiStore.isHistoryModalOpen
 }
 
 function togglePlatformNav() {
@@ -460,46 +406,27 @@ onUnmounted(() => {
    ============================================ */
 
 /* 面板容器 - 移动端全屏 / 桌面端左上角 */
+/* 站点导航面板 - 右下角弹出 (亮色模式) */
 .nav-panel {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.98) 100%
+  );
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   overflow: hidden;
 }
 
-/* 移动端：全屏样式 */
-@media (max-width: 639px) {
-  .nav-panel {
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-  }
-}
-
-/* 桌面端：左上角悬浮样式 */
-@media (min-width: 640px) {
-  .nav-panel {
-    border-radius: 1.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow:
-      0 20px 40px -8px rgba(255, 20, 147, 0.2),
-      0 8px 24px -4px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-  }
-}
-
+/* 站点导航面板 - 右下角弹出 (暗色模式) */
 .dark .nav-panel {
-  background: rgba(15, 23, 42, 0.98);
-}
-
-@media (min-width: 640px) {
-  .dark .nav-panel {
-    border: 1px solid rgba(255, 105, 180, 0.15);
-    box-shadow:
-      0 20px 40px -8px rgba(255, 20, 147, 0.15),
-      0 8px 24px -4px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-  }
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.95) 0%,
+    rgba(15, 23, 42, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* 标题栏 */
@@ -565,14 +492,5 @@ onUnmounted(() => {
 }
 
 /* 底部栏 */
-.nav-footer {
-  background: rgba(248, 250, 252, 0.8);
-  border-top: 1px solid rgba(255, 20, 147, 0.1);
-}
-
-.dark .nav-footer {
-  background: rgba(15, 23, 42, 0.5);
-  border-top: 1px solid rgba(255, 105, 180, 0.1);
-}
 </style>
 

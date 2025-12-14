@@ -18,7 +18,7 @@
 
     <main class="flex-1 flex flex-col min-h-screen">
       <StatsCorner />
-      <TopToolbar :current-background-url="randomImageUrl" @open-settings="navigateToSettings" />
+      <TopToolbar :current-background-url="randomImageUrl" @open-settings="openSettings" />
       <SearchHeader ref="searchHeaderRef" />
       <SearchResults />
       <FloatingButtons />
@@ -29,7 +29,7 @@
         :is-open="uiStore.isSettingsModalOpen"
         :custom-api="searchStore.customApi"
         :custom-c-s-s="uiStore.customCSS"
-        @close="navigateToHome"
+        @close="uiStore.isSettingsModalOpen = false"
         @save="saveSettings"
       />
 
@@ -43,8 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
@@ -78,67 +77,26 @@ useClickEffect({
   duration: 500,
 })
 
-const router = useRouter()
-const route = useRoute()
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
 const searchHeaderRef = ref<InstanceType<typeof SearchHeader> | null>(null)
 
-// 路由导航函数 - 使用 ?ui=xxx 查询参数
-function navigateToSettings() {
-  router.push({ path: '/', query: { ...route.query, ui: 'settings' } })
+// 打开设置
+function openSettings() {
+  uiStore.isSettingsModalOpen = true
 }
-
-function navigateToHome() {
-  // 移除 ui 参数，保留其他参数（如 s, mode）
-  const newQuery = { ...route.query }
-  delete newQuery.ui
-  router.push({ path: '/', query: newQuery })
-}
-
-// 监听模态框状态，关闭时移除 ui 参数
-watch(() => uiStore.isSettingsModalOpen, (isOpen) => {
-  if (!isOpen && route.query.ui === 'settings') {
-    navigateToHome()
-  }
-})
-
-watch(() => uiStore.isCommentsModalOpen, (isOpen) => {
-  if (!isOpen && route.query.ui === 'comments') {
-    navigateToHome()
-  }
-})
-
-watch(() => uiStore.isVndbPanelOpen, (isOpen) => {
-  if (!isOpen && route.query.ui === 'vndb') {
-    navigateToHome()
-  }
-})
-
-// 标记是否是从历史记录选择触发的关闭
-let isHistorySelection = false
-
-watch(() => uiStore.isHistoryModalOpen, (isOpen) => {
-  if (!isOpen && route.query.ui === 'history' && !isHistorySelection) {
-    navigateToHome()
-  }
-  // 重置标记
-  if (!isOpen) {
-    isHistorySelection = false
-  }
-})
 
 // 处理历史记录选择
 function handleHistorySelect(item: { query: string; mode: 'game' | 'patch' }) {
-  // 标记为历史记录选择，避免 watch 覆盖 URL
-  isHistorySelection = true
-  
   // 同步设置 store（用于其他地方读取）
   searchStore.setSearchQuery(item.query)
   searchStore.setSearchMode(item.mode)
   
   // 直接调用 SearchHeader 的搜索方法（会更新 URL 参数）
   searchHeaderRef.value?.searchWithParams(item.query, item.mode)
+  
+  // 关闭历史模态框
+  uiStore.isHistoryModalOpen = false
 }
 
 // SW 更新相关

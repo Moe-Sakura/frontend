@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
-import router from './router'
 import { piniaLogger, piniaPerformance, piniaErrorHandler } from './stores/plugins'
 
 // 全局基础样式（Tailwind CSS @layer base）
@@ -20,7 +19,7 @@ preloadImage.src = `https://api.illlights.com/v1/img?t=${Date.now()}`
 
 // NProgress - 轻量级进度条
 import './styles/nprogress.css'
-import { setupRouterProgress, createProgressFetch } from './composables/useProgress'
+import { createProgressFetch } from './composables/useProgress'
 
 // Artalk 评论系统
 import 'artalk/dist/Artalk.css'
@@ -46,10 +45,6 @@ pinia.use(piniaPerformance) // 性能监控
 pinia.use(piniaErrorHandler) // 错误处理
 
 app.use(pinia)
-app.use(router)
-
-// 配置路由进度条
-setupRouterProgress(router)
 
 // 配置 fetch 进度条（拦截所有 fetch 请求）
 createProgressFetch()
@@ -117,16 +112,11 @@ Fancybox.bind('[data-fancybox]', {
 })
 
 // Service Worker 更新检测
-// 当前 SW 版本（与 sw.js 保持同步）
-const CURRENT_SW_VERSION = '2.1.0'
+// 当前激活的 SW 版本（运行时获取）
+let activatedSwVersion: string | null = null
 
-// 检查 SW 版本
-async function checkSwVersion(registration: ServiceWorkerRegistration): Promise<string | null> {
-  const sw = registration.active
-  if (!sw) {
-    return null
-  }
-
+// 获取 SW 版本
+async function getSwVersion(sw: ServiceWorker): Promise<string | null> {
   return new Promise((resolve) => {
     const messageChannel = new MessageChannel()
     messageChannel.port1.onmessage = (event) => {
@@ -135,8 +125,31 @@ async function checkSwVersion(registration: ServiceWorkerRegistration): Promise<
     sw.postMessage({ type: 'GET_VERSION' }, [messageChannel.port2])
 
     // 超时处理
-    setTimeout(() => resolve(null), 1000)
+    setTimeout(() => resolve(null), 2000)
   })
+}
+
+// 检查是否有新版本
+async function checkForNewVersion(registration: ServiceWorkerRegistration): Promise<boolean> {
+  const sw = registration.active
+  if (!sw) {return false}
+
+  const currentVersion = await getSwVersion(sw)
+  
+  // 首次获取版本时记录
+  if (!activatedSwVersion && currentVersion) {
+    activatedSwVersion = currentVersion
+    console.log(`[SW] Current version: ${activatedSwVersion}`)
+    return false
+  }
+  
+  // 版本不同则有更新
+  if (currentVersion && activatedSwVersion && currentVersion !== activatedSwVersion) {
+    console.log(`[SW] New version available: ${currentVersion} (was: ${activatedSwVersion})`)
+    return true
+  }
+  
+  return false
 }
 
 // 触发 SW 更新
@@ -175,12 +188,18 @@ if ('serviceWorker' in navigator) {
         }
       })
 
+      // 首次获取当前版本
+      if (registration.active) {
+        activatedSwVersion = await getSwVersion(registration.active)
+        console.log(`[SW] Registered, version: ${activatedSwVersion || 'unknown'}`)
+      }
+
       // 定期检查版本（每 5 分钟）
       setInterval(async () => {
         try {
           await registration.update()
-          const version = await checkSwVersion(registration)
-          if (version && version !== CURRENT_SW_VERSION) {
+          const hasNewVersion = await checkForNewVersion(registration)
+          if (hasNewVersion) {
             dispatchUpdateEvent(registration)
           }
         } catch {
@@ -200,7 +219,7 @@ if ('serviceWorker' in navigator) {
       })
 
     } catch {
-      // 静默处理注册失败
+        // 静默处理注册失败
     }
   })
 }

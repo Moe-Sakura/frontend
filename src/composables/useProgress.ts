@@ -1,5 +1,4 @@
 import NProgress from 'nprogress'
-import type { Router } from 'vue-router'
 
 // NProgress 配置
 NProgress.configure({
@@ -55,24 +54,6 @@ export function setProgress(n: number) {
  */
 export function incProgress(amount?: number) {
   NProgress.inc(amount)
-}
-
-/**
- * 配置路由进度条
- */
-export function setupRouterProgress(router: Router) {
-  router.beforeEach((_to, _from, next) => {
-    startProgress()
-    next()
-  })
-
-  router.afterEach(() => {
-    doneProgress()
-  })
-
-  router.onError(() => {
-    forceComplete()
-  })
 }
 
 /**

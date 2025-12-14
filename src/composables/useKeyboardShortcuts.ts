@@ -1,5 +1,4 @@
 import { onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { useUIStore } from '@/stores/ui'
 import { useSearchStore } from '@/stores/search'
 import { playClick, playPop, playWhoosh } from '@/composables/useSound'
@@ -45,8 +44,6 @@ export const shortcutsList: ShortcutInfo[] = [
 ]
 
 export function useKeyboardShortcuts() {
-  const router = useRouter()
-  const route = useRoute()
   const uiStore = useUIStore()
   const searchStore = useSearchStore()
 
@@ -140,24 +137,35 @@ export function useKeyboardShortcuts() {
     )
   }
 
-  // 导航到 UI 面板（使用查询参数）
-  function navigateToPanel(panel: string | null) {
-    const newQuery = { ...route.query }
-    if (panel) {
-      newQuery.ui = panel
-    } else {
-      delete newQuery.ui
-    }
-    router.push({ path: '/', query: newQuery })
+  // 关闭所有面板
+  function closeAllPanels() {
+    uiStore.closeAllModals()
   }
 
   // 切换面板
-  function togglePanel(panel: string) {
-    if (route.query.ui === panel) {
-      navigateToPanel(null)
-    } else {
-      navigateToPanel(panel)
+  function togglePanel(panel: 'settings' | 'comments' | 'vndb' | 'history') {
+    switch (panel) {
+      case 'settings':
+        uiStore.isSettingsModalOpen = !uiStore.isSettingsModalOpen
+        break
+      case 'comments':
+        uiStore.isCommentsModalOpen = !uiStore.isCommentsModalOpen
+        break
+      case 'vndb':
+        uiStore.isVndbPanelOpen = !uiStore.isVndbPanelOpen
+        break
+      case 'history':
+        uiStore.isHistoryModalOpen = !uiStore.isHistoryModalOpen
+        break
     }
+  }
+
+  // 检查是否有任何面板打开
+  function hasAnyPanelOpen(): boolean {
+    return uiStore.isSettingsModalOpen || 
+           uiStore.isCommentsModalOpen || 
+           uiStore.isVndbPanelOpen || 
+           uiStore.isHistoryModalOpen
   }
 
   // 键盘事件处理
@@ -166,10 +174,10 @@ export function useKeyboardShortcuts() {
     
     // Escape 键 - 总是处理（关闭面板）
     if (event.key === 'Escape') {
-      if (route.query.ui) {
+      if (hasAnyPanelOpen()) {
         event.preventDefault()
         playPop()
-        navigateToPanel(null)
+        closeAllPanels()
       }
       return
     }
@@ -219,7 +227,7 @@ export function useKeyboardShortcuts() {
         // 返回首页（关闭所有面板）
         event.preventDefault()
         playClick()
-        navigateToPanel(null)
+        closeAllPanels()
         break
 
       case 'n':
