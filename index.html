@@ -1,8 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh" class="no-fouc">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 防止 FOUC: 在 CSS 加载前隐藏内容，并同步检测主题 -->
+  <script>
+    // 同步检测暗色模式，防止主题闪烁
+    (function() {
+      try {
+        var saved = localStorage.getItem('ui-state');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var isDark = saved ? JSON.parse(saved).isDarkMode : prefersDark;
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {
+        // 静默处理
+      }
+      // 移除 no-fouc 类以显示内容
+      document.documentElement.classList.remove('no-fouc');
+    })();
+  </script>
+  <style>
+    /* 防止 FOUC: 初始隐藏 */
+    html.no-fouc { visibility: hidden; }
+  </style>
 
     <!-- Primary Meta Tags -->
   <title>SearchGal - Galgame 聚合搜索</title>
@@ -81,30 +104,6 @@
     /* ============================================
        第三方库样式覆盖
        ============================================ */
-    
-    /* Pace.js 加载进度条 - 艳粉主色调 */
-    .pace {
-      pointer-events: none;
-      user-select: none;
-    }
-    .pace-inactive {
-      display: none;
-    }
-    .pace .pace-progress {
-      background: linear-gradient(90deg, #ff1493, #ff69b4, #d946ef);
-      position: fixed;
-      z-index: 9999;
-      top: 0;
-      right: 100%;
-      width: 100%;
-      height: 4px;
-      box-shadow: 0 0 15px rgba(255, 20, 147, 0.6), 0 0 30px rgba(217, 70, 239, 0.4);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
-    }
 
     /* Fancybox 图片查看器 - 艳粉主色调 */
     .fancybox-custom .fancybox__backdrop {
@@ -170,103 +169,23 @@
     }
 
     /* ============================================
-       背景图层样式和动画（由 App.vue 控制）
+       背景图层样式（由 App.vue + motion-v 控制动画）
        ============================================ */
     
-    /* 背景图层基础样式 */
-    #background-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      z-index: -2;
-      transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-      animation: slowZoom 10s ease-out forwards;
-    }
-
-    /* 背景图片慢速放大动画 */
-    @keyframes slowZoom {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.1); }
-    }
-
-    /* 背景图片转场动画 */
-    #background-layer.transition-fade { animation: fadeTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
-    #background-layer.transition-zoom { animation: zoomTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-    #background-layer.transition-slide-left { animation: slideLeftTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
-    #background-layer.transition-slide-right { animation: slideRightTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
-    #background-layer.transition-blur { animation: blurTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-    #background-layer.transition-rotate { animation: rotateTransition 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-
-    @keyframes fadeTransition {
-      0% { opacity: 1; }
-      50% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-    @keyframes zoomTransition {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0; transform: scale(1.1); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes slideLeftTransition {
-      0% { opacity: 1; transform: translateX(0); }
-      50% { opacity: 0; transform: translateX(-30px); }
-      100% { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes slideRightTransition {
-      0% { opacity: 1; transform: translateX(0); }
-      50% { opacity: 0; transform: translateX(30px); }
-      100% { opacity: 1; transform: translateX(0); }
-    }
-    @keyframes blurTransition {
-      0% { opacity: 1; filter: blur(0px); }
-      50% { opacity: 0.3; filter: blur(10px); }
-      100% { opacity: 1; filter: blur(0px); }
-    }
-    @keyframes rotateTransition {
-      0% { opacity: 1; transform: scale(1) rotate(0deg); }
-      50% { opacity: 0; transform: scale(0.95) rotate(5deg); }
-      100% { opacity: 1; transform: scale(1) rotate(0deg); }
-    }
-
-    /* 背景图层伪元素 - 仅在无背景图时显示淡粉色纹理 */
-    #background-layer::before {
-      content: "";
-      position: absolute;
-      inset: 0;
+    /* 背景纹理层 - 仅在无背景图时显示 */
+    #background-pattern {
       background: 
         radial-gradient(circle at 20% 50%, rgba(255, 20, 147, 0.08), transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(217, 70, 239, 0.08), transparent 50%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Cpath fill='%23ff1493' fill-opacity='0.02' d='M192 15v2a11 11 0 0 0-11 11c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H145v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11 13 13 0 1 1 .02 26 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43a6.1 6.1 0 0 0-3.03 4.87V143h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 181 164a11 11 0 0 0 11 11v2a13 13 0 0 1-13-13 12 12 0 0 1 3.11-7.53l-2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84a6.1 6.1 0 0 0-4.87-3.03H145v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 124 181a11 11 0 0 0-11 11h-2a13 13 0 0 1 13-13c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43a6.1 6.1 0 0 0 3.03-4.87V145h-35.02a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 107 124a11 11 0 0 0-22 0c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H49v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11A13 13 0 0 1 81 192h-2a11 11 0 0 0-11-11c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V145H11.98a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 0 1 0 177v-2a11 11 0 0 0 11-11c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H47v-35.02a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 28 109a13 13 0 1 1 0-26c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43A6.1 6.1 0 0 0 47 84.02V49H11.98a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 11 28 11 11 0 0 0 0 17v-2a13 13 0 0 1 13 13c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84A6.1 6.1 0 0 0 11.98 47H47V11.98a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 68 11 11 11 0 0 0 79 0h2a13 13 0 0 1-13 13 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43A6.1 6.1 0 0 0 49 11.98V47h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 85 68a11 11 0 0 0 22 0c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H143V11.98a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 124 13a13 13 0 0 1-13-13h2a11 11 0 0 0 11 11c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V47h35.02a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 179 28a13 13 0 0 1 13-13zM84.02 143a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 83 124a13 13 0 1 1 26 0c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84a6.1 6.1 0 0 0 4.87 3.03H143v-35.02a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 164 107a11 11 0 0 0 0-22c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V49h-35.02a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 1 1 83 68a12 12 0 0 1 3.11-7.53l2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84A6.1 6.1 0 0 0 84.02 49H49v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 28 85a11 11 0 0 0 0 22c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V143h35.02z'%3E%3C/path%3E%3C/svg%3E") center;
-      z-index: -1;
       opacity: 0.4;
-      transition: opacity 0.8s ease-in-out;
     }
-    .dark #background-layer::before {
+    .dark #background-pattern {
       background: 
         radial-gradient(circle at 30% 20%, rgba(255, 105, 180, 0.06), transparent 40%),
         radial-gradient(circle at 70% 70%, rgba(232, 121, 249, 0.05), transparent 40%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Cpath fill='%23ff69b4' fill-opacity='0.015' d='M192 15v2a11 11 0 0 0-11 11c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H145v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11 13 13 0 1 1 .02 26 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43a6.1 6.1 0 0 0-3.03 4.87V143h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 181 164a11 11 0 0 0 11 11v2a13 13 0 0 1-13-13 12 12 0 0 1 3.11-7.53l-2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84a6.1 6.1 0 0 0-4.87-3.03H145v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 124 181a11 11 0 0 0-11 11h-2a13 13 0 0 1 13-13c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43a6.1 6.1 0 0 0 3.03-4.87V145h-35.02a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 107 124a11 11 0 0 0-22 0c0 1.94 1.16 4.75 2.53 6.11l2.36 2.36a6.93 6.93 0 0 1 1.22 7.56l-.43.84a8.08 8.08 0 0 1-6.66 4.13H49v35.02a6.1 6.1 0 0 0 3.03 4.87l.84.43c1.58.79 4 .4 5.24-.85l2.36-2.36a12.04 12.04 0 0 1 7.51-3.11A13 13 0 0 1 81 192h-2a11 11 0 0 0-11-11c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V145H11.98a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 0 1 0 177v-2a11 11 0 0 0 11-11c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H47v-35.02a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 28 109a13 13 0 1 1 0-26c2.47 0 5.79 1.37 7.53 3.11l2.36 2.36a4.94 4.94 0 0 0 5.24.85l.84-.43A6.1 6.1 0 0 0 47 84.02V49H11.98a8.08 8.08 0 0 1-6.66-4.13l-.43-.84a6.91 6.91 0 0 1 1.22-7.56l2.36-2.36A10.06 10.06 0 0 0 11 28 11 11 0 0 0 0 17v-2a13 13 0 0 1 13 13c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84A6.1 6.1 0 0 0 11.98 47H47V11.98a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 68 11 11 11 0 0 0 79 0h2a13 13 0 0 1-13 13 12 12 0 0 1-7.53-3.11l-2.36-2.36a4.93 4.93 0 0 0-5.24-.85l-.84.43A6.1 6.1 0 0 0 49 11.98V47h35.02a8.08 8.08 0 0 1 6.66 4.13l.43.84a6.91 6.91 0 0 1-1.22 7.56l-2.36 2.36A10.06 10.06 0 0 0 85 68a11 11 0 0 0 22 0c0-1.94-1.16-4.75-2.53-6.11l-2.36-2.36a6.93 6.93 0 0 1-1.22-7.56l.43-.84a8.08 8.08 0 0 1 6.66-4.13H143V11.98a6.1 6.1 0 0 0-3.03-4.87l-.84-.43c-1.59-.8-4-.4-5.24.85l-2.36 2.36A12 12 0 0 1 124 13a13 13 0 0 1-13-13h2a11 11 0 0 0 11 11c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V47h35.02a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 179 28a13 13 0 0 1 13-13zM84.02 143a6.1 6.1 0 0 0 4.87-3.03l.43-.84c.8-1.59.4-4-.85-5.24l-2.36-2.36A12 12 0 0 1 83 124a13 13 0 1 1 26 0c0 2.47-1.37 5.79-3.11 7.53l-2.36 2.36a4.94 4.94 0 0 0-.85 5.24l.43.84a6.1 6.1 0 0 0 4.87 3.03H143v-35.02a8.08 8.08 0 0 1 4.13-6.66l.84-.43a6.91 6.91 0 0 1 7.56 1.22l2.36 2.36A10.06 10.06 0 0 0 164 107a11 11 0 0 0 0-22c-1.94 0-4.75 1.16-6.11 2.53l-2.36 2.36a6.93 6.93 0 0 1-7.56 1.22l-.84-.43a8.08 8.08 0 0 1-4.13-6.66V49h-35.02a6.1 6.1 0 0 0-4.87 3.03l-.43.84c-.79 1.58-.4 4 .85 5.24l2.36 2.36a12.04 12.04 0 0 1 3.11 7.51A13 13 0 1 1 83 68a12 12 0 0 1 3.11-7.53l2.36-2.36a4.93 4.93 0 0 0 .85-5.24l-.43-.84A6.1 6.1 0 0 0 84.02 49H49v35.02a8.08 8.08 0 0 1-4.13 6.66l-.84.43a6.91 6.91 0 0 1-7.56-1.22l-2.36-2.36A10.06 10.06 0 0 0 28 85a11 11 0 0 0 0 22c1.94 0 4.75-1.16 6.11-2.53l2.36-2.36a6.93 6.93 0 0 1 7.56-1.22l.84.43a8.08 8.08 0 0 1 4.13 6.66V143h35.02z'%3E%3C/path%3E%3C/svg%3E") center;
       opacity: 0.3;
-    }
-    #background-layer.has-image::before {
-      opacity: 0;
-    }
-
-    /* 半透明遮罩层（提升内容可读性） */
-    #background-layer::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.15);
-      z-index: -1;
-    }
-    .dark #background-layer::after {
-      background: rgba(15, 23, 42, 0.3);
     }
   </style>
 
@@ -278,6 +197,136 @@
     ></script>
 </head>
   <body>
+    <!-- 禁止无 JavaScript 用户访问 -->
+    <noscript>
+      <style>
+        #app { display: none !important; }
+        .noscript-warning {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+          color: white;
+          font-family: system-ui, -apple-system, sans-serif;
+          text-align: center;
+          padding: 2rem;
+          z-index: 99999;
+        }
+        .noscript-warning svg {
+          width: 80px;
+          height: 80px;
+          margin-bottom: 1.5rem;
+          color: #ff1493;
+        }
+        .noscript-warning h1 {
+          font-size: 1.75rem;
+          font-weight: 700;
+          margin-bottom: 1rem;
+          background: linear-gradient(135deg, #ff1493, #d946ef);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .noscript-warning p {
+          color: #94a3b8;
+          max-width: 400px;
+          line-height: 1.6;
+          margin-bottom: 0.5rem;
+        }
+        .noscript-warning .hint {
+          font-size: 0.875rem;
+          color: #64748b;
+          margin-top: 1.5rem;
+          padding: 1rem;
+          background: rgba(255, 20, 147, 0.1);
+          border-radius: 0.75rem;
+          border: 1px solid rgba(255, 20, 147, 0.2);
+        }
+      </style>
+      <div class="noscript-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m4.9 4.9 14.2 14.2"/>
+        </svg>
+        <h1>请启用 JavaScript</h1>
+        <p>SearchGal 需要 JavaScript 才能正常运行。</p>
+        <p>请在浏览器设置中启用 JavaScript 后刷新页面。</p>
+        <div class="hint">
+          💡 大多数浏览器默认启用 JavaScript。<br>
+          如果您使用了广告拦截器，请将本站加入白名单。
+        </div>
+      </div>
+    </noscript>
+
+    <!-- 禁止 IE 浏览器访问 -->
+    <script>
+      (function() {
+        // 检测 IE 浏览器
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        // 检测 IE 11 及更早版本
+        var isOldIE = typeof window.MSInputMethodContext !== 'undefined' && typeof document.documentMode !== 'undefined';
+        // 检测 Edge Legacy (EdgeHTML)
+        var isEdgeLegacy = !isIE && !!window.StyleMedia;
+        
+        if (isIE || isOldIE || isEdgeLegacy) {
+          document.body.innerHTML = '\
+            <div style="\
+              position: fixed;\
+              inset: 0;\
+              display: flex;\
+              flex-direction: column;\
+              align-items: center;\
+              justify-content: center;\
+              background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);\
+              color: white;\
+              font-family: system-ui, -apple-system, sans-serif;\
+              text-align: center;\
+              padding: 2rem;\
+              z-index: 99999;\
+            ">\
+              <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff1493" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1.5rem;">\
+                <circle cx="12" cy="12" r="10"/>\
+                <path d="m4.9 4.9 14.2 14.2"/>\
+              </svg>\
+              <h1 style="\
+                font-size: 1.75rem;\
+                font-weight: 700;\
+                margin-bottom: 1rem;\
+                background: linear-gradient(135deg, #ff1493, #d946ef);\
+                -webkit-background-clip: text;\
+                -webkit-text-fill-color: transparent;\
+              ">不支持的浏览器</h1>\
+              <p style="color: #94a3b8; max-width: 400px; line-height: 1.6; margin-bottom: 0.5rem;">\
+                您正在使用 Internet Explorer 或旧版 Edge 浏览器。\
+              </p>\
+              <p style="color: #94a3b8; max-width: 400px; line-height: 1.6;">\
+                SearchGal 使用了现代 Web 技术，不支持这些旧版浏览器。\
+              </p>\
+              <div style="\
+                font-size: 0.875rem;\
+                color: #64748b;\
+                margin-top: 1.5rem;\
+                padding: 1rem;\
+                background: rgba(255, 20, 147, 0.1);\
+                border-radius: 0.75rem;\
+                border: 1px solid rgba(255, 20, 147, 0.2);\
+              ">\
+                🌐 推荐使用以下现代浏览器：<br>\
+                <a href="https://www.google.com/chrome/" style="color: #ff69b4; text-decoration: underline;">Chrome</a> · \
+                <a href="https://www.mozilla.org/firefox/" style="color: #ff69b4; text-decoration: underline;">Firefox</a> · \
+                <a href="https://www.microsoft.com/edge" style="color: #ff69b4; text-decoration: underline;">Edge (Chromium)</a> · \
+                <a href="https://www.apple.com/safari/" style="color: #ff69b4; text-decoration: underline;">Safari</a>\
+              </div>\
+            </div>\
+          ';
+          throw new Error('不支持的浏览器');
+        }
+      })();
+    </script>
+
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
 </body>

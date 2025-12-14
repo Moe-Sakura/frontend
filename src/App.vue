@@ -9,12 +9,32 @@
     id="app" 
     class="min-h-screen relative"
   >
-    <!-- 背景层 -->
-    <div
-      id="background-layer"
-      :class="{ 'has-image': hasBackgroundImage }"
-      :style="backgroundStyle"
-    />
+    <!-- 背景层容器 -->
+    <div id="background-container" class="fixed inset-0 z-[-2] overflow-hidden">
+      <!-- 默认背景纹理（无图片时显示） -->
+      <div
+        id="background-pattern"
+        class="absolute inset-0 transition-opacity duration-800"
+        :class="{ 'opacity-0': hasBackgroundImage }"
+      />
+      
+      <!-- 动画背景图层 - 新图片直接覆盖在旧图片上入场 -->
+      <AnimatePresence>
+        <Motion
+          v-if="currentBgKey"
+          :key="currentBgKey"
+          :initial="getTransitionVariant('initial')"
+          :animate="getTransitionVariant('animate')"
+          :exit="getTransitionVariant('exit')"
+          :transition="bgTransition"
+          class="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
+          :style="{ backgroundImage: `url(${backgroundImageUrl})` }"
+        />
+      </AnimatePresence>
+      
+      <!-- 半透明遮罩层（提升内容可读性） -->
+      <div class="absolute inset-0 bg-white/15 dark:bg-slate-900/30 z-[1]" />
+    </div>
 
     <main class="flex-1 flex flex-col min-h-screen">
       <StatsCorner />
@@ -24,12 +44,19 @@
       <FloatingButtons />
       <CommentsModal />
       <VndbPanel />
+      <SearchHistoryModal @select="handleHistorySelect" />
       <SettingsModal
-        :is-open="isSettingsOpen"
+        :is-open="uiStore.isSettingsModalOpen"
         :custom-api="searchStore.customApi"
-        :custom-c-s-s="customCSS"
-        @close="closeSettings"
+        :custom-c-s-s="uiStore.customCSS"
+        @close="uiStore.isSettingsModalOpen = false"
         @save="saveSettings"
+      />
+
+      <!-- SW 更新提示 -->
+      <UpdateToast
+        :is-visible="uiStore.showUpdateToast"
+        :on-update="handleSwUpdate"
       />
     </main>
   </div>
@@ -37,13 +64,14 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { Motion, AnimatePresence } from 'motion-v'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
+import { useUIStore } from '@/stores/ui'
 import { 
   getSystemTheme,
   applyTheme, 
   watchSystemTheme,
-  loadCustomCSS,
   saveCustomCSS,
   applyCustomCSS,
 } from '@/utils/theme'
@@ -55,8 +83,59 @@ import FloatingButtons from '@/components/FloatingButtons.vue'
 import CommentsModal from '@/components/CommentsModal.vue'
 import VndbPanel from '@/components/VndbPanel.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
+import SearchHistoryModal from '@/components/SearchHistoryModal.vue'
+import UpdateToast from '@/components/UpdateToast.vue'
+import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
+import { useClickEffect } from '@/composables/useClickEffect'
+
+// 启用全局快捷键
+useKeyboardShortcuts()
+
+// 启用全局点击特效
+useClickEffect({
+  color: 'rgba(255, 20, 147, 0.35)',
+  size: 80,
+  duration: 500,
+})
 
 const searchStore = useSearchStore()
+const uiStore = useUIStore()
+const searchHeaderRef = ref<InstanceType<typeof SearchHeader> | null>(null)
+
+// 打开设置
+function openSettings() {
+  uiStore.isSettingsModalOpen = true
+}
+
+// 处理历史记录选择
+function handleHistorySelect(item: { query: string; mode: 'game' | 'patch' }) {
+  // 同步设置 store（用于其他地方读取）
+  searchStore.setSearchQuery(item.query)
+  searchStore.setSearchMode(item.mode)
+  
+  // 直接调用 SearchHeader 的搜索方法（会更新 URL 参数）
+  searchHeaderRef.value?.searchWithParams(item.query, item.mode)
+  
+  // 关闭历史模态框
+  uiStore.isHistoryModalOpen = false
+}
+
+// SW 更新相关
+let swRegistration: globalThis.ServiceWorkerRegistration | null = null
+
+function handleSwUpdate() {
+  if (swRegistration) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const triggerUpdate = (window as any).triggerSwUpdate
+    if (triggerUpdate) {
+      triggerUpdate(swRegistration)
+    } else {
+      window.location.reload()
+    }
+  } else {
+    window.location.reload()
+  }
+}
 const randomImageUrl = ref('')
 const imageCache = ref<string[]>([])
 const imageCacheSet = ref<Set<string>>(new Set()) // 用于快速查重
@@ -66,14 +145,69 @@ let fetchInterval: number | null = null
 let displayInterval: number | null = null
 let systemThemeCleanup: (() => void) | null = null
 
-// 设置模态框
-const isSettingsOpen = ref(false)
-const customCSS = ref('')
-
 const MAX_CACHE_SIZE = 10000 // 最大缓存 10000 张图片
 const CLEANUP_BATCH_SIZE = 2000 // 每次清理 2000 张
 const FETCH_INTERVAL = 5000 // 5秒获取一次
 const DISPLAY_INTERVAL = 10000 // 10秒切换一次
+
+// 背景动画相关
+const currentBgKey = ref(0) // 用于触发 AnimatePresence 动画
+const currentTransitionType = ref<'fade' | 'zoom' | 'slide' | 'blur' | 'scale'>('fade')
+
+// 入场动画时长
+const ENTER_DURATION = 1.2
+
+// 转场动画变体定义
+// 新图片入场覆盖旧图片，缩放从 1.0 到 1.2
+// 退出动画延迟到新图片入场完成后再执行
+const transitionVariants = {
+  fade: {
+    initial: { opacity: 0, scale: 1 },
+    animate: { opacity: 1, scale: 1.2 },
+    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
+  },
+  zoom: {
+    initial: { opacity: 0, scale: 1.3 },
+    animate: { opacity: 1, scale: 1.2 },
+    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
+  },
+  slide: {
+    initial: { opacity: 0, x: 60, scale: 1 },
+    animate: { opacity: 1, x: 0, scale: 1.2 },
+    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
+  },
+  blur: {
+    initial: { opacity: 0, filter: 'blur(20px)', scale: 1 },
+    animate: { opacity: 1, filter: 'blur(0px)', scale: 1.2 },
+    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
+  },
+  scale: {
+    initial: { opacity: 0, scale: 0.85 },
+    animate: { opacity: 1, scale: 1.2 },
+    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
+  },
+}
+
+// 背景动画过渡配置（入场动画）
+const bgTransition = {
+  // 入场淡入时间
+  opacity: { duration: ENTER_DURATION, ease: 'easeOut' as const },
+  // 缩放动画持续整个显示周期（10秒）
+  scale: { duration: DISPLAY_INTERVAL / 1000, ease: 'linear' as const },
+  // 其他属性（位移、滤镜等）
+  default: { duration: ENTER_DURATION, ease: 'easeInOut' as const },
+}
+
+// 获取当前转场变体
+function getTransitionVariant(phase: 'initial' | 'animate' | 'exit') {
+  return transitionVariants[currentTransitionType.value][phase]
+}
+
+// 随机选择转场类型
+function selectRandomTransition() {
+  const types: Array<'fade' | 'zoom' | 'slide' | 'blur' | 'scale'> = ['fade', 'zoom', 'slide', 'blur', 'scale']
+  currentTransitionType.value = types[Math.floor(Math.random() * types.length)]
+}
 
 const hasBackgroundImage = computed(
   () => !!randomImageUrl.value,
@@ -85,18 +219,6 @@ const backgroundImageUrl = computed(() => {
     return imageBlobUrls.value.get(randomImageUrl.value) || randomImageUrl.value
   }
   return ''
-})
-
-const backgroundStyle = computed(() => {
-  const url = backgroundImageUrl.value
-  if (url) {
-    return {
-      backgroundImage: `url(${url})`,
-      // 平滑过渡，与 CSS 保持一致
-      transition: 'background-image 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
-    }
-  }
-  return {}
 })
 
 // 从 IndexedDB 加载缓存
@@ -234,48 +356,6 @@ async function fetchAndCacheImage() {
   }
 }
 
-// 转场动画类型
-const transitionTypes = [
-  'transition-fade',
-  'transition-zoom',
-  'transition-slide-left',
-  'transition-slide-right',
-  'transition-blur',
-  'transition-rotate',
-]
-
-// 随机选择转场动画
-function getRandomTransition(): string {
-  return transitionTypes[Math.floor(Math.random() * transitionTypes.length)]
-}
-
-// 应用转场动画
-function applyTransition() {
-  const bgLayer = document.getElementById('background-layer')
-  if (!bgLayer) {return}
-  
-  const transitionClass = getRandomTransition()
-  bgLayer.classList.add(transitionClass)
-  
-  // 动画结束后移除类
-  setTimeout(() => {
-    bgLayer.classList.remove(transitionClass)
-  }, 1500) // 最长动画时间
-}
-
-// 重启慢慢放大动画
-function restartSlowZoom() {
-  const bgLayer = document.getElementById('background-layer')
-  if (!bgLayer) {return}
-  
-  // 移除动画，触发重排
-  bgLayer.style.animation = 'none'
-  // 强制重排
-  void bgLayer.offsetHeight
-  // 重新应用动画
-  bgLayer.style.animation = 'slowZoom 10s ease-out forwards'
-}
-
 // 从洗牌队列中取出下一张图片（预加载后再切换）
 async function displayNextImage() {
   // 如果队列为空，重新洗牌
@@ -306,16 +386,12 @@ async function displayNextImage() {
     // 预加载图片，确保加载完成后再切换
     const preloadImg = new Image()
     preloadImg.onload = () => {
-      // 应用随机转场动画
-      applyTransition()
+      // 选择随机转场动画类型
+      selectRandomTransition()
       
-      // 图片加载完成，平滑切换
+      // 图片加载完成，更新 key 触发 motion-v 动画
       randomImageUrl.value = nextImageUrl
-      
-      // 重启慢慢放大动画
-      setTimeout(() => {
-        restartSlowZoom()
-      }, 100) // 等待图片切换完成
+      currentBgKey.value++
     }
     preloadImg.onerror = () => {
       // 加载失败，尝试下一张
@@ -369,17 +445,29 @@ function stopAllIntervals() {
 }
 
 onMounted(async () => {
+  // 初始化 UI Store（恢复持久化状态）
+  uiStore.init()
+
   // 初始化主题 - 跟随系统
   const systemTheme = getSystemTheme()
   applyTheme(systemTheme)
   
-  // 加载并应用自定义CSS
-  customCSS.value = loadCustomCSS()
-  applyCustomCSS(customCSS.value)
+  // 应用自定义 CSS
+  if (uiStore.customCSS) {
+    applyCustomCSS(uiStore.customCSS)
+  }
   
   // 监听系统主题变化
   systemThemeCleanup = watchSystemTheme((theme) => {
     applyTheme(theme)
+  })
+
+  // 监听 SW 更新事件
+  window.addEventListener('sw-update-available', (event) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const customEvent = event as any
+    swRegistration = customEvent.detail?.registration || null
+    uiStore.setShowUpdateToast(true)
   })
   
   // 恢复保存的搜索状态
@@ -421,21 +509,15 @@ onUnmounted(() => {
 })
 
 // 设置相关函数
-function openSettings() {
-  isSettingsOpen.value = true
-}
-
-function closeSettings() {
-  isSettingsOpen.value = false
-}
-
 function saveSettings(customApi: string, newCustomCSS: string) {
-  // 保存自定义 API 到 store
+  // 保存自定义 API 到 search store
   searchStore.setCustomApi(customApi)
-  // 保存并应用自定义CSS
-  customCSS.value = newCustomCSS
-  saveCustomCSS(newCustomCSS) // 保存到 localStorage
-  applyCustomCSS(newCustomCSS) // 应用到页面
+  // 保存自定义 CSS 到 UI store（会自动持久化）
+  uiStore.setCustomCSS(newCustomCSS)
+  // 同时保存到旧的 localStorage key（兼容性）
+  saveCustomCSS(newCustomCSS)
+  // 应用到页面
+  applyCustomCSS(newCustomCSS)
 }
 </script>
 

@@ -7,7 +7,7 @@
   >
     <!-- 访问统计 - 纵向排列 -->
     <div
-      class="stats-card bg-white/50 dark:bg-slate-800/50 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl shadow-lg px-4 py-3 flex flex-col gap-2 border border-white/40 dark:border-slate-700/40"
+      class="stats-card glassmorphism-card rounded-2xl shadow-lg px-4 py-3 flex flex-col gap-2"
     >
       <!-- 访问量 -->
       <div class="flex items-center gap-2">

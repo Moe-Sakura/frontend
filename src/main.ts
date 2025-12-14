@@ -12,29 +12,14 @@ import './styles/theme.css'
 // 苹果同款液态玻璃效果
 import './styles/glassmorphism.css'
 
-// lozad.js - 高性能图片懒加载（基于 IntersectionObserver）
-import lozad from 'lozad'
-
 // 预加载随机图片 API
 const preloadImage = new Image()
 preloadImage.fetchPriority = 'high'
 preloadImage.src = `https://api.illlights.com/v1/img?t=${Date.now()}`
 
-// Pace.js 页面加载进度条 - 自动监听所有加载活动
-import Pace from 'pace-js'
-import 'pace-js/themes/blue/pace-theme-flash.css'
-
-// 配置 Pace.js：启用全面监听
-Pace.options = {
-  ajax: true,         // 监听 AJAX 请求
-  document: true,     // 监听文档加载
-  eventLag: true,     // 监听事件延迟
-  elements: {
-    selectors: ['img', 'link', 'script', 'iframe'],  // 监听资源加载
-  },
-  restartOnPushState: true,   // 路由切换时重启
-  restartOnRequestAfter: 500,  // 请求后重启
-}
+// NProgress - 轻量级进度条
+import './styles/nprogress.css'
+import { createProgressFetch } from './composables/useProgress'
 
 // Artalk 评论系统
 import 'artalk/dist/Artalk.css'
@@ -43,7 +28,13 @@ import 'artalk/dist/Artalk.css'
 import { Fancybox } from '@fancyapps/ui'
 import '@fancyapps/ui/dist/fancybox/fancybox.css'
 
+// 点击涟漪指令
+import { vRipple } from './directives/vRipple'
+
 const app = createApp(App)
+
+// 注册全局指令
+app.directive('ripple', vRipple)
 const pinia = createPinia()
 
 // 配置 Pinia 插件
@@ -54,6 +45,10 @@ pinia.use(piniaPerformance) // 性能监控
 pinia.use(piniaErrorHandler) // 错误处理
 
 app.use(pinia)
+
+// 配置 fetch 进度条（拦截所有 fetch 请求）
+createProgressFetch()
+
 app.mount('#app')
 
 // 初始化 Fancybox 图片灯箱
@@ -116,21 +111,127 @@ Fancybox.bind('[data-fancybox]', {
   mainClass: 'fancybox-custom',
 })
 
-// 注册 Service Worker (PWA 支持)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => {
-        // Service Worker 注册成功
-      })
-      .catch(() => {
-        // 静默处理注册失败
-      })
+// Service Worker 更新检测
+// 当前激活的 SW 版本（运行时获取）
+let activatedSwVersion: string | null = null
+
+// 获取 SW 版本
+async function getSwVersion(sw: ServiceWorker): Promise<string | null> {
+  return new Promise((resolve) => {
+    const messageChannel = new MessageChannel()
+    messageChannel.port1.onmessage = (event) => {
+      resolve(event.data?.version || null)
+    }
+    sw.postMessage({ type: 'GET_VERSION' }, [messageChannel.port2])
+
+    // 超时处理
+    setTimeout(() => resolve(null), 2000)
   })
 }
 
+// 检查是否有新版本
+async function checkForNewVersion(registration: ServiceWorkerRegistration): Promise<boolean> {
+  const sw = registration.active
+  if (!sw) {return false}
+
+  const currentVersion = await getSwVersion(sw)
+  
+  // 首次获取版本时记录
+  if (!activatedSwVersion && currentVersion) {
+    activatedSwVersion = currentVersion
+    console.log(`[SW] Current version: ${activatedSwVersion}`)
+    return false
+  }
+  
+  // 版本不同则有更新
+  if (currentVersion && activatedSwVersion && currentVersion !== activatedSwVersion) {
+    console.log(`[SW] New version available: ${currentVersion} (was: ${activatedSwVersion})`)
+    return true
+  }
+  
+  return false
+}
+
+// 触发 SW 更新
+function triggerSwUpdate(registration: ServiceWorkerRegistration) {
+  const waitingSw = registration.waiting
+  if (waitingSw) {
+    waitingSw.postMessage({ type: 'SKIP_WAITING' })
+  }
+  // 刷新页面
+  window.location.reload()
+}
+
+// 派发更新事件
+function dispatchUpdateEvent(registration: ServiceWorkerRegistration) {
+  window.dispatchEvent(new CustomEvent('sw-update-available', {
+    detail: { registration },
+  }))
+}
+
+// 注册 Service Worker (PWA 支持)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js')
+
+      // 检查更新
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // 有新版本可用
+              dispatchUpdateEvent(registration)
+            }
+          })
+        }
+      })
+
+      // 首次获取当前版本
+      if (registration.active) {
+        activatedSwVersion = await getSwVersion(registration.active)
+        console.log(`[SW] Registered, version: ${activatedSwVersion || 'unknown'}`)
+      }
+
+      // 定期检查版本（每 5 分钟）
+      setInterval(async () => {
+        try {
+          await registration.update()
+          const hasNewVersion = await checkForNewVersion(registration)
+          if (hasNewVersion) {
+            dispatchUpdateEvent(registration)
+          }
+        } catch {
+          // 静默处理检查失败
+        }
+      }, 5 * 60 * 1000)
+
+      // 页面可见时检查更新
+      document.addEventListener('visibilitychange', async () => {
+        if (document.visibilityState === 'visible') {
+          try {
+            await registration.update()
+          } catch {
+            // 静默处理
+          }
+        }
+      })
+
+    } catch {
+        // 静默处理注册失败
+    }
+  })
+}
+
+// 导出更新函数供组件使用
+;(window as Window & { triggerSwUpdate?: typeof triggerSwUpdate }).triggerSwUpdate = triggerSwUpdate
+
 // Quicklink - 智能预加载可见链接
 import { listen } from 'quicklink'
+
+// Lozad 懒加载 - 与 Pinia store 集成
+import { initGlobalLazyLoad } from './composables/useLazyLoad'
 
 // 在页面加载完成后启用 Quicklink 和 Lozad
 window.addEventListener('load', () => {
@@ -151,18 +252,6 @@ window.addEventListener('load', () => {
     ],
   })
 
-  // Lozad 图片懒加载 - 使用 IntersectionObserver API
-  const observer = lozad('.lozad', {
-    rootMargin: '100px 0px', // 提前 100px 开始加载
-    threshold: 0.1,
-    enableAutoReload: true, // 支持动态内容
-    loaded: (el) => {
-      // 加载完成后添加淡入效果
-      el.classList.add('lozad-loaded')
-    },
-  })
-  observer.observe()
-
-  // 导出 observer 供动态内容使用
-  ;(window as Window & { lozadObserver?: ReturnType<typeof lozad> }).lozadObserver = observer
+  // 初始化 Lozad 懒加载（集成 Pinia store）
+  initGlobalLazyLoad()
 })

@@ -1,261 +1,250 @@
 <template>
-  <!-- 遮罩层 -->
+  <!-- 设置面板 - macOS 风格 -->
   <AnimatePresence>
+    <!-- 背景遮罩 -->
     <Motion
       v-if="isOpen"
       :initial="{ opacity: 0 }"
       :animate="{ opacity: 1 }"
       :exit="{ opacity: 0 }"
-      :transition="{ duration: 0.25 }"
-      class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
-      @click.self="close"
+      :transition="{ duration: 0.2 }"
+      class="fixed inset-0 z-40 bg-black/30"
+      @click="close"
+    />
+    <Motion
+      v-if="isOpen"
+      :initial="{ opacity: 0, y: 40, scale: 0.98 }"
+      :animate="{ opacity: 1, y: 0, scale: 1 }"
+      :exit="{ opacity: 0, y: 40, scale: 0.98 }"
+      :transition="{ type: 'spring', stiffness: 400, damping: 35 }"
+      class="fixed z-50 flex flex-col settings-page
+             inset-0
+             sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
+             sm:rounded-t-3xl
+             shadow-2xl shadow-black/20"
     >
-      <!-- 背景遮罩 -->
-      <div class="absolute inset-0 bg-black/40 backdrop-blur-md" />
-
-      <!-- 对话框 -->
+      <!-- 顶部导航栏 -->
       <Motion
-        :initial="{ opacity: 0, scale: 0.95, y: 20 }"
-        :animate="{ opacity: 1, scale: 1, y: 0 }"
-        :exit="{ opacity: 0, scale: 0.95, y: 20 }"
-        :transition="{ type: 'spring', stiffness: 400, damping: 30 }"
-        class="glassmorphism-modal relative rounded-xl sm:rounded-2xl md:rounded-3xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] mx-1 sm:mx-4 flex flex-col overflow-hidden"
-        @click.stop
+        :initial="{ opacity: 0, y: -20 }"
+        :animate="{ opacity: 1, y: 0 }"
+        :transition="{ delay: 0.1, duration: 0.3 }"
+        class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 sm:rounded-t-3xl glassmorphism-navbar"
       >
-        <!-- 标题栏 -->
-        <div class="relative z-10 flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-5 border-b border-white/20 dark:border-slate-700/50">
-          <Motion
-            :initial="{ rotate: -90, scale: 0 }"
-            :animate="{ rotate: 0, scale: 1 }"
-            :transition="{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }"
-            :while-hover="{ rotate: 90, scale: 1.1 }"
-            class="cursor-pointer"
-          >
-            <SettingsIcon :size="24" class="text-[#ff1493] dark:text-[#ff69b4]" />
-          </Motion>
-          
-          <Motion
-            :initial="{ opacity: 0, x: -10 }"
-            :animate="{ opacity: 1, x: 0 }"
-            :transition="{ delay: 0.15 }"
-          >
-            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-slate-100">
-              设置
-            </h2>
-          </Motion>
-          
-          <div class="flex-1" />
-          
-          <Motion
-            :initial="{ opacity: 0, scale: 0 }"
-            :animate="{ opacity: 1, scale: 1 }"
-            :transition="{ type: 'spring', stiffness: 400, damping: 20, delay: 0.2 }"
-            :while-hover="{ scale: 1.1, backgroundColor: 'rgba(255,20,147,0.1)' }"
-            :while-tap="{ scale: 0.9 }"
-            as="button"
-            class="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:text-[#ff1493] dark:text-slate-400 dark:hover:text-[#ff69b4] transition-colors"
-            @click="close"
-          >
-            <X :size="20" />
-          </Motion>
-        </div>
-
-        <!-- 内容区域 -->
-        <div class="relative z-10 flex-1 overflow-y-auto p-3 sm:p-6 custom-scrollbar">
-          <div class="space-y-6">
-            <!-- 自定义样式区块 -->
-            <Motion
-              :initial="{ opacity: 0, y: 15 }"
-              :animate="{ opacity: 1, y: 0 }"
-              :transition="{ delay: 0.1 }"
-              class="setting-section"
-            >
-              <div class="text-base sm:text-lg font-semibold text-gray-800 dark:text-slate-100 mb-3 flex items-center gap-2">
-                <Paintbrush :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
-                <span>自定义样式</span>
-              </div>
-
-              <div class="space-y-4">
-                <p class="text-sm text-gray-600 dark:text-slate-400">
-                  输入自定义 CSS 样式代码
-                </p>
-
-                <!-- CSS 代码编辑器 -->
-                <div class="relative">
-                  <textarea
-                    v-model="localCustomCSS"
-                    placeholder="*:hover {
-  display: none;
-}"
-                    rows="10"
-                    class="css-input w-full px-4 py-3 text-sm font-mono rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-md focus:shadow-lg focus:shadow-pink-500/10 transition-shadow duration-200 outline-none border-2 border-white/50 dark:border-slate-600/50 focus:border-[#ff1493] text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 resize-y min-h-[200px] max-h-[600px]"
-                  />
-                  <div class="absolute bottom-2 right-2 pointer-events-none text-gray-400 dark:text-slate-500 opacity-50">
-                    <GripVertical :size="14" />
-                  </div>
-                </div>
-
-                <!-- 提示信息卡片 -->
-                <div class="bg-blue-50 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-800/30 rounded-xl p-4">
-                  <div class="flex items-start gap-3">
-                    <Info :size="20" class="text-blue-500 dark:text-blue-400 mt-0.5" />
-                    <div class="flex-1 text-sm text-blue-700 dark:text-blue-300">
-                      <p class="font-semibold mb-1">使用说明</p>
-                      <ul class="list-disc list-inside space-y-1 text-blue-600 dark:text-blue-400">
-                        <li>支持标准 CSS 语法</li>
-                        <li>可以覆盖现有样式或添加新样式</li>
-                        <li>修改后点击"保存"即可应用</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Motion>
-
-            <!-- API 设置区块 -->
-            <Motion
-              :initial="{ opacity: 0, y: 15 }"
-              :animate="{ opacity: 1, y: 0 }"
-              :transition="{ delay: 0.15 }"
-              class="setting-section"
-            >
-              <div class="text-base sm:text-lg font-semibold text-gray-800 dark:text-slate-100 mb-3 flex items-center gap-2">
-                <Server :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
-                <span>API 设置</span>
-              </div>
-
-              <div class="space-y-4">
-                <!-- API 服务器选择 -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
-                    API 服务器
-                  </label>
-                  <div class="flex flex-wrap gap-2">
-                    <Motion
-                      v-for="(option, index) in apiOptions"
-                      :key="option.value"
-                      :initial="{ opacity: 0, scale: 0.9 }"
-                      :animate="{ opacity: 1, scale: 1 }"
-                      :transition="{ delay: 0.2 + index * 0.05 }"
-                      :while-hover="{ scale: 1.03, y: -1 }"
-                      :while-tap="{ scale: 0.97 }"
-                      as="button"
-                      type="button"
-                      :class="[
-                        'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 select-none',
-                        selectedApiOption === option.value
-                          ? 'bg-gradient-to-r from-[#ff1493] to-[#d946ef] text-white shadow-lg shadow-pink-500/25'
-                          : 'bg-white/80 dark:bg-slate-700/80 text-gray-700 dark:text-slate-300 border border-gray-200/50 dark:border-slate-600/50 hover:border-pink-300 dark:hover:border-pink-500/50 hover:shadow-md'
-                      ]"
-                      @click="selectApiOption(option.value)"
-                    >
-                      {{ option.label }}
-                    </Motion>
-                  </div>
-                </div>
-
-                <!-- 自定义 API 地址 -->
-                <AnimatePresence>
-                  <Motion
-                    v-if="selectedApiOption === 'custom'"
-                    :initial="{ opacity: 0, height: 0 }"
-                    :animate="{ opacity: 1, height: 'auto' }"
-                    :exit="{ opacity: 0, height: 0 }"
-                    :transition="{ duration: 0.2 }"
-                    class="overflow-hidden"
-                  >
-                    <div class="pt-2">
-                      <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                        自定义 API 地址
-                      </label>
-                      <div class="relative">
-                        <LinkIcon
-                          :size="20"
-                          class="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10"
-                        />
-                        <input
-                          v-model="customApiInput"
-                          type="url"
-                          placeholder="https://api.example.com"
-                          class="api-input w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-md focus:shadow-lg focus:shadow-pink-500/10 transition-shadow duration-200 outline-none border-2 border-white/50 dark:border-slate-600/50 focus:border-[#ff1493] text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-400"
-                        />
-                      </div>
-                      <div class="mt-2 space-y-1">
-                        <p class="text-xs text-gray-500 dark:text-slate-400">
-                          输入您自己部署的后端 API 地址。例如: http://127.0.0.1:8787
-                        </p>
-                        <p class="text-xs text-gray-500 dark:text-slate-400">
-                          部署自定义 API 后端:
-                          <a
-                            href="https://github.com/Moe-Sakura/Wrangler-API"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] hover:underline"
-                          >
-                            <Github :size="12" />
-                            <span>Moe-Sakura/Wrangler-API</span>
-                          </a>
-                        </p>
-                      </div>
-                    </div>
-                  </Motion>
-                </AnimatePresence>
-
-                <!-- 当前选择展示 -->
-                <AnimatePresence>
-                  <Motion
-                    v-if="selectedApiOption !== 'custom'"
-                    :initial="{ opacity: 0, y: -5 }"
-                    :animate="{ opacity: 1, y: 0 }"
-                    :exit="{ opacity: 0, y: -5 }"
-                    :transition="{ duration: 0.15 }"
-                    class="p-3 rounded-xl bg-gray-50/80 dark:bg-slate-800/60 border border-gray-200/50 dark:border-slate-700/50"
-                  >
-                    <p class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-2 flex-wrap">
-                      <span>当前 API 地址:</span>
-                      <code class="px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-700/80 text-[#ff1493] dark:text-[#ff69b4] font-mono text-xs select-all border border-pink-200/50 dark:border-pink-800/30">
-                        {{ getApiUrl(selectedApiOption) }}
-                      </code>
-                    </p>
-                  </Motion>
-                </AnimatePresence>
-              </div>
-            </Motion>
-          </div>
-        </div>
-
-        <!-- 底部操作栏 -->
+        <!-- 返回按钮 -->
         <Motion
-          :initial="{ opacity: 0, y: 10 }"
-          :animate="{ opacity: 1, y: 0 }"
-          :transition="{ delay: 0.2 }"
-          class="relative z-10 flex items-center justify-end gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 border-t border-white/20 dark:border-slate-700/50 bg-white/30 dark:bg-slate-900/30"
+          :while-hover="{ scale: 1.05, x: -2 }"
+          :while-tap="{ scale: 0.95 }"
+          as="button"
+          class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors"
+          @click="close"
         >
-          <!-- 重置按钮 -->
-          <Motion
-            :while-hover="{ scale: 1.02 }"
-            :while-tap="{ scale: 0.98 }"
-            as="button"
-            class="px-4 py-2 rounded-xl text-gray-600 dark:text-slate-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-slate-700/80 transition-colors font-medium flex items-center gap-2"
-            @click="reset"
-          >
-            <RotateCcw :size="16" />
-            <span>重置</span>
-          </Motion>
-          
-          <!-- 保存按钮 -->
-          <Motion
-            :while-hover="{ scale: 1.03 }"
-            :while-tap="{ scale: 0.97 }"
-            as="button"
-            class="px-6 py-2 rounded-xl text-white font-semibold shadow-lg shadow-pink-500/25 bg-gradient-to-r from-[#ff1493] to-[#d946ef] hover:shadow-xl hover:shadow-pink-500/30 transition-shadow flex items-center gap-2"
-            @click="save"
-          >
-            <Check :size="16" />
-            <span>保存</span>
-          </Motion>
+          <ChevronLeft :size="24" />
+          <span class="text-base">返回</span>
+        </Motion>
+
+        <!-- 标题 -->
+        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+          <SettingsIcon :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
+          <h1 class="text-lg font-bold text-gray-800 dark:text-white">设置</h1>
+        </div>
+
+        <!-- 保存按钮 -->
+        <Motion
+          :while-hover="{ scale: 1.05 }"
+          :while-tap="{ scale: 0.95 }"
+          as="button"
+          class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
+          @click="save"
+        >
+          保存
         </Motion>
       </Motion>
+
+      <!-- 内容区域 -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+          <!-- API 设置卡片 -->
+          <Motion
+            :initial="{ opacity: 0, y: 30 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :transition="{ delay: 0.15 }"
+            class="settings-card"
+          >
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                <Server :size="20" class="text-white" />
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">API 服务器</h2>
+                <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 API 地址</p>
+              </div>
+            </div>
+
+            <!-- API 选项列表 -->
+            <div class="space-y-2">
+              <Motion
+                v-for="(option, index) in apiOptions"
+                :key="option.value"
+                :initial="{ opacity: 0, x: -20 }"
+                :animate="{ opacity: 1, x: 0 }"
+                :transition="{ delay: 0.25 + index * 0.05 }"
+                :while-tap="{ scale: 0.98 }"
+                as="button"
+                type="button"
+                :class="[
+                  'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
+                  selectedApiOption === option.value
+                    ? 'bg-gradient-to-r from-[#ff1493]/10 to-[#d946ef]/10 border-2 border-[#ff1493] dark:border-[#ff69b4]'
+                    : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-pink-200 dark:hover:border-pink-900'
+                ]"
+                @click="selectApiOption(option.value)"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    :class="[
+                      'w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors',
+                      selectedApiOption === option.value
+                        ? 'border-[#ff1493] bg-[#ff1493]'
+                        : 'border-gray-300 dark:border-slate-600'
+                    ]"
+                  >
+                    <Check v-if="selectedApiOption === option.value" :size="12" class="text-white" />
+                  </div>
+                  <span
+                    :class="[
+                      'font-medium text-sm sm:text-base',
+                      selectedApiOption === option.value
+                        ? 'text-[#ff1493] dark:text-[#ff69b4]'
+                        : 'text-gray-700 dark:text-slate-300'
+                    ]"
+                  >
+                    {{ option.label }}
+                  </span>
+                </div>
+                <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧 -->
+                <span 
+                  v-if="option.value !== 'custom'" 
+                  class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-0 truncate"
+                >
+                  {{ getApiUrl(option.value) }}
+                </span>
+              </Motion>
+            </div>
+
+            <!-- 自定义 API 输入 -->
+            <AnimatePresence>
+              <Motion
+                v-if="selectedApiOption === 'custom'"
+                :initial="{ opacity: 0, height: 0 }"
+                :animate="{ opacity: 1, height: 'auto' }"
+                :exit="{ opacity: 0, height: 0 }"
+                :transition="{ duration: 0.2 }"
+                class="overflow-hidden"
+              >
+                <div class="mt-4 space-y-3">
+                  <div class="relative">
+                    <LinkIcon :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      v-model="customApiInput"
+                      type="url"
+                      placeholder="https://api.example.com"
+                      class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-pink-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-[#ff1493] text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
+                    <Github :size="14" />
+                    <span>部署后端:</span>
+                    <a
+                      href="https://github.com/Moe-Sakura/Wrangler-API"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-[#ff1493] dark:text-[#ff69b4] hover:underline"
+                    >
+                      Moe-Sakura/Wrangler-API
+                    </a>
+                  </div>
+                </div>
+              </Motion>
+            </AnimatePresence>
+          </Motion>
+
+          <!-- 自定义样式卡片 -->
+          <Motion
+            :initial="{ opacity: 0, y: 30 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :transition="{ delay: 0.2 }"
+            class="settings-card"
+          >
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <Paintbrush :size="20" class="text-white" />
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">自定义样式</h2>
+                <p class="text-sm text-gray-500 dark:text-slate-400">添加自定义 CSS 代码</p>
+              </div>
+            </div>
+
+            <!-- CSS 编辑器 -->
+            <div class="relative">
+              <textarea
+                v-model="localCustomCSS"
+                placeholder="/* 在这里输入自定义 CSS */
+*:hover {
+  display: none;
+}"
+                rows="12"
+                class="css-input w-full px-4 py-4 text-sm font-mono rounded-2xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-pink-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-[#ff1493] text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 resize-y min-h-[250px] max-h-[500px]"
+              />
+              <div class="absolute bottom-3 right-3 pointer-events-none text-gray-300 dark:text-slate-600">
+                <GripVertical :size="16" />
+              </div>
+            </div>
+
+            <!-- 提示信息 -->
+            <div class="mt-4 flex items-start gap-3 p-4 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-800/30">
+              <Info :size="18" class="text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                <p class="font-medium">使用说明</p>
+                <ul class="text-blue-600 dark:text-blue-400 space-y-0.5 text-xs">
+                  <li>• 支持标准 CSS 语法</li>
+                  <li>• 可以覆盖现有样式或添加新样式</li>
+                  <li>• 修改后点击"保存"即可应用</li>
+                </ul>
+              </div>
+            </div>
+          </Motion>
+
+          <!-- 重置区域 -->
+          <Motion
+            :initial="{ opacity: 0, y: 30 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :transition="{ delay: 0.25 }"
+            class="settings-card bg-red-50/50 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/30"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg shadow-red-500/30">
+                  <RotateCcw :size="20" class="text-white" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">重置设置</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">恢复所有设置为默认值</p>
+                </div>
+              </div>
+              <Motion
+                :while-hover="{ scale: 1.05 }"
+                :while-tap="{ scale: 0.95 }"
+                as="button"
+                class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+                @click="reset"
+              >
+                重置
+              </Motion>
+            </div>
+          </Motion>
+        </div>
+      </div>
     </Motion>
   </AnimatePresence>
 </template>
@@ -263,9 +252,11 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { Motion, AnimatePresence } from 'motion-v'
+import { playClick, playSuccess, playToggle } from '@/composables/useSound'
+import { lockScroll, unlockScroll } from '@/composables/useScrollLock'
 import {
   Settings as SettingsIcon,
-  X,
+  ChevronLeft,
   Paintbrush,
   GripVertical,
   Info,
@@ -289,7 +280,7 @@ const emit = defineEmits<{
 
 // API 服务器选项
 const apiOptions = [
-  { value: 'cfapi', label: 'Cloudflare' },
+  { value: 'cfapi', label: 'Cloudflare (默认)' },
   { value: 'api', label: '香港' },
   { value: 'custom', label: '自定义' },
 ]
@@ -321,7 +312,6 @@ const customApiInput = ref(
   selectedApiOption.value === 'custom' ? props.customApi : '',
 )
 const localCustomCSS = ref(props.customCSS)
-const originalCustomCSS = ref(props.customCSS)
 
 // 计算最终的 API 地址
 const localCustomApi = computed(() => {
@@ -336,6 +326,7 @@ const localCustomApi = computed(() => {
 
 // 选择 API 选项
 function selectApiOption(option: string) {
+  playToggle()
   selectedApiOption.value = option
   if (option !== 'custom') {
     customApiInput.value = ''
@@ -360,54 +351,80 @@ watch(() => props.isOpen, (isOpen) => {
     selectedApiOption.value = getOptionFromUrl(props.customApi)
     customApiInput.value = selectedApiOption.value === 'custom' ? props.customApi : ''
     localCustomCSS.value = props.customCSS
-    originalCustomCSS.value = props.customCSS
+    // 锁定 body 滚动
+    lockScroll()
+  } else {
+    // 恢复 body 滚动
+    unlockScroll()
   }
 })
 
 function close() {
+  playClick()
   emit('close')
 }
 
 function save() {
+  playSuccess()
   emit('save', localCustomApi.value, localCustomCSS.value)
   emit('close')
 }
 
 function reset() {
+  playClick()
   selectedApiOption.value = 'cfapi'
   customApiInput.value = ''
   localCustomCSS.value = ''
 }
 </script>
 
-<style scoped>
-/* 液态玻璃效果 */
-.glassmorphism-modal {
+<style>
+/* 设置面板 - macOS 风格 (亮色模式) */
+.settings-page {
   background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.8) 100%
+    180deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 250, 252, 0.96) 100%
   );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow:
-    0 20px 40px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: none;
 }
 
-.dark .glassmorphism-modal {
+/* 设置面板 - macOS 风格 (暗色模式) */
+.dark .settings-page {
   background: linear-gradient(
-    135deg,
-    rgba(30, 41, 59, 0.95) 0%,
-    rgba(15, 23, 42, 0.9) 100%
-  );
+    180deg,
+    rgba(30, 41, 59, 0.92) 0%,
+    rgba(15, 23, 42, 0.96) 100%
+  ) !important;
+  backdrop-filter: blur(40px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: none !important;
+}
+
+/* 设置卡片 - 亮色模式 */
+.settings-card {
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 105, 180, 0.15);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow:
-    0 20px 40px -12px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    0 4px 24px -4px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+}
+
+/* 设置卡片 - 暗色模式 */
+.dark .settings-card {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    0 4px 24px -4px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
 }
 
 /* 自定义滚动条 */
@@ -428,30 +445,15 @@ function reset() {
   background: linear-gradient(180deg, #c71585, #c026d3);
 }
 
-/* 确保输入框内容可以正常选中 */
+/* 输入框选中样式 */
 .api-input,
 .css-input {
   user-select: text;
   -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
 }
 
 .api-input::selection,
 .css-input::selection {
   background-color: rgba(255, 20, 147, 0.3);
-}
-
-/* 设置区块 */
-.setting-section {
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .setting-section {
-    border-radius: 1rem;
-    padding: 1rem;
-  }
 }
 </style>

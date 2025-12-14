@@ -5,7 +5,7 @@
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
         :data-platform="platformName"
-        class="result-card bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl backdrop-saturate-150 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in-up border-2"
+        class="result-card glassmorphism-card rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in-up border-2"
         :class="getBorderClass(platformData.color)"
       >
         <div class="p-4 sm:p-5 md:p-6">
@@ -69,7 +69,7 @@
           </div>
           
           <!-- 错误信息 -->
-          <div v-if="platformData.error" class="flex items-center gap-3 p-4 mb-4 bg-red-50 dark:bg-red-900/40 border-2 border-red-300 dark:border-red-700 rounded-xl backdrop-blur-sm">
+          <div v-if="platformData.error" class="flex items-center gap-3 p-4 mb-4 bg-red-50/90 dark:bg-red-900/50 border-2 border-red-300 dark:border-red-700 rounded-xl">
             <AlertTriangle :size="20" class="text-red-600 dark:text-red-400" />
             <span class="text-red-700 dark:text-red-300 font-medium">{{ platformData.error }}</span>
           </div>
@@ -80,9 +80,8 @@
               v-for="(result, index) in getDisplayedResults(platformData)"
               :key="index"
               class="result-item group p-3 sm:p-4 rounded-xl 
-                     bg-gradient-to-r from-white/60 to-white/40 dark:from-slate-700/60 dark:to-slate-700/40
+                     bg-gradient-to-r from-white/70 to-white/50 dark:from-slate-700/70 dark:to-slate-700/50
                      hover:from-white/90 hover:to-white/70 dark:hover:from-slate-700/90 dark:hover:to-slate-700/70
-                     backdrop-blur-sm
                      border border-gray-200/50 dark:border-slate-600/50
                      hover:border-theme-primary/40 dark:hover:border-theme-accent/40
                      hover:shadow-lg hover:shadow-theme-primary/10 dark:hover:shadow-theme-accent/15
@@ -118,14 +117,13 @@
             <button
               class="px-6 py-3 rounded-xl
                      bg-gradient-pink text-white font-bold
-                     backdrop-blur-md
                      border border-white/30 dark:border-white/20
                      shadow-lg shadow-theme-primary/20 dark:shadow-theme-accent/25
                      hover:shadow-xl hover:shadow-theme-primary/30 dark:hover:shadow-theme-accent/35
                      hover:scale-105
                      active:scale-95
                      transition-all duration-300
-                     flex items-center gap-2"
+                     flex items-center gap-2 glass-gpu"
               @click="loadMore(platformName)"
             >
               <ArrowDown :size="18" />
@@ -153,6 +151,7 @@
 <script setup lang="ts">
 import { useSearchStore } from '@/stores/search'
 import type { PlatformData } from '@/stores/search'
+import { playClick } from '@/composables/useSound'
 import {
   ExternalLink,
   AlertTriangle,
@@ -210,6 +209,7 @@ function getDisplayedResults(platformData: PlatformData) {
 
 // 加载更多
 function loadMore(platformName: string) {
+  playClick()
   searchStore.loadMoreResults(platformName, 20)
 }
 

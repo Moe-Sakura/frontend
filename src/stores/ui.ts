@@ -1,7 +1,28 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+
+// 持久化的 UI 状态类型
+export interface PersistedUIState {
+  isDarkMode: boolean
+  customCSS: string
+  showSearchHistory: boolean
+  lastVisitTime: number
+}
+
+const STORAGE_KEY = 'ui-state'
+
+// 默认持久化状态
+const DEFAULT_PERSISTED_STATE: PersistedUIState = {
+  isDarkMode: false,
+  customCSS: '',
+  showSearchHistory: true,
+  lastVisitTime: 0,
+}
 
 export const useUIStore = defineStore('ui', () => {
+  // 是否已初始化
+  const isInitialized = ref(false)
+
   // 主题相关
   const isDarkMode = ref(false)
   const customCSS = ref('')
@@ -10,6 +31,7 @@ export const useUIStore = defineStore('ui', () => {
   const isCommentsModalOpen = ref(false)
   const isVndbPanelOpen = ref(false)
   const isSettingsModalOpen = ref(false)
+  const isHistoryModalOpen = ref(false)
   
   // 浮动按钮状态
   const showScrollToTop = ref(false)
@@ -25,6 +47,9 @@ export const useUIStore = defineStore('ui', () => {
   // 加载状态
   const isLoading = ref(false)
   const loadingMessage = ref('')
+
+  // SW 更新状态
+  const showUpdateToast = ref(false)
   
   // Toast 通知
   const toasts = ref<Array<{
@@ -38,7 +63,8 @@ export const useUIStore = defineStore('ui', () => {
   const hasOpenModal = computed(() => 
     isCommentsModalOpen.value || 
     isVndbPanelOpen.value || 
-    isSettingsModalOpen.value,
+    isSettingsModalOpen.value ||
+    isHistoryModalOpen.value,
   )
   
   const activeModalsCount = computed(() => {
@@ -46,6 +72,7 @@ export const useUIStore = defineStore('ui', () => {
     if (isCommentsModalOpen.value) {count++}
     if (isVndbPanelOpen.value) {count++}
     if (isSettingsModalOpen.value) {count++}
+    if (isHistoryModalOpen.value) {count++}
     return count
   })
   
@@ -83,6 +110,11 @@ export const useUIStore = defineStore('ui', () => {
     isCommentsModalOpen.value = false
     isVndbPanelOpen.value = false
     isSettingsModalOpen.value = false
+    isHistoryModalOpen.value = false
+  }
+  
+  function toggleHistoryModal() {
+    isHistoryModalOpen.value = !isHistoryModalOpen.value
   }
   
   // 方法 - 浮动按钮
@@ -146,28 +178,78 @@ export const useUIStore = defineStore('ui', () => {
     toasts.value = []
   }
   
+  // 从 localStorage 加载持久化状态
+  function loadPersistedState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        const parsed: PersistedUIState = JSON.parse(saved)
+        isDarkMode.value = parsed.isDarkMode ?? DEFAULT_PERSISTED_STATE.isDarkMode
+        customCSS.value = parsed.customCSS ?? DEFAULT_PERSISTED_STATE.customCSS
+        showSearchHistory.value = parsed.showSearchHistory ?? DEFAULT_PERSISTED_STATE.showSearchHistory
+      }
+    } catch {
+      // 解析失败，使用默认值
+    }
+  }
+
+  // 保存持久化状态到 localStorage
+  function savePersistedState() {
+    try {
+      const state: PersistedUIState = {
+        isDarkMode: isDarkMode.value,
+        customCSS: customCSS.value,
+        showSearchHistory: showSearchHistory.value,
+        lastVisitTime: Date.now(),
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    } catch {
+      // 保存失败，静默处理
+    }
+  }
+
+  // 监听需要持久化的状态变化
+  watch(
+    [isDarkMode, customCSS, showSearchHistory],
+    () => {
+      if (isInitialized.value) {
+        savePersistedState()
+      }
+    },
+  )
+
   // 初始化
   function init() {
-    // 恢复暗色模式
-    const savedDarkMode = localStorage.getItem('darkMode')
-    if (savedDarkMode === 'true') {
-      setDarkMode(true)
-    } else if (savedDarkMode === 'false') {
-      setDarkMode(false)
-    } else {
-      // 默认跟随系统
+    // 加载持久化状态
+    loadPersistedState()
+
+    // 如果没有保存的主题偏好，跟随系统
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (!saved) {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      setDarkMode(prefersDark)
+      isDarkMode.value = prefersDark
     }
+
+    // 应用主题
+    document.documentElement.classList.toggle('dark', isDarkMode.value)
+    
+    isInitialized.value = true
+  }
+
+  // 显示 SW 更新提示
+  function setShowUpdateToast(show: boolean) {
+    showUpdateToast.value = show
   }
   
   return {
     // 状态
+    isInitialized,
     isDarkMode,
     customCSS,
     isCommentsModalOpen,
     isVndbPanelOpen,
     isSettingsModalOpen,
+    isHistoryModalOpen,
     showScrollToTop,
     showPlatformNav,
     showSearchHistory,
@@ -175,6 +257,7 @@ export const useUIStore = defineStore('ui', () => {
     backgroundImageLoaded,
     isLoading,
     loadingMessage,
+    showUpdateToast,
     toasts,
     
     // 计算属性
@@ -188,6 +271,7 @@ export const useUIStore = defineStore('ui', () => {
     toggleCommentsModal,
     toggleVndbPanel,
     toggleSettingsModal,
+    toggleHistoryModal,
     closeAllModals,
     setShowScrollToTop,
     togglePlatformNav,
@@ -196,9 +280,12 @@ export const useUIStore = defineStore('ui', () => {
     setBackgroundImage,
     setBackgroundImageLoaded,
     setLoading,
+    setShowUpdateToast,
     showToast,
     removeToast,
     clearToasts,
+    loadPersistedState,
+    savePersistedState,
     init,
   }
 })
