@@ -28,13 +28,13 @@
       <div
         v-if="uiStore.isCommentsModalOpen"
         class="comments-modal fixed z-[100] flex flex-col
-               top-3 left-2 right-2 bottom-0
+               inset-0
                sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
-               rounded-t-2xl sm:rounded-t-3xl
+               sm:rounded-t-3xl
                shadow-2xl shadow-black/20"
       >
         <!-- 顶部导航栏 -->
-        <div class="comments-header flex-shrink-0 flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 rounded-t-2xl sm:rounded-t-3xl">
+        <div class="comments-header flex-shrink-0 flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-4 border-b border-white/10 dark:border-slate-700/50 sm:rounded-t-3xl">
           <!-- 返回按钮 -->
           <button
             v-ripple
@@ -68,7 +68,7 @@
 
         <!-- 内容区域 -->
         <div class="flex-1 overflow-y-auto custom-scrollbar">
-          <div class="px-4 sm:px-5 py-4 sm:py-5">
+          <div class="px-2 sm:px-5 py-3 sm:py-5">
             <div id="Comments" class="comments-container" />
           </div>
         </div>

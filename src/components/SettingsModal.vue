@@ -18,9 +18,9 @@
       :exit="{ opacity: 0, y: 40, scale: 0.98 }"
       :transition="{ type: 'spring', stiffness: 400, damping: 35 }"
       class="fixed z-50 flex flex-col settings-page
-             top-3 left-2 right-2 bottom-0
+             inset-0
              sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
-             rounded-t-2xl sm:rounded-t-3xl
+             sm:rounded-t-3xl
              shadow-2xl shadow-black/20"
     >
       <!-- 顶部导航栏 -->
@@ -28,7 +28,7 @@
         :initial="{ opacity: 0, y: -20 }"
         :animate="{ opacity: 1, y: 0 }"
         :transition="{ delay: 0.1, duration: 0.3 }"
-        class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 rounded-t-2xl sm:rounded-t-3xl glassmorphism-navbar"
+        class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 sm:rounded-t-3xl glassmorphism-navbar"
       >
         <!-- 返回按钮 -->
         <Motion
@@ -92,7 +92,7 @@
                 as="button"
                 type="button"
                 :class="[
-                  'w-full flex items-center justify-between p-4 rounded-xl transition-all duration-200',
+                  'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
                   selectedApiOption === option.value
                     ? 'bg-gradient-to-r from-[#ff1493]/10 to-[#d946ef]/10 border-2 border-[#ff1493] dark:border-[#ff69b4]'
                     : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-pink-200 dark:hover:border-pink-900'
@@ -102,7 +102,7 @@
                 <div class="flex items-center gap-3">
                   <div
                     :class="[
-                      'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors',
+                      'w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors',
                       selectedApiOption === option.value
                         ? 'border-[#ff1493] bg-[#ff1493]'
                         : 'border-gray-300 dark:border-slate-600'
@@ -112,7 +112,7 @@
                   </div>
                   <span
                     :class="[
-                      'font-medium',
+                      'font-medium text-sm sm:text-base',
                       selectedApiOption === option.value
                         ? 'text-[#ff1493] dark:text-[#ff69b4]'
                         : 'text-gray-700 dark:text-slate-300'
@@ -121,7 +121,11 @@
                     {{ option.label }}
                   </span>
                 </div>
-                <span v-if="option.value !== 'custom'" class="text-xs text-gray-400 dark:text-slate-500 font-mono">
+                <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧 -->
+                <span 
+                  v-if="option.value !== 'custom'" 
+                  class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-0 truncate"
+                >
                   {{ getApiUrl(option.value) }}
                 </span>
               </Motion>

@@ -122,6 +122,10 @@ export const useSearchStore = defineStore('search', () => {
     const COOLDOWN_MS = 30 * 1000
     return isSearching.value || (now - lastSearchTime.value < COOLDOWN_MS)
   })
+  const totalResults = computed(() => 
+    Array.from(platformResults.value.values())
+      .reduce((sum, platform) => sum + platform.items.length, 0)
+  )
 
   // 方法
   function clearResults() {
@@ -184,13 +188,10 @@ export const useSearchStore = defineStore('search', () => {
     
     // 保存搜索历史到 historyStore
     if (searchQuery.value && !isSearching.value) {
-      const resultCount = Array.from(platformResults.value.values())
-        .reduce((sum, platform) => sum + platform.items.length, 0)
-      
       historyStore.addHistory({
         query: searchQuery.value,
         mode: searchMode.value,
-        resultCount,
+        resultCount: totalResults.value,
       })
     }
   }
@@ -223,6 +224,7 @@ export const useSearchStore = defineStore('search', () => {
     hasResults,
     isVndbMode,
     searchDisabled,
+    totalResults,
     // 方法
     clearResults,
     setSearchQuery,

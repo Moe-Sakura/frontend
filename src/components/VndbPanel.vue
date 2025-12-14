@@ -26,13 +26,13 @@
     <div
       v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
       class="fixed z-50 flex flex-col vndb-page
-             top-3 left-2 right-2 bottom-0
+             inset-0
              sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
-             rounded-t-2xl sm:rounded-t-3xl
+             sm:rounded-t-3xl
              shadow-2xl shadow-black/20"
     >
       <!-- 顶部导航栏 -->
-      <div class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 rounded-t-2xl sm:rounded-t-3xl glassmorphism-navbar">
+      <div class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 sm:rounded-t-3xl glassmorphism-navbar">
         <!-- 返回按钮 -->
         <button
           class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors hover:opacity-80"
