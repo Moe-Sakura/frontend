@@ -8,7 +8,7 @@ const CORE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.svg',
+  '/logo.svg',
 ];
 
 // 缓存策略配置

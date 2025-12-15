@@ -4,7 +4,7 @@
 
 ## 当前图标文件
 
-- `favicon.svg` - 主图标（SVG 格式，带粉紫渐变）
+- `logo.svg` - 主图标（SVG 格式，带粉紫渐变）
 - `gamepad-solid.svg` - 原始 Font Awesome 图标
 - `favicon-32x32.png` - 32x32 PNG 图标（需要生成）
 - `favicon-16x16.png` - 16x16 PNG 图标（需要生成）
@@ -15,7 +15,7 @@
 ### 方法 1: 使用在线工具
 
 1. 访问 [RealFaviconGenerator](https://realfavicongenerator.net/)
-2. 上传 `favicon.svg`
+2. 上传 `logo.svg`
 3. 自定义设置（建议使用粉紫渐变背景）
 4. 生成并下载所有尺寸的图标
 5. 将文件放到 `public/` 目录
@@ -29,9 +29,9 @@ brew install imagemagick  # macOS
 sudo apt-get install imagemagick  # Linux
 
 # 生成 PNG 图标
-convert -background none favicon.svg -resize 32x32 favicon-32x32.png
-convert -background none favicon.svg -resize 16x16 favicon-16x16.png
-convert -background none favicon.svg -resize 180x180 apple-touch-icon.png
+convert -background none logo.svg -resize 32x32 favicon-32x32.png
+convert -background none logo.svg -resize 16x16 favicon-16x16.png
+convert -background none logo.svg -resize 180x180 apple-touch-icon.png
 ```
 
 ### 方法 3: 使用 Inkscape
@@ -41,9 +41,9 @@ convert -background none favicon.svg -resize 180x180 apple-touch-icon.png
 brew install inkscape  # macOS
 
 # 生成 PNG 图标
-inkscape favicon.svg --export-filename=favicon-32x32.png --export-width=32 --export-height=32
-inkscape favicon.svg --export-filename=favicon-16x16.png --export-width=16 --export-height=16
-inkscape favicon.svg --export-filename=apple-touch-icon.png --export-width=180 --export-height=180
+inkscape logo.svg --export-filename=favicon-32x32.png --export-width=32 --export-height=32
+inkscape logo.svg --export-filename=favicon-16x16.png --export-width=16 --export-height=16
+inkscape logo.svg --export-filename=apple-touch-icon.png --export-width=180 --export-height=180
 ```
 
 ## 图标说明
