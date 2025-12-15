@@ -9,8 +9,11 @@
     id="app" 
     class="min-h-screen relative"
   >
-    <!-- 背景层容器 -->
-    <div id="background-container" class="fixed inset-0 z-[-2] overflow-hidden">
+    <!-- 背景层容器 - GPU 加速 -->
+    <div 
+      id="background-container" 
+      class="fixed inset-0 z-[-2] overflow-hidden gpu-layer"
+    >
       <!-- 默认背景纹理（无图片时显示） -->
       <div
         id="background-pattern"
@@ -27,7 +30,7 @@
           :animate="getTransitionVariant('animate')"
           :exit="getTransitionVariant('exit')"
           :transition="bgTransition"
-          class="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
+          class="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform gpu-layer"
           :style="{ backgroundImage: `url(${backgroundImageUrl})` }"
         />
       </AnimatePresence>
@@ -63,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import { Motion, AnimatePresence } from 'motion-v'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
@@ -75,16 +78,21 @@ import {
   saveCustomCSS,
   applyCustomCSS,
 } from '@/utils/theme'
+
+// 关键组件 - 同步加载
 import StatsCorner from '@/components/StatsCorner.vue'
 import TopToolbar from '@/components/TopToolbar.vue'
 import SearchHeader from '@/components/SearchHeader.vue'
 import SearchResults from '@/components/SearchResults.vue'
 import FloatingButtons from '@/components/FloatingButtons.vue'
-import CommentsModal from '@/components/CommentsModal.vue'
-import VndbPanel from '@/components/VndbPanel.vue'
-import SettingsModal from '@/components/SettingsModal.vue'
-import SearchHistoryModal from '@/components/SearchHistoryModal.vue'
-import UpdateToast from '@/components/UpdateToast.vue'
+
+// 非关键组件 - 异步懒加载（用户交互时才加载）
+const CommentsModal = defineAsyncComponent(() => import('@/components/CommentsModal.vue'))
+const VndbPanel = defineAsyncComponent(() => import('@/components/VndbPanel.vue'))
+const SettingsModal = defineAsyncComponent(() => import('@/components/SettingsModal.vue'))
+const SearchHistoryModal = defineAsyncComponent(() => import('@/components/SearchHistoryModal.vue'))
+const UpdateToast = defineAsyncComponent(() => import('@/components/UpdateToast.vue'))
+
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import { useClickEffect } from '@/composables/useClickEffect'
 
@@ -137,10 +145,11 @@ function handleSwUpdate() {
   }
 }
 const randomImageUrl = ref('')
-const imageCache = ref<string[]>([])
-const imageCacheSet = ref<Set<string>>(new Set()) // 用于快速查重
-const imageBlobUrls = ref<Map<string, string>>(new Map()) // URL -> Blob URL 映射
-const shuffledQueue = ref<string[]>([])
+// 使用 shallowRef 优化大型数据结构的响应式性能
+const imageCache = shallowRef<string[]>([])
+const imageCacheSet = shallowRef<Set<string>>(new Set()) // 用于快速查重
+const imageBlobUrls = shallowRef<Map<string, string>>(new Map()) // URL -> Blob URL 映射
+const shuffledQueue = shallowRef<string[]>([])
 let fetchInterval: number | null = null
 let displayInterval: number | null = null
 let systemThemeCleanup: (() => void) | null = null
@@ -149,6 +158,10 @@ const MAX_CACHE_SIZE = 10000 // 最大缓存 10000 张图片
 const CLEANUP_BATCH_SIZE = 2000 // 每次清理 2000 张
 const FETCH_INTERVAL = 5000 // 5秒获取一次
 const DISPLAY_INTERVAL = 10000 // 10秒切换一次
+const MAX_BLOB_URLS = 20 // 最大同时保持的 Blob URL 数量（内存优化）
+
+// 导入性能优化工具
+import { scheduleIdleTask } from '@/composables/usePerformance'
 
 // 背景动画相关
 const currentBgKey = ref(0) // 用于触发 AnimatePresence 动画
@@ -228,21 +241,23 @@ async function loadCacheFromDB() {
     const urls = await imageDB.getAllUrls()
     
     if (urls.length > 0) {
-      // 去重处理
+      // 去重处理 - shallowRef 需要重新赋值
       const uniqueUrls = [...new Set(urls)]
       imageCache.value = uniqueUrls
       imageCacheSet.value = new Set(uniqueUrls)
       
-      // 预加载部分图片的 Blob URL（前10张）
+      // 预加载部分图片的 Blob URL（前10张）- 使用新 Map 触发更新
       const preloadCount = Math.min(10, uniqueUrls.length)
+      const newBlobUrls = new Map(imageBlobUrls.value)
       for (let i = 0; i < preloadCount; i++) {
         const url = uniqueUrls[i]
         const blob = await imageDB.getImageByUrl(url)
         if (blob) {
           const blobUrl = URL.createObjectURL(blob)
-          imageBlobUrls.value.set(url, blobUrl)
+          newBlobUrls.set(url, blobUrl)
         }
       }
+      imageBlobUrls.value = newBlobUrls
       
       return true
     }
@@ -265,7 +280,8 @@ function shuffleArray<T>(array: T[]): T[] {
 // 重新洗牌队列
 function reshuffleQueue() {
   if (imageCache.value.length > 0) {
-    shuffledQueue.value = shuffleArray(imageCache.value)
+    // shallowRef 需要重新赋值才能触发更新
+    shuffledQueue.value = shuffleArray([...imageCache.value])
   }
 }
 
@@ -306,10 +322,16 @@ async function fetchAndCacheImage() {
           // 保存到 IndexedDB
           await imageDB.addImage(finalUrl, blob)
           
-          // 添加到内存缓存
-          imageCache.value.push(finalUrl)
-          imageCacheSet.value.add(finalUrl)
-          imageBlobUrls.value.set(finalUrl, blobUrl)
+          // 添加到内存缓存 - shallowRef 需要重新赋值触发更新
+          const newCache = [...imageCache.value, finalUrl]
+          const newCacheSet = new Set(imageCacheSet.value)
+          newCacheSet.add(finalUrl)
+          const newBlobUrls = new Map(imageBlobUrls.value)
+          newBlobUrls.set(finalUrl, blobUrl)
+          
+          imageCache.value = newCache
+          imageCacheSet.value = newCacheSet
+          imageBlobUrls.value = newBlobUrls
           
           // 限制缓存大小 - 大于 10000 张即清理最早的 2000 张
           const count = await imageDB.getCount()
@@ -318,17 +340,31 @@ async function fetchAndCacheImage() {
             const deletedCount = await imageDB.deleteOldestBatch(CLEANUP_BATCH_SIZE)
             
             // 同步更新内存缓存 - 移除前 deletedCount 张
+            const cleanedCache = imageCache.value.slice(deletedCount)
+            const cleanedSet = new Set(cleanedCache)
+            const cleanedBlobUrls = new Map<string, string>()
+            
+            // 清理被删除图片的 Blob URL
             for (let i = 0; i < deletedCount; i++) {
-              const removed = imageCache.value.shift()
+              const removed = imageCache.value[i]
               if (removed) {
-                imageCacheSet.value.delete(removed)
                 const oldBlobUrl = imageBlobUrls.value.get(removed)
                 if (oldBlobUrl) {
                   URL.revokeObjectURL(oldBlobUrl)
-                  imageBlobUrls.value.delete(removed)
                 }
               }
             }
+            
+            // 保留剩余的 Blob URL
+            imageBlobUrls.value.forEach((url, key) => {
+              if (cleanedSet.has(key)) {
+                cleanedBlobUrls.set(key, url)
+              }
+            })
+            
+            imageCache.value = cleanedCache
+            imageCacheSet.value = cleanedSet
+            imageBlobUrls.value = cleanedBlobUrls
           }
           
           // 如果队列为空，重新洗牌
@@ -356,6 +392,31 @@ async function fetchAndCacheImage() {
   }
 }
 
+// 清理过多的 Blob URL 以释放内存
+function cleanupBlobUrls(currentUrl: string) {
+  const blobUrls = imageBlobUrls.value
+  if (blobUrls.size <= MAX_BLOB_URLS) { return }
+  
+  // 创建新 Map，保留当前使用的 URL
+  const newBlobUrls = new Map<string, string>()
+  newBlobUrls.set(currentUrl, blobUrls.get(currentUrl)!)
+  
+  // 保留最近添加的 URL（Map 保持插入顺序）
+  const entries = Array.from(blobUrls.entries())
+  const toKeep = entries.slice(-MAX_BLOB_URLS + 1) // 保留最后 N-1 个
+  
+  // 释放旧的 Blob URL
+  for (const [url, blobUrl] of entries) {
+    if (url !== currentUrl && !toKeep.some(([u]) => u === url)) {
+      URL.revokeObjectURL(blobUrl)
+    } else if (url !== currentUrl) {
+      newBlobUrls.set(url, blobUrl)
+    }
+  }
+  
+  imageBlobUrls.value = newBlobUrls
+}
+
 // 从洗牌队列中取出下一张图片（预加载后再切换）
 async function displayNextImage() {
   // 如果队列为空，重新洗牌
@@ -366,8 +427,11 @@ async function displayNextImage() {
     reshuffleQueue()
   }
   
-  // 从队列中取出第一张图片
-  const nextImageUrl = shuffledQueue.value.shift()
+  // 从队列中取出第一张图片 - shallowRef 需要重新赋值
+  const queue = [...shuffledQueue.value]
+  const nextImageUrl = queue.shift()
+  shuffledQueue.value = queue
+  
   if (!nextImageUrl) {return}
   
   try {
@@ -379,7 +443,10 @@ async function displayNextImage() {
       const blob = await imageDB.getImageByUrl(nextImageUrl)
       if (blob) {
         blobUrl = URL.createObjectURL(blob)
-        imageBlobUrls.value.set(nextImageUrl, blobUrl)
+        // shallowRef 需要重新赋值
+        const newBlobUrls = new Map(imageBlobUrls.value)
+        newBlobUrls.set(nextImageUrl, blobUrl)
+        imageBlobUrls.value = newBlobUrls
       }
     }
     
@@ -392,6 +459,9 @@ async function displayNextImage() {
       // 图片加载完成，更新 key 触发 motion-v 动画
       randomImageUrl.value = nextImageUrl
       currentBgKey.value++
+      
+      // 清理过多的 Blob URL 以释放内存
+      cleanupBlobUrls(nextImageUrl)
     }
     preloadImg.onerror = () => {
       // 加载失败，尝试下一张
@@ -445,6 +515,8 @@ function stopAllIntervals() {
 }
 
 onMounted(async () => {
+  // === 关键任务：立即执行 ===
+  
   // 初始化 UI Store（恢复持久化状态）
   uiStore.init()
 
@@ -452,26 +524,32 @@ onMounted(async () => {
   const systemTheme = getSystemTheme()
   applyTheme(systemTheme)
   
-  // 应用自定义 CSS
-  if (uiStore.customCSS) {
-    applyCustomCSS(uiStore.customCSS)
-  }
-  
-  // 监听系统主题变化
-  systemThemeCleanup = watchSystemTheme((theme) => {
-    applyTheme(theme)
-  })
-
-  // 监听 SW 更新事件
-  window.addEventListener('sw-update-available', (event) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const customEvent = event as any
-    swRegistration = customEvent.detail?.registration || null
-    uiStore.setShowUpdateToast(true)
-  })
-  
   // 恢复保存的搜索状态
   searchStore.restoreState()
+  
+  // === 非关键任务：空闲时执行 ===
+  
+  scheduleIdleTask(() => {
+    // 应用自定义 CSS
+    if (uiStore.customCSS) {
+      applyCustomCSS(uiStore.customCSS)
+    }
+    
+    // 监听系统主题变化
+    systemThemeCleanup = watchSystemTheme((theme) => {
+      applyTheme(theme)
+    })
+
+    // 监听 SW 更新事件
+    window.addEventListener('sw-update-available', (event) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const customEvent = event as any
+      swRegistration = customEvent.detail?.registration || null
+      uiStore.setShowUpdateToast(true)
+    })
+  }, { timeout: 2000 })
+  
+  // === 背景图片初始化：稍后执行 ===
   
   // 初始化 IndexedDB
   await imageDB.init()

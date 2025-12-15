@@ -124,7 +124,7 @@ export const useSearchStore = defineStore('search', () => {
   })
   const totalResults = computed(() => 
     Array.from(platformResults.value.values())
-      .reduce((sum, platform) => sum + platform.items.length, 0)
+      .reduce((sum, platform) => sum + platform.items.length, 0),
   )
 
   // 方法

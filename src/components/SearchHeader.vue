@@ -42,100 +42,144 @@
         class="search-form w-full max-w-2xl px-2 sm:px-0 animate-fade-in-up"
         @submit.prevent="triggerSearch"
       >
-        <div class="flex flex-col gap-4">
-          <!-- Search Input with Button Inside - 使用 Tailwind -->
-          <div class="relative">
-            <!-- 搜索图标 -->
-            <Search
-              :size="20"
-              class="absolute left-4 top-1/2 -translate-y-1/2 text-theme-primary/60 dark:text-theme-accent/70 pointer-events-none z-10"
+        <div class="flex flex-col gap-5">
+          <!-- Search Input Container - Google 风格 -->
+          <div 
+            class="search-input-wrapper group relative"
+            :class="{ 'is-searching': searchStore.isSearching }"
+          >
+            <!-- 外层发光效果 -->
+            <div 
+              class="absolute -inset-0.5 rounded-[1.25rem] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100
+                     bg-gradient-to-r from-[#ff1493]/30 via-[#d946ef]/20 to-[#ff69b4]/30
+                     blur-lg transition-opacity duration-500"
+              :class="{ 'opacity-100': searchStore.isSearching }"
             />
             
-            <!-- 输入框 -->
-            <input
-              v-model="searchQuery"
-              type="search"
-              placeholder="游戏或补丁关键字词*"
-              required
-              class="w-full pl-12 pr-32 py-4 text-base rounded-2xl 
-                     text-gray-900 dark:text-slate-100 
-                     placeholder:text-gray-400 dark:placeholder:text-slate-400 
-                     glassmorphism-input
-                     shadow-lg shadow-theme-primary/10 dark:shadow-theme-accent/15
-                     hover:shadow-xl hover:shadow-theme-primary/15 dark:hover:shadow-theme-accent/20
-                     focus:shadow-2xl focus:shadow-theme-primary/20 dark:focus:shadow-theme-accent/25
-                     focus:scale-[1.01]
-                     transition-all duration-300 outline-none font-medium"
-              @keydown.enter.prevent="triggerSearch"
-            />
-            
-            <!-- 搜索按钮 - 内嵌在输入框右侧 -->
-            <button
-              type="submit"
-              :disabled="searchStore.searchDisabled"
-              class="absolute right-2 top-1/2 -translate-y-1/2 
-                     px-6 py-2.5 rounded-xl
-                     bg-gradient-pink text-white font-bold text-sm
-                     border border-white/30 dark:border-white/20
-                     shadow-md shadow-theme-primary/20
-                     hover:shadow-lg hover:shadow-theme-primary/30 hover:scale-105
-                     active:scale-95
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-all duration-200
-                     flex items-center gap-2 z-10 glass-gpu"
-              @click.prevent="triggerSearch"
-            >
-              <Search :size="16" />
-              <span v-if="!searchStore.isSearching && !isSearchLocked" class="hidden sm:inline">搜索</span>
-              <span v-else-if="isSearchLocked && !searchStore.isSearching" class="hidden sm:inline">稍候...</span>
-              <span v-else class="hidden sm:inline">{{ searchStore.searchProgress.current }}/{{ searchStore.searchProgress.total }}</span>
-            </button>
+            <!-- 输入框容器 -->
+            <div class="search-box relative flex items-center rounded-2xl overflow-hidden">
+              <!-- 进度填充层 - 输入框本身就是进度条 -->
+              <div 
+                v-if="searchStore.isSearching"
+                class="search-progress-fill absolute inset-0 z-0 pointer-events-none
+                       bg-gradient-to-r from-[#ff1493]/20 via-[#d946ef]/15 to-[#ff69b4]/20
+                       dark:from-[#ff1493]/25 dark:via-[#d946ef]/20 dark:to-[#ff69b4]/25"
+                :style="{ 
+                  clipPath: `inset(0 ${100 - (searchStore.searchProgress.total > 0 ? (searchStore.searchProgress.current / searchStore.searchProgress.total) * 100 : 0)}% 0 0)`
+                }"
+              />
+              
+              <!-- 搜索图标 / 加载动画 -->
+              <div class="absolute left-4 sm:left-5 z-20 pointer-events-none">
+                <component
+                  :is="searchStore.isSearching ? Loader2 : Search"
+                  :size="22"
+                  :class="[
+                    searchStore.isSearching 
+                      ? 'text-[#ff1493] dark:text-[#ff69b4] animate-spin' 
+                      : 'text-[#ff1493]/50 dark:text-[#ff69b4]/60 group-hover:text-[#ff1493]/70 dark:group-hover:text-[#ff69b4]/80 group-focus-within:text-[#ff1493] dark:group-focus-within:text-[#ff69b4] group-focus-within:scale-110',
+                    'transition-all duration-300'
+                  ]"
+                />
+              </div>
+              
+              <!-- 输入框 -->
+              <input
+                v-model="searchQuery"
+                type="search"
+                :placeholder="searchMode === 'game' ? '搜索游戏...' : '搜索补丁...'"
+                :disabled="searchStore.isSearching"
+                required
+                class="search-input relative z-10 w-full pl-12 sm:pl-14 pr-14 sm:pr-20 py-4 sm:py-5 
+                       text-base sm:text-lg rounded-2xl 
+                       text-gray-800 dark:text-slate-100 
+                       placeholder:text-gray-400/80 dark:placeholder:text-slate-400/70
+                       glassmorphism-input
+                       transition-all duration-300 outline-none font-medium
+                       tracking-wide
+                       disabled:cursor-not-allowed"
+                :class="{ 'bg-transparent!': searchStore.isSearching }"
+                @keydown.enter.prevent="triggerSearch"
+              />
+              
+              <!-- 右侧：回车提示 / 进度指示 -->
+              <div class="absolute right-3 sm:right-4 z-20 flex items-center">
+                <!-- 搜索时显示进度 -->
+                <span 
+                  v-if="searchStore.isSearching"
+                  class="text-sm font-bold text-[#ff1493] dark:text-[#ff69b4] tabular-nums"
+                >
+                  {{ searchStore.searchProgress.current }}/{{ searchStore.searchProgress.total }}
+                </span>
+                
+                <!-- 非搜索时显示回车提示 -->
+                <kbd 
+                  v-else
+                  class="enter-hint hidden sm:inline-flex items-center gap-1.5 
+                         px-2.5 py-1.5 rounded-lg text-xs font-medium
+                         bg-gray-100/80 dark:bg-slate-700/60
+                         text-gray-500 dark:text-slate-400
+                         border border-gray-200/50 dark:border-slate-600/50
+                         group-focus-within:bg-[#ff1493]/10 group-focus-within:text-[#ff1493]
+                         dark:group-focus-within:bg-[#ff69b4]/15 dark:group-focus-within:text-[#ff69b4]
+                         group-focus-within:border-[#ff1493]/30 dark:group-focus-within:border-[#ff69b4]/30
+                         transition-all duration-200"
+                >
+                  <CornerDownLeft :size="14" />
+                  <span>Enter</span>
+                </kbd>
+              </div>
+            </div>
           </div>
 
-          <!-- Search Mode Selector - 使用 Tailwind 胶囊开关 -->
-          <div class="flex justify-center items-center gap-3">
-            <div
-              class="relative flex p-1.5 rounded-full glassmorphism-mode-switch"
-            >
+          <!-- Search Mode Selector - 现代胶囊切换器 -->
+          <div class="flex justify-center items-center">
+            <div class="mode-switch relative flex p-1 rounded-2xl glassmorphism-mode-switch">
               <!-- 滑动背景指示器 -->
               <div
-                class="absolute top-1.5 bottom-1.5 rounded-full 
-                       bg-gradient-pink
-                       shadow-md shadow-theme-primary/30
-                       transition-all duration-300 ease-out"
+                class="mode-indicator absolute top-1 bottom-1 rounded-xl 
+                       bg-gradient-to-r from-[#ff1493] to-[#d946ef]
+                       shadow-lg shadow-[#ff1493]/30
+                       transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                 :style="{
-                  left: searchMode === 'game' ? '6px' : 'calc(50% + 2px)',
-                  width: 'calc(50% - 8px)'
+                  left: searchMode === 'game' ? '4px' : 'calc(50% + 0px)',
+                  width: 'calc(50% - 4px)'
                 }"
               />
               
               <!-- 游戏按钮 -->
               <button
                 type="button"
-                class="relative z-10 px-6 py-2 rounded-full font-semibold
+                class="mode-btn relative z-10 px-5 sm:px-7 py-2.5 rounded-xl font-semibold
                        transition-all duration-300 
-                       flex items-center gap-2 text-sm whitespace-nowrap"
+                       flex items-center gap-2.5 text-sm whitespace-nowrap"
                 :class="searchMode === 'game' 
-                  ? 'text-white drop-shadow-md' 
-                  : 'text-gray-700 dark:text-slate-300 hover:text-theme-primary dark:hover:text-theme-accent'"
+                  ? 'text-white' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4]'"
                 @click="setSearchMode('game')"
               >
-                <Gamepad2 :size="18" />
+                <Gamepad2 
+                  :size="18" 
+                  :class="searchMode === 'game' ? 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]' : ''"
+                />
                 <span>游戏</span>
               </button>
               
               <!-- 补丁按钮 -->
               <button
                 type="button"
-                class="relative z-10 px-6 py-2 rounded-full font-semibold
+                class="mode-btn relative z-10 px-5 sm:px-7 py-2.5 rounded-xl font-semibold
                        transition-all duration-300 
-                       flex items-center gap-2 text-sm whitespace-nowrap"
+                       flex items-center gap-2.5 text-sm whitespace-nowrap"
                 :class="searchMode === 'patch' 
-                  ? 'text-white drop-shadow-md' 
-                  : 'text-gray-700 dark:text-slate-300 hover:text-theme-primary dark:hover:text-theme-accent'"
+                  ? 'text-white' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4]'"
                 @click="setSearchMode('patch')"
               >
-                <Wrench :size="18" />
+                <Wrench 
+                  :size="18" 
+                  :class="searchMode === 'patch' ? 'drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]' : ''"
+                />
                 <span>补丁</span>
               </button>
             </div>
@@ -451,6 +495,8 @@ import {
   WifiOff,
   Clock,
   Server,
+  Loader2,
+  CornerDownLeft,
 } from 'lucide-vue-next'
 import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from '@/utils/urlParams'
 import { saveSearchHistory } from '@/utils/persistence'
@@ -977,12 +1023,14 @@ defineExpose({
   padding: 0.5rem 0.75rem;
   background: rgba(255, 20, 147, 0.05);
   border-radius: 0.75rem;
-  transition: all 0.2s ease;
+  /* GPU 加速 */
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .shortcut-item:hover {
   background: rgba(255, 20, 147, 0.1);
-  transform: translateY(-1px);
+  transform: translate3d(0, -1px, 0);
 }
 
 .dark .shortcut-item {
@@ -1063,5 +1111,180 @@ defineExpose({
 @keyframes pulseSlow {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
+}
+
+/* ============================================
+   搜索输入框增强样式
+   ============================================ */
+
+/* 搜索输入框 - 隐藏默认的清除按钮和搜索图标 */
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-decoration,
+.search-input::-webkit-search-results-button,
+.search-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* 搜索框容器 */
+.search-box {
+  position: relative;
+}
+
+/* 进度填充层 - 输入框即进度条 */
+.search-progress-fill {
+  transition: clip-path 0.3s ease-out;
+}
+
+/* 搜索中状态 - 输入框整体效果 */
+.search-input-wrapper.is-searching .search-box {
+  box-shadow: 
+    0 0 0 2px rgba(255, 20, 147, 0.4),
+    0 0 25px rgba(255, 20, 147, 0.2),
+    0 0 50px rgba(255, 20, 147, 0.1);
+}
+
+.dark .search-input-wrapper.is-searching .search-box {
+  box-shadow: 
+    0 0 0 2px rgba(255, 105, 180, 0.5),
+    0 0 25px rgba(255, 105, 180, 0.25),
+    0 0 50px rgba(255, 105, 180, 0.15);
+}
+
+/* 搜索中输入框透明背景 */
+.search-input-wrapper.is-searching .glassmorphism-input {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* 搜索框基础背景 - 搜索时显示 */
+.search-input-wrapper.is-searching .search-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 228, 242, 0.75) 100%
+  );
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  z-index: -1;
+}
+
+.dark .search-input-wrapper.is-searching .search-box::before {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.9) 0%,
+    rgba(51, 65, 85, 0.85) 100%
+  );
+}
+
+/* 模式切换指示器动画 */
+.mode-indicator {
+  will-change: left, width;
+}
+
+/* 模式按钮点击反馈 */
+.mode-btn:active {
+  transform: scale(0.97);
+}
+
+/* 输入框聚焦时的边框动画 */
+.search-input-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 20, 147, 0.4) 25%,
+    rgba(217, 70, 239, 0.4) 50%,
+    rgba(255, 105, 180, 0.4) 75%,
+    transparent 100%
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.search-input-wrapper:focus-within::after {
+  opacity: 1;
+  animation: borderRotate 3s linear infinite;
+}
+
+@keyframes borderRotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 模式切换按钮 hover 效果 */
+.mode-btn {
+  position: relative;
+}
+
+.mode-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, rgba(255, 20, 147, 0.1), rgba(217, 70, 239, 0.05));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.mode-btn:not(.active):hover::after {
+  opacity: 1;
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  .search-input-wrapper {
+    /* 确保触摸目标足够大 */
+    min-height: 56px;
+  }
+  
+  .mode-switch {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .mode-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* 减少动效模式 */
+@media (prefers-reduced-motion: reduce) {
+  .search-input-wrapper::after,
+  .search-btn::before {
+    animation: none;
+    transition: none;
+  }
+  
+  .mode-indicator {
+    transition-duration: 0.1s;
+  }
 }
 </style>

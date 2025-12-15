@@ -283,7 +283,14 @@ onUnmounted(() => {
     0 3px 10px rgba(255, 105, 180, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 性能优化：仅过渡 transform 和 opacity（GPU 加速） */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s ease-out,
+              border-color 0.3s ease-out;
+  
+  /* 强制 GPU 层 */
+  transform: translate3d(0, 0, 0);
+  contain: layout paint;
 }
 
 @media (min-width: 640px) {
@@ -314,12 +321,13 @@ onUnmounted(() => {
     0 6px 20px rgba(255, 105, 180, 0.35),
     0 0 40px rgba(255, 20, 147, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.7) inset;
-  transform: translateY(-4px) scale(1.08) rotate(5deg);
+  /* 使用 translate3d 保持 GPU 层 */
+  transform: translate3d(0, -4px, 0) scale(1.08) rotate(5deg);
   border-color: rgba(255, 20, 147, 0.5);
 }
 
 .fab-button:active {
-  transform: translateY(-2px) scale(1.02);
+  transform: translate3d(0, -2px, 0) scale(1.02);
   box-shadow: 
     0 6px 20px rgba(255, 20, 147, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.4) inset;
@@ -413,10 +421,14 @@ onUnmounted(() => {
     rgba(255, 255, 255, 0.95) 0%,
     rgba(248, 250, 252, 0.98) 100%
   );
-  backdrop-filter: blur(40px) saturate(1.5);
-  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  /* 降低 blur 值以提升性能 */
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.5);
   overflow: hidden;
+  /* 渲染隔离 */
+  contain: layout paint;
+  isolation: isolate;
 }
 
 /* 站点导航面板 - 右下角弹出 (暗色模式) */
@@ -440,19 +452,22 @@ onUnmounted(() => {
   border-bottom: 1px solid rgba(255, 105, 180, 0.15);
 }
 
-/* 导航项 */
+/* 导航项 - GPU 加速动画 */
 .nav-item {
   background: transparent;
   animation: navItemSlideIn 0.3s ease-out both;
+  /* 强制 GPU 层 */
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.2s ease-out, background 0.2s ease-out;
 }
 
 .nav-item:hover {
   background: linear-gradient(135deg, rgba(255, 20, 147, 0.08), rgba(217, 70, 239, 0.05));
-  transform: translateX(4px);
+  transform: translate3d(4px, 0, 0);
 }
 
 .nav-item:active {
-  transform: translateX(2px) scale(0.98);
+  transform: translate3d(2px, 0, 0) scale(0.98);
 }
 
 .dark .nav-item:hover {
@@ -462,11 +477,11 @@ onUnmounted(() => {
 @keyframes navItemSlideIn {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translate3d(-10px, 0, 0);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
