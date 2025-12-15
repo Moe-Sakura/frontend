@@ -9,7 +9,7 @@
     <atom:link href="https://searchgal.homes/feed.xml" rel="self" type="application/rss+xml" />
     <generator>SearchGal Frontend</generator>
     <image>
-      <url>https://searchgal.homes/favicon.svg</url>
+      <url>https://searchgal.homes/logo.svg</url>
       <title>SearchGal</title>
       <link>https://searchgal.homes</link>
     </image>
