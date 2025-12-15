@@ -3,6 +3,12 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import { piniaLogger, piniaPerformance, piniaErrorHandler } from './stores/plugins'
 
+// Noto Sans SC 字体（本地安装）
+import '@fontsource/noto-sans-sc/300.css'
+import '@fontsource/noto-sans-sc/400.css'
+import '@fontsource/noto-sans-sc/500.css'
+import '@fontsource/noto-sans-sc/700.css'
+
 // 全局基础样式（Tailwind CSS @layer base）
 import './styles/base.css'
 
