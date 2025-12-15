@@ -49,7 +49,6 @@
     saturate(var(--glass-saturate)) 
     brightness(var(--glass-brightness));
   border: 1px solid var(--glass-border-light);
-  will-change: backdrop-filter;
 }
 
 .dark .glass {
@@ -61,67 +60,108 @@
 .glassmorphism-input {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.75) 0%,
-    rgba(var(--glass-pink-pale), 0.55) 100%
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 240, 248, 0.75) 50%,
+    rgba(255, 228, 242, 0.65) 100%
   );
   backdrop-filter: 
-    blur(var(--glass-blur)) 
-    saturate(var(--glass-saturate)) 
-    brightness(var(--glass-brightness));
+    blur(16px) 
+    saturate(200%) 
+    brightness(1.08);
   -webkit-backdrop-filter: 
-    blur(var(--glass-blur)) 
-    saturate(var(--glass-saturate)) 
-    brightness(var(--glass-brightness));
-  border: 1.5px solid var(--glass-border-light);
+    blur(16px) 
+    saturate(200%) 
+    brightness(1.08);
+  border: 2px solid rgba(var(--glass-pink), 0.15);
   box-shadow: 
-    0 4px 16px rgba(var(--glass-pink), 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  transition: all 0.25s ease-out;
-  will-change: transform, box-shadow;
+    0 4px 24px rgba(var(--glass-pink), 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    inset 0 2px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(var(--glass-pink), 0.05);
+  transition: 
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+    box-shadow 0.3s ease-out, 
+    border-color 0.3s ease-out,
+    background 0.3s ease-out;
 }
 
 .glassmorphism-input:hover {
-  border-color: var(--glass-border-light-hover);
+  border-color: rgba(var(--glass-pink), 0.25);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 240, 248, 0.82) 50%,
+    rgba(255, 228, 242, 0.72) 100%
+  );
   box-shadow: 
-    0 6px 20px rgba(var(--glass-pink), 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 8px 32px rgba(var(--glass-pink), 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    inset 0 2px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(var(--glass-pink), 0.08);
 }
 
 .glassmorphism-input:focus {
-  border-color: rgba(var(--glass-pink), 0.35);
+  border-color: rgba(var(--glass-pink), 0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 245, 250, 0.88) 50%,
+    rgba(255, 235, 245, 0.8) 100%
+  );
   box-shadow: 
-    0 8px 24px rgba(var(--glass-pink), 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 0 0 3px rgba(var(--glass-pink), 0.08);
-  transform: scale(1.005);
+    0 12px 40px rgba(var(--glass-pink), 0.18),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    0 0 0 4px rgba(var(--glass-pink), 0.1),
+    inset 0 2px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(var(--glass-pink), 0.1);
+  transform: scale(1.01);
 }
 
 .dark .glassmorphism-input {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.82) 0%,
-    rgba(51, 65, 85, 0.72) 100%
+    rgba(30, 41, 59, 0.88) 0%,
+    rgba(45, 55, 75, 0.78) 50%,
+    rgba(55, 65, 85, 0.7) 100%
   );
-  border-color: var(--glass-border-dark);
+  border: 2px solid rgba(var(--glass-pink-light), 0.2);
   box-shadow: 
-    0 4px 16px rgba(var(--glass-pink-light), 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 4px 24px rgba(var(--glass-pink-light), 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(var(--glass-pink-light), 0.1);
 }
 
 .dark .glassmorphism-input:hover {
-  border-color: var(--glass-border-dark-hover);
+  border-color: rgba(var(--glass-pink-light), 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(35, 46, 64, 0.92) 0%,
+    rgba(50, 60, 80, 0.82) 50%,
+    rgba(60, 70, 90, 0.75) 100%
+  );
   box-shadow: 
-    0 6px 20px rgba(var(--glass-pink-light), 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 8px 36px rgba(var(--glass-pink-light), 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(var(--glass-pink-light), 0.12);
 }
 
 .dark .glassmorphism-input:focus {
-  border-color: rgba(var(--glass-pink-light), 0.45);
+  border-color: rgba(var(--glass-pink-light), 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(40, 51, 69, 0.95) 0%,
+    rgba(55, 65, 85, 0.88) 50%,
+    rgba(65, 75, 95, 0.8) 100%
+  );
   box-shadow: 
-    0 8px 24px rgba(var(--glass-pink-light), 0.25),
+    0 12px 48px rgba(var(--glass-pink-light), 0.28),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 4px rgba(var(--glass-pink-light), 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 0 0 3px rgba(var(--glass-pink-light), 0.12);
-  transform: scale(1.005);
+    inset 0 -1px 0 rgba(var(--glass-pink-light), 0.15);
+  transform: scale(1.01);
 }
 
 /* ========== 搜索按钮玻璃效果 ========== */
@@ -141,8 +181,7 @@
   box-shadow: 
     0 4px 16px rgba(var(--glass-pink), 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transition: all 0.2s ease-out;
-  will-change: transform, box-shadow;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 .glassmorphism-button:hover:not(:disabled) {
@@ -209,8 +248,7 @@
   box-shadow: 
     0 2px 8px rgba(var(--glass-pink), 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transition: all 0.2s ease-out;
-  will-change: transform;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 .glassmorphism-search-button:hover:not(:disabled) {
@@ -254,46 +292,52 @@
 .glassmorphism-mode-switch {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.65) 0%,
-    rgba(var(--glass-pink-pale), 0.5) 100%
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(255, 245, 250, 0.72) 50%,
+    rgba(255, 235, 245, 0.65) 100%
   );
   backdrop-filter: 
-    blur(var(--glass-blur)) 
-    saturate(var(--glass-saturate));
+    blur(14px) 
+    saturate(180%);
   -webkit-backdrop-filter: 
-    blur(var(--glass-blur)) 
-    saturate(var(--glass-saturate));
-  border: 1.5px solid var(--glass-border-light);
+    blur(14px) 
+    saturate(180%);
+  border: 2px solid rgba(var(--glass-pink), 0.12);
   box-shadow: 
-    0 4px 16px rgba(var(--glass-pink), 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  transition: all 0.25s ease-out;
+    0 4px 20px rgba(var(--glass-pink), 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease-out;
 }
 
 .glassmorphism-mode-switch:hover {
-  border-color: var(--glass-border-light-hover);
+  border-color: rgba(var(--glass-pink), 0.2);
   box-shadow: 
-    0 6px 20px rgba(var(--glass-pink), 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    0 6px 24px rgba(var(--glass-pink), 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 .dark .glassmorphism-mode-switch {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.78) 0%,
-    rgba(51, 65, 85, 0.68) 100%
+    rgba(30, 41, 59, 0.85) 0%,
+    rgba(45, 55, 75, 0.75) 50%,
+    rgba(55, 65, 85, 0.68) 100%
   );
-  border-color: var(--glass-border-dark);
+  border: 2px solid rgba(var(--glass-pink-light), 0.18);
   box-shadow: 
-    0 4px 16px rgba(var(--glass-pink-light), 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 4px 20px rgba(var(--glass-pink-light), 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .dark .glassmorphism-mode-switch:hover {
-  border-color: var(--glass-border-dark-hover);
+  border-color: rgba(var(--glass-pink-light), 0.28);
   box-shadow: 
-    0 6px 20px rgba(var(--glass-pink-light), 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 6px 28px rgba(var(--glass-pink-light), 0.22),
+    0 2px 4px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* ========== 模态框液态玻璃效果 ========== */
@@ -316,8 +360,7 @@
     0 8px 32px rgba(var(--glass-pink), 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   border-radius: 24px;
-  transition: all 0.3s ease-out;
-  will-change: transform, box-shadow;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
 }
 
 .glassmorphism-modal:hover {
@@ -366,8 +409,7 @@
     0 8px 32px rgba(var(--glass-pink), 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
   border-radius: 20px;
-  transition: all 0.3s ease-out;
-  will-change: transform;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
 }
 
 .glassmorphism-panel:hover {
@@ -416,8 +458,7 @@
     0 2px 8px rgba(var(--glass-pink), 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   border-radius: 12px;
-  transition: all 0.2s ease-out;
-  will-change: transform;
+  transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 .glassmorphism-toolbar-button:hover {
@@ -490,8 +531,7 @@
     0 4px 16px rgba(var(--glass-pink), 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   border-radius: 16px;
-  transition: all 0.25s ease-out;
-  will-change: transform;
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease-out;
 }
 
 .glassmorphism-card:hover {
@@ -539,8 +579,7 @@
   box-shadow: 
     0 4px 16px rgba(var(--glass-pink), 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transition: all 0.2s ease-out;
-  will-change: transform, box-shadow;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 .glassmorphism-fab:hover {
@@ -631,4 +670,52 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
+}
+
+/* 低电量模式 / 省电模式降级 */
+@media (prefers-reduced-data: reduce) {
+  .glass,
+  .glassmorphism-input,
+  .glassmorphism-button,
+  .glassmorphism-modal,
+  .glassmorphism-panel,
+  .glassmorphism-card,
+  .glassmorphism-fab {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+/* ========== 性能提示：will-change 自动管理 ========== */
+/* 仅在 hover 时激活 will-change，避免长期占用 GPU 内存 */
+.glassmorphism-card:hover,
+.glassmorphism-panel:hover,
+.glassmorphism-modal:hover,
+.glassmorphism-fab:hover,
+.glassmorphism-button:hover {
+  will-change: transform;
+}
+
+/* 触摸设备的优化 */
+@media (hover: none) {
+  .glassmorphism-card,
+  .glassmorphism-panel,
+  .glassmorphism-modal,
+  .glassmorphism-fab,
+  .glassmorphism-button {
+    /* 触摸设备禁用 hover 状态的 will-change 以节省资源 */
+    will-change: auto;
+  }
+}
+
+/* 渲染隔离 - 防止 backdrop-filter 影响其他层 */
+.glass,
+.glassmorphism-input,
+.glassmorphism-button,
+.glassmorphism-modal,
+.glassmorphism-panel,
+.glassmorphism-card,
+.glassmorphism-fab {
+  isolation: isolate;
+  contain: paint;
 }

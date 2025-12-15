@@ -1,11 +1,13 @@
 <template>
   <div v-if="searchStore.hasResults" class="w-full px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 animate-fade-in">
     <div id="results" class="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+      <!-- 使用 v-memo 优化平台卡片渲染，仅在关键数据变化时重新渲染 -->
       <div
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
+        v-memo="[platformName, platformData.items.length, platformData.displayedCount, platformData.error]"
         :data-platform="platformName"
-        class="result-card glassmorphism-card rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 animate-fade-in-up border-2"
+        class="result-card glassmorphism-card rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 animate-fade-in-up border-2 content-auto"
         :class="getBorderClass(platformData.color)"
       >
         <div class="p-4 sm:p-5 md:p-6">
@@ -74,18 +76,18 @@
             <span class="text-red-700 dark:text-red-300 font-medium">{{ platformData.error }}</span>
           </div>
           
-          <!-- 搜索结果列表 -->
-          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list space-y-2">
+          <!-- 搜索结果列表 - 使用 contain 优化布局性能 -->
+          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list space-y-2 contain-layout">
             <div
               v-for="(result, index) in getDisplayedResults(platformData)"
-              :key="index"
+              :key="result.url || index"
               class="result-item group p-3 sm:p-4 rounded-xl 
                      bg-gradient-to-r from-white/70 to-white/50 dark:from-slate-700/70 dark:to-slate-700/50
                      hover:from-white/90 hover:to-white/70 dark:hover:from-slate-700/90 dark:hover:to-slate-700/70
                      border border-gray-200/50 dark:border-slate-600/50
                      hover:border-theme-primary/40 dark:hover:border-theme-accent/40
                      hover:shadow-lg hover:shadow-theme-primary/10 dark:hover:shadow-theme-accent/15
-                     transition-all duration-300"
+                     transition-colors duration-200"
             >
               <!-- 标题行 -->
               <div class="flex items-start gap-2 sm:gap-3">
@@ -344,19 +346,31 @@ function getTagLabel(tag: string) {
 </script>
 
 <style scoped>
+/* 平台卡片 - 延迟渲染优化 */
 .result-card {
   animation-delay: calc(var(--index, 0) * 0.1s);
+  /* content-visibility 自动延迟屏幕外内容渲染 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
+/* 结果项 - 仅使用 transform 动画（GPU 加速） */
 .result-item {
-  transition: all 0.2s ease;
+  /* 使用 translate3d 强制 GPU 层 */
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.2s ease-out, background 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 .result-item:hover {
-  transform: translateX(4px);
+  transform: translate3d(4px, 0, 0);
 }
 
-/* Tailwind 动画 */
+/* 结果列表布局隔离 */
+.results-list {
+  contain: layout style;
+}
+
+/* Tailwind 动画 - 优化为仅使用 transform 和 opacity */
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
 }
@@ -381,11 +395,11 @@ function getTagLabel(tag: string) {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translate3d(0, 20px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 </style>

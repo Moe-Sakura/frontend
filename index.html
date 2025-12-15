@@ -100,6 +100,10 @@
     <link rel="dns-prefetch" href="https://artalk.saop.cc" />
     <link rel="dns-prefetch" href="https://status.searchgal.homes" />
 
+    <!-- 性能优化 Meta 标签 -->
+    <meta http-equiv="x-dns-prefetch-control" content="on" />
+    <meta name="color-scheme" content="light dark" />
+
   <style>
     /* ============================================
        第三方库样式覆盖
@@ -196,7 +200,7 @@
       src="https://registry.npmmirror.com/js-asuna/latest/files/js/bsz.pure.mini.js"
     ></script>
 </head>
-  <body>
+  <body class="touch-optimize">
     <!-- 禁止无 JavaScript 用户访问 -->
     <noscript>
       <style>

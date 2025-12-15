@@ -4,6 +4,18 @@
  */
 
 @layer base {
+  /* ============================================
+     性能优化 - 全局渲染提示
+     ============================================ */
+  
+  /* 启用硬件加速的根元素 */
+  html {
+    /* 文本渲染优化 */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   /* body 基础样式 */
   body {
     /* 字体栈 - Google Noto Sans SC + Apple System 备用 */
@@ -71,6 +83,152 @@
   .lozad-loaded,
   .lozad[data-loaded="true"] {
     opacity: 1;
+  }
+
+  /* ============================================
+     性能优化工具类
+     ============================================ */
+
+  /* GPU 加速层 - 用于需要频繁重绘的元素 */
+  .gpu-layer {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* 隔离渲染层 - 防止布局抖动影响其他元素 */
+  .contain-layout {
+    contain: layout;
+  }
+
+  .contain-paint {
+    contain: paint;
+  }
+
+  .contain-strict {
+    contain: strict;
+  }
+
+  .contain-content {
+    contain: content;
+  }
+
+  /* 内容可见性优化 - 延迟渲染屏幕外内容 */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+  }
+
+  /* 高性能动画 - 仅使用 transform 和 opacity */
+  .perf-animate {
+    will-change: transform, opacity;
+  }
+
+  /* 滚动性能优化 */
+  .scroll-contain {
+    overscroll-behavior: contain;
+  }
+
+  /* 触摸优化 */
+  .touch-optimize {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 减少重绘的过渡动画 */
+  .transition-gpu {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+
+  /* ============================================
+     响应式性能优化
+     ============================================ */
+
+  /* 减少动效偏好 - 尊重用户系统设置 */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* 低数据模式 - 减少动画复杂度 */
+  @media (prefers-reduced-data: reduce) {
+    .gpu-layer {
+      transform: none;
+      perspective: none;
+    }
+  }
+
+  /* ============================================
+     批量动画延迟 - 用于列表项交错动画
+     ============================================ */
+  
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+  .stagger-5 { animation-delay: 250ms; }
+
+  /* ============================================
+     渲染优化提示
+     ============================================ */
+
+  /* 仅在 hover 时激活 will-change（节省 GPU 内存） */
+  .will-change-hover:hover {
+    will-change: transform;
+  }
+
+  /* 固定元素渲染隔离 */
+  .fixed-layer {
+    position: fixed;
+    contain: layout paint;
+    isolation: isolate;
+  }
+
+  /* 图片渲染优化 */
+  .img-optimize {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+
+  /* 高质量图片渲染 */
+  .img-quality {
+    image-rendering: smooth;
+    image-rendering: high-quality;
+  }
+
+  /* ============================================
+     交互优化
+     ============================================ */
+
+  /* 防止双击缩放（移动端） */
+  .no-zoom {
+    touch-action: manipulation;
+  }
+
+  /* 硬件加速滚动 */
+  .scroll-smooth-gpu {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* 可拖拽区域优化 */
+  .draggable {
+    user-select: none;
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .draggable:active {
+    cursor: grabbing;
   }
 }
 

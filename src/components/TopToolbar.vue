@@ -200,14 +200,14 @@ async function saveBackgroundImage() {
   height: 40px;
   border-radius: 50%;
   
-  /* 液态玻璃效果 - 艳粉主题 */
+  /* 液态玻璃效果 - 艳粉主题（降低 blur 提升性能） */
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.85) 0%,
     rgba(255, 228, 242, 0.7) 100%
   );
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   
   /* 艳粉边框和阴影 */
   border: 1.5px solid rgba(255, 20, 147, 0.2);
@@ -221,8 +221,14 @@ async function saveBackgroundImage() {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
+  
+  /* 性能优化：GPU 加速 + 只过渡 transform 和 opacity */
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s ease-out,
+              border-color 0.3s ease-out;
+  contain: layout paint;
 }
 
 @media (min-width: 640px) {
@@ -246,8 +252,8 @@ async function saveBackgroundImage() {
     rgba(51, 65, 85, 0.85) 0%,
     rgba(30, 41, 59, 0.75) 100%
   );
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
   
   border: 1.5px solid rgba(255, 105, 180, 0.3);
   box-shadow: 
@@ -259,12 +265,8 @@ async function saveBackgroundImage() {
 }
 
 .toolbar-button:hover {
-  transform: scale(1.05) translateY(-2px);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 228, 242, 0.85) 100%
-  );
+  /* 使用 translate3d 保持 GPU 层 */
+  transform: translate3d(0, -2px, 0) scale(1.05);
   box-shadow: 
     0 12px 24px rgba(255, 20, 147, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.9) inset,
@@ -274,11 +276,6 @@ async function saveBackgroundImage() {
 }
 
 .dark .toolbar-button:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(51, 65, 85, 0.95) 0%,
-    rgba(30, 41, 59, 0.85) 100%
-  );
   box-shadow: 
     0 12px 24px rgba(255, 105, 180, 0.3),
     0 0 0 1px rgba(255, 105, 180, 0.2) inset,
@@ -288,7 +285,7 @@ async function saveBackgroundImage() {
 }
 
 .toolbar-button:active {
-  transform: scale(0.95);
+  transform: translate3d(0, 0, 0) scale(0.95);
 }
 
 /* GitHub 按钮特殊样式 */
