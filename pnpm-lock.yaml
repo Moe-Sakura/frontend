@@ -11,6 +11,9 @@ importers:
       '@fancyapps/ui':
         specifier: ^6.1.7
         version: 6.1.7
+      '@fontsource/noto-sans-sc':
+        specifier: ^5.2.8
+        version: 5.2.8
       artalk:
         specifier: ^2.9.1
         version: 2.9.1(marked@14.1.4)
@@ -294,6 +297,9 @@ packages:
 
   '@fancyapps/ui@6.1.7':
     resolution: {integrity: sha512-KHOvuy90JBFDgbNa2V1N9Jg7PE/lSQMXN9VbhR+WQSIxIEi4PV7kndeao7ezir5WeJ8OZRyDelNKJVLicXfBIg==}
+
+  '@fontsource/noto-sans-sc@5.2.8':
+    resolution: {integrity: sha512-8T8HxIS3uAMCfaQawKRH/6yYZ1oRnJZB/CrGwfxGgJa+zAOBgx2lqZMiTY/WbQpLGlPRqX4zHXJYI09CI2q6tA==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -1536,6 +1542,8 @@ snapshots:
       levn: 0.4.1
 
   '@fancyapps/ui@6.1.7': {}
+
+  '@fontsource/noto-sans-sc@5.2.8': {}
 
   '@humanfs/core@0.19.1': {}
 

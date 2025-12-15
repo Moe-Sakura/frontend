@@ -6,11 +6,14 @@
 @layer base {
   /* body 基础样式 */
   body {
-    /* 字体栈 - 优先使用系统字体，支持中文 */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-      "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB",
-      "Noto Sans CJK SC", "Source Han Sans SC", "WenQuanYi Micro Hei",
-      "Roboto", Helvetica, Arial, sans-serif;
+    /* 字体栈 - Google Noto Sans SC + Apple System 备用 */
+    font-family: 
+      "Noto Sans SC",
+      -apple-system, BlinkMacSystemFont,
+      "PingFang SC", "Hiragino Sans GB",
+      "Microsoft YaHei", "微软雅黑",
+      "Segoe UI", Roboto, Helvetica, Arial,
+      sans-serif;
     
     /* 行高 */
     line-height: 1.6;
@@ -42,6 +45,16 @@
   .dark body {
     background: transparent;
     color: rgb(226, 232, 240);
+  }
+
+  /* 代码字体 */
+  code, kbd, pre, samp, .font-mono {
+    font-family: 
+      Consolas, 
+      "SF Mono", "Monaco", 
+      "Andale Mono", "Ubuntu Mono",
+      "Noto Sans Mono",
+      monospace;
   }
 
   /* 图片懒加载过渡动画 */
