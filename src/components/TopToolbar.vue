@@ -199,22 +199,19 @@ async function saveBackgroundImage() {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  position: relative;
+  overflow: hidden;
   
-  /* 液态玻璃效果 - 艳粉主题（降低 blur 提升性能） */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 228, 242, 0.7) 100%
-  );
+  /* WWDC 2025 液态玻璃效果 */
+  background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-  
-  /* 艳粉边框和阴影 */
-  border: 1.5px solid rgba(255, 20, 147, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
-    0 8px 16px rgba(255, 20, 147, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset;
+    0 6px 12px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(255, 20, 147, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
   
   color: rgb(199, 21, 133);
   cursor: pointer;
@@ -223,12 +220,30 @@ async function saveBackgroundImage() {
   justify-content: center;
   user-select: none;
   
-  /* 性能优化：GPU 加速 + 只过渡 transform 和 opacity */
+  /* 性能优化 */
   transform: translate3d(0, 0, 0);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s ease-out,
-              border-color 0.3s ease-out;
-  contain: layout paint;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+}
+
+/* 液态玻璃高光 */
+.toolbar-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 40%,
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.toolbar-button:hover::before {
+  opacity: 1;
 }
 
 @media (min-width: 640px) {
@@ -247,41 +262,40 @@ async function saveBackgroundImage() {
 
 /* 暗色主题 */
 .dark .toolbar-button {
-  background: linear-gradient(
-    135deg,
-    rgba(51, 65, 85, 0.85) 0%,
-    rgba(30, 41, 59, 0.75) 100%
-  );
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  
-  border: 1.5px solid rgba(255, 105, 180, 0.3);
+  background: rgba(30, 30, 40, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 
-    0 8px 16px rgba(255, 105, 180, 0.2),
-    0 0 0 1px rgba(255, 105, 180, 0.1) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.1) inset;
-  
+    0 6px 12px rgba(0, 0, 0, 0.25),
+    0 0 20px rgba(255, 105, 180, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
   color: rgb(255, 179, 217);
 }
 
+.dark .toolbar-button::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    transparent 60%
+  );
+}
+
 .toolbar-button:hover {
-  /* 使用 translate3d 保持 GPU 层 */
-  transform: translate3d(0, -2px, 0) scale(1.05);
+  transform: translate3d(0, -3px, 0) scale(1.08);
   box-shadow: 
-    0 12px 24px rgba(255, 20, 147, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-    0 1px 0 0 rgba(255, 255, 255, 1) inset,
-    0 0 30px rgba(255, 105, 180, 0.2);
-  border-color: rgba(255, 20, 147, 0.35);
+    0 16px 40px rgba(255, 20, 147, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .dark .toolbar-button:hover {
   box-shadow: 
-    0 12px 24px rgba(255, 105, 180, 0.3),
-    0 0 0 1px rgba(255, 105, 180, 0.2) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
-    0 0 35px rgba(255, 20, 147, 0.25);
-  border-color: rgba(255, 105, 180, 0.45);
+    0 16px 40px rgba(255, 105, 180, 0.35),
+    0 8px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .toolbar-button:active {

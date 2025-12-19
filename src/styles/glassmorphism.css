@@ -719,3 +719,243 @@
   isolation: isolate;
   contain: paint;
 }
+
+/* ========================================
+   WWDC 2025 液态玻璃效果
+   Liquid Glass Effect
+   参考: https://github.com/lucasromerodb/liquid-glass-effect-macos
+   ======================================== */
+
+/* 液态玻璃容器 - 包装器 */
+.liquid-glass {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 
+    0 6px 6px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(255, 20, 147, 0.08);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+}
+
+/* 液态玻璃扭曲效果层 - 只扭曲透过来的背景，不扭曲内容 */
+.liquid-glass-effect {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  filter: url(#liquid-glass-lite);
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* 液态玻璃着色层 */
+.liquid-glass-tint {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.dark .liquid-glass-tint {
+  background: rgba(30, 30, 40, 0.35);
+}
+
+/* 液态玻璃高光层 - 内阴影 */
+.liquid-glass-shine {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  box-shadow: 
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.dark .liquid-glass-shine {
+  box-shadow: 
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.15),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* 液态玻璃内容层 - 在最上层，不受滤镜影响 */
+.liquid-glass-content {
+  position: relative;
+  z-index: 3;
+}
+
+/* 液态玻璃边框（可选） */
+.liquid-glass-border {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.dark .liquid-glass-border {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 液态玻璃内容层 */
+.liquid-glass-content {
+  position: relative;
+  z-index: 4;
+}
+
+/* 液态玻璃阴影 */
+.liquid-glass-shadow {
+  box-shadow: 
+    0 8px 32px rgba(255, 20, 147, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.dark .liquid-glass-shadow {
+  box-shadow: 
+    0 8px 32px rgba(255, 105, 180, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* 液态玻璃悬停效果 */
+.liquid-glass:hover .liquid-glass-shine {
+  opacity: 1;
+}
+
+.liquid-glass:hover .liquid-glass-border {
+  border-color: rgba(255, 20, 147, 0.3);
+}
+
+.dark .liquid-glass:hover .liquid-glass-border {
+  border-color: rgba(255, 105, 180, 0.3);
+}
+
+/* 液态玻璃按钮 */
+.liquid-glass-btn {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  padding: 12px 24px;
+  cursor: pointer;
+  box-shadow: 
+    0 6px 6px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(255, 20, 147, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+}
+
+/* 按钮扭曲背景层 */
+.liquid-glass-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  filter: url(#liquid-glass-lite);
+}
+
+/* 按钮着色和高光层 */
+.liquid-glass-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+/* 按钮内容在最上层 */
+.liquid-glass-btn > * {
+  position: relative;
+  z-index: 2;
+}
+
+.dark .liquid-glass-btn {
+  box-shadow: 
+    0 6px 6px rgba(0, 0, 0, 0.25),
+    0 0 20px rgba(255, 105, 180, 0.12);
+}
+
+.dark .liquid-glass-btn::after {
+  background: rgba(30, 30, 40, 0.35);
+  box-shadow: 
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.15),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+.liquid-glass-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 10px 10px rgba(0, 0, 0, 0.2),
+    0 0 30px rgba(255, 20, 147, 0.15);
+}
+
+.dark .liquid-glass-btn:hover {
+  box-shadow: 
+    0 10px 10px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(255, 105, 180, 0.2);
+}
+
+.liquid-glass-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 轻量版液态玻璃类 */
+.liquid-glass-lite-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 
+    0 6px 6px rgba(0, 0, 0, 0.12),
+    0 0 20px rgba(255, 20, 147, 0.06);
+}
+
+.liquid-glass-lite-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  filter: url(#liquid-glass-lite);
+}
+
+.liquid-glass-lite-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+.liquid-glass-lite-wrapper > * {
+  position: relative;
+  z-index: 2;
+}
+
+.dark .liquid-glass-lite-wrapper::after {
+  background: rgba(30, 30, 40, 0.35);
+  box-shadow: 
+    inset 2px 2px 1px 0 rgba(255, 255, 255, 0.15),
+    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.1);
+}

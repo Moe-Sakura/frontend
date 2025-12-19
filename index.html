@@ -331,6 +331,75 @@
       })();
     </script>
 
+    <!-- WWDC 2025 液态玻璃 SVG 滤镜 -->
+    <!-- 参考: https://github.com/lucasromerodb/liquid-glass-effect-macos -->
+    <svg style="display: none" aria-hidden="true">
+      <defs>
+        <!-- 液态玻璃扭曲滤镜 - 完整版 (用于大元素) -->
+        <filter 
+          id="liquid-glass" 
+          x="0%" y="0%" width="100%" height="100%" 
+          filterUnits="objectBoundingBox"
+        >
+          <feTurbulence 
+            type="fractalNoise" 
+            baseFrequency="0.01 0.01" 
+            numOctaves="1" 
+            seed="5" 
+            result="turbulence" 
+          />
+          <feComponentTransfer in="turbulence" result="mapped">
+            <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+            <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+            <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+          </feComponentTransfer>
+          <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+          <feSpecularLighting 
+            in="softMap" 
+            surfaceScale="5" 
+            specularConstant="1" 
+            specularExponent="100" 
+            lighting-color="white" 
+            result="specLight"
+          >
+            <fePointLight x="-200" y="-200" z="300" />
+          </feSpecularLighting>
+          <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
+          <!-- scale 值控制扭曲程度，20 是微妙的扭曲 -->
+          <feDisplacementMap in="SourceGraphic" in2="softMap" scale="20" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        <!-- 液态玻璃滤镜 - 轻量版 (用于按钮等小元素，更微妙的扭曲) -->
+        <filter 
+          id="liquid-glass-lite" 
+          x="0%" y="0%" width="100%" height="100%" 
+          filterUnits="objectBoundingBox"
+        >
+          <feTurbulence 
+            type="fractalNoise" 
+            baseFrequency="0.015 0.015" 
+            numOctaves="1" 
+            seed="3" 
+            result="turbulence" 
+          />
+          <feGaussianBlur in="turbulence" stdDeviation="2" result="softMap" />
+          <feSpecularLighting 
+            in="softMap" 
+            surfaceScale="3" 
+            specularConstant="0.8" 
+            specularExponent="80" 
+            lighting-color="white" 
+            result="specLight"
+          >
+            <fePointLight x="-100" y="-100" z="200" />
+          </feSpecularLighting>
+          <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
+          <!-- 更小的 scale 值，扭曲更微妙 -->
+          <feDisplacementMap in="SourceGraphic" in2="softMap" scale="8" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
 </body>

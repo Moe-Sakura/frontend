@@ -346,23 +346,69 @@ function getTagLabel(tag: string) {
 </script>
 
 <style scoped>
-/* 平台卡片 - 延迟渲染优化 */
+/* 平台卡片 - WWDC 2025 液态玻璃效果 */
 .result-card {
   animation-delay: calc(var(--index, 0) * 0.1s);
-  /* content-visibility 自动延迟屏幕外内容渲染 */
   content-visibility: auto;
   contain-intrinsic-size: auto 400px;
+  
+  /* WWDC 2025 液态玻璃效果 */
+  background: rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 0 20px rgba(255, 20, 147, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
 }
 
-/* 结果项 - 仅使用 transform 动画（GPU 加速） */
+/* 液态玻璃高光 */
+.result-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.result-card:hover::before {
+  opacity: 1;
+}
+
+/* 暗色模式 */
+.dark .result-card {
+  background: rgba(30, 30, 40, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(255, 105, 180, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 结果项 - 液态玻璃效果 */
 .result-item {
-  /* 使用 translate3d 强制 GPU 层 */
   transform: translate3d(0, 0, 0);
-  transition: transform 0.2s ease-out, background 0.2s ease-out, border-color 0.2s ease-out;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  position: relative;
 }
 
 .result-item:hover {
   transform: translate3d(4px, 0, 0);
+  box-shadow: 0 4px 16px rgba(255, 20, 147, 0.1);
+}
+
+.dark .result-item:hover {
+  box-shadow: 0 4px 16px rgba(255, 105, 180, 0.15);
 }
 
 /* 结果列表布局隔离 */
