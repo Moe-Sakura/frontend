@@ -132,18 +132,23 @@
             </div>
           </div>
 
-          <!-- Search Mode Selector - 现代胶囊切换器 -->
+          <!-- Search Mode Selector - WWDC 2025 液态玻璃 -->
           <div class="flex justify-center items-center">
-            <div class="mode-switch relative flex p-1 rounded-2xl glassmorphism-mode-switch">
+            <div class="mode-switch liquid-mode-switch relative flex p-1.5 rounded-2xl">
+              <!-- 液态玻璃高光 -->
+              <div class="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+                <div class="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-transparent" />
+              </div>
+              
               <!-- 滑动背景指示器 -->
               <div
-                class="mode-indicator absolute top-1 bottom-1 rounded-xl 
+                class="mode-indicator absolute top-1.5 bottom-1.5 rounded-xl 
                        bg-gradient-to-r from-[#ff1493] to-[#d946ef]
-                       shadow-lg shadow-[#ff1493]/30
+                       shadow-lg shadow-[#ff1493]/40
                        transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                 :style="{
-                  left: searchMode === 'game' ? '4px' : 'calc(50% + 0px)',
-                  width: 'calc(50% - 4px)'
+                  left: searchMode === 'game' ? '6px' : 'calc(50% + 0px)',
+                  width: 'calc(50% - 6px)'
                 }"
               />
               
@@ -1126,9 +1131,47 @@ defineExpose({
   appearance: none;
 }
 
-/* 搜索框容器 */
+/* 搜索框容器 - 液态玻璃效果 */
 .search-box {
   position: relative;
+}
+
+/* 搜索框液态玻璃高光 */
+.search-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.search-input-wrapper:hover .search-box::after,
+.search-input-wrapper:focus-within .search-box::after {
+  opacity: 1;
+}
+
+.dark .search-box::after {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.03) 30%,
+    transparent 50%
+  );
+  opacity: 0.4;
+}
+
+.dark .search-input-wrapper:hover .search-box::after,
+.dark .search-input-wrapper:focus-within .search-box::after {
+  opacity: 0.7;
 }
 
 /* 进度填充层 - 输入框即进度条 */
@@ -1235,6 +1278,27 @@ defineExpose({
   100% {
     background-position: 0% 50%;
   }
+}
+
+/* 液态玻璃模式切换器 */
+.liquid-mode-switch {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.12),
+    0 0 20px rgba(255, 20, 147, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+.dark .liquid-mode-switch {
+  background: rgba(30, 30, 40, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(255, 105, 180, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 /* 模式切换按钮 hover 效果 */

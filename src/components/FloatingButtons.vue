@@ -1,4 +1,5 @@
 <template>
+  <!-- 浮动按钮组 -->
   <div class="floating-buttons fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col gap-2 sm:gap-3 z-40">
     <!-- 回到顶部按钮 -->
     <button
@@ -56,8 +57,10 @@
     >
       <component :is="uiStore.isHistoryModalOpen ? X : History" :size="20" />
     </button>
-
-    <!-- 站点导航面板 - 右下角弹出 -->
+  </div>
+  
+  <!-- 站点导航面板 - 独立于按钮组，避免 transform 影响 fixed 定位 -->
+  <Teleport to="body">
     <Transition
       enter-active-class="transition-all duration-200 ease-out"
       enter-from-class="opacity-0 scale-90 translate-y-2"
@@ -131,7 +134,7 @@
         </div>
       </div>
     </Transition>
-  </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -268,29 +271,68 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 18px;
-  border: 1.5px solid rgba(255, 20, 147, 0.3);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  position: relative;
+  overflow: hidden;
   
-  /* 液态玻璃效果 + 艳粉阴影 */
-  backdrop-filter: blur(15px) saturate(180%);
-  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  /* WWDC 2025 液态玻璃效果 */
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   box-shadow: 
-    0 6px 20px rgba(255, 20, 147, 0.3),
-    0 3px 10px rgba(255, 105, 180, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    0 6px 12px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(255, 20, 147, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   
-  /* 性能优化：仅过渡 transform 和 opacity（GPU 加速） */
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.3s ease-out,
-              border-color 0.3s ease-out;
-  
-  /* 强制 GPU 层 */
+  /* 性能优化 */
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
   transform: translate3d(0, 0, 0);
-  contain: layout paint;
+}
+
+/* 液态玻璃高光 */
+.fab-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 40%,
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.fab-button:hover::before {
+  opacity: 1;
+}
+
+.dark .fab-button {
+  background: rgba(30, 30, 40, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.25),
+    0 0 20px rgba(255, 105, 180, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .fab-button::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    transparent 60%
+  );
 }
 
 @media (min-width: 640px) {
@@ -299,10 +341,6 @@ onUnmounted(() => {
     height: 52px;
     border-radius: 22px;
     font-size: 22px;
-    box-shadow: 
-      0 8px 24px rgba(255, 20, 147, 0.35),
-      0 4px 12px rgba(255, 105, 180, 0.25),
-      0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   }
 }
 
@@ -316,21 +354,24 @@ onUnmounted(() => {
 }
 
 .fab-button:hover {
+  transform: translate3d(0, -4px, 0) scale(1.08);
   box-shadow: 
-    0 12px 36px rgba(255, 20, 147, 0.45),
-    0 6px 20px rgba(255, 105, 180, 0.35),
-    0 0 40px rgba(255, 20, 147, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
-  /* 使用 translate3d 保持 GPU 层 */
-  transform: translate3d(0, -4px, 0) scale(1.08) rotate(5deg);
-  border-color: rgba(255, 20, 147, 0.5);
+    0 16px 48px rgba(255, 20, 147, 0.35),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dark .fab-button:hover {
+  box-shadow: 
+    0 16px 48px rgba(255, 105, 180, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .fab-button:active {
   transform: translate3d(0, -2px, 0) scale(1.02);
-  box-shadow: 
-    0 6px 20px rgba(255, 20, 147, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
 }
 
 /* 各按钮特定颜色 - 艳粉主题 */
@@ -410,45 +451,66 @@ onUnmounted(() => {
 }
 
 /* ============================================
-   站点导航面板样式
+   站点导航面板样式 - WWDC 2025 液态玻璃
    ============================================ */
 
-/* 面板容器 - 移动端全屏 / 桌面端左上角 */
-/* 站点导航面板 - 右下角弹出 (亮色模式) */
+/* 站点导航面板 - 液态玻璃效果 */
 .nav-panel {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(248, 250, 252, 0.98) 100%
-  );
-  /* 降低 blur 值以提升性能 */
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  /* 不设置 position，使用模板中的 fixed */
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(255, 20, 147, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
   overflow: hidden;
-  /* 渲染隔离 */
-  contain: layout paint;
-  isolation: isolate;
 }
 
-/* 站点导航面板 - 右下角弹出 (暗色模式) */
-.dark .nav-panel {
+/* 液态玻璃高光 */
+.nav-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
   background: linear-gradient(
-    180deg,
-    rgba(30, 41, 59, 0.95) 0%,
-    rgba(15, 23, 42, 0.98) 100%
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    transparent 50%
   );
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+/* 站点导航面板 - 暗色模式 */
+.dark .nav-panel {
+  background: rgba(30, 30, 40, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 0 20px rgba(255, 105, 180, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+.dark .nav-panel::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.03) 30%,
+    transparent 50%
+  );
 }
 
 /* 标题栏 */
 .nav-header {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.05), rgba(217, 70, 239, 0.05));
-  border-bottom: 1px solid rgba(255, 20, 147, 0.1);
+  background: linear-gradient(135deg, rgba(255, 20, 147, 0.08), rgba(217, 70, 239, 0.05));
+  border-bottom: 1px solid rgba(255, 20, 147, 0.15);
 }
 
 .dark .nav-header {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.1), rgba(217, 70, 239, 0.1));
+  background: linear-gradient(135deg, rgba(255, 20, 147, 0.12), rgba(217, 70, 239, 0.08));
   border-bottom: 1px solid rgba(255, 105, 180, 0.15);
 }
 

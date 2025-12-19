@@ -23,6 +23,7 @@
              sm:rounded-t-3xl
              shadow-2xl shadow-black/20"
     >
+      
       <!-- 顶部导航栏 -->
       <Motion
         :initial="{ opacity: 0, y: -20 }"
@@ -379,30 +380,43 @@ function reset() {
 </script>
 
 <style>
-/* 设置面板 - macOS 风格 (亮色模式) */
+/* 设置面板 - WWDC 2025 液态玻璃效果 */
 .settings-page {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.92) 0%,
-    rgba(248, 250, 252, 0.96) 100%
-  );
-  backdrop-filter: blur(40px) saturate(1.5);
-  -webkit-backdrop-filter: blur(40px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-bottom: none;
+  box-shadow: 
+    0 -8px 24px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(255, 20, 147, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 
-/* 设置面板 - macOS 风格 (暗色模式) */
-.dark .settings-page {
+/* 液态玻璃高光 */
+.settings-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background: linear-gradient(
-    180deg,
-    rgba(30, 41, 59, 0.92) 0%,
-    rgba(15, 23, 42, 0.96) 100%
-  ) !important;
-  backdrop-filter: blur(40px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-bottom: none !important;
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* 设置面板 - 暗色模式 */
+.dark .settings-page {
+  background: rgba(30, 30, 40, 0.5);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 -8px 24px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(255, 105, 180, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
 }
 
 /* 设置卡片 - 亮色模式 */
