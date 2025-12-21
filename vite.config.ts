@@ -126,7 +126,6 @@ export default defineConfig({
       'pinia',
       'lucide-vue-next',
       'animejs',
-      'nprogress',
     ],
     // 排除不需要预构建的
     exclude: ['artalk'],

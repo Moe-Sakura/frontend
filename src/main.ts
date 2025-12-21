@@ -22,8 +22,7 @@ import './styles/glassmorphism.css'
 const preloadImage = new Image()
 preloadImage.src = `https://api.illlights.com/v1/img?t=${Date.now()}`
 
-// NProgress - 轻量级进度条
-import './styles/nprogress.css'
+// 自定义进度条（使用 anime.js）
 import { createProgressFetch } from './composables/useProgress'
 
 // Artalk 评论系统

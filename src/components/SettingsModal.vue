@@ -7,7 +7,7 @@
       @leave="onLeave"
     >
       <div
-        v-if="isOpen"
+      v-if="isOpen"
         ref="modalRef"
         :class="[
           'fixed z-[100] flex flex-col settings-page shadow-2xl shadow-black/20',
@@ -16,7 +16,7 @@
             : 'inset-0 md:inset-6 md:m-auto md:w-[600px] md:min-w-[400px] md:max-w-[800px] md:h-[500px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
         ]"
         :style="windowStyle"
-      >
+    >
       <!-- 调整大小手柄 -->
       <WindowResizeHandles 
         :is-fullscreen="isFullscreen" 
@@ -51,13 +51,13 @@
 
         <!-- 右侧按钮组 -->
         <div class="flex items-center gap-2">
-          <!-- 保存按钮 -->
+        <!-- 保存按钮 -->
           <button
             v-tap
-            class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
-            @click="save"
-          >
-            保存
+          class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
+          @click="save"
+        >
+          保存
           </button>
           
           <!-- 全屏按钮 - 仅桌面端 -->

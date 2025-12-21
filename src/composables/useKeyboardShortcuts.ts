@@ -264,6 +264,13 @@ export function useKeyboardShortcuts() {
         playSwipe()
         scrollToNextPlatform()
         break
+
+      case '?':
+        // 显示/隐藏快捷键帮助
+        event.preventDefault()
+        playButton()
+        uiStore.isKeyboardHelpOpen = !uiStore.isKeyboardHelpOpen
+        break
     }
   }
 

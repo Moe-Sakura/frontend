@@ -128,6 +128,37 @@ const uiStore = useUIStore()
 let artalkInstance: ArtalkInstance | null = null
 let isClosing = false
 
+// 检查并滚动到指定评论
+function scrollToComment() {
+  const hash = window.location.hash
+  if (!hash.startsWith('#atk-comment-')) return
+  
+  // 等待 Artalk 渲染完成后滚动
+  const maxAttempts = 20
+  let attempts = 0
+  
+  const tryScroll = () => {
+    attempts++
+    const targetEl = document.querySelector(hash)
+    
+    if (targetEl) {
+      // 滚动到评论
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // 高亮效果
+      targetEl.classList.add('atk-comment-highlight')
+      setTimeout(() => {
+        targetEl.classList.remove('atk-comment-highlight')
+      }, 2000)
+    } else if (attempts < maxAttempts) {
+      // 评论还没加载完，继续尝试
+      setTimeout(tryScroll, 200)
+    }
+  }
+  
+  // 延迟一点开始尝试，等待 Artalk 初始化
+  setTimeout(tryScroll, 500)
+}
+
 // 窗口管理
 const modalRef = ref<HTMLElement | null>(null)
 const { isFullscreen, windowStyle, startDrag, startResize, toggleFullscreen, reset } = useWindowManager({
@@ -193,6 +224,9 @@ function initArtalk() {
           site: 'Galgame 聚合搜索',
           darkMode: 'auto',
         })
+        
+        // 尝试滚动到指定评论
+        scrollToComment()
       } catch {
         // 静默处理错误
       }
@@ -352,5 +386,22 @@ onUnmounted(() => {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #c71585, #c026d3);
+}
+
+/* 评论高亮动画 */
+.atk-comment-highlight {
+  animation: comment-highlight 2s ease-out;
+}
+
+@keyframes comment-highlight {
+  0%, 50% {
+    background-color: rgba(255, 20, 147, 0.2);
+    box-shadow: 0 0 0 4px rgba(255, 20, 147, 0.3);
+    border-radius: 8px;
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 </style>
