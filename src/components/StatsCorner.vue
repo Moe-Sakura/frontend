@@ -119,7 +119,7 @@ function setupObserver() {
   const pvElement = document.getElementById('busuanzi_value_site_pv')
   const uvElement = document.getElementById('busuanzi_value_site_uv')
   
-  if (!pvElement || !uvElement) return
+  if (!pvElement || !uvElement) {return}
   
   observer = new MutationObserver(() => {
     checkBusuanziData()

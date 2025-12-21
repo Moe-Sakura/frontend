@@ -8,288 +8,288 @@
     >
       <div
         v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
-      ref="modalRef"
-      :class="[
-        'fixed z-50 flex flex-col vndb-page shadow-2xl shadow-black/20',
-        isFullscreen 
-          ? 'inset-0' 
-          : 'inset-0 md:inset-6 md:m-auto md:w-[600px] md:min-w-[400px] md:max-w-[800px] md:h-[500px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
-      ]"
-      :style="windowStyle"
-    >
-      <!-- 调整大小手柄 -->
-      <WindowResizeHandles 
-        :is-fullscreen="isFullscreen" 
-        @resize="handleResize" 
-      />
-      
-      <!-- 顶部导航栏 - 可拖动 -->
-      <div 
+        ref="modalRef"
         :class="[
-          'flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none',
-          isFullscreen ? '' : 'md:rounded-t-3xl md:cursor-move'
+          'fixed z-50 flex flex-col vndb-page shadow-2xl shadow-black/20',
+          isFullscreen 
+            ? 'inset-0' 
+            : 'inset-0 md:inset-6 md:m-auto md:w-[600px] md:min-w-[400px] md:max-w-[800px] md:h-[500px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
         ]"
-        @mousedown="handleDragStart"
-        @touchstart="handleDragStart"
+        :style="windowStyle"
       >
-        <!-- 返回按钮 - 移动端 -->
-        <button
-          class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors hover:opacity-80 md:hidden"
-          @click="closePanel"
+        <!-- 调整大小手柄 -->
+        <WindowResizeHandles 
+          :is-fullscreen="isFullscreen" 
+          @resize="handleResize" 
+        />
+      
+        <!-- 顶部导航栏 - 可拖动 -->
+        <div 
+          :class="[
+            'flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none',
+            isFullscreen ? '' : 'md:rounded-t-3xl md:cursor-move'
+          ]"
+          @mousedown="handleDragStart"
+          @touchstart="handleDragStart"
         >
-          <ChevronLeft :size="24" />
-          <span class="text-base">返回</span>
-        </button>
-
-        <!-- 标题 -->
-        <div class="flex items-center gap-2 md:ml-0">
-          <BookOpen :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
-          <h1 class="text-lg font-bold text-gray-800 dark:text-white">作品介绍</h1>
-        </div>
-
-        <!-- 右侧按钮组 -->
-        <div class="flex items-center gap-2">
-        <!-- VNDB 链接按钮 -->
-        <a
-          :href="vndbUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-white bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25 hover:shadow-xl transition-shadow"
-        >
-          <ExternalLink :size="14" />
-          <span class="hidden sm:inline">VNDB</span>
-        </a>
-          
-          <!-- 全屏按钮 - 仅桌面端 -->
+          <!-- 返回按钮 - 移动端 -->
           <button
-            class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
-            title="全屏"
-            @click="handleToggleFullscreen"
-          >
-            <Maximize2 v-if="!isFullscreen" :size="16" />
-            <Minimize2 v-else :size="16" />
-          </button>
-          
-          <!-- 关闭按钮 - 仅桌面端 -->
-          <button
-            class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-            title="关闭"
+            class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors hover:opacity-80 md:hidden"
             @click="closePanel"
           >
-            <X :size="16" />
+            <ChevronLeft :size="24" />
+            <span class="text-base">返回</span>
           </button>
-        </div>
-      </div>
 
-      <!-- 内容区域 -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-          <!-- 封面和标题卡片 -->
-          <div class="vndb-card">
-            <!-- 封面图 -->
-            <div v-if="searchStore.vndbInfo.mainImageUrl" class="mb-4">
-              <a
-                :href="searchStore.vndbInfo.mainImageUrl"
-                data-fancybox="vndb-gallery"
-                :data-caption="searchStore.vndbInfo.mainName + ' - 游戏封面'"
-              >
-                <img
-                  :src="searchStore.vndbInfo.mainImageUrl"
-                  :alt="searchStore.vndbInfo.mainName"
-                  class="w-full max-w-sm mx-auto h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
-                  loading="lazy"
-                  @error="handleImageError"
-                />
-              </a>
-            </div>
-
-            <!-- 标题 -->
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white text-center mb-2">
-              {{ searchStore.vndbInfo.mainName }}
-            </h2>
-
-            <!-- 原名 -->
-            <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 dark:text-slate-400 text-center mb-4">
-              {{ searchStore.vndbInfo.originalTitle }}
-            </p>
-
-            <!-- 别名标签 -->
-            <div v-if="searchStore.vndbInfo.names.length > 1" class="flex flex-wrap justify-center gap-2">
-              <span
-                v-for="(name, index) in searchStore.vndbInfo.names.slice(0, 5)"
-                :key="index"
-                class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-[#ff1493] dark:text-[#ff69b4] text-xs rounded-full"
-              >
-                {{ name }}
-              </span>
-            </div>
+          <!-- 标题 -->
+          <div class="flex items-center gap-2 md:ml-0">
+            <BookOpen :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
+            <h1 class="text-lg font-bold text-gray-800 dark:text-white">作品介绍</h1>
           </div>
 
-          <!-- 信息卡片网格 -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- 评分 -->
-            <div v-if="searchStore.vndbInfo.rating" class="vndb-card flex items-center gap-4">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
-                <Star :size="24" class="text-white" />
-              </div>
-              <div>
-                <p class="text-xs text-gray-500 dark:text-slate-400">VNDB 评分</p>
-                <p class="text-xl font-bold text-gray-800 dark:text-white">
-                  {{ (searchStore.vndbInfo.rating / 10).toFixed(1) }}
-                  <span class="text-sm font-normal text-gray-500 dark:text-slate-400">/ 10</span>
-                </p>
-                <p class="text-xs text-gray-400 dark:text-slate-500">{{ searchStore.vndbInfo.votecount }} 票</p>
-              </div>
-            </div>
+          <!-- 右侧按钮组 -->
+          <div class="flex items-center gap-2">
+            <!-- VNDB 链接按钮 -->
+            <a
+              :href="vndbUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-white bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25 hover:shadow-xl transition-shadow"
+            >
+              <ExternalLink :size="14" />
+              <span class="hidden sm:inline">VNDB</span>
+            </a>
+          
+            <!-- 全屏按钮 - 仅桌面端 -->
+            <button
+              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
+              title="全屏"
+              @click="handleToggleFullscreen"
+            >
+              <Maximize2 v-if="!isFullscreen" :size="16" />
+              <Minimize2 v-else :size="16" />
+            </button>
+          
+            <!-- 关闭按钮 - 仅桌面端 -->
+            <button
+              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+              title="关闭"
+              @click="closePanel"
+            >
+              <X :size="16" />
+            </button>
+          </div>
+        </div>
 
-            <!-- 游戏时长 -->
-            <div v-if="searchStore.vndbInfo.play_hours" class="vndb-card flex items-center gap-4">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <Clock :size="24" class="text-white" />
-              </div>
-              <div>
-                <p class="text-xs text-gray-500 dark:text-slate-400">游戏时长</p>
-                <p class="text-xl font-bold text-gray-800 dark:text-white">
-                  {{ searchStore.vndbInfo.play_hours }}
-                  <span class="text-sm font-normal text-gray-500 dark:text-slate-400">小时</span>
-                </p>
-                <p class="text-xs text-gray-400 dark:text-slate-500">{{ searchStore.vndbInfo.book_length }}</p>
-              </div>
-            </div>
-
-            <!-- 发行日期 -->
-            <div v-if="searchStore.vndbInfo.released" class="vndb-card flex items-center gap-4">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <Calendar :size="24" class="text-white" />
-              </div>
-              <div>
-                <p class="text-xs text-gray-500 dark:text-slate-400">发行日期</p>
-                <p class="text-lg font-bold text-gray-800 dark:text-white">
-                  {{ formatDate(searchStore.vndbInfo.released) }}
-                </p>
-              </div>
-            </div>
-
-            <!-- 开发商 -->
-            <div v-if="searchStore.vndbInfo.developers && searchStore.vndbInfo.developers.length > 0" class="vndb-card flex items-center gap-4">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                <Building :size="24" class="text-white" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs text-gray-500 dark:text-slate-400">开发商</p>
-                <p 
-                  v-text-scroll 
-                  class="text-base font-bold text-gray-800 dark:text-white"
+        <!-- 内容区域 -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+          <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+            <!-- 封面和标题卡片 -->
+            <div class="vndb-card">
+              <!-- 封面图 -->
+              <div v-if="searchStore.vndbInfo.mainImageUrl" class="mb-4">
+                <a
+                  :href="searchStore.vndbInfo.mainImageUrl"
+                  data-fancybox="vndb-gallery"
+                  :data-caption="searchStore.vndbInfo.mainName + ' - 游戏封面'"
                 >
-                  {{ searchStore.vndbInfo.developers.join(', ') }}
-                </p>
+                  <img
+                    :src="searchStore.vndbInfo.mainImageUrl"
+                    :alt="searchStore.vndbInfo.mainName"
+                    class="w-full max-w-sm mx-auto h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+                    loading="lazy"
+                    @error="handleImageError"
+                  />
+                </a>
+              </div>
+
+              <!-- 标题 -->
+              <h2 class="text-2xl font-bold text-gray-800 dark:text-white text-center mb-2">
+                {{ searchStore.vndbInfo.mainName }}
+              </h2>
+
+              <!-- 原名 -->
+              <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 dark:text-slate-400 text-center mb-4">
+                {{ searchStore.vndbInfo.originalTitle }}
+              </p>
+
+              <!-- 别名标签 -->
+              <div v-if="searchStore.vndbInfo.names.length > 1" class="flex flex-wrap justify-center gap-2">
+                <span
+                  v-for="(name, index) in searchStore.vndbInfo.names.slice(0, 5)"
+                  :key="index"
+                  class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-[#ff1493] dark:text-[#ff69b4] text-xs rounded-full"
+                >
+                  {{ name }}
+                </span>
               </div>
             </div>
-          </div>
 
-          <!-- 平台 -->
-          <div v-if="searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0" class="vndb-card">
-            <div class="flex items-center gap-2 mb-3">
-              <Monitor :size="18" class="text-green-500" />
-              <h3 class="font-bold text-gray-800 dark:text-white">支持平台</h3>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="(platform, index) in searchStore.vndbInfo.platforms"
-                :key="index"
-                class="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium rounded-xl"
-              >
-                {{ formatPlatform(platform) }}
-              </span>
-            </div>
-          </div>
-
-          <!-- 简介 -->
-          <div v-if="searchStore.vndbInfo.description" class="vndb-card">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <AlignLeft :size="18" class="text-[#ff1493]" />
-                <h3 class="font-bold text-gray-800 dark:text-white">简介</h3>
-              </div>
-              <!-- 翻译按钮 -->
-              <button
-                v-if="!isTranslating && !translatedDescription"
-                class="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-[#ff1493] to-[#d946ef] rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-1"
-                @click="handleTranslate"
-              >
-                <Languages :size="14" />
-                <span>AI 翻译</span>
-              </button>
-              <button
-                v-if="translatedDescription && !isTranslating"
-                class="px-3 py-1.5 text-xs font-medium text-[#ff1493] dark:text-[#ff69b4] bg-pink-100 dark:bg-pink-900/30 rounded-full hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors flex items-center gap-1"
-                @click="showOriginal = !showOriginal; playToggle()"
-              >
-                <ArrowLeftRight :size="14" />
-                <span>{{ showOriginal ? '显示译文' : '显示原文' }}</span>
-              </button>
-            </div>
-
-            <!-- 翻译中 -->
-            <div v-if="isTranslating" class="flex flex-col items-center justify-center gap-2 text-[#ff1493] py-8">
-              <Loader :size="24" class="animate-spin" />
-              <span>AI 翻译中，请稍候...</span>
-            </div>
-            <!-- 翻译失败 -->
-            <div v-else-if="translateError" class="flex flex-col items-center justify-center gap-2 text-red-500 py-8">
-              <AlertTriangle :size="24" />
-              <span>翻译服务暂时不可用</span>
-              <button
-                class="mt-2 px-3 py-1 text-xs bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors flex items-center gap-1"
-                @click="handleTranslate"
-              >
-                <RotateCcw :size="12" />
-                <span>重试</span>
-              </button>
-            </div>
-            <!-- 显示内容 -->
-            <div v-else class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-              <template v-if="showOriginal || !translatedDescription">
-                {{ searchStore.vndbInfo.description }}
-              </template>
-              <template v-else>
-                <div class="inline-flex items-center gap-1 px-2 py-0.5 mb-2 bg-gradient-to-r from-[#ff1493] to-[#d946ef] text-white text-xs rounded-full">
-                  <Bot :size="12" />
-                  <span>AI 译文</span>
+            <!-- 信息卡片网格 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- 评分 -->
+              <div v-if="searchStore.vndbInfo.rating" class="vndb-card flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
+                  <Star :size="24" class="text-white" />
                 </div>
-                <div>{{ translatedDescription }}</div>
-              </template>
-            </div>
-          </div>
+                <div>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">VNDB 评分</p>
+                  <p class="text-xl font-bold text-gray-800 dark:text-white">
+                    {{ (searchStore.vndbInfo.rating / 10).toFixed(1) }}
+                    <span class="text-sm font-normal text-gray-500 dark:text-slate-400">/ 10</span>
+                  </p>
+                  <p class="text-xs text-gray-400 dark:text-slate-500">{{ searchStore.vndbInfo.votecount }} 票</p>
+                </div>
+              </div>
 
-          <!-- 游戏截图 -->
-          <div v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0" class="vndb-card">
-            <div class="flex items-center gap-2 mb-4">
-              <Image :size="18" class="text-[#d946ef]" />
-              <h3 class="font-bold text-gray-800 dark:text-white">游戏截图</h3>
+              <!-- 游戏时长 -->
+              <div v-if="searchStore.vndbInfo.play_hours" class="vndb-card flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                  <Clock :size="24" class="text-white" />
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">游戏时长</p>
+                  <p class="text-xl font-bold text-gray-800 dark:text-white">
+                    {{ searchStore.vndbInfo.play_hours }}
+                    <span class="text-sm font-normal text-gray-500 dark:text-slate-400">小时</span>
+                  </p>
+                  <p class="text-xs text-gray-400 dark:text-slate-500">{{ searchStore.vndbInfo.book_length }}</p>
+                </div>
+              </div>
+
+              <!-- 发行日期 -->
+              <div v-if="searchStore.vndbInfo.released" class="vndb-card flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <Calendar :size="24" class="text-white" />
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">发行日期</p>
+                  <p class="text-lg font-bold text-gray-800 dark:text-white">
+                    {{ formatDate(searchStore.vndbInfo.released) }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- 开发商 -->
+              <div v-if="searchStore.vndbInfo.developers && searchStore.vndbInfo.developers.length > 0" class="vndb-card flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <Building :size="24" class="text-white" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-gray-500 dark:text-slate-400">开发商</p>
+                  <p 
+                    v-text-scroll 
+                    class="text-base font-bold text-gray-800 dark:text-white"
+                  >
+                    {{ searchStore.vndbInfo.developers.join(', ') }}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <a
-                v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
-                :key="index"
-                :href="screenshot"
-                data-fancybox="vndb-gallery"
-                :data-caption="`${searchStore.vndbInfo.mainName} - 截图 ${index + 1}`"
-                class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all bg-gray-100 dark:bg-slate-700"
-              >
-                <img
-                  :src="screenshot"
-                  :alt="`${searchStore.vndbInfo.mainName} 截图 ${index + 1}`"
-                  class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                  @error="handleImageError"
-                />
-              </a>
+
+            <!-- 平台 -->
+            <div v-if="searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0" class="vndb-card">
+              <div class="flex items-center gap-2 mb-3">
+                <Monitor :size="18" class="text-green-500" />
+                <h3 class="font-bold text-gray-800 dark:text-white">支持平台</h3>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="(platform, index) in searchStore.vndbInfo.platforms"
+                  :key="index"
+                  class="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium rounded-xl"
+                >
+                  {{ formatPlatform(platform) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- 简介 -->
+            <div v-if="searchStore.vndbInfo.description" class="vndb-card">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <AlignLeft :size="18" class="text-[#ff1493]" />
+                  <h3 class="font-bold text-gray-800 dark:text-white">简介</h3>
+                </div>
+                <!-- 翻译按钮 -->
+                <button
+                  v-if="!isTranslating && !translatedDescription"
+                  class="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-[#ff1493] to-[#d946ef] rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-1"
+                  @click="handleTranslate"
+                >
+                  <Languages :size="14" />
+                  <span>AI 翻译</span>
+                </button>
+                <button
+                  v-if="translatedDescription && !isTranslating"
+                  class="px-3 py-1.5 text-xs font-medium text-[#ff1493] dark:text-[#ff69b4] bg-pink-100 dark:bg-pink-900/30 rounded-full hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors flex items-center gap-1"
+                  @click="showOriginal = !showOriginal; playToggle()"
+                >
+                  <ArrowLeftRight :size="14" />
+                  <span>{{ showOriginal ? '显示译文' : '显示原文' }}</span>
+                </button>
+              </div>
+
+              <!-- 翻译中 -->
+              <div v-if="isTranslating" class="flex flex-col items-center justify-center gap-2 text-[#ff1493] py-8">
+                <Loader :size="24" class="animate-spin" />
+                <span>AI 翻译中，请稍候...</span>
+              </div>
+              <!-- 翻译失败 -->
+              <div v-else-if="translateError" class="flex flex-col items-center justify-center gap-2 text-red-500 py-8">
+                <AlertTriangle :size="24" />
+                <span>翻译服务暂时不可用</span>
+                <button
+                  class="mt-2 px-3 py-1 text-xs bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors flex items-center gap-1"
+                  @click="handleTranslate"
+                >
+                  <RotateCcw :size="12" />
+                  <span>重试</span>
+                </button>
+              </div>
+              <!-- 显示内容 -->
+              <div v-else class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                <template v-if="showOriginal || !translatedDescription">
+                  {{ searchStore.vndbInfo.description }}
+                </template>
+                <template v-else>
+                  <div class="inline-flex items-center gap-1 px-2 py-0.5 mb-2 bg-gradient-to-r from-[#ff1493] to-[#d946ef] text-white text-xs rounded-full">
+                    <Bot :size="12" />
+                    <span>AI 译文</span>
+                  </div>
+                  <div>{{ translatedDescription }}</div>
+                </template>
+              </div>
+            </div>
+
+            <!-- 游戏截图 -->
+            <div v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0" class="vndb-card">
+              <div class="flex items-center gap-2 mb-4">
+                <Image :size="18" class="text-[#d946ef]" />
+                <h3 class="font-bold text-gray-800 dark:text-white">游戏截图</h3>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <a
+                  v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
+                  :key="index"
+                  :href="screenshot"
+                  data-fancybox="vndb-gallery"
+                  :data-caption="`${searchStore.vndbInfo.mainName} - 截图 ${index + 1}`"
+                  class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all bg-gray-100 dark:bg-slate-700"
+                >
+                  <img
+                    :src="screenshot"
+                    :alt="`${searchStore.vndbInfo.mainName} 截图 ${index + 1}`"
+                    class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    @error="handleImageError"
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </Transition>
   </Teleport>
 </template>
@@ -363,7 +363,7 @@ const { isFullscreen, windowStyle, startDrag, startResize, toggleFullscreen, res
 })
 
 function handleDragStart(e: MouseEvent | TouchEvent) {
-  if ((e.target as HTMLElement).closest('button, a')) return
+  if ((e.target as HTMLElement).closest('button, a')) {return}
   if (modalRef.value) {
     startDrag(e, modalRef.value)
   }

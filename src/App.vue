@@ -49,6 +49,9 @@
         @save="saveSettings"
       />
 
+      <!-- 键盘快捷键帮助 -->
+      <KeyboardHelpPanel />
+
       <!-- SW 更新提示 -->
       <UpdateToast
         :is-visible="uiStore.showUpdateToast"
@@ -84,6 +87,7 @@ const CommentsModal = defineAsyncComponent(() => import('@/components/CommentsMo
 const VndbPanel = defineAsyncComponent(() => import('@/components/VndbPanel.vue'))
 const SettingsModal = defineAsyncComponent(() => import('@/components/SettingsModal.vue'))
 const SearchHistoryModal = defineAsyncComponent(() => import('@/components/SearchHistoryModal.vue'))
+const KeyboardHelpPanel = defineAsyncComponent(() => import('@/components/KeyboardHelpPanel.vue'))
 const UpdateToast = defineAsyncComponent(() => import('@/components/UpdateToast.vue'))
 
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
@@ -474,8 +478,15 @@ function stopAllIntervals() {
 onMounted(async () => {
   // === 关键任务：立即执行 ===
   
-  // 初始化 UI Store（恢复持久化状态）
+  // 初始化 UI Store（恢复持久化状态 + 会话状态）
   uiStore.init()
+  
+  // URL hash 优先级最高 - 覆盖会话状态
+  const hash = window.location.hash
+  if (hash.startsWith('#atk-comment-')) {
+    // 评论链接：打开评论面板
+    uiStore.isCommentsModalOpen = true
+  }
 
   // 初始化主题 - 跟随系统
   const systemTheme = getSystemTheme()

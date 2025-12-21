@@ -1,31 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh" class="no-fouc">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- 初始背景色和主题检测 - 必须在最前面防止白屏闪烁 -->
-  <style>
-    /* 初始背景 - 立即生效防止白屏，使用渐变提升视觉体验 */
-    html {
-      background: 
-        radial-gradient(ellipse at 20% 30%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
-        linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      background-attachment: fixed;
-    }
-    html:not(.dark) {
-      background: 
-        radial-gradient(ellipse at 20% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
-        linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      background-attachment: fixed;
-    }
-    /* 防止 FOUC: 内容隐藏直到样式加载完成 */
-    html.no-fouc { visibility: hidden; }
-  </style>
+  <!-- 关键渲染路径优化 - 同步执行，防止任何视觉闪烁 -->
   <script>
-    // 同步检测暗色模式，防止主题闪烁（必须同步执行）
+    // 立即检测主题，在任何内容渲染前执行
     (function() {
       var d = document.documentElement;
       try {
@@ -33,11 +14,39 @@
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         var isDark = saved ? JSON.parse(saved).isDarkMode : prefersDark;
         if (isDark) d.classList.add('dark');
-      } catch (e) {}
-      // 移除 no-fouc 类以显示内容
-      d.classList.remove('no-fouc');
+      } catch (e) {
+        // 默认跟随系统
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          d.classList.add('dark');
+        }
+      }
     })();
   </script>
+  <style>
+    /* 初始背景 - 根据主题类立即应用，防止白屏 */
+    html {
+      background: 
+        radial-gradient(ellipse at 20% 30%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+        linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+    html:not(.dark) {
+      background: 
+        radial-gradient(ellipse at 20% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+        linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    /* 页面内容淡入效果 */
+    body {
+      opacity: 0;
+      transition: opacity 0.15s ease-out;
+    }
+    body.ready {
+      opacity: 1;
+    }
+  </style>
 
     <!-- Primary Meta Tags -->
   <title>SearchGal - Galgame 聚合搜索</title>
@@ -168,14 +177,12 @@
 
     /* 文本选中高亮 - 艳粉主色调 */
     ::selection {
-      background: linear-gradient(135deg, rgba(255, 20, 147, 0.35), rgba(255, 105, 180, 0.3));
+      background-color: rgba(255, 20, 147, 0.35);
       color: #1d1b1e;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
     }
     .dark ::selection {
-      background: linear-gradient(135deg, rgba(255, 105, 180, 0.4), rgba(232, 121, 249, 0.35));
+      background-color: rgba(255, 105, 180, 0.4);
       color: #ffffff;
-      text-shadow: 0 0 10px rgba(255, 20, 147, 0.6);
     }
 
     /* ============================================
@@ -209,8 +216,8 @@
     <!-- 禁止无 JavaScript 用户访问 -->
     <noscript>
       <style>
-        /* 禁用 JS 时移除 FOUC 隐藏 */
-        html.no-fouc { visibility: visible !important; }
+        /* 禁用 JS 时确保内容可见 */
+        body { opacity: 1 !important; }
         #app { display: none !important; }
         .noscript-warning {
           position: fixed;
@@ -346,5 +353,11 @@
 
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      // 页面内容准备好后淡入显示
+      requestAnimationFrame(function() {
+        document.body.classList.add('ready');
+      });
+    </script>
 </body>
 </html>

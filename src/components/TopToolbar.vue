@@ -33,6 +33,15 @@
       <Github :size="20" />
     </a>
 
+    <!-- 键盘快捷键按钮 -->
+    <button
+      aria-label="键盘快捷键"
+      class="toolbar-button keyboard-button"
+      @click="toggleKeyboardHelp"
+    >
+      <Keyboard :size="20" />
+    </button>
+
     <!-- 设置按钮 -->
     <button
       aria-label="设置"
@@ -47,11 +56,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
+import { useUIStore } from '@/stores/ui'
 import { generateShareURL } from '@/utils/urlParams'
-import { Check, Download, Share2, Github, Settings } from 'lucide-vue-next'
+import { Check, Download, Share2, Github, Keyboard, Settings } from 'lucide-vue-next'
 import { playTap, playCelebration, playNotification, playSwipe } from '@/composables/useSound'
 
 const searchStore = useSearchStore()
+const uiStore = useUIStore()
 
 // Props
 const props = defineProps<{
@@ -109,6 +120,12 @@ async function shareSearch() {
     
     document.body.removeChild(textarea)
   }
+}
+
+// 切换键盘快捷键帮助
+function toggleKeyboardHelp() {
+  playTap()
+  uiStore.isKeyboardHelpOpen = !uiStore.isKeyboardHelpOpen
 }
 
 // 打开设置

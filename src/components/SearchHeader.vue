@@ -79,8 +79,21 @@
                 @keydown.enter.prevent="triggerSearch"
               />
               
-              <!-- 右侧：回车提示 / 进度指示 -->
-              <div class="absolute right-3 sm:right-4 z-20 flex items-center">
+              <!-- 右侧：清除按钮 + 回车提示 / 进度指示 -->
+              <div class="absolute right-3 sm:right-4 z-20 flex items-center gap-2">
+                <!-- 清除按钮 - 有输入且非搜索时显示 -->
+                <button
+                  v-if="searchQuery && !searchStore.isSearching"
+                  type="button"
+                  class="w-6 h-6 flex items-center justify-center rounded-full
+                         text-gray-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4]
+                         hover:bg-[#ff1493]/10 dark:hover:bg-[#ff69b4]/15
+                         transition-all duration-200"
+                  @click="clearSearch"
+                >
+                  <XCircle :size="18" />
+                </button>
+                
                 <!-- 搜索时显示进度 -->
                 <span 
                   v-if="searchStore.isSearching"
@@ -375,79 +388,6 @@
             <strong>Star</strong> 吧，秋梨膏！你的支持就是咱最大的动力，比心~
           </li>
         </ul>
-
-        <!-- 快捷键提示 -->
-        <div class="mt-6 pt-5 border-t border-gray-200/50 dark:border-slate-700/50">
-          <h3 class="text-base sm:text-lg font-bold text-gray-700 dark:text-slate-200 mb-4 flex items-center gap-2">
-            <Keyboard :size="18" class="text-theme-primary dark:text-theme-accent" />
-            键盘快捷键
-          </h3>
-          
-          <!-- 导航类 -->
-          <div class="mb-4">
-            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2 uppercase tracking-wide">导航</p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-              <div class="shortcut-item">
-                <kbd>Esc</kbd>
-                <span>关闭面板</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>H</kbd>
-                <span>返回首页</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>,</kbd>
-                <span>设置</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>C</kbd>
-                <span>评论</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>V</kbd>
-                <span>作品介绍</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>Y</kbd>
-                <span>搜索历史</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>N</kbd>
-                <span>站点导航</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 操作类 -->
-          <div class="mb-4">
-            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2 uppercase tracking-wide">操作</p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-              <div class="shortcut-item">
-                <kbd>/</kbd>
-                <span>聚焦搜索</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 滚动类 -->
-          <div>
-            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2 uppercase tracking-wide">滚动</p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-              <div class="shortcut-item">
-                <kbd>T</kbd>
-                <span>回到顶部</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>[</kbd>
-                <span>上一平台</span>
-              </div>
-              <div class="shortcut-item">
-                <kbd>]</kbd>
-                <span>下一平台</span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -469,7 +409,6 @@ import {
   User,
   Rocket,
   Magnet,
-  Keyboard,
   X,
   RefreshCw,
   Wifi,
@@ -478,6 +417,7 @@ import {
   Server,
   Loader2,
   CornerDownLeft,
+  XCircle,
 } from 'lucide-vue-next'
 import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from '@/utils/urlParams'
 import { saveSearchHistory } from '@/utils/persistence'
@@ -498,11 +438,15 @@ onMounted(() => {
   // 优先从 URL 读取参数
   const urlParams = getSearchParamsFromURL()
   
-  if (urlParams.s) {
-    searchQuery.value = urlParams.s
-    searchMode.value = urlParams.mode || 'game'
-    customApi.value = urlParams.api || ''
-  } else if (searchStore.searchQuery) {
+  // URL 参数可以独立生效（mode 和 api 不依赖 s）
+  const hasURLParams = urlParams.s || urlParams.mode || urlParams.api
+  
+  if (hasURLParams) {
+    // 从 URL 恢复
+    if (urlParams.s) {searchQuery.value = urlParams.s}
+    if (urlParams.mode) {searchMode.value = urlParams.mode}
+    if (urlParams.api) {customApi.value = urlParams.api}
+  } else if (searchStore.searchQuery || searchStore.searchMode !== 'game') {
     // 否则从 store 恢复
     searchQuery.value = searchStore.searchQuery
     searchMode.value = searchStore.searchMode
@@ -821,6 +765,11 @@ function getErrorCodeInfo(error: string): ErrorCodeInfo {
 }
 
 
+// 清除搜索输入
+function clearSearch() {
+  searchQuery.value = ''
+}
+
 // 防抖搜索 - 防止快速连续触发
 function triggerSearch() {
   if (isSearchLocked.value || searchStore.isSearching) {
@@ -973,67 +922,6 @@ defineExpose({
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
   }
-}
-
-/* 快捷键样式 */
-.shortcut-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: rgba(255, 20, 147, 0.05);
-  border-radius: 0.75rem;
-  /* GPU 加速 */
-  transform: translate3d(0, 0, 0);
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.shortcut-item:hover {
-  background: rgba(255, 20, 147, 0.1);
-  transform: translate3d(0, -1px, 0);
-}
-
-.dark .shortcut-item {
-  background: rgba(255, 105, 180, 0.1);
-}
-
-.dark .shortcut-item:hover {
-  background: rgba(255, 105, 180, 0.15);
-}
-
-.shortcut-item kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.75rem;
-  height: 1.75rem;
-  padding: 0 0.5rem;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
-  background: linear-gradient(135deg, #ff1493, #d946ef);
-  border-radius: 0.5rem;
-  box-shadow: 
-    0 2px 4px rgba(255, 20, 147, 0.3),
-    0 1px 0 rgba(255, 255, 255, 0.2) inset;
-}
-
-.dark .shortcut-item kbd {
-  background: linear-gradient(135deg, #ff69b4, #e879f9);
-  box-shadow: 
-    0 2px 6px rgba(255, 105, 180, 0.4),
-    0 1px 0 rgba(255, 255, 255, 0.15) inset;
-}
-
-.shortcut-item span {
-  font-size: 0.8125rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.dark .shortcut-item span {
-  color: #94a3b8;
 }
 
 /* 错误卡片样式 */

@@ -38,7 +38,7 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
   let initialPosY = 0
   let initialWidth_ = 0
   let initialHeight_ = 0
-  let elementRef: HTMLElement | null = null
+  let _elementRef: HTMLElement | null = null
 
   // 计算样式
   const windowStyle = computed(() => {
@@ -73,10 +73,10 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
 
   // 开始拖动
   function startDrag(e: MouseEvent | TouchEvent, element: HTMLElement) {
-    if (isFullscreen.value || isResizing.value) return
+    if (isFullscreen.value || isResizing.value) {return}
     
     isDragging.value = true
-    elementRef = element
+    _elementRef = element
     
     const point = e instanceof MouseEvent ? e : e.touches[0]
     startX = point.clientX
@@ -93,7 +93,7 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
   }
 
   function onDrag(e: MouseEvent | TouchEvent) {
-    if (!isDragging.value) return
+    if (!isDragging.value) {return}
     
     const point = e instanceof MouseEvent ? e : e.touches[0]
     const deltaX = point.clientX - startX
@@ -104,7 +104,7 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
       y: initialPosY + deltaY,
     }
     
-    if (e instanceof TouchEvent) e.preventDefault()
+    if (e instanceof TouchEvent) {e.preventDefault()}
   }
 
   function stopDrag() {
@@ -117,11 +117,11 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
 
   // 开始调整大小
   function startResize(e: MouseEvent | TouchEvent, direction: ResizeDirection, element: HTMLElement) {
-    if (isFullscreen.value || isDragging.value) return
+    if (isFullscreen.value || isDragging.value) {return}
     
     isResizing.value = true
     resizeDirection.value = direction
-    elementRef = element
+    _elementRef = element
     
     const rect = element.getBoundingClientRect()
     const point = e instanceof MouseEvent ? e : e.touches[0]
@@ -140,7 +140,7 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
   }
 
   function onResize(e: MouseEvent | TouchEvent) {
-    if (!isResizing.value || !resizeDirection.value) return
+    if (!isResizing.value || !resizeDirection.value) {return}
     
     const point = e instanceof MouseEvent ? e : e.touches[0]
     const deltaX = point.clientX - startX
@@ -168,7 +168,7 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
     
     size.value = { width: newWidth, height: newHeight }
     
-    if (e instanceof TouchEvent) e.preventDefault()
+    if (e instanceof TouchEvent) {e.preventDefault()}
   }
 
   function stopResize() {

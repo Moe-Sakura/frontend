@@ -17,242 +17,242 @@
         ]"
         :style="windowStyle"
       >
-      <!-- 调整大小手柄 -->
-      <WindowResizeHandles 
-        :is-fullscreen="isFullscreen" 
-        @resize="handleResize" 
-      />
+        <!-- 调整大小手柄 -->
+        <WindowResizeHandles 
+          :is-fullscreen="isFullscreen" 
+          @resize="handleResize" 
+        />
       
-      <!-- 顶部导航栏 - 可拖动 -->
-      <div
-        v-anime:100="'slideUp'"
-        :class="[
-          'flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none',
-          isFullscreen ? '' : 'md:rounded-t-3xl md:cursor-move'
-        ]"
-        @mousedown="handleDragStart"
-        @touchstart="handleDragStart"
-      >
-        <!-- 返回按钮 - 仅移动端 -->
-        <button
-          v-tap
-          class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors md:hidden"
-          @click="close"
+        <!-- 顶部导航栏 - 可拖动 -->
+        <div
+          v-anime:100="'slideUp'"
+          :class="[
+            'flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none',
+            isFullscreen ? '' : 'md:rounded-t-3xl md:cursor-move'
+          ]"
+          @mousedown="handleDragStart"
+          @touchstart="handleDragStart"
         >
-          <ChevronLeft :size="24" />
-          <span class="text-base">返回</span>
-        </button>
-
-        <!-- 标题 -->
-        <div class="flex items-center gap-2 md:ml-0">
-          <SettingsIcon :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
-          <h1 class="text-lg font-bold text-gray-800 dark:text-white">设置</h1>
-        </div>
-
-        <!-- 右侧按钮组 -->
-        <div class="flex items-center gap-2">
-          <!-- 保存按钮 -->
+          <!-- 返回按钮 - 仅移动端 -->
           <button
             v-tap
-            class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
-            @click="save"
-          >
-            保存
-          </button>
-          
-          <!-- 全屏按钮 - 仅桌面端 -->
-          <button
-            class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
-            title="全屏"
-            @click="handleToggleFullscreen"
-          >
-            <Maximize2 v-if="!isFullscreen" :size="16" />
-            <Minimize2 v-else :size="16" />
-          </button>
-          
-          <!-- 关闭按钮 - 仅桌面端 -->
-          <button
-            class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-            title="关闭"
+            class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors md:hidden"
             @click="close"
           >
-            <X :size="16" />
+            <ChevronLeft :size="24" />
+            <span class="text-base">返回</span>
           </button>
-        </div>
-      </div>
 
-      <!-- 内容区域 -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-          <!-- API 设置卡片 -->
-          <div
-            v-anime:150="'cardIn'"
-            class="settings-card"
-          >
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                <Server :size="20" class="text-white" />
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-gray-800 dark:text-white">API 服务器</h2>
-                <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 API 地址</p>
-              </div>
-            </div>
+          <!-- 标题 -->
+          <div class="flex items-center gap-2 md:ml-0">
+            <SettingsIcon :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
+            <h1 class="text-lg font-bold text-gray-800 dark:text-white">设置</h1>
+          </div>
 
-            <!-- API 选项列表 -->
-            <div v-anime-stagger:50="'slideRight'" class="space-y-2">
-              <button
-                v-for="option in apiOptions"
-                :key="option.value"
-                v-tap
-                type="button"
-                :class="[
-                  'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
-                  selectedApiOption === option.value
-                    ? 'bg-gradient-to-r from-[#ff1493]/10 to-[#d946ef]/10 border-2 border-[#ff1493] dark:border-[#ff69b4]'
-                    : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-pink-200 dark:hover:border-pink-900'
-                ]"
-                @click="selectApiOption(option.value)"
-              >
-                <div class="flex items-center gap-3">
-                  <div
-                    :class="[
-                      'w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors',
-                      selectedApiOption === option.value
-                        ? 'border-[#ff1493] bg-[#ff1493]'
-                        : 'border-gray-300 dark:border-slate-600'
-                    ]"
-                  >
-                    <Check v-if="selectedApiOption === option.value" :size="12" class="text-white" />
-                  </div>
-                  <span
-                    :class="[
-                      'font-medium text-sm sm:text-base',
-                      selectedApiOption === option.value
-                        ? 'text-[#ff1493] dark:text-[#ff69b4]'
-                        : 'text-gray-700 dark:text-slate-300'
-                    ]"
-                  >
-                    {{ option.label }}
-                  </span>
-                </div>
-                <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧 -->
-                <span 
-                  v-if="option.value !== 'custom'" 
-                  class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-0 truncate"
-                >
-                  {{ getApiUrl(option.value) }}
-                </span>
-              </button>
-            </div>
-
-            <!-- 自定义 API 输入 -->
-            <Transition
-              enter-active-class="transition-all duration-200 ease-out"
-              enter-from-class="opacity-0 max-h-0"
-              enter-to-class="opacity-100 max-h-40"
-              leave-active-class="transition-all duration-200 ease-in"
-              leave-from-class="opacity-100 max-h-40"
-              leave-to-class="opacity-0 max-h-0"
+          <!-- 右侧按钮组 -->
+          <div class="flex items-center gap-2">
+            <!-- 保存按钮 -->
+            <button
+              v-tap
+              class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
+              @click="save"
             >
-              <div
-                v-if="selectedApiOption === 'custom'"
-                class="overflow-hidden"
-              >
-                <div class="mt-4 space-y-3">
-                  <div class="relative">
-                    <LinkIcon :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      v-model="customApiInput"
-                      type="url"
-                      placeholder="https://api.example.com"
-                      class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-pink-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-[#ff1493] text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
-                      @input="handleTyping"
-                    />
-                  </div>
-                  <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
-                    <Github :size="14" />
-                    <span>部署后端:</span>
-                    <a
-                      href="https://github.com/Moe-Sakura/Wrangler-API"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="text-[#ff1493] dark:text-[#ff69b4] hover:underline"
-                    >
-                      Moe-Sakura/Wrangler-API
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </Transition>
+              保存
+            </button>
+          
+            <!-- 全屏按钮 - 仅桌面端 -->
+            <button
+              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
+              title="全屏"
+              @click="handleToggleFullscreen"
+            >
+              <Maximize2 v-if="!isFullscreen" :size="16" />
+              <Minimize2 v-else :size="16" />
+            </button>
+          
+            <!-- 关闭按钮 - 仅桌面端 -->
+            <button
+              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+              title="关闭"
+              @click="close"
+            >
+              <X :size="16" />
+            </button>
           </div>
+        </div>
 
-          <!-- 自定义样式卡片 -->
-          <div
-            v-anime:200="'cardIn'"
-            class="settings-card"
-          >
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <Paintbrush :size="20" class="text-white" />
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-gray-800 dark:text-white">自定义样式</h2>
-                <p class="text-sm text-gray-500 dark:text-slate-400">添加自定义 CSS 代码</p>
-              </div>
-            </div>
-
-            <!-- CSS 编辑器 - 带语法高亮 -->
-            <div class="css-editor-wrapper rounded-2xl overflow-hidden border-2 border-transparent focus-within:border-[#ff1493] transition-all duration-200">
-              <PrismEditor
-                v-model="localCustomCSS"
-                :highlight="highlightCSS"
-                :line-numbers="true"
-                class="css-editor"
-                @input="handleTyping"
-              />
-            </div>
-
-            <!-- 提示信息 -->
-            <div class="mt-4 flex items-start gap-3 p-4 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-800/30">
-              <Info :size="18" class="text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-              <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <p class="font-medium">使用说明</p>
-                <ul class="text-blue-600 dark:text-blue-400 space-y-0.5 text-xs">
-                  <li>• 支持标准 CSS 语法</li>
-                  <li>• 可以覆盖现有样式或添加新样式</li>
-                  <li>• 修改后点击"保存"即可应用</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- 重置区域 -->
-          <div
-            v-anime:250="'cardIn'"
-            class="settings-card bg-red-50/50 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/30"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg shadow-red-500/30">
-                  <RotateCcw :size="20" class="text-white" />
+        <!-- 内容区域 -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+          <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+            <!-- API 设置卡片 -->
+            <div
+              v-anime:150="'cardIn'"
+              class="settings-card"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                  <Server :size="20" class="text-white" />
                 </div>
                 <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">重置设置</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">恢复所有设置为默认值</p>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">API 服务器</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 API 地址</p>
                 </div>
               </div>
-              <button
-                v-tap
-                class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
-                @click="reset"
+
+              <!-- API 选项列表 -->
+              <div v-anime-stagger:50="'slideRight'" class="space-y-2">
+                <button
+                  v-for="option in apiOptions"
+                  :key="option.value"
+                  v-tap
+                  type="button"
+                  :class="[
+                    'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
+                    selectedApiOption === option.value
+                      ? 'bg-gradient-to-r from-[#ff1493]/10 to-[#d946ef]/10 border-2 border-[#ff1493] dark:border-[#ff69b4]'
+                      : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-pink-200 dark:hover:border-pink-900'
+                  ]"
+                  @click="selectApiOption(option.value)"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      :class="[
+                        'w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors',
+                        selectedApiOption === option.value
+                          ? 'border-[#ff1493] bg-[#ff1493]'
+                          : 'border-gray-300 dark:border-slate-600'
+                      ]"
+                    >
+                      <Check v-if="selectedApiOption === option.value" :size="12" class="text-white" />
+                    </div>
+                    <span
+                      :class="[
+                        'font-medium text-sm sm:text-base',
+                        selectedApiOption === option.value
+                          ? 'text-[#ff1493] dark:text-[#ff69b4]'
+                          : 'text-gray-700 dark:text-slate-300'
+                      ]"
+                    >
+                      {{ option.label }}
+                    </span>
+                  </div>
+                  <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧 -->
+                  <span 
+                    v-if="option.value !== 'custom'" 
+                    class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-0 truncate"
+                  >
+                    {{ getApiUrl(option.value) }}
+                  </span>
+                </button>
+              </div>
+
+              <!-- 自定义 API 输入 -->
+              <Transition
+                enter-active-class="transition-all duration-200 ease-out"
+                enter-from-class="opacity-0 max-h-0"
+                enter-to-class="opacity-100 max-h-40"
+                leave-active-class="transition-all duration-200 ease-in"
+                leave-from-class="opacity-100 max-h-40"
+                leave-to-class="opacity-0 max-h-0"
               >
-                重置
-              </button>
+                <div
+                  v-if="selectedApiOption === 'custom'"
+                  class="overflow-hidden"
+                >
+                  <div class="mt-4 space-y-3">
+                    <div class="relative">
+                      <LinkIcon :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        v-model="customApiInput"
+                        type="url"
+                        placeholder="https://api.example.com"
+                        class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-pink-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-[#ff1493] text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                        @input="handleTyping"
+                      />
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
+                      <Github :size="14" />
+                      <span>部署后端:</span>
+                      <a
+                        href="https://github.com/Moe-Sakura/Wrangler-API"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-[#ff1493] dark:text-[#ff69b4] hover:underline"
+                      >
+                        Moe-Sakura/Wrangler-API
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+
+            <!-- 自定义样式卡片 -->
+            <div
+              v-anime:200="'cardIn'"
+              class="settings-card"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                  <Paintbrush :size="20" class="text-white" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">自定义样式</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">添加自定义 CSS 代码</p>
+                </div>
+              </div>
+
+              <!-- CSS 编辑器 - 带语法高亮 -->
+              <div class="css-editor-wrapper rounded-2xl overflow-hidden border-2 border-transparent focus-within:border-[#ff1493] transition-all duration-200">
+                <PrismEditor
+                  v-model="localCustomCSS"
+                  :highlight="highlightCSS"
+                  :line-numbers="true"
+                  class="css-editor"
+                  @input="handleTyping"
+                />
+              </div>
+
+              <!-- 提示信息 -->
+              <div class="mt-4 flex items-start gap-3 p-4 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-800/30">
+                <Info :size="18" class="text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                  <p class="font-medium">使用说明</p>
+                  <ul class="text-blue-600 dark:text-blue-400 space-y-0.5 text-xs">
+                    <li>• 支持标准 CSS 语法</li>
+                    <li>• 可以覆盖现有样式或添加新样式</li>
+                    <li>• 修改后点击"保存"即可应用</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- 重置区域 -->
+            <div
+              v-anime:250="'cardIn'"
+              class="settings-card bg-red-50/50 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/30"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg shadow-red-500/30">
+                    <RotateCcw :size="20" class="text-white" />
+                  </div>
+                  <div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white">重置设置</h2>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">恢复所有设置为默认值</p>
+                  </div>
+                </div>
+                <button
+                  v-tap
+                  class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+                  @click="reset"
+                >
+                  重置
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
     </Transition>
   </Teleport>
@@ -294,7 +294,6 @@ import {
   Settings as SettingsIcon,
   ChevronLeft,
   Paintbrush,
-  GripVertical,
   Info,
   Server,
   Link as LinkIcon,
@@ -348,7 +347,7 @@ function onLeave(el: Element, done: () => void) {
 }
 
 function handleDragStart(e: MouseEvent | TouchEvent) {
-  if ((e.target as HTMLElement).closest('button')) return
+  if ((e.target as HTMLElement).closest('button')) {return}
   if (modalRef.value) {
     startDrag(e, modalRef.value)
   }

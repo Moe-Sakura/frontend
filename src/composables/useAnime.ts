@@ -4,7 +4,7 @@
  */
 
 import { animate as animeAnimate, utils, createTimeline } from 'animejs'
-import { ref, onMounted, onUnmounted, watch, nextTick, type Ref, type DirectiveBinding } from 'vue'
+import { ref, onMounted, watch, nextTick, type Ref, type DirectiveBinding } from 'vue'
 
 // 动画预设 - 使用 anime.js v4 语法
 export const presets = {
@@ -32,14 +32,14 @@ export const presets = {
     scale: [0.98, 1], 
     translateY: [40, 0], 
     duration: 400, 
-    ease: 'outCubic' 
+    ease: 'outCubic', 
   },
   windowOut: { 
     opacity: [1, 0], 
     scale: [1, 0.98], 
     translateY: [0, 40], 
     duration: 300, 
-    ease: 'inCubic' 
+    ease: 'inCubic', 
   },
   
   // 卡片动画
@@ -77,7 +77,7 @@ interface AnimationParams {
 export function animate(
   target: HTMLElement | string | NodeList | HTMLElement[],
   animation: AnimationParams | PresetName,
-  options?: Partial<AnimationParams>
+  options?: Partial<AnimationParams>,
 ) {
   const params = typeof animation === 'string' 
     ? { ...presets[animation], ...options } 
@@ -101,7 +101,7 @@ export function stagger(
   targets: HTMLElement[] | NodeList | string,
   animation: AnimationParams | PresetName,
   staggerDelay = 50,
-  options?: Partial<AnimationParams>
+  options?: Partial<AnimationParams>,
 ) {
   const params = typeof animation === 'string' ? { ...presets[animation] } : { ...animation }
   const { complete, ...animParams } = { ...params, ...options }
@@ -124,7 +124,7 @@ export function stagger(
 export function useAnimePresence(
   isVisible: Ref<boolean>,
   enterAnimation: PresetName | AnimationParams = 'fadeIn',
-  exitAnimation: PresetName | AnimationParams = 'fadeOut'
+  exitAnimation: PresetName | AnimationParams = 'fadeOut',
 ) {
   const elementRef = ref<HTMLElement | null>(null)
   const isAnimating = ref(false)
@@ -171,7 +171,7 @@ export function useAnimePresence(
  */
 export function useAnimeOnMount(
   animation: PresetName | AnimationParams = 'fadeIn',
-  delay = 0
+  delay = 0,
 ) {
   const elementRef = ref<HTMLElement | null>(null)
 

@@ -3,19 +3,43 @@ import { ref, computed, watch } from 'vue'
 
 // 持久化的 UI 状态类型
 export interface PersistedUIState {
+  // 主题
   isDarkMode: boolean
   customCSS: string
+  
+  // 模态框状态
+  isCommentsModalOpen: boolean
+  isVndbPanelOpen: boolean
+  isSettingsModalOpen: boolean
+  isHistoryModalOpen: boolean
+  isKeyboardHelpOpen: boolean
+  
+  // 其他 UI 状态
   showSearchHistory: boolean
+  showPlatformNav: boolean
+  
+  // 滚动位置
+  scrollPosition: number
+  
+  // 时间戳
   lastVisitTime: number
 }
 
 const STORAGE_KEY = 'ui-state'
+const SESSION_KEY = 'ui-session-state'
 
 // 默认持久化状态
 const DEFAULT_PERSISTED_STATE: PersistedUIState = {
   isDarkMode: false,
   customCSS: '',
+  isCommentsModalOpen: false,
+  isVndbPanelOpen: false,
+  isSettingsModalOpen: false,
+  isHistoryModalOpen: false,
+  isKeyboardHelpOpen: false,
   showSearchHistory: true,
+  showPlatformNav: false,
+  scrollPosition: 0,
   lastVisitTime: 0,
 }
 
@@ -32,6 +56,7 @@ export const useUIStore = defineStore('ui', () => {
   const isVndbPanelOpen = ref(false)
   const isSettingsModalOpen = ref(false)
   const isHistoryModalOpen = ref(false)
+  const isKeyboardHelpOpen = ref(false)
   
   // 浮动按钮状态
   const showScrollToTop = ref(false)
@@ -50,6 +75,9 @@ export const useUIStore = defineStore('ui', () => {
 
   // SW 更新状态
   const showUpdateToast = ref(false)
+  
+  // 滚动位置（用于恢复）
+  const scrollPosition = ref(0)
   
   // Toast 通知
   const toasts = ref<Array<{
@@ -111,6 +139,7 @@ export const useUIStore = defineStore('ui', () => {
     isVndbPanelOpen.value = false
     isSettingsModalOpen.value = false
     isHistoryModalOpen.value = false
+    isKeyboardHelpOpen.value = false
   }
   
   function toggleHistoryModal() {
@@ -178,12 +207,12 @@ export const useUIStore = defineStore('ui', () => {
     toasts.value = []
   }
   
-  // 从 localStorage 加载持久化状态
+  // 从 localStorage 加载持久化状态（长期偏好）
   function loadPersistedState() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
-        const parsed: PersistedUIState = JSON.parse(saved)
+        const parsed: Partial<PersistedUIState> = JSON.parse(saved)
         isDarkMode.value = parsed.isDarkMode ?? DEFAULT_PERSISTED_STATE.isDarkMode
         customCSS.value = parsed.customCSS ?? DEFAULT_PERSISTED_STATE.customCSS
         showSearchHistory.value = parsed.showSearchHistory ?? DEFAULT_PERSISTED_STATE.showSearchHistory
@@ -192,11 +221,34 @@ export const useUIStore = defineStore('ui', () => {
       // 解析失败，使用默认值
     }
   }
+  
+  // 从 sessionStorage 加载会话状态（刷新恢复）
+  function loadSessionState() {
+    try {
+      const saved = sessionStorage.getItem(SESSION_KEY)
+      if (saved) {
+        const parsed: Partial<PersistedUIState> = JSON.parse(saved)
+        
+        // 恢复模态框状态
+        isCommentsModalOpen.value = parsed.isCommentsModalOpen ?? false
+        isVndbPanelOpen.value = parsed.isVndbPanelOpen ?? false
+        isSettingsModalOpen.value = parsed.isSettingsModalOpen ?? false
+        isHistoryModalOpen.value = parsed.isHistoryModalOpen ?? false
+        isKeyboardHelpOpen.value = parsed.isKeyboardHelpOpen ?? false
+        
+        // 恢复其他状态
+        showPlatformNav.value = parsed.showPlatformNav ?? false
+        scrollPosition.value = parsed.scrollPosition ?? 0
+      }
+    } catch {
+      // 解析失败，使用默认值
+    }
+  }
 
-  // 保存持久化状态到 localStorage
+  // 保存持久化状态到 localStorage（长期偏好）
   function savePersistedState() {
     try {
-      const state: PersistedUIState = {
+      const state: Partial<PersistedUIState> = {
         isDarkMode: isDarkMode.value,
         customCSS: customCSS.value,
         showSearchHistory: showSearchHistory.value,
@@ -207,8 +259,26 @@ export const useUIStore = defineStore('ui', () => {
       // 保存失败，静默处理
     }
   }
+  
+  // 保存会话状态到 sessionStorage（刷新恢复）
+  function saveSessionState() {
+    try {
+      const state: Partial<PersistedUIState> = {
+        isCommentsModalOpen: isCommentsModalOpen.value,
+        isVndbPanelOpen: isVndbPanelOpen.value,
+        isSettingsModalOpen: isSettingsModalOpen.value,
+        isHistoryModalOpen: isHistoryModalOpen.value,
+        isKeyboardHelpOpen: isKeyboardHelpOpen.value,
+        showPlatformNav: showPlatformNav.value,
+        scrollPosition: window.scrollY,
+      }
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(state))
+    } catch {
+      // 保存失败，静默处理
+    }
+  }
 
-  // 监听需要持久化的状态变化
+  // 监听需要持久化的状态变化（localStorage - 长期偏好）
   watch(
     [isDarkMode, customCSS, showSearchHistory],
     () => {
@@ -217,11 +287,31 @@ export const useUIStore = defineStore('ui', () => {
       }
     },
   )
+  
+  // 监听需要保存到会话的状态变化（sessionStorage - 刷新恢复）
+  watch(
+    [
+      isCommentsModalOpen,
+      isVndbPanelOpen,
+      isSettingsModalOpen,
+      isHistoryModalOpen,
+      isKeyboardHelpOpen,
+      showPlatformNav,
+    ],
+    () => {
+      if (isInitialized.value) {
+        saveSessionState()
+      }
+    },
+  )
 
   // 初始化
   function init() {
-    // 加载持久化状态
+    // 加载持久化状态（长期偏好）
     loadPersistedState()
+    
+    // 加载会话状态（刷新恢复）
+    loadSessionState()
 
     // 如果没有保存的主题偏好，跟随系统
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -234,11 +324,39 @@ export const useUIStore = defineStore('ui', () => {
     document.documentElement.classList.toggle('dark', isDarkMode.value)
     
     isInitialized.value = true
+    
+    // 恢复滚动位置
+    if (scrollPosition.value > 0) {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollPosition.value)
+      })
+    }
+    
+    // 监听页面卸载，保存滚动位置
+    window.addEventListener('beforeunload', saveSessionState)
+    
+    // 定期保存滚动位置（防止意外关闭）
+    let scrollSaveTimer: number | null = null
+    window.addEventListener('scroll', () => {
+      if (scrollSaveTimer) {
+        clearTimeout(scrollSaveTimer)
+      }
+      scrollSaveTimer = window.setTimeout(() => {
+        if (isInitialized.value) {
+          saveSessionState()
+        }
+      }, 500)
+    }, { passive: true })
   }
 
   // 显示 SW 更新提示
   function setShowUpdateToast(show: boolean) {
     showUpdateToast.value = show
+  }
+  
+  // 清除会话状态（用于完全重置）
+  function clearSessionState() {
+    sessionStorage.removeItem(SESSION_KEY)
   }
   
   return {
@@ -259,6 +377,8 @@ export const useUIStore = defineStore('ui', () => {
     loadingMessage,
     showUpdateToast,
     toasts,
+    isKeyboardHelpOpen,
+    scrollPosition,
     
     // 计算属性
     hasOpenModal,
@@ -286,7 +406,9 @@ export const useUIStore = defineStore('ui', () => {
     clearToasts,
     loadPersistedState,
     savePersistedState,
+    loadSessionState,
+    saveSessionState,
+    clearSessionState,
     init,
   }
 })
-
