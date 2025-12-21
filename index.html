@@ -4,28 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- 防止 FOUC: 在 CSS 加载前隐藏内容，并同步检测主题 -->
+  <!-- 初始背景色和主题检测 - 必须在最前面防止白屏闪烁 -->
+  <style>
+    /* 初始背景 - 立即生效防止白屏，使用渐变提升视觉体验 */
+    html {
+      background: 
+        radial-gradient(ellipse at 20% 30%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+        linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      background-attachment: fixed;
+    }
+    html:not(.dark) {
+      background: 
+        radial-gradient(ellipse at 20% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+        linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      background-attachment: fixed;
+    }
+    /* 防止 FOUC: 内容隐藏直到样式加载完成 */
+    html.no-fouc { visibility: hidden; }
+  </style>
   <script>
-    // 同步检测暗色模式，防止主题闪烁
+    // 同步检测暗色模式，防止主题闪烁（必须同步执行）
     (function() {
+      var d = document.documentElement;
       try {
         var saved = localStorage.getItem('ui-state');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         var isDark = saved ? JSON.parse(saved).isDarkMode : prefersDark;
-        if (isDark) {
-          document.documentElement.classList.add('dark');
-        }
-      } catch (e) {
-        // 静默处理
-      }
+        if (isDark) d.classList.add('dark');
+      } catch (e) {}
       // 移除 no-fouc 类以显示内容
-      document.documentElement.classList.remove('no-fouc');
+      d.classList.remove('no-fouc');
     })();
   </script>
-  <style>
-    /* 防止 FOUC: 初始隐藏 */
-    html.no-fouc { visibility: hidden; }
-  </style>
 
     <!-- Primary Meta Tags -->
   <title>SearchGal - Galgame 聚合搜索</title>
@@ -84,19 +96,13 @@
     <meta name="msapplication-TileColor" content="#ff1493" />
     <meta name="msapplication-config" content="/browserconfig.xml" />
     
-    <!-- RSS Feed -->
-    <link rel="alternate" type="application/rss+xml" title="SearchGal RSS Feed" href="/feed.xml" />
-    
     <!-- Canonical URL -->
     <link rel="canonical" href="https://searchgal.homes/" />
 
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://searchgal.homes/" />
-
-    <!-- Priority Hints - 预加载关键资源 -->
-    <link rel="preconnect" href="https://api.illlights.com" fetchpriority="high" />
-    <link rel="preconnect" href="https://api.vndb.org" fetchpriority="high" />
-    <link rel="preconnect" href="https://registry.npmmirror.com" fetchpriority="low" />
+    <!-- 预连接关键资源 -->
+    <link rel="preconnect" href="https://api.illlights.com" />
+    <link rel="preconnect" href="https://api.vndb.org" />
+    <link rel="preconnect" href="https://registry.npmmirror.com" />
     <link rel="dns-prefetch" href="https://artalk.saop.cc" />
     <link rel="dns-prefetch" href="https://status.searchgal.homes" />
 
@@ -193,10 +199,9 @@
     }
   </style>
 
-    <!-- 不蒜子统计 - 低优先级 -->
+    <!-- 不蒜子统计 -->
     <script
       async
-      fetchpriority="low"
       src="https://registry.npmmirror.com/js-asuna/latest/files/js/bsz.pure.mini.js"
     ></script>
 </head>
@@ -204,6 +209,8 @@
     <!-- 禁止无 JavaScript 用户访问 -->
     <noscript>
       <style>
+        /* 禁用 JS 时移除 FOUC 隐藏 */
+        html.no-fouc { visibility: visible !important; }
         #app { display: none !important; }
         .noscript-warning {
           position: fixed;
@@ -266,70 +273,7 @@
     </noscript>
 
     <!-- 禁止 IE 浏览器访问 -->
-    <script>
-      (function() {
-        // 检测 IE 浏览器
-        var isIE = /*@cc_on!@*/false || !!document.documentMode;
-        // 检测 IE 11 及更早版本
-        var isOldIE = typeof window.MSInputMethodContext !== 'undefined' && typeof document.documentMode !== 'undefined';
-        // 检测 Edge Legacy (EdgeHTML)
-        var isEdgeLegacy = !isIE && !!window.StyleMedia;
-        
-        if (isIE || isOldIE || isEdgeLegacy) {
-          document.body.innerHTML = '\
-            <div style="\
-              position: fixed;\
-              inset: 0;\
-              display: flex;\
-              flex-direction: column;\
-              align-items: center;\
-              justify-content: center;\
-              background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);\
-              color: white;\
-              font-family: system-ui, -apple-system, sans-serif;\
-              text-align: center;\
-              padding: 2rem;\
-              z-index: 99999;\
-            ">\
-              <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff1493" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1.5rem;">\
-                <circle cx="12" cy="12" r="10"/>\
-                <path d="m4.9 4.9 14.2 14.2"/>\
-              </svg>\
-              <h1 style="\
-                font-size: 1.75rem;\
-                font-weight: 700;\
-                margin-bottom: 1rem;\
-                background: linear-gradient(135deg, #ff1493, #d946ef);\
-                -webkit-background-clip: text;\
-                -webkit-text-fill-color: transparent;\
-              ">不支持的浏览器</h1>\
-              <p style="color: #94a3b8; max-width: 400px; line-height: 1.6; margin-bottom: 0.5rem;">\
-                您正在使用 Internet Explorer 或旧版 Edge 浏览器。\
-              </p>\
-              <p style="color: #94a3b8; max-width: 400px; line-height: 1.6;">\
-                SearchGal 使用了现代 Web 技术，不支持这些旧版浏览器。\
-              </p>\
-              <div style="\
-                font-size: 0.875rem;\
-                color: #64748b;\
-                margin-top: 1.5rem;\
-                padding: 1rem;\
-                background: rgba(255, 20, 147, 0.1);\
-                border-radius: 0.75rem;\
-                border: 1px solid rgba(255, 20, 147, 0.2);\
-              ">\
-                🌐 推荐使用以下现代浏览器：<br>\
-                <a href="https://www.google.com/chrome/" style="color: #ff69b4; text-decoration: underline;">Chrome</a> · \
-                <a href="https://www.mozilla.org/firefox/" style="color: #ff69b4; text-decoration: underline;">Firefox</a> · \
-                <a href="https://www.microsoft.com/edge" style="color: #ff69b4; text-decoration: underline;">Edge (Chromium)</a> · \
-                <a href="https://www.apple.com/safari/" style="color: #ff69b4; text-decoration: underline;">Safari</a>\
-              </div>\
-            </div>\
-          ';
-          throw new Error('不支持的浏览器');
-        }
-      })();
-    </script>
+    <script>/MSIE|Trident/.test(window.navigator.userAgent)&&(alert("抱歉，本站不支持 IE 浏览器，请用 Chrome 访问。"),window.location.href="https://support.dmeng.net/upgrade-your-browser.html?referrer="+encodeURIComponent(window.location.href))</script>
 
     <!-- WWDC 2025 液态玻璃 SVG 滤镜 -->
     <!-- 参考: https://github.com/lucasromerodb/liquid-glass-effect-macos -->

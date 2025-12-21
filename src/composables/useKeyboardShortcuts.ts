@@ -1,7 +1,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { useSearchStore } from '@/stores/search'
-import { playClick, playPop, playWhoosh } from '@/composables/useSound'
+import { playTap, playButton, playSwipe } from '@/composables/useSound'
 
 // 快捷键配置
 export const SHORTCUTS = {
@@ -176,7 +176,7 @@ export function useKeyboardShortcuts() {
     if (event.key === 'Escape') {
       if (hasAnyPanelOpen()) {
         event.preventDefault()
-        playPop()
+        playButton()
         closeAllPanels()
       }
       return
@@ -196,14 +196,14 @@ export function useKeyboardShortcuts() {
       case ',':
         // 打开/关闭设置
         event.preventDefault()
-        playPop()
+        playButton()
         togglePanel('settings')
         break
 
       case 'c':
         // 打开/关闭评论
         event.preventDefault()
-        playPop()
+        playButton()
         togglePanel('comments')
         break
 
@@ -211,7 +211,7 @@ export function useKeyboardShortcuts() {
         // 打开/关闭 VNDB（需要有 VNDB 信息）
         if (searchStore.vndbInfo) {
           event.preventDefault()
-          playPop()
+          playButton()
           togglePanel('vndb')
         }
         break
@@ -219,49 +219,49 @@ export function useKeyboardShortcuts() {
       case 'y':
         // 打开/关闭搜索历史
         event.preventDefault()
-        playPop()
+        playButton()
         togglePanel('history')
         break
 
       case 'h':
         // 返回首页（关闭所有面板）
         event.preventDefault()
-        playClick()
+        playTap()
         closeAllPanels()
         break
 
       case 'n':
         // 站点导航
         event.preventDefault()
-        playClick()
+        playTap()
         toggleNav()
         break
 
       case '/':
         // 聚焦搜索框
         event.preventDefault()
-        playClick()
+        playTap()
         focusSearch()
         break
 
       case 't':
         // 回到顶部
         event.preventDefault()
-        playWhoosh()
+        playSwipe()
         scrollToTop()
         break
 
       case '[':
         // 上一个平台
         event.preventDefault()
-        playClick()
+        playSwipe()
         scrollToPrevPlatform()
         break
 
       case ']':
         // 下一个平台
         event.preventDefault()
-        playClick()
+        playSwipe()
         scrollToNextPlatform()
         break
     }

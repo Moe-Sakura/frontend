@@ -1,45 +1,41 @@
 <template>
   <Teleport to="body">
-    <!-- 背景遮罩 -->
+    <!-- 评论面板 - macOS 风格浮动窗口 -->
     <Transition
-      enter-active-class="transition-opacity duration-200 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-200 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
+      :css="false"
+      @enter="onEnter"
+      @leave="onLeave"
     >
       <div
         v-if="uiStore.isCommentsModalOpen"
-        class="fixed inset-0 z-[99] bg-black/30"
-        @click="closeModal"
-      />
-    </Transition>
-
-    <!-- 评论面板 - macOS 风格 -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 translate-y-10 scale-[0.98]"
-      enter-to-class="opacity-100 translate-y-0 scale-100"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-y-0 scale-100"
-      leave-to-class="opacity-0 translate-y-10 scale-[0.98]"
-    >
-      <div
-        v-if="uiStore.isCommentsModalOpen"
-        class="comments-modal fixed z-[100] flex flex-col
-               inset-0
-               sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
-               sm:rounded-t-3xl
-               shadow-2xl shadow-black/20"
+        ref="modalRef"
+        :class="[
+          'comments-modal fixed z-[100] flex flex-col shadow-2xl shadow-black/20',
+          isFullscreen 
+            ? 'inset-0' 
+            : 'inset-0 md:inset-6 md:m-auto md:w-[800px] md:min-w-[400px] md:max-w-[calc(100%-3rem)] md:h-[600px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
+        ]"
+        :style="windowStyle"
       >
+        <!-- 调整大小手柄 -->
+        <WindowResizeHandles 
+          :is-fullscreen="isFullscreen" 
+          @resize="handleResize" 
+        />
         
-        <!-- 顶部导航栏 -->
-        <div class="comments-header flex-shrink-0 flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-4 border-b border-white/10 dark:border-slate-700/50 sm:rounded-t-3xl">
-          <!-- 返回按钮 -->
+        <!-- 顶部导航栏 - 可拖动 -->
+        <div 
+          :class="[
+            'comments-header flex-shrink-0 flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-4 border-b border-white/10 dark:border-slate-700/50 select-none',
+            isFullscreen ? '' : 'md:rounded-t-3xl md:cursor-move'
+          ]"
+          @mousedown="handleDragStart"
+          @touchstart="handleDragStart"
+        >
+          <!-- 返回按钮 - 移动端 -->
           <button
             v-ripple
-            class="flex items-center gap-1 px-3 py-2 -ml-2 rounded-xl text-[#ff1493] dark:text-[#ff69b4] font-medium transition-all hover:bg-pink-50 dark:hover:bg-pink-900/20"
+            class="flex items-center gap-1 px-3 py-2 -ml-2 rounded-xl text-[#ff1493] dark:text-[#ff69b4] font-medium transition-all hover:bg-pink-50 dark:hover:bg-pink-900/20 md:hidden"
             @click="closeModal"
           >
             <ChevronLeft :size="20" />
@@ -47,24 +43,37 @@
           </button>
 
           <!-- 标题 -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 md:ml-0">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-lg shadow-pink-500/30">
               <MessageCircle :size="16" class="text-white" />
             </div>
             <h1 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white">评论区</h1>
           </div>
 
-          <!-- 桌面端关闭按钮 -->
-          <button
-            v-ripple
-            class="hidden sm:flex w-9 h-9 rounded-xl items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
-            @click="closeModal"
-          >
-            <X :size="20" />
-          </button>
-          
-          <!-- 移动端占位 -->
-          <div class="w-12 sm:hidden" />
+          <!-- 右侧按钮组 -->
+          <div class="flex items-center gap-2">
+            <!-- 全屏按钮 - 仅桌面端 -->
+            <button
+              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
+              title="全屏"
+              @click="handleToggleFullscreen"
+            >
+              <Maximize2 v-if="!isFullscreen" :size="16" />
+              <Minimize2 v-else :size="16" />
+            </button>
+            
+            <!-- 关闭按钮 - 仅桌面端 -->
+            <button
+              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+              title="关闭"
+              @click="closeModal"
+            >
+              <X :size="16" />
+            </button>
+            
+            <!-- 移动端占位 -->
+            <div class="w-8 md:hidden" />
+          </div>
         </div>
 
         <!-- 内容区域 -->
@@ -79,28 +88,79 @@
 </template>
 
 <script setup lang="ts">
-import { watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useUIStore } from '@/stores/ui'
-import { playPop } from '@/composables/useSound'
-import { lockScroll, unlockScroll, forceUnlockScroll } from '@/composables/useScrollLock'
+import { playTransitionUp, playTransitionDown, playSwipe } from '@/composables/useSound'
+import { useWindowManager, type ResizeDirection } from '@/composables/useWindowManager'
+import { animate } from '@/composables/useAnime'
+import WindowResizeHandles from '@/components/WindowResizeHandles.vue'
 import Artalk from 'artalk/dist/Artalk.mjs'
-import { MessageCircle, ChevronLeft, X } from 'lucide-vue-next'
+import { MessageCircle, ChevronLeft, X, Maximize2, Minimize2 } from 'lucide-vue-next'
 
 interface ArtalkInstance {
   destroy(): void
+}
+
+// 进入/离开动画
+function onEnter(el: Element, done: () => void) {
+  animate(el as HTMLElement, {
+    opacity: [0, 1],
+    scale: [0.98, 1],
+    translateY: [40, 0],
+    duration: 300,
+    ease: 'outCubic',
+    complete: done,
+  })
+}
+
+function onLeave(el: Element, done: () => void) {
+  animate(el as HTMLElement, {
+    opacity: [1, 0],
+    scale: [1, 0.98],
+    translateY: [0, 40],
+    duration: 200,
+    ease: 'inCubic',
+    complete: done,
+  })
 }
 
 const uiStore = useUIStore()
 let artalkInstance: ArtalkInstance | null = null
 let isClosing = false
 
+// 窗口管理
+const modalRef = ref<HTMLElement | null>(null)
+const { isFullscreen, windowStyle, startDrag, startResize, toggleFullscreen, reset } = useWindowManager({
+  minWidth: 400,
+  minHeight: 300,
+})
+
+function handleDragStart(e: MouseEvent | TouchEvent) {
+  if ((e.target as HTMLElement).closest('button')) return
+  if (modalRef.value) {
+    startDrag(e, modalRef.value)
+  }
+}
+
+function handleResize(e: MouseEvent | TouchEvent, direction: ResizeDirection) {
+  if (modalRef.value) {
+    startResize(e, direction, modalRef.value)
+  }
+}
+
+// 切换全屏（带音效）
+function handleToggleFullscreen() {
+  playSwipe()
+  toggleFullscreen()
+}
+
 function closeModal() {
   if (isClosing) {return}
   isClosing = true
   
-  playPop()
-  // 恢复 body 滚动
-  unlockScroll()
+  playTransitionDown()
+  // 重置位置
+  reset()
   // 关闭模态框
   uiStore.isCommentsModalOpen = false
   
@@ -153,16 +213,11 @@ function handleKeydown(e: globalThis.KeyboardEvent) {
 // 监听模态框打开状态
 watch(() => uiStore.isCommentsModalOpen, (isOpen: boolean) => {
   if (isOpen) {
-    playPop()
-    // 锁定 body 滚动
-    lockScroll()
+    playTransitionUp()
     // 延迟初始化，确保 DOM 已渲染
     setTimeout(() => {
       initArtalk()
     }, 100)
-  } else {
-    // 恢复 body 滚动
-    unlockScroll()
   }
 })
 
@@ -170,7 +225,6 @@ onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
   // 如果挂载时模态框就是打开的，初始化 Artalk
   if (uiStore.isCommentsModalOpen) {
-    lockScroll()
     setTimeout(() => {
       initArtalk()
     }, 200)
@@ -188,8 +242,6 @@ onUnmounted(() => {
       // 静默处理错误
     }
   }
-  // 确保恢复 body 滚动
-  forceUnlockScroll()
 })
 </script>
 
@@ -200,11 +252,27 @@ onUnmounted(() => {
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: none;
   box-shadow: 
-    0 -8px 24px rgba(0, 0, 0, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.12),
     0 0 20px rgba(255, 20, 147, 0.06),
     inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  /* 窗口/全屏切换动画 */
+  transition: 
+    inset 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    min-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 移动端无底部边框 */
+@media (max-width: 767px) {
+  .comments-modal {
+    border-bottom: none;
+  }
 }
 
 /* 液态玻璃高光 */

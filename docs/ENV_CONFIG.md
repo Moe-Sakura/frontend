@@ -141,8 +141,6 @@ THIRD_PARTY_CONFIG.busuanziEnabled // 不蒜子统计
 ### 8. 性能配置 (`PERFORMANCE_CONFIG`)
 
 ```typescript
-PERFORMANCE_CONFIG.quicklinkDelay       // Quicklink 预加载延迟（毫秒）
-PERFORMANCE_CONFIG.quicklinkLimit       // Quicklink 预加载限制
 PERFORMANCE_CONFIG.statusCheckInterval  // 状态检查间隔（毫秒）
 PERFORMANCE_CONFIG.statusCheckTimeout   // 状态检查超时（毫秒）
 ```

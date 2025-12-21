@@ -153,7 +153,7 @@
 <script setup lang="ts">
 import { useSearchStore } from '@/stores/search'
 import type { PlatformData } from '@/stores/search'
-import { playClick } from '@/composables/useSound'
+import { playTap } from '@/composables/useSound'
 import {
   ExternalLink,
   AlertTriangle,
@@ -211,7 +211,7 @@ function getDisplayedResults(platformData: PlatformData) {
 
 // 加载更多
 function loadMore(platformName: string) {
-  playClick()
+  playTap()
   searchStore.loadMoreResults(platformName, 20)
 }
 

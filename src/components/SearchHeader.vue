@@ -2,40 +2,16 @@
   <div class="container mx-auto w-full px-4 sm:px-6 lg:px-8">
     <!-- 上半部分：标题和搜索框 - 底部对齐到视口中心 -->
     <div class="flex flex-col items-center justify-end min-h-[48vh] sm:min-h-[50vh] pb-2">
-      <!-- Title with gamepad icon and status - 艳粉主题 -->
-      <div
-        class="header-title flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8 animate-fade-in-down"
+      <!-- Title - 艳粉主题 -->
+      <h1
+        class="header-title text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-6 sm:mb-8 animate-fade-in-down
+               text-white
+               drop-shadow-[0_2px_8px_rgba(255,20,147,0.6)]
+               dark:drop-shadow-[0_2px_12px_rgba(255,105,180,0.8)]"
+        style="text-shadow: 0 0 30px rgba(255, 20, 147, 0.4), 0 0 60px rgba(255, 105, 180, 0.2);"
       >
-        <h1
-          class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center 
-                 text-white
-                 drop-shadow-[0_2px_8px_rgba(255,20,147,0.6)]
-                 dark:drop-shadow-[0_2px_12px_rgba(255,105,180,0.8)]"
-          style="text-shadow: 0 0 30px rgba(255, 20, 147, 0.4), 0 0 60px rgba(255, 105, 180, 0.2);"
-        >
-          <span class="whitespace-nowrap">Galgame 聚合搜索</span>
-        </h1>
-        <a
-          href="https://status.searchgal.homes"
-          target="_blank"
-          rel="noopener noreferrer"
-          :class="[
-            'status-link px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/30 dark:border-white/20 flex items-center gap-1.5 sm:gap-2 text-white text-sm sm:text-base font-bold hover:scale-105 transition-all duration-300 shadow-md glass-gpu',
-            statusOnline === null 
-              ? 'bg-gray-500 hover:bg-gray-600 shadow-gray-500/20 hover:shadow-gray-500/30 dark:bg-gray-600 dark:hover:bg-gray-700' 
-              : statusOnline
-                ? 'bg-green-500 hover:bg-green-600 shadow-green-500/20 hover:shadow-green-500/30 dark:bg-green-600 dark:hover:bg-green-700'
-                : 'bg-red-500 hover:bg-red-600 shadow-red-500/20 hover:shadow-red-500/30 dark:bg-red-600 dark:hover:bg-red-700'
-          ]"
-        >
-          <component
-            :is="statusOnline === null ? Loader : statusOnline ? CheckCircle : AlertCircle"
-            :size="18"
-            :class="statusOnline === null ? 'animate-spin' : ''"
-          />
-          <span>{{ statusOnline === null ? '检测中' : statusOnline ? '正常' : '异常' }}</span>
-        </a>
-      </div>
+        <span class="whitespace-nowrap">Galgame 聚合搜索</span>
+      </h1>
 
       <!-- Search Form -->
       <form
@@ -99,6 +75,7 @@
                        tracking-wide
                        disabled:cursor-not-allowed"
                 :class="{ 'bg-transparent!': searchStore.isSearching }"
+                @input="handleTyping"
                 @keydown.enter.prevent="triggerSearch"
               />
               
@@ -480,11 +457,10 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { searchGameStream, fetchVndbData } from '@/api/search'
-import { playWhoosh, playToggle, playSuccess, playError } from '@/composables/useSound'
+import { playSwipe, playToggle, playCelebration, playCaution, playType } from '@/composables/useSound'
 import { useDebouncedClick } from '@/composables/useDebounce'
 import {
   Search,
-  Loader,
   CheckCircle,
   AlertCircle,
   Gamepad2,
@@ -510,45 +486,15 @@ const searchStore = useSearchStore()
 const searchQuery = ref('')
 const customApi = ref('')
 const searchMode = ref<'game' | 'patch'>('game')
-const statusOnline = ref<boolean | null>(null) // null=检测中, true=在线, false=离线
 let cleanupURLListener: (() => void) | null = null
 
 // 搜索防抖 - 防止 800ms 内重复触发
 const { isLocked: isSearchLocked, click: debouncedSearchTrigger } = useDebouncedClick(800)
 
 let isUpdatingFromURL = false
-let statusCheckInterval: number | null = null
-
-// 检查状态页面是否在线
-async function checkStatus() {
-  try {
-    const controller = new window.AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5秒超时
-    
-    await fetch('https://status.searchgal.homes', {
-      method: 'HEAD',
-      mode: 'no-cors', // 避免CORS问题
-      signal: controller.signal,
-    })
-    
-    clearTimeout(timeoutId)
-    // no-cors模式下，只要请求不报错就认为是在线
-    statusOnline.value = true
-  } catch (_error) {
-    statusOnline.value = false
-  }
-}
 
 // 从 URL 或 store 恢复搜索参数
 onMounted(() => {
-  // 立即检查状态
-  checkStatus()
-  
-  // 每30秒检查一次状态
-  statusCheckInterval = window.setInterval(() => {
-    checkStatus()
-  }, 30000)
-  
   // 优先从 URL 读取参数
   const urlParams = getSearchParamsFromURL()
   
@@ -588,9 +534,6 @@ onUnmounted(() => {
   if (cleanupURLListener) {
     cleanupURLListener()
   }
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-  }
 })
 
 // 同步到 store 和 URL
@@ -620,7 +563,7 @@ watch(() => searchStore.customApi, (newApi) => {
 async function handleSearch() {
   if (!searchQuery.value.trim()) {return}
 
-  playWhoosh() // 搜索开始音效
+  playSwipe() // 搜索开始音效
   searchStore.clearResults()
   searchStore.isSearching = true
   searchStore.errorMessage = ''
@@ -667,7 +610,7 @@ async function handleSearch() {
       },
       onComplete: () => {
         searchStore.isSearching = false
-        playSuccess() // 搜索完成音效
+        playCelebration() // 搜索完成音效
         
         // 保存搜索历史
         const resultCount = searchStore.totalResults
@@ -681,7 +624,7 @@ async function handleSearch() {
       onError: (error) => {
         searchStore.errorMessage = error
         searchStore.isSearching = false
-        playError() // 错误音效
+        playCaution() // 错误音效
       },
     })
 
@@ -696,7 +639,19 @@ async function handleSearch() {
     searchStore.errorMessage =
       error instanceof Error ? error.message : '搜索失败'
     searchStore.isSearching = false
-    playError() // 错误音效
+    playCaution() // 错误音效
+  }
+}
+
+// 打字音效（节流，避免过于频繁）
+let lastTypingSound = 0
+const TYPING_THROTTLE = 80 // 80ms 节流
+
+function handleTyping() {
+  const now = Date.now()
+  if (now - lastTypingSound >= TYPING_THROTTLE) {
+    playType()
+    lastTypingSound = now
   }
 }
 

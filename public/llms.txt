@@ -1,61 +1,40 @@
 # SearchGal Frontend
 
-> Galgame 聚合搜索前端 - 基于 Vue 3 + TypeScript + Tailwind CSS 构建的现代化 Web 应用，提供多平台 Galgame 资源聚合搜索、实时流式响应、游戏信息展示和 AI 翻译功能。
+> Galgame 聚合搜索前端 - Vue 3 + TypeScript + Tailwind CSS
 
-重要特性：
+## 技术栈
 
-- **流式搜索**：使用 Server-Sent Events (SSE) 实时推送多个平台的搜索结果
-- **状态管理**：Pinia 管理全局搜索状态和平台结果
-- **UI 设计**：艳粉色（#ff1493）主题 + 液态玻璃拟态效果（glassmorphism）
-- **图标系统**：使用 Lucide Icons 替代 Font Awesome，支持动态组件渲染
-- **响应式布局**：Tailwind CSS 实现移动端和桌面端适配
-- **性能优化**：Lazysizes 懒加载、Quicklink 智能预加载
-- **PWA 支持**：可安装为桌面/移动应用，支持离线访问
-- **外部集成**：VNDB 游戏数据库、Artalk 评论系统、AI 翻译服务
+Vue 3.5 | TypeScript 5.9 | Vite 7 | Pinia 3 | Tailwind CSS 4.1 | motion-v | snd-lib
 
-## 核心文档
+## 特性
 
-- [README](https://github.com/Moe-Sakura/frontend/blob/main/README.md): 项目概述、技术栈、安装和开发指南
-- [响应式设计](https://github.com/Moe-Sakura/frontend/blob/main/docs/RESPONSIVE_DESIGN.md): 移动端适配和响应式设计规范
-- [主题系统](https://github.com/Moe-Sakura/frontend/blob/main/docs/THEME_SYSTEM.md): 艳粉色配色方案和液态玻璃效果实现
-- [贡献指南](https://github.com/Moe-Sakura/frontend/blob/main/docs/CONTRIBUTING.md): 如何参与项目开发
+- 流式搜索 (SSE)
+- 液态玻璃 UI (#ff1493 主题)
+- VNDB 游戏信息 + AI 翻译
+- Artalk 评论系统
+- PWA 支持
 
-## 关键组件
+## AI 开发指南
 
-- [App.vue](https://github.com/Moe-Sakura/frontend/blob/main/src/App.vue): 应用根组件，管理暗色模式、自定义 CSS 和随机背景
-- [SearchHeader.vue](https://github.com/Moe-Sakura/frontend/blob/main/src/components/SearchHeader.vue): 搜索输入框、模式切换、状态检测和使用说明
-- [SearchResults.vue](https://github.com/Moe-Sakura/frontend/blob/main/src/components/SearchResults.vue): 搜索结果展示，支持"加载更多"功能
-- [VndbPanel.vue](https://github.com/Moe-Sakura/frontend/blob/main/src/components/VndbPanel.vue): VNDB 游戏信息面板，包含 AI 翻译功能
+详细的项目结构、代码规范和常用操作请参考:
 
-## API 和状态管理
+- [CLAUDE.md](https://github.com/Moe-Sakura/frontend/blob/main/CLAUDE.md): AI 助手项目上下文
 
-- [search.ts (API)](https://github.com/Moe-Sakura/frontend/blob/main/src/api/search.ts): SSE 流式搜索、VNDB 数据获取、AI 翻译 API
-- [search.ts (Store)](https://github.com/Moe-Sakura/frontend/blob/main/src/stores/search.ts): Pinia 状态管理，处理搜索状态、平台结果和分页
+## 核心文件
 
-## 工具函数
+| 文件 | 说明 |
+|------|------|
+| `src/App.vue` | 根组件，暗色模式、随机背景 |
+| `src/components/SearchHeader.vue` | 搜索框、模式切换 |
+| `src/components/SearchResults.vue` | 搜索结果列表 |
+| `src/stores/search.ts` | 搜索状态管理 |
+| `src/api/search.ts` | SSE 搜索 API |
+| `src/composables/useSound.ts` | snd-lib 音效 |
+| `src/styles/glassmorphism.css` | 液态玻璃样式 |
 
-- [imageDB.ts](https://github.com/Moe-Sakura/frontend/blob/main/src/utils/imageDB.ts): IndexedDB 图片缓存系统
-- [persistence.ts](https://github.com/Moe-Sakura/frontend/blob/main/src/utils/persistence.ts): LocalStorage 数据持久化（搜索历史、自定义设置）
-- [theme.ts](https://github.com/Moe-Sakura/frontend/blob/main/src/utils/theme.ts): 主题管理和自定义 CSS 注入
-- [icons.ts](https://github.com/Moe-Sakura/frontend/blob/main/src/utils/icons.ts): Lucide Icons 集中管理
+## 文档
 
-## 样式系统
-
-- [theme.css](https://github.com/Moe-Sakura/frontend/blob/main/src/styles/theme.css): 艳粉色主题 CSS 变量和渐变类
-- [glassmorphism.css](https://github.com/Moe-Sakura/frontend/blob/main/src/styles/glassmorphism.css): 液态玻璃拟态效果样式
-- [tailwind.config.js](https://github.com/Moe-Sakura/frontend/blob/main/tailwind.config.js): Tailwind CSS 自定义配置
-
-## Optional
-
-- [CHANGELOG](https://github.com/Moe-Sakura/frontend/blob/main/docs/CHANGELOG.md): 版本更新记录
-- [CODE_OF_CONDUCT](https://github.com/Moe-Sakura/frontend/blob/main/docs/CODE_OF_CONDUCT.md): 社区行为准则
-- [Favicon 指南](https://github.com/Moe-Sakura/frontend/blob/main/docs/FAVICON_GUIDE.md): 网站图标设计规范
-- [RSS Feed](https://searchgal.homes/feed.xml): RSS 订阅源
-- [PWA Manifest](https://searchgal.homes/manifest.json): PWA 配置文件
-- [Vue 3 文档](https://vuejs.org/guide/introduction.html): Vue 3 官方指南
-- [Tailwind CSS 文档](https://tailwindcss.com/docs): Tailwind CSS 官方文档
-- [Pinia 文档](https://pinia.vuejs.org/): Pinia 状态管理文档
-- [Lucide Icons](https://lucide.dev/icons/): Lucide 图标库参考
-- [Lozad.js](https://github.com/ApoorvSaxena/lozad.js): 基于 IntersectionObserver 的高性能图片懒加载库
-- [Quicklink](https://getquick.link/): 智能预加载库
+- [README](https://github.com/Moe-Sakura/frontend/blob/main/README.md)
+- [环境变量配置](https://github.com/Moe-Sakura/frontend/blob/main/docs/ENV_CONFIG.md)
+- [主题系统](https://github.com/Moe-Sakura/frontend/blob/main/docs/THEME_SYSTEM.md)
 

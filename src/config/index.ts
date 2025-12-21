@@ -68,8 +68,6 @@ interface AppConfig {
   
   // 性能配置
   performance: {
-    quicklinkDelay: number
-    quicklinkLimit: number
     lazyLoadThreshold: number
   }
   
@@ -167,8 +165,6 @@ export const config: AppConfig = {
   },
   
   performance: {
-    quicklinkDelay: getEnv('VITE_QUICKLINK_DELAY', 500),
-    quicklinkLimit: getEnv('VITE_QUICKLINK_LIMIT', 10),
     lazyLoadThreshold: getEnv('VITE_LAZY_LOAD_THRESHOLD', 0.5),
   },
   

@@ -68,8 +68,6 @@ export const THIRD_PARTY_CONFIG = {
 
 // 性能配置
 export const PERFORMANCE_CONFIG = {
-  quicklinkDelay: Number(import.meta.env.VITE_QUICKLINK_DELAY) || 500,
-  quicklinkLimit: Number(import.meta.env.VITE_QUICKLINK_LIMIT) || 10,
   statusCheckInterval: Number(import.meta.env.VITE_STATUS_CHECK_INTERVAL) || 30000,
   statusCheckTimeout: Number(import.meta.env.VITE_STATUS_CHECK_TIMEOUT) || 5000,
 } as const

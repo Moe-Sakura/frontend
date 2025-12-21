@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { RefreshCw } from 'lucide-vue-next'
-import { playPop, playClick, playWhoosh } from '@/composables/useSound'
+import { playNotification, playTap, playSwipe } from '@/composables/useSound'
 
 const props = defineProps<{
   isVisible: boolean
@@ -50,9 +50,9 @@ const countdown = ref(3)
 let timer: number | null = null
 
 function updateNow() {
-  playClick()
+  playTap()
   countdown.value = 0
-  playWhoosh()
+  playSwipe()
   props.onUpdate()
 }
 
@@ -63,7 +63,7 @@ function startCountdown() {
     timer = null
   }
   
-  playPop()
+  playNotification()
   countdown.value = 3
   timer = window.setInterval(() => {
     countdown.value--

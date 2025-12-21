@@ -19,9 +19,8 @@
 - 💬 **评论系统** - 基于 Artalk 的评论功能
 - 🖼️ **随机背景** - IndexedDB 缓存的随机背景图片系统
 - 📱 **响应式设计** - 完美适配桌面和移动设备
-- ⚡ **性能优化** - Pace.js 加载进度、Fancybox 图片预览、Lazysizes 懒加载、Quicklink 预加载
+- ⚡ **性能优化** - NProgress 进度条、Fancybox 图片预览
 - 📲 **PWA 支持** - 可安装为桌面/移动应用，支持离线访问
-- 📡 **RSS 订阅** - 订阅更新动态
 
 ## 🛠️ 技术栈
 
@@ -38,9 +37,7 @@
 ### 功能库
 - **Artalk 2.9** - 评论系统
 - **Fancybox 6** - 图片和内容预览
-- **Pace.js 1.2** - 页面加载进度条
-- **Lazysizes 5.3** - 高性能图片懒加载
-- **Quicklink 2.3** - 智能预加载
+- **NProgress** - 页面加载进度条
 
 ### API 集成
 - **Cloudflare Workers API** - 搜索聚合后端

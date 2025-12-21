@@ -1,15 +1,18 @@
 <template>
   <!-- 浮动按钮组 -->
   <div class="floating-buttons fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col gap-2 sm:gap-3 z-40">
-    <!-- 回到顶部按钮 -->
+    <!-- 回到顶部按钮 - 显示滚动进度 -->
     <button
       v-show="showScrollToTop"
       v-ripple
       aria-label="回到顶部"
       class="fab-button scroll-top-btn"
       @click="handleScrollToTop"
+      @mouseenter="isHoveringScrollTop = true"
+      @mouseleave="isHoveringScrollTop = false"
     >
-      <ArrowUp :size="20" />
+      <ArrowUp v-if="isHoveringScrollTop || scrollProgress >= 100" :size="20" />
+      <span v-else class="text-sm font-bold">{{ Math.round(scrollProgress) }}%</span>
     </button>
 
     <!-- 站点导航按钮 -->
@@ -92,7 +95,7 @@
             </span>
             <button
               class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-[#ff1493] hover:bg-pink-50 dark:hover:bg-pink-900/30 transition-colors"
-              @click="togglePlatformNav"
+              @click="togglePlatformNav(true)"
             >
               <X :size="16" />
             </button>
@@ -122,7 +125,10 @@
             </div>
             
             <!-- 平台名称 -->
-            <span class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 truncate text-left">
+            <span 
+              v-text-scroll 
+              class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 text-left"
+            >
               {{ platformName }}
             </span>
             
@@ -141,7 +147,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
-import { playClick, playPop } from '@/composables/useSound'
+import { playTap, playButton, playTransitionUp, playTransitionDown, playSwipe } from '@/composables/useSound'
 import { throttle } from '@/composables/useDebounce'
 import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare, History, Star, Circle, DollarSign, XCircle } from 'lucide-vue-next'
 import type { FunctionalComponent } from 'vue'
@@ -150,6 +156,8 @@ const searchStore = useSearchStore()
 const uiStore = useUIStore()
 const showScrollToTop = ref(false)
 const showPlatformNav = ref(false)
+const scrollProgress = ref(0)
+const isHoveringScrollTop = ref(false)
 
 // 计算总结果数
 const totalResults = computed(() => {
@@ -198,38 +206,53 @@ function toggleHistory() {
   uiStore.isHistoryModalOpen = !uiStore.isHistoryModalOpen
 }
 
-function togglePlatformNav() {
+function togglePlatformNav(withSound = false) {
+  const isClosing = showPlatformNav.value
   showPlatformNav.value = !showPlatformNav.value
+  
+  // 如果是通过面板内的关闭按钮调用，需要播放音效
+  if (withSound) {
+    if (isClosing) {
+      playTransitionDown()
+    } else {
+      playTransitionUp()
+    }
+  }
 }
 
 // 带音效的操作函数
 function handleScrollToTop() {
-  playClick()
+  playSwipe()
   scrollToTop()
 }
 
 function handleToggleComments() {
-  playPop()
+  playButton()
   toggleComments()
 }
 
 function handleToggleVndbPanel() {
-  playPop()
+  playButton()
   toggleVndbPanel()
 }
 
 function handleToggleHistory() {
-  playPop()
+  playButton()
   toggleHistory()
 }
 
 function handleTogglePlatformNav() {
-  playPop()
-  togglePlatformNav()
+  // 根据当前状态播放不同音效
+  if (showPlatformNav.value) {
+    playTransitionDown()
+  } else {
+    playTransitionUp()
+  }
+  showPlatformNav.value = !showPlatformNav.value
 }
 
 function handleScrollToPlatform(platformName: string) {
-  playClick()
+  playTap()
   scrollToPlatform(platformName)
 }
 
@@ -245,12 +268,17 @@ function scrollToPlatform(platformName: string) {
     window.scrollTo({ top: y, behavior: 'smooth' })
     
     // 滚动后关闭导航
+    playTransitionDown()
     showPlatformNav.value = false
   }
 }
 
 function handleScroll() {
-  showScrollToTop.value = window.scrollY > 200
+  const scrollTop = window.scrollY
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight
+  
+  showScrollToTop.value = scrollTop > 200
+  scrollProgress.value = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0
 }
 
 // 节流滚动处理 - 每 100ms 最多触发一次
