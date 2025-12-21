@@ -1,5 +1,10 @@
 import { ref, onMounted, onUnmounted, watchEffect, type Ref } from 'vue'
 
+// 扩展 HTMLElement 类型，添加自定义属性
+interface TextScrollElement extends HTMLElement {
+  _textScrollObserver?: ResizeObserver
+}
+
 /**
  * 检测元素文本是否溢出，并设置滚动动画
  */
@@ -9,7 +14,7 @@ export function useTextScroll(elementRef: Ref<HTMLElement | null>) {
 
   function checkOverflow() {
     const el = elementRef.value
-    if (!el) return
+    if (!el) {return}
 
     // 检查是否溢出
     const isOver = el.scrollWidth > el.clientWidth
@@ -72,7 +77,7 @@ export const vTextScroll = {
     // 检查溢出
     const checkOverflow = () => {
       const inner = el.querySelector('.text-scroll-inner') as HTMLElement
-      if (!inner) return
+      if (!inner) {return}
       
       const isOver = inner.scrollWidth > el.clientWidth
       if (isOver) {
@@ -90,7 +95,7 @@ export const vTextScroll = {
         el.classList.remove('is-overflowing')
         // 移除克隆
         const clone = el.querySelector('.text-scroll-clone')
-        if (clone) clone.remove()
+        if (clone) {clone.remove()}
       }
     }
     
@@ -101,7 +106,7 @@ export const vTextScroll = {
     if ('ResizeObserver' in window) {
       const observer = new ResizeObserver(checkOverflow)
       observer.observe(el)
-      ;(el as any)._textScrollObserver = observer
+      ;(el as TextScrollElement)._textScrollObserver = observer
     }
   },
   
@@ -109,7 +114,7 @@ export const vTextScroll = {
     // 内容更新时重新检查
     requestAnimationFrame(() => {
       const inner = el.querySelector('.text-scroll-inner') as HTMLElement
-      if (!inner) return
+      if (!inner) {return}
       
       const isOver = inner.scrollWidth > el.clientWidth
       if (isOver) {
@@ -121,7 +126,7 @@ export const vTextScroll = {
   },
   
   unmounted(el: HTMLElement) {
-    const observer = (el as any)._textScrollObserver
+    const observer = (el as TextScrollElement)._textScrollObserver
     if (observer) {
       observer.disconnect()
     }

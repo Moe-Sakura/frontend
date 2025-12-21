@@ -388,7 +388,6 @@
             <strong>Star</strong> 吧，秋梨膏！你的支持就是咱最大的动力，比心~
           </li>
         </ul>
-
       </div>
     </div>
   </div>
@@ -444,9 +443,9 @@ onMounted(() => {
   
   if (hasURLParams) {
     // 从 URL 恢复
-    if (urlParams.s) searchQuery.value = urlParams.s
-    if (urlParams.mode) searchMode.value = urlParams.mode
-    if (urlParams.api) customApi.value = urlParams.api
+    if (urlParams.s) {searchQuery.value = urlParams.s}
+    if (urlParams.mode) {searchMode.value = urlParams.mode}
+    if (urlParams.api) {customApi.value = urlParams.api}
   } else if (searchStore.searchQuery || searchStore.searchMode !== 'game') {
     // 否则从 store 恢复
     searchQuery.value = searchStore.searchQuery

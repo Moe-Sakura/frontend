@@ -25,7 +25,7 @@ const config = {
  * 创建进度条 DOM 元素
  */
 function createElements() {
-  if (barElement) return
+  if (barElement) {return}
 
   // 创建容器
   const container = document.createElement('div')
@@ -158,17 +158,17 @@ function set(n: number) {
  * 递增进度
  */
 function inc(amount?: number) {
-  if (!isStarted) return
+  if (!isStarted) {return}
   
-  if (progress >= 1) return
+  if (progress >= 1) {return}
   
   if (typeof amount !== 'number') {
     // 自动计算递增量（越接近完成，递增越慢）
-    if (progress < 0.2) amount = 0.1
-    else if (progress < 0.5) amount = 0.04
-    else if (progress < 0.8) amount = 0.02
-    else if (progress < 0.99) amount = 0.005
-    else amount = 0
+    if (progress < 0.2) {amount = 0.1}
+    else if (progress < 0.5) {amount = 0.04}
+    else if (progress < 0.8) {amount = 0.02}
+    else if (progress < 0.99) {amount = 0.005}
+    else {amount = 0}
   }
   
   set(Math.min(progress + amount, 0.994))
@@ -178,7 +178,7 @@ function inc(amount?: number) {
  * 开始 trickle（自动递增）
  */
 function startTrickle() {
-  if (trickleInterval) return
+  if (trickleInterval) {return}
   
   trickleInterval = window.setInterval(() => {
     inc()

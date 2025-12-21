@@ -108,7 +108,7 @@ export function initFancyboxLazy() {
   // 使用事件委托，在点击时懒加载
   document.addEventListener('click', async (e) => {
     const target = (e.target as HTMLElement).closest('[data-fancybox]')
-    if (!target) return
+    if (!target) {return}
     
     // 阻止默认行为
     e.preventDefault()
@@ -165,7 +165,7 @@ export function preloadFancybox() {
  */
 export async function openFancybox(
   items: Array<{ src: string; caption?: string }>,
-  options?: Partial<typeof fancyboxOptions>
+  options?: Partial<typeof fancyboxOptions>,
 ) {
   const Fancybox = await loadFancybox()
   Fancybox.show(items, { ...fancyboxOptions, ...options })

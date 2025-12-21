@@ -15,10 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { animate } from '@/composables/useAnime'
 
-const props = defineProps<{
+defineProps<{
   imageUrl: string
   imageKey: string | number
   kenBurnsClass: string

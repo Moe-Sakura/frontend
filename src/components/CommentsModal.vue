@@ -131,7 +131,7 @@ let isClosing = false
 // 检查并滚动到指定评论
 function scrollToComment() {
   const hash = window.location.hash
-  if (!hash.startsWith('#atk-comment-')) return
+  if (!hash.startsWith('#atk-comment-')) {return}
   
   // 等待 Artalk 渲染完成后滚动
   const maxAttempts = 20
@@ -167,7 +167,7 @@ const { isFullscreen, windowStyle, startDrag, startResize, toggleFullscreen, res
 })
 
 function handleDragStart(e: MouseEvent | TouchEvent) {
-  if ((e.target as HTMLElement).closest('button')) return
+  if ((e.target as HTMLElement).closest('button')) {return}
   if (modalRef.value) {
     startDrag(e, modalRef.value)
   }
