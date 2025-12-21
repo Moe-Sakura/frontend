@@ -13,29 +13,33 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@tailwindcss/vite": "^4.1.18",
-    "@types/node": "^25.0.2",
+    "@types/node": "^25.0.3",
     "@types/nprogress": "^0.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.49.0",
-    "@typescript-eslint/parser": "^8.49.0",
+    "@types/prismjs": "^1.26.5",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
     "@vitejs/plugin-vue": "^6.0.3",
     "eslint": "^9.39.2",
     "eslint-plugin-vue": "^10.6.2",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.49.0",
-    "vite": "^7.2.7",
-    "vue-tsc": "^3.1.8"
+    "typescript-eslint": "^8.50.0",
+    "vite": "^7.3.0",
+    "vue-tsc": "^3.2.0"
   },
   "dependencies": {
     "@fancyapps/ui": "^6.1.7",
     "@fontsource/noto-sans-sc": "^5.2.8",
+    "@types/animejs": "^3.1.13",
+    "animejs": "^4.2.2",
     "artalk": "^2.9.1",
-    "lozad": "^1.16.0",
-    "lucide-vue-next": "^0.561.0",
-    "motion-v": "^1.7.4",
+    "lucide-vue-next": "^0.562.0",
     "nprogress": "^0.2.0",
     "pinia": "^3.0.4",
-    "quicklink": "^3.0.1",
-    "vue": "^3.5.25"
-  }
+    "prismjs": "^1.30.0",
+    "snd-lib": "^1.2.4",
+    "vue": "^3.5.26",
+    "vue-prism-editor": "2.0.0-alpha.2"
+  },
+  "packageManager": "pnpm@10.26.1+sha512.664074abc367d2c9324fdc18037097ce0a8f126034160f709928e9e9f95d98714347044e5c3164d65bd5da6c59c6be362b107546292a8eecb7999196e5ce58fa"
 }

@@ -48,8 +48,6 @@ interface ImportMetaEnv {
   readonly VITE_THEME_BACKGROUND_DARK: string
   
   // 性能配置
-  readonly VITE_QUICKLINK_DELAY: string
-  readonly VITE_QUICKLINK_LIMIT: string
   readonly VITE_LAZY_LOAD_THRESHOLD: string
   
   // 开发配置

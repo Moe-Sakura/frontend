@@ -73,8 +73,6 @@ interface ImportMetaEnv {
   readonly VITE_BUSUANZI_ENABLED: string
   
   // 性能配置
-  readonly VITE_QUICKLINK_DELAY: string
-  readonly VITE_QUICKLINK_LIMIT: string
   readonly VITE_STATUS_CHECK_INTERVAL: string
   readonly VITE_STATUS_CHECK_TIMEOUT: string
   

@@ -1,229 +1,214 @@
 /**
  * 音效管理 composable
- * 使用 Vocaloid Miku 风格的合成音效
- * 特点：高音调、电子合成感、带颤音
+ * 使用 snd-lib 提供精心设计的 UI 音效
+ * https://snd.dev/
  */
 
 import { ref } from 'vue'
-
-// 音效类型
-export type SoundType = 'click' | 'success' | 'error' | 'pop' | 'whoosh' | 'toggle'
+import Snd from 'snd-lib'
 
 // 音效是否启用
 const soundEnabled = ref(true)
 
-// 音频上下文（懒加载）
-let audioContext: AudioContext | null = null
+// snd-lib 实例（单例）
+let sndInstance: Snd | null = null
+let isLoaded = false
+let isLoading = false
 
-// 获取音频上下文
-function getAudioContext(): AudioContext {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)()
-  }
-  return audioContext
-}
+// 当前音效套件
+const currentKit = ref<'SND01' | 'SND02'>('SND01')
 
-// Miku 音符频率 (基于 A4 = 440Hz)
-const MIKU_NOTES = {
-  C4: 261.63,
-  D4: 293.66,
-  E4: 329.63,
-  F4: 349.23,
-  G4: 392.00,
-  A4: 440.00,
-  B4: 493.88,
-  C5: 523.25,
-  D5: 587.33,
-  E5: 659.25,
-  F5: 698.46,
-  G5: 783.99,
-  A5: 880.00,
-  B5: 987.77,
-  C6: 1046.50,
-}
-
-// 随机选择
-function randomChoice<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
-
-// 创建 Miku 风格的振荡器（带颤音）
-function createMikuOscillator(
-  ctx: AudioContext, 
-  frequency: number, 
-  type: OscillatorType = 'square',
-  vibratoDepth: number = 10,
-  vibratoRate: number = 6,
-): { osc: OscillatorNode; gain: GainNode } {
-  const osc = ctx.createOscillator()
-  const gain = ctx.createGain()
-  
-  // 主振荡器 - 使用方波模拟 Vocaloid 音色
-  osc.type = type
-  osc.frequency.setValueAtTime(frequency, ctx.currentTime)
-  
-  // 添加颤音 (vibrato) - Miku 特征
-  if (vibratoDepth > 0) {
-    const vibrato = ctx.createOscillator()
-    const vibratoGain = ctx.createGain()
-    vibrato.frequency.setValueAtTime(vibratoRate, ctx.currentTime)
-    vibratoGain.gain.setValueAtTime(vibratoDepth, ctx.currentTime)
-    vibrato.connect(vibratoGain)
-    vibratoGain.connect(osc.frequency)
-    vibrato.start(ctx.currentTime)
-    vibrato.stop(ctx.currentTime + 0.5)
+// 获取或创建 snd 实例
+async function getSnd(): Promise<Snd | null> {
+  if (!soundEnabled.value) {
+    return null
   }
   
-  osc.connect(gain)
+  if (sndInstance && isLoaded) {
+    return sndInstance
+  }
   
-  return { osc, gain }
-}
-
-// 播放 Miku 风格音效
-function playSound(type: SoundType, volume = 0.25) {
-  if (!soundEnabled.value) {return}
-
+  if (isLoading) {
+    // 等待加载完成
+    return new Promise((resolve) => {
+      const check = setInterval(() => {
+        if (isLoaded) {
+          clearInterval(check)
+          resolve(sndInstance)
+        }
+      }, 50)
+    })
+  }
+  
   try {
-    const ctx = getAudioContext()
+    isLoading = true
+    sndInstance = new Snd()
+    
+    // 加载音效套件
+    const kit = currentKit.value === 'SND01' ? Snd.KITS.SND01 : Snd.KITS.SND02
+    await sndInstance.load(kit)
+    
+    isLoaded = true
+    isLoading = false
+    return sndInstance
+  } catch (error) {
+    console.warn('[Sound] Failed to load snd-lib:', error)
+    isLoading = false
+    return null
+  }
+}
 
-    switch (type) {
-      case 'click': {
-        // Miku 点击音 - 高音「ピッ」
-        const notes = [MIKU_NOTES.E5, MIKU_NOTES.F5, MIKU_NOTES.G5, MIKU_NOTES.A5]
-        const freq = randomChoice(notes)
-        
-        const { osc, gain } = createMikuOscillator(ctx, freq, 'square', 5, 8)
-        gain.connect(ctx.destination)
-        
-        gain.gain.setValueAtTime(volume, ctx.currentTime)
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.06)
-        
-        osc.start(ctx.currentTime)
-        osc.stop(ctx.currentTime + 0.06)
-        break
-      }
+// 预加载音效（可选，用于首次交互前预热）
+async function preloadSounds(): Promise<void> {
+  await getSnd()
+}
 
-      case 'success': {
-        // Miku 成功音 - 上升琶音「ラララ♪」
-        const melodies = [
-          [MIKU_NOTES.C5, MIKU_NOTES.E5, MIKU_NOTES.G5, MIKU_NOTES.C6],
-          [MIKU_NOTES.D5, MIKU_NOTES.F5, MIKU_NOTES.A5, MIKU_NOTES.D5 * 2],
-          [MIKU_NOTES.E5, MIKU_NOTES.G5, MIKU_NOTES.B5, MIKU_NOTES.E5 * 2],
-        ]
-        const melody = randomChoice(melodies)
-        
-        melody.forEach((freq, i) => {
-          const { osc, gain } = createMikuOscillator(ctx, freq, 'square', 12, 6)
-          gain.connect(ctx.destination)
-          
-          const startTime = ctx.currentTime + i * 0.08
-          gain.gain.setValueAtTime(0, startTime)
-          gain.gain.linearRampToValueAtTime(volume * 0.8, startTime + 0.02)
-          gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.12)
-          
-          osc.start(startTime)
-          osc.stop(startTime + 0.12)
-        })
-        break
-      }
+// 切换音效套件
+async function switchKit(kit: 'SND01' | 'SND02'): Promise<void> {
+  if (currentKit.value === kit) {
+    return
+  }
+  
+  currentKit.value = kit
+  isLoaded = false
+  
+  if (sndInstance) {
+    try {
+      const sndKit = kit === 'SND01' ? Snd.KITS.SND01 : Snd.KITS.SND02
+      await sndInstance.load(sndKit)
+      isLoaded = true
+    } catch (error) {
+      console.warn('[Sound] Failed to switch kit:', error)
+    }
+  }
+}
 
-      case 'error': {
-        // Miku 错误音 - 下降「えっ？」
-        const freq = randomChoice([MIKU_NOTES.A4, MIKU_NOTES.B4])
-        
-        const { osc, gain } = createMikuOscillator(ctx, freq, 'sawtooth', 15, 4)
-        gain.connect(ctx.destination)
-        
-        osc.frequency.setValueAtTime(freq, ctx.currentTime)
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, ctx.currentTime + 0.2)
-        
-        gain.gain.setValueAtTime(volume * 0.7, ctx.currentTime)
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2)
-        
-        osc.start(ctx.currentTime)
-        osc.stop(ctx.currentTime + 0.2)
-        break
-      }
+// ========================================
+// 音效类型定义（对应 snd-lib 的 SOUNDS）
+// ========================================
+export type SoundType = 
+  | 'tap'             // 轻触
+  | 'button'          // 按钮
+  | 'select'          // 选择
+  | 'toggle_on'       // 开关打开
+  | 'toggle_off'      // 开关关闭
+  | 'type'            // 打字
+  | 'swipe'           // 滑动
+  | 'notification'    // 通知
+  | 'celebration'     // 庆祝
+  | 'caution'         // 警告
+  | 'disabled'        // 禁用
+  | 'transition_up'   // 上升过渡
+  | 'transition_down' // 下降过渡
+  | 'progress_loop'   // 进度循环
+  | 'ringtone_loop'   // 铃声循环
 
-      case 'pop': {
-        // Miku 弹出音 - 可爱「ポン♪」
-        const notes = [MIKU_NOTES.C5, MIKU_NOTES.D5, MIKU_NOTES.E5, MIKU_NOTES.G5]
-        const freq = randomChoice(notes)
-        
-        const { osc, gain } = createMikuOscillator(ctx, freq * 0.8, 'square', 8, 10)
-        gain.connect(ctx.destination)
-        
-        // 快速上升音调
-        osc.frequency.setValueAtTime(freq * 0.8, ctx.currentTime)
-        osc.frequency.exponentialRampToValueAtTime(freq * 1.2, ctx.currentTime + 0.03)
-        osc.frequency.exponentialRampToValueAtTime(freq, ctx.currentTime + 0.08)
-        
-        gain.gain.setValueAtTime(volume * 0.9, ctx.currentTime)
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1)
-        
-        osc.start(ctx.currentTime)
-        osc.stop(ctx.currentTime + 0.1)
-        break
-      }
+// 音效类型映射到 snd-lib 的 SOUNDS
+const soundMap: Record<SoundType, keyof typeof Snd.SOUNDS> = {
+  tap: 'TAP',
+  button: 'BUTTON',
+  select: 'SELECT',
+  toggle_on: 'TOGGLE_ON',
+  toggle_off: 'TOGGLE_OFF',
+  type: 'TYPE',
+  swipe: 'SWIPE',
+  notification: 'NOTIFICATION',
+  celebration: 'CELEBRATION',
+  caution: 'CAUTION',
+  disabled: 'DISABLED',
+  transition_up: 'TRANSITION_UP',
+  transition_down: 'TRANSITION_DOWN',
+  progress_loop: 'PROGRESS_LOOP',
+  ringtone_loop: 'RINGTONE_LOOP',
+}
 
-      case 'whoosh': {
-        // Miku 滑动音 - 快速「シュッ」
-        const startFreqs = [MIKU_NOTES.C6, MIKU_NOTES.D5 * 2, MIKU_NOTES.E5 * 2]
-        const startFreq = randomChoice(startFreqs)
-        
-        const { osc, gain } = createMikuOscillator(ctx, startFreq, 'sawtooth', 0, 0)
-        gain.connect(ctx.destination)
-        
-        osc.frequency.setValueAtTime(startFreq, ctx.currentTime)
-        osc.frequency.exponentialRampToValueAtTime(startFreq * 0.2, ctx.currentTime + 0.12)
-        
-        gain.gain.setValueAtTime(volume * 0.5, ctx.currentTime)
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12)
-        
-        osc.start(ctx.currentTime)
-        osc.stop(ctx.currentTime + 0.12)
-        break
-      }
-
-      case 'toggle': {
-        // Miku 切换音 - 双音「ピコッ」
-        const pairs = [
-          [MIKU_NOTES.E5, MIKU_NOTES.A5],
-          [MIKU_NOTES.G5, MIKU_NOTES.C6],
-          [MIKU_NOTES.D5, MIKU_NOTES.G5],
-          [MIKU_NOTES.F5, MIKU_NOTES.B5],
-        ]
-        const [freq1, freq2] = randomChoice(pairs)
-        
-        // 第一个音
-        const { osc: osc1, gain: gain1 } = createMikuOscillator(ctx, freq1, 'square', 6, 8)
-        gain1.connect(ctx.destination)
-        gain1.gain.setValueAtTime(volume * 0.7, ctx.currentTime)
-        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05)
-        osc1.start(ctx.currentTime)
-        osc1.stop(ctx.currentTime + 0.05)
-        
-        // 第二个音（稍高）
-        const { osc: osc2, gain: gain2 } = createMikuOscillator(ctx, freq2, 'square', 6, 8)
-        gain2.connect(ctx.destination)
-        gain2.gain.setValueAtTime(0, ctx.currentTime + 0.04)
-        gain2.gain.linearRampToValueAtTime(volume * 0.8, ctx.currentTime + 0.05)
-        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12)
-        osc2.start(ctx.currentTime + 0.04)
-        osc2.stop(ctx.currentTime + 0.12)
-        break
-      }
+// 播放音效
+async function playSound(type: SoundType): Promise<void> {
+  if (!soundEnabled.value) {
+    return
+  }
+  
+  try {
+    const snd = await getSnd()
+    if (!snd) {
+      return
+    }
+    
+    const soundKey = soundMap[type]
+    const sound = Snd.SOUNDS[soundKey]
+    
+    if (sound) {
+      snd.play(sound)
     }
   } catch {
-    // 静默处理音频播放失败
+    // 静默处理错误
   }
 }
 
+// ========================================
+// 兼容旧 API 的音效类型（映射到新类型）
+// ========================================
+export type LegacySoundType = 
+  | 'click'
+  | 'success'  
+  | 'error'
+  | 'pop'
+  | 'whoosh'
+  | 'toggle'
+  | 'hover'
+  | 'complete'
+  | 'warning'
+  | 'typing'
+  | 'coin'
+  | 'levelup'
+  | 'bubble'
+  | 'sweep'
+  | 'ding'
+  | 'chime'
+  | 'bounce'
+  | 'unlock'
+  | 'close'
+
+// 旧 API 映射
+const legacyMap: Record<LegacySoundType, SoundType> = {
+  click: 'tap',
+  success: 'celebration',
+  error: 'caution',
+  pop: 'button',
+  whoosh: 'swipe',
+  toggle: 'toggle_on',
+  hover: 'tap',
+  complete: 'celebration',
+  warning: 'caution',
+  typing: 'type',
+  coin: 'celebration',
+  levelup: 'celebration',
+  bubble: 'button',
+  sweep: 'swipe',
+  ding: 'notification',
+  chime: 'notification',
+  bounce: 'transition_up',
+  unlock: 'celebration',
+  close: 'transition_down',
+}
+
+// 兼容旧 API 的播放方法
+async function playLegacySound(type: LegacySoundType): Promise<void> {
+  const mappedType = legacyMap[type]
+  return playSound(mappedType)
+}
+
+// ========================================
 // 导出 composable
+// ========================================
 export function useSound() {
   return {
     soundEnabled,
+    currentKit,
     playSound,
+    playLegacySound,
+    preloadSounds,
+    switchKit,
     toggleSound: () => {
       soundEnabled.value = !soundEnabled.value
     },
@@ -233,10 +218,44 @@ export function useSound() {
   }
 }
 
-// 导出便捷方法
-export const playClick = () => playSound('click')
-export const playSuccess = () => playSound('success')
-export const playError = () => playSound('error')
-export const playPop = () => playSound('pop')
-export const playWhoosh = () => playSound('whoosh')
-export const playToggle = () => playSound('toggle')
+// ========================================
+// 导出便捷方法（使用 snd-lib 原生音效）
+// ========================================
+export const playTap = () => playSound('tap')
+export const playButton = () => playSound('button')
+export const playSelect = () => playSound('select')
+export const playToggleOn = () => playSound('toggle_on')
+export const playToggleOff = () => playSound('toggle_off')
+export const playType = () => playSound('type')
+export const playSwipe = () => playSound('swipe')
+export const playNotification = () => playSound('notification')
+export const playCelebration = () => playSound('celebration')
+export const playCaution = () => playSound('caution')
+export const playDisabled = () => playSound('disabled')
+export const playTransitionUp = () => playSound('transition_up')
+export const playTransitionDown = () => playSound('transition_down')
+export const playProgressLoop = () => playSound('progress_loop')
+export const playRingtoneLoop = () => playSound('ringtone_loop')
+
+// ========================================
+// 兼容旧 API 的便捷方法
+// ========================================
+export const playClick = () => playLegacySound('click')
+export const playSuccess = () => playLegacySound('success')
+export const playError = () => playLegacySound('error')
+export const playPop = () => playLegacySound('pop')
+export const playWhoosh = () => playLegacySound('whoosh')
+export const playToggle = () => playLegacySound('toggle')
+export const playHover = () => playLegacySound('hover')
+export const playComplete = () => playLegacySound('complete')
+export const playWarning = () => playLegacySound('warning')
+export const playTyping = () => playLegacySound('typing')
+export const playCoin = () => playLegacySound('coin')
+export const playLevelup = () => playLegacySound('levelup')
+export const playBubble = () => playLegacySound('bubble')
+export const playSweep = () => playLegacySound('sweep')
+export const playDing = () => playLegacySound('ding')
+export const playChime = () => playLegacySound('chime')
+export const playBounce = () => playLegacySound('bounce')
+export const playUnlock = () => playLegacySound('unlock')
+export const playClose = () => playLegacySound('close')

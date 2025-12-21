@@ -89,23 +89,7 @@ function initArtalk() {
 }
 ```
 
-### 5. Quicklink 配置
-
-**在 main.ts 中：**
-```typescript
-import { listen } from 'quicklink'
-import { config } from '@/config'
-
-window.addEventListener('load', () => {
-  listen({
-    delay: config.performance.quicklinkDelay,
-    limit: config.performance.quicklinkLimit,
-    ignores: [/\/api\//, /artalk/],
-  })
-})
-```
-
-### 6. 状态检查
+### 5. 状态检查
 
 **在 SearchHeader.vue 中：**
 ```typescript

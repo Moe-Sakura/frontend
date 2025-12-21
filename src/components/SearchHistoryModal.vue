@@ -97,7 +97,10 @@
                   </span>
                   
                   <!-- 搜索关键词 -->
-                  <span class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 truncate text-left group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <span 
+                    v-text-scroll 
+                    class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 text-left group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
+                  >
                     {{ item.query }}
                   </span>
 
@@ -131,7 +134,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { loadSearchHistory, clearSearchHistory as clearHistoryStorage, type SearchHistory } from '@/utils/persistence'
-import { playClick, playPop } from '@/composables/useSound'
+import { playSelect, playTap, playCaution, playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import { History, Trash2, X } from 'lucide-vue-next'
 
 const uiStore = useUIStore()
@@ -148,7 +151,7 @@ function loadHistory() {
 
 // 选择历史记录
 function handleSelectHistory(item: SearchHistory) {
-  playClick()
+  playSelect()
   
   // 先发送事件（让父组件更新 URL）
   emit('select', item)
@@ -159,7 +162,7 @@ function handleSelectHistory(item: SearchHistory) {
 
 // 清空历史
 function handleClearHistory() {
-  playPop()
+  playCaution()
   if (confirm('确定要清空所有搜索历史吗？')) {
     clearHistoryStorage()
     history.value = []
@@ -168,7 +171,7 @@ function handleClearHistory() {
 
 // 删除单条记录
 function handleRemoveItem(index: number) {
-  playClick()
+  playTap()
   history.value.splice(index, 1)
   if (history.value.length > 0) {
     // 使用与 persistence.ts 一致的 key
@@ -180,7 +183,7 @@ function handleRemoveItem(index: number) {
 
 // 关闭模态框
 function closeModal() {
-  playPop()
+  playTransitionDown()
   uiStore.isHistoryModalOpen = false
 }
 
@@ -197,6 +200,7 @@ function handleKeydown(e: globalThis.KeyboardEvent) {
 // 监听面板打开时加载数据
 watch(() => uiStore.isHistoryModalOpen, (isOpen) => {
   if (isOpen) {
+    playTransitionUp()
     loadHistory()
   }
 })

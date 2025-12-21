@@ -20,7 +20,6 @@ import './styles/glassmorphism.css'
 
 // 预加载随机图片 API
 const preloadImage = new Image()
-preloadImage.fetchPriority = 'high'
 preloadImage.src = `https://api.illlights.com/v1/img?t=${Date.now()}`
 
 // NProgress - 轻量级进度条
@@ -30,17 +29,27 @@ import { createProgressFetch } from './composables/useProgress'
 // Artalk 评论系统
 import 'artalk/dist/Artalk.css'
 
-// Fancybox - 图片灯箱和内容预览
-import { Fancybox } from '@fancyapps/ui'
-import '@fancyapps/ui/dist/fancybox/fancybox.css'
+// Fancybox - 图片灯箱（懒加载）
+import { initFancyboxLazy } from './composables/useFancybox'
 
 // 点击涟漪指令
 import { vRipple } from './directives/vRipple'
+
+// 文本滚动指令
+import { vTextScroll } from './composables/useTextScroll'
+
+// Anime.js 动画指令
+import { vAnime, vAnimeStagger, vHover, vTap } from './composables/useAnime'
 
 const app = createApp(App)
 
 // 注册全局指令
 app.directive('ripple', vRipple)
+app.directive('text-scroll', vTextScroll)
+app.directive('anime', vAnime)
+app.directive('anime-stagger', vAnimeStagger)
+app.directive('hover', vHover)
+app.directive('tap', vTap)
 const pinia = createPinia()
 
 // 配置 Pinia 插件
@@ -57,65 +66,8 @@ createProgressFetch()
 
 app.mount('#app')
 
-// 初始化 Fancybox 图片灯箱
-Fancybox.bind('[data-fancybox]', {
-  // 动画效果
-  showClass: 'f-fadeIn',
-  hideClass: 'f-fadeOut',
-  // 工具栏
-  Toolbar: {
-    display: {
-      left: ['infobar'],
-      middle: ['zoomIn', 'zoomOut', 'toggle1to1', 'rotateCCW', 'rotateCW', 'flipX', 'flipY'],
-      right: ['slideshow', 'thumbs', 'close'],
-    },
-  },
-  // 缩略图
-  Thumbs: {
-    type: 'classic',
-    autoStart: false,
-  },
-  // 幻灯片
-  Carousel: {
-    infinite: true,
-    transition: 'slide',
-    friction: 0.8,
-  },
-  // 图片设置
-  Images: {
-    zoom: true,
-    protected: true,
-  },
-  // 关闭设置
-  closeButton: 'top',
-  dragToClose: true,
-  // 键盘导航
-  keyboard: {
-    Escape: 'close',
-    Delete: 'close',
-    Backspace: 'close',
-    PageUp: 'next',
-    PageDown: 'prev',
-    ArrowUp: 'prev',
-    ArrowDown: 'next',
-    ArrowRight: 'next',
-    ArrowLeft: 'prev',
-  },
-  // 预加载
-  preload: 2,
-  // 移动端优化
-  touch: {
-    vertical: true,
-    momentum: true,
-  },
-  // 点击背景关闭
-  closeExisting: false,
-  trapFocus: true,
-  autoFocus: true,
-  placeFocusBack: true,
-  // 自定义样式
-  mainClass: 'fancybox-custom',
-})
+// 初始化 Fancybox 懒加载（首次点击图片时才加载）
+initFancyboxLazy()
 
 // Service Worker 更新检测
 // 当前激活的 SW 版本（运行时获取）
@@ -232,32 +184,3 @@ if ('serviceWorker' in navigator) {
 
 // 导出更新函数供组件使用
 ;(window as Window & { triggerSwUpdate?: typeof triggerSwUpdate }).triggerSwUpdate = triggerSwUpdate
-
-// Quicklink - 智能预加载可见链接
-import { listen } from 'quicklink'
-
-// Lozad 懒加载 - 与 Pinia store 集成
-import { initGlobalLazyLoad } from './composables/useLazyLoad'
-
-// 在页面加载完成后启用 Quicklink 和 Lozad
-window.addEventListener('load', () => {
-  // Quicklink 智能预加载
-  listen({
-    // 延迟启动（毫秒）
-    delay: 500,
-    // 预加载限制
-    limit: 10,
-    // 忽略的 URL 模式
-    ignores: [
-      // 忽略外部 API 链接
-      /\/api\//,
-      // 忽略评论系统
-      /artalk/,
-      // 忽略图片 API
-      /illlights\.com/,
-    ],
-  })
-
-  // 初始化 Lozad 懒加载（集成 Pinia store）
-  initGlobalLazyLoad()
-})

@@ -48,9 +48,23 @@
     
     /* 平滑滚动 */
     scroll-behavior: smooth;
-    
-    /* 过渡动画 */
-    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  /* 背景占位 - 在图片加载前显示渐变 */
+  #background-pattern {
+    background: 
+      radial-gradient(ellipse at 20% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 60%),
+      linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+
+  .dark #background-pattern {
+    background: 
+      radial-gradient(ellipse at 20% 30%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 60%),
+      linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   }
 
   /* 暗色模式 - 透明背景 */
@@ -72,17 +86,6 @@
   /* 图片懒加载过渡动画 */
   img[loading="lazy"] {
     transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Lozad.js 懒加载样式 */
-  .lozad {
-    opacity: 0;
-    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .lozad-loaded,
-  .lozad[data-loaded="true"] {
-    opacity: 1;
   }
 
   /* ============================================
@@ -229,6 +232,87 @@
 
   .draggable:active {
     cursor: grabbing;
+  }
+
+  /* ============================================
+     滚动显示文本 - 替代省略号
+     ============================================ */
+  
+  /* 滚动文本容器 */
+  .text-scroll {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .text-scroll-inner {
+    display: inline-block;
+    padding-right: 2rem;
+    animation: none;
+  }
+
+  /* 悬停时滚动 */
+  .text-scroll:hover .text-scroll-inner {
+    animation: marquee-scroll 8s linear infinite;
+  }
+
+  /* 需要滚动时才启用动画（JS 控制添加此类） */
+  .text-scroll.is-overflowing:hover .text-scroll-inner {
+    animation: marquee-scroll var(--scroll-duration, 8s) linear infinite;
+  }
+
+  /* 非溢出时不滚动 */
+  .text-scroll:not(.is-overflowing) .text-scroll-inner {
+    animation: none !important;
+  }
+
+  @keyframes marquee-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* 渐隐边缘 */
+  .text-scroll::before,
+  .text-scroll::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.5rem;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .text-scroll::before {
+    left: 0;
+    background: linear-gradient(to right, currentColor 0%, transparent 100%);
+  }
+
+  .text-scroll::after {
+    right: 0;
+    background: linear-gradient(to left, currentColor 0%, transparent 100%);
+  }
+
+  .text-scroll.is-overflowing::after {
+    opacity: 0.15;
+  }
+
+  .text-scroll.is-overflowing:hover::before {
+    opacity: 0.15;
+  }
+
+  /* 减少动画偏好时禁用滚动 */
+  @media (prefers-reduced-motion: reduce) {
+    .text-scroll:hover .text-scroll-inner,
+    .text-scroll.is-overflowing:hover .text-scroll-inner {
+      animation: none !important;
+    }
   }
 }
 

@@ -99,8 +99,6 @@ pnpm dev
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `VITE_QUICKLINK_DELAY` | Quicklink 延迟（毫秒） | 500 |
-| `VITE_QUICKLINK_LIMIT` | Quicklink 限制数 | 10 |
 | `VITE_LAZY_LOAD_THRESHOLD` | 懒加载阈值 | 0.5 |
 
 ### 开发配置

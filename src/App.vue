@@ -10,7 +10,7 @@
     class="min-h-screen relative"
   >
     <!-- 背景层容器 - GPU 加速 -->
-    <div 
+    <div
       id="background-container" 
       class="fixed inset-0 z-[-2] overflow-hidden gpu-layer"
     >
@@ -21,19 +21,12 @@
         :class="{ 'opacity-0': hasBackgroundImage }"
       />
       
-      <!-- 动画背景图层 - 新图片直接覆盖在旧图片上入场 -->
-      <AnimatePresence>
-        <Motion
-          v-if="currentBgKey"
-          :key="currentBgKey"
-          :initial="getTransitionVariant('initial')"
-          :animate="getTransitionVariant('animate')"
-          :exit="getTransitionVariant('exit')"
-          :transition="bgTransition"
-          class="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform gpu-layer"
-          :style="{ backgroundImage: `url(${backgroundImageUrl})` }"
-        />
-      </AnimatePresence>
+      <!-- 动画背景图层 - 使用 anime.js + CSS Ken Burns 效果 -->
+      <AnimatedBackground
+        :image-url="backgroundImageUrl"
+        :image-key="currentBgKey"
+        :ken-burns-class="kenBurnsClass"
+      />
       
       <!-- 半透明遮罩层（提升内容可读性） -->
       <div class="absolute inset-0 bg-white/15 dark:bg-slate-900/30 z-[1]" />
@@ -67,7 +60,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, shallowRef } from 'vue'
-import { Motion, AnimatePresence } from 'motion-v'
+import AnimatedBackground from '@/components/AnimatedBackground.vue'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
@@ -110,9 +103,9 @@ const searchStore = useSearchStore()
 const uiStore = useUIStore()
 const searchHeaderRef = ref<InstanceType<typeof SearchHeader> | null>(null)
 
-// 打开设置
+// 切换设置面板
 function openSettings() {
-  uiStore.isSettingsModalOpen = true
+  uiStore.isSettingsModalOpen = !uiStore.isSettingsModalOpen
 }
 
 // 处理历史记录选择
@@ -164,62 +157,26 @@ const MAX_BLOB_URLS = 20 // 最大同时保持的 Blob URL 数量（内存优化
 import { scheduleIdleTask } from '@/composables/usePerformance'
 
 // 背景动画相关
-const currentBgKey = ref(0) // 用于触发 AnimatePresence 动画
-const currentTransitionType = ref<'fade' | 'zoom' | 'slide' | 'blur' | 'scale'>('fade')
+const currentBgKey = ref(0) // 用于触发背景切换动画
 
-// 入场动画时长
-const ENTER_DURATION = 1.2
+// Ken Burns 动画变体（使用 CSS 动画实现更流畅的效果）
+type KenBurnsType = 'kb-zoom-in' | 'kb-zoom-out' | 'kb-pan-left' | 'kb-pan-right' | 'kb-pan-up' | 'kb-pan-down'
+const currentKenBurns = ref<KenBurnsType>('kb-zoom-in')
 
-// 转场动画变体定义
-// 新图片入场覆盖旧图片，缩放从 1.0 到 1.2
-// 退出动画延迟到新图片入场完成后再执行
-const transitionVariants = {
-  fade: {
-    initial: { opacity: 0, scale: 1 },
-    animate: { opacity: 1, scale: 1.2 },
-    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
-  },
-  zoom: {
-    initial: { opacity: 0, scale: 1.3 },
-    animate: { opacity: 1, scale: 1.2 },
-    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
-  },
-  slide: {
-    initial: { opacity: 0, x: 60, scale: 1 },
-    animate: { opacity: 1, x: 0, scale: 1.2 },
-    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
-  },
-  blur: {
-    initial: { opacity: 0, filter: 'blur(20px)', scale: 1 },
-    animate: { opacity: 1, filter: 'blur(0px)', scale: 1.2 },
-    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
-  },
-  scale: {
-    initial: { opacity: 0, scale: 0.85 },
-    animate: { opacity: 1, scale: 1.2 },
-    exit: { opacity: 0, transition: { delay: ENTER_DURATION, duration: 0.5 } },
-  },
-}
+// Ken Burns CSS 类
+const kenBurnsClass = computed(() => currentKenBurns.value)
 
-// 背景动画过渡配置（入场动画）
-const bgTransition = {
-  // 入场淡入时间
-  opacity: { duration: ENTER_DURATION, ease: 'easeOut' as const },
-  // 缩放动画持续整个显示周期（10秒）
-  scale: { duration: DISPLAY_INTERVAL / 1000, ease: 'linear' as const },
-  // 其他属性（位移、滤镜等）
-  default: { duration: ENTER_DURATION, ease: 'easeInOut' as const },
-}
-
-// 获取当前转场变体
-function getTransitionVariant(phase: 'initial' | 'animate' | 'exit') {
-  return transitionVariants[currentTransitionType.value][phase]
-}
-
-// 随机选择转场类型
-function selectRandomTransition() {
-  const types: Array<'fade' | 'zoom' | 'slide' | 'blur' | 'scale'> = ['fade', 'zoom', 'slide', 'blur', 'scale']
-  currentTransitionType.value = types[Math.floor(Math.random() * types.length)]
+// 随机选择 Ken Burns 效果
+function selectRandomKenBurns() {
+  const effects: KenBurnsType[] = [
+    'kb-zoom-in',
+    'kb-zoom-out', 
+    'kb-pan-left',
+    'kb-pan-right',
+    'kb-pan-up',
+    'kb-pan-down',
+  ]
+  currentKenBurns.value = effects[Math.floor(Math.random() * effects.length)]
 }
 
 const hasBackgroundImage = computed(
@@ -359,7 +316,7 @@ async function fetchAndCacheImage() {
             imageBlobUrls.value.forEach((url, key) => {
               if (cleanedSet.has(key)) {
                 cleanedBlobUrls.set(key, url)
-              }
+                }
             })
             
             imageCache.value = cleanedCache
@@ -453,10 +410,10 @@ async function displayNextImage() {
     // 预加载图片，确保加载完成后再切换
     const preloadImg = new Image()
     preloadImg.onload = () => {
-      // 选择随机转场动画类型
-      selectRandomTransition()
+      // 选择随机 Ken Burns 效果
+      selectRandomKenBurns()
       
-      // 图片加载完成，更新 key 触发 motion-v 动画
+      // 图片加载完成，更新 key 触发动画
       randomImageUrl.value = nextImageUrl
       currentBgKey.value++
       
@@ -530,23 +487,23 @@ onMounted(async () => {
   // === 非关键任务：空闲时执行 ===
   
   scheduleIdleTask(() => {
-    // 应用自定义 CSS
-    if (uiStore.customCSS) {
-      applyCustomCSS(uiStore.customCSS)
-    }
-    
-    // 监听系统主题变化
-    systemThemeCleanup = watchSystemTheme((theme) => {
-      applyTheme(theme)
-    })
+  // 应用自定义 CSS
+  if (uiStore.customCSS) {
+    applyCustomCSS(uiStore.customCSS)
+  }
+  
+  // 监听系统主题变化
+  systemThemeCleanup = watchSystemTheme((theme) => {
+    applyTheme(theme)
+  })
 
-    // 监听 SW 更新事件
-    window.addEventListener('sw-update-available', (event) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const customEvent = event as any
-      swRegistration = customEvent.detail?.registration || null
-      uiStore.setShowUpdateToast(true)
-    })
+  // 监听 SW 更新事件
+  window.addEventListener('sw-update-available', (event) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const customEvent = event as any
+    swRegistration = customEvent.detail?.registration || null
+    uiStore.setShowUpdateToast(true)
+  })
   }, { timeout: 2000 })
   
   // === 背景图片初始化：稍后执行 ===
@@ -601,4 +558,78 @@ function saveSettings(customApi: string, newCustomCSS: string) {
 
 <style>
 @import "tailwindcss";
+
+/* Ken Burns 动画效果 - 使用 CSS 动画实现更流畅的背景切换 */
+.ken-burns {
+  /* 初始状态 - 稍微放大以便动画有空间 */
+  transform-origin: center center;
+}
+
+/* 缩放进入 - 从 100% 缓慢放大到 115% */
+.kb-zoom-in {
+  animation: kb-zoom-in 12s ease-out forwards;
+}
+
+@keyframes kb-zoom-in {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+/* 缩放退出 - 从 115% 缓慢缩小到 100% */
+.kb-zoom-out {
+  animation: kb-zoom-out 12s ease-out forwards;
+}
+
+@keyframes kb-zoom-out {
+  0% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* 向左平移 */
+.kb-pan-left {
+  animation: kb-pan-left 12s ease-out forwards;
+}
+
+@keyframes kb-pan-left {
+  0% { transform: scale(1.1) translateX(3%); }
+  100% { transform: scale(1.1) translateX(-3%); }
+}
+
+/* 向右平移 */
+.kb-pan-right {
+  animation: kb-pan-right 12s ease-out forwards;
+}
+
+@keyframes kb-pan-right {
+  0% { transform: scale(1.1) translateX(-3%); }
+  100% { transform: scale(1.1) translateX(3%); }
+}
+
+/* 向上平移 */
+.kb-pan-up {
+  animation: kb-pan-up 12s ease-out forwards;
+}
+
+@keyframes kb-pan-up {
+  0% { transform: scale(1.1) translateY(3%); }
+  100% { transform: scale(1.1) translateY(-3%); }
+}
+
+/* 向下平移 */
+.kb-pan-down {
+  animation: kb-pan-down 12s ease-out forwards;
+}
+
+@keyframes kb-pan-down {
+  0% { transform: scale(1.1) translateY(-3%); }
+  100% { transform: scale(1.1) translateY(3%); }
+}
+
+/* 减少动画偏好 - 禁用 Ken Burns 效果 */
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns {
+    animation: none !important;
+    transform: scale(1.05) !important;
+  }
+}
 </style>

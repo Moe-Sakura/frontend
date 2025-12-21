@@ -1,74 +1,92 @@
 <template>
-  <!-- 设置面板 - macOS 风格 -->
-  <AnimatePresence>
-    <!-- 背景遮罩 -->
-    <Motion
-      v-if="isOpen"
-      :initial="{ opacity: 0 }"
-      :animate="{ opacity: 1 }"
-      :exit="{ opacity: 0 }"
-      :transition="{ duration: 0.2 }"
-      class="fixed inset-0 z-40 bg-black/30"
-      @click="close"
-    />
-    <Motion
-      v-if="isOpen"
-      :initial="{ opacity: 0, y: 40, scale: 0.98 }"
-      :animate="{ opacity: 1, y: 0, scale: 1 }"
-      :exit="{ opacity: 0, y: 40, scale: 0.98 }"
-      :transition="{ type: 'spring', stiffness: 400, damping: 35 }"
-      class="fixed z-50 flex flex-col settings-page
-             inset-0
-             sm:top-6 sm:left-4 sm:right-4 sm:bottom-0
-             sm:rounded-t-3xl
-             shadow-2xl shadow-black/20"
+  <Teleport to="body">
+    <!-- 设置面板 - macOS 风格浮动窗口 -->
+    <Transition
+      :css="false"
+      @enter="onEnter"
+      @leave="onLeave"
     >
-      
-      <!-- 顶部导航栏 -->
-      <Motion
-        :initial="{ opacity: 0, y: -20 }"
-        :animate="{ opacity: 1, y: 0 }"
-        :transition="{ delay: 0.1, duration: 0.3 }"
-        class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 sm:rounded-t-3xl glassmorphism-navbar"
+      <div
+        v-if="isOpen"
+        ref="modalRef"
+        :class="[
+          'fixed z-[100] flex flex-col settings-page shadow-2xl shadow-black/20',
+          isFullscreen 
+            ? 'inset-0' 
+            : 'inset-0 md:inset-6 md:m-auto md:w-[600px] md:min-w-[400px] md:max-w-[800px] md:h-[500px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
+        ]"
+        :style="windowStyle"
       >
-        <!-- 返回按钮 -->
-        <Motion
-          :while-hover="{ scale: 1.05, x: -2 }"
-          :while-tap="{ scale: 0.95 }"
-          as="button"
-          class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors"
+      <!-- 调整大小手柄 -->
+      <WindowResizeHandles 
+        :is-fullscreen="isFullscreen" 
+        @resize="handleResize" 
+      />
+      
+      <!-- 顶部导航栏 - 可拖动 -->
+      <div
+        v-anime:100="'slideUp'"
+        :class="[
+          'flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none',
+          isFullscreen ? '' : 'md:rounded-t-3xl md:cursor-move'
+        ]"
+        @mousedown="handleDragStart"
+        @touchstart="handleDragStart"
+      >
+        <!-- 返回按钮 - 仅移动端 -->
+        <button
+          v-tap
+          class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors md:hidden"
           @click="close"
         >
           <ChevronLeft :size="24" />
           <span class="text-base">返回</span>
-        </Motion>
+        </button>
 
         <!-- 标题 -->
-        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+        <div class="flex items-center gap-2 md:ml-0">
           <SettingsIcon :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
           <h1 class="text-lg font-bold text-gray-800 dark:text-white">设置</h1>
         </div>
 
-        <!-- 保存按钮 -->
-        <Motion
-          :while-hover="{ scale: 1.05 }"
-          :while-tap="{ scale: 0.95 }"
-          as="button"
-          class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
-          @click="save"
-        >
-          保存
-        </Motion>
-      </Motion>
+        <!-- 右侧按钮组 -->
+        <div class="flex items-center gap-2">
+          <!-- 保存按钮 -->
+          <button
+            v-tap
+            class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
+            @click="save"
+          >
+            保存
+          </button>
+          
+          <!-- 全屏按钮 - 仅桌面端 -->
+          <button
+            class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
+            title="全屏"
+            @click="handleToggleFullscreen"
+          >
+            <Maximize2 v-if="!isFullscreen" :size="16" />
+            <Minimize2 v-else :size="16" />
+          </button>
+          
+          <!-- 关闭按钮 - 仅桌面端 -->
+          <button
+            class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+            title="关闭"
+            @click="close"
+          >
+            <X :size="16" />
+          </button>
+        </div>
+      </div>
 
       <!-- 内容区域 -->
       <div class="flex-1 overflow-y-auto custom-scrollbar">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
           <!-- API 设置卡片 -->
-          <Motion
-            :initial="{ opacity: 0, y: 30 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ delay: 0.15 }"
+          <div
+            v-anime:150="'cardIn'"
             class="settings-card"
           >
             <div class="flex items-center gap-3 mb-4">
@@ -82,15 +100,11 @@
             </div>
 
             <!-- API 选项列表 -->
-            <div class="space-y-2">
-              <Motion
-                v-for="(option, index) in apiOptions"
+            <div v-anime-stagger:50="'slideRight'" class="space-y-2">
+              <button
+                v-for="option in apiOptions"
                 :key="option.value"
-                :initial="{ opacity: 0, x: -20 }"
-                :animate="{ opacity: 1, x: 0 }"
-                :transition="{ delay: 0.25 + index * 0.05 }"
-                :while-tap="{ scale: 0.98 }"
-                as="button"
+                v-tap
                 type="button"
                 :class="[
                   'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
@@ -129,17 +143,20 @@
                 >
                   {{ getApiUrl(option.value) }}
                 </span>
-              </Motion>
+              </button>
             </div>
 
             <!-- 自定义 API 输入 -->
-            <AnimatePresence>
-              <Motion
+            <Transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 max-h-0"
+              enter-to-class="opacity-100 max-h-40"
+              leave-active-class="transition-all duration-200 ease-in"
+              leave-from-class="opacity-100 max-h-40"
+              leave-to-class="opacity-0 max-h-0"
+            >
+              <div
                 v-if="selectedApiOption === 'custom'"
-                :initial="{ opacity: 0, height: 0 }"
-                :animate="{ opacity: 1, height: 'auto' }"
-                :exit="{ opacity: 0, height: 0 }"
-                :transition="{ duration: 0.2 }"
                 class="overflow-hidden"
               >
                 <div class="mt-4 space-y-3">
@@ -150,6 +167,7 @@
                       type="url"
                       placeholder="https://api.example.com"
                       class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-pink-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-[#ff1493] text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                      @input="handleTyping"
                     />
                   </div>
                   <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
@@ -165,15 +183,13 @@
                     </a>
                   </div>
                 </div>
-              </Motion>
-            </AnimatePresence>
-          </Motion>
+              </div>
+            </Transition>
+          </div>
 
           <!-- 自定义样式卡片 -->
-          <Motion
-            :initial="{ opacity: 0, y: 30 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ delay: 0.2 }"
+          <div
+            v-anime:200="'cardIn'"
             class="settings-card"
           >
             <div class="flex items-center gap-3 mb-4">
@@ -186,20 +202,15 @@
               </div>
             </div>
 
-            <!-- CSS 编辑器 -->
-            <div class="relative">
-              <textarea
+            <!-- CSS 编辑器 - 带语法高亮 -->
+            <div class="css-editor-wrapper rounded-2xl overflow-hidden border-2 border-transparent focus-within:border-[#ff1493] transition-all duration-200">
+              <PrismEditor
                 v-model="localCustomCSS"
-                placeholder="/* 在这里输入自定义 CSS */
-*:hover {
-  display: none;
-}"
-                rows="12"
-                class="css-input w-full px-4 py-4 text-sm font-mono rounded-2xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-pink-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-[#ff1493] text-gray-800 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 resize-y min-h-[250px] max-h-[500px]"
+                :highlight="highlightCSS"
+                :line-numbers="true"
+                class="css-editor"
+                @input="handleTyping"
               />
-              <div class="absolute bottom-3 right-3 pointer-events-none text-gray-300 dark:text-slate-600">
-                <GripVertical :size="16" />
-              </div>
             </div>
 
             <!-- 提示信息 -->
@@ -214,13 +225,11 @@
                 </ul>
               </div>
             </div>
-          </Motion>
+          </div>
 
           <!-- 重置区域 -->
-          <Motion
-            :initial="{ opacity: 0, y: 30 }"
-            :animate="{ opacity: 1, y: 0 }"
-            :transition="{ delay: 0.25 }"
+          <div
+            v-anime:250="'cardIn'"
             class="settings-card bg-red-50/50 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/30"
           >
             <div class="flex items-center justify-between">
@@ -233,28 +242,54 @@
                   <p class="text-sm text-gray-500 dark:text-slate-400">恢复所有设置为默认值</p>
                 </div>
               </div>
-              <Motion
-                :while-hover="{ scale: 1.05 }"
-                :while-tap="{ scale: 0.95 }"
-                as="button"
+              <button
+                v-tap
                 class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
                 @click="reset"
               >
                 重置
-              </Motion>
+              </button>
             </div>
-          </Motion>
+          </div>
         </div>
       </div>
-    </Motion>
-  </AnimatePresence>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { Motion, AnimatePresence } from 'motion-v'
-import { playClick, playSuccess, playToggle } from '@/composables/useSound'
-import { lockScroll, unlockScroll } from '@/composables/useScrollLock'
+import { animate } from '@/composables/useAnime'
+import { playTap, playCelebration, playToggle, playType, playSwipe } from '@/composables/useSound'
+
+// Prism Editor
+import { PrismEditor } from 'vue-prism-editor'
+import 'vue-prism-editor/dist/prismeditor.min.css'
+
+// Prism 语法高亮
+import { highlight, languages } from 'prismjs/components/prism-core'
+import 'prismjs/components/prism-css'
+import 'prismjs/themes/prism-tomorrow.css'
+
+// CSS 语法高亮函数
+function highlightCSS(code: string): string {
+  return highlight(code, languages.css, 'css')
+}
+
+// 打字音效节流
+let lastTypingSound = 0
+const TYPING_THROTTLE = 80
+
+function handleTyping() {
+  const now = Date.now()
+  if (now - lastTypingSound >= TYPING_THROTTLE) {
+    playType()
+    lastTypingSound = now
+  }
+}
+import { useWindowManager, type ResizeDirection } from '@/composables/useWindowManager'
+import WindowResizeHandles from '@/components/WindowResizeHandles.vue'
 import {
   Settings as SettingsIcon,
   ChevronLeft,
@@ -266,6 +301,9 @@ import {
   RotateCcw,
   Check,
   Github,
+  Maximize2,
+  Minimize2,
+  X,
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -279,9 +317,65 @@ const emit = defineEmits<{
   save: [customApi: string, customCSS: string]
 }>()
 
+// 窗口管理
+const modalRef = ref<HTMLElement | null>(null)
+const { isFullscreen, windowStyle, startDrag, startResize, toggleFullscreen, reset: resetWindow } = useWindowManager({
+  minWidth: 400,
+  minHeight: 300,
+})
+
+// 进入/离开动画
+function onEnter(el: Element, done: () => void) {
+  animate(el as HTMLElement, {
+    opacity: [0, 1],
+    scale: [0.98, 1],
+    translateY: [40, 0],
+    duration: 400,
+    ease: 'outCubic',
+    complete: done,
+  })
+}
+
+function onLeave(el: Element, done: () => void) {
+  animate(el as HTMLElement, {
+    opacity: [1, 0],
+    scale: [1, 0.98],
+    translateY: [0, 40],
+    duration: 300,
+    ease: 'inCubic',
+    complete: done,
+  })
+}
+
+function handleDragStart(e: MouseEvent | TouchEvent) {
+  if ((e.target as HTMLElement).closest('button')) return
+  if (modalRef.value) {
+    startDrag(e, modalRef.value)
+  }
+}
+
+function handleResize(e: MouseEvent | TouchEvent, direction: ResizeDirection) {
+  if (modalRef.value) {
+    startResize(e, direction, modalRef.value)
+  }
+}
+
+// 切换全屏（带音效）
+function handleToggleFullscreen() {
+  playSwipe()
+  toggleFullscreen()
+}
+
+// 关闭时重置窗口状态
+watch(() => props.isOpen, (newVal) => {
+  if (!newVal) {
+    resetWindow()
+  }
+})
+
 // API 服务器选项
 const apiOptions = [
-  { value: 'cfapi', label: 'Cloudflare (默认)' },
+  { value: 'cfapi', label: 'Cloudflare' },
   { value: 'api', label: '香港' },
   { value: 'custom', label: '自定义' },
 ]
@@ -352,27 +446,22 @@ watch(() => props.isOpen, (isOpen) => {
     selectedApiOption.value = getOptionFromUrl(props.customApi)
     customApiInput.value = selectedApiOption.value === 'custom' ? props.customApi : ''
     localCustomCSS.value = props.customCSS
-    // 锁定 body 滚动
-    lockScroll()
-  } else {
-    // 恢复 body 滚动
-    unlockScroll()
   }
 })
 
 function close() {
-  playClick()
+  playTap()
   emit('close')
 }
 
 function save() {
-  playSuccess()
+  playCelebration()
   emit('save', localCustomApi.value, localCustomCSS.value)
   emit('close')
 }
 
 function reset() {
-  playClick()
+  playTap()
   selectedApiOption.value = 'cfapi'
   customApiInput.value = ''
   localCustomCSS.value = ''
@@ -386,11 +475,27 @@ function reset() {
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: none;
   box-shadow: 
-    0 -8px 24px rgba(0, 0, 0, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.12),
     0 0 20px rgba(255, 20, 147, 0.06),
     inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  /* 窗口/全屏切换动画 */
+  transition: 
+    inset 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    min-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 移动端无底部边框 */
+@media (max-width: 767px) {
+  .settings-page {
+    border-bottom: none;
+  }
 }
 
 /* 液态玻璃高光 */
@@ -469,5 +574,107 @@ function reset() {
 .api-input::selection,
 .css-input::selection {
   background-color: rgba(255, 20, 147, 0.3);
+}
+
+/* CSS 编辑器容器 */
+.css-editor-wrapper {
+  background: #1e1e1e;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Prism Editor 样式覆盖 */
+.css-editor {
+  font-family: "Consolas", "Monaco", "Fira Code", monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 1rem !important;
+  min-height: 280px !important;
+  max-height: 450px !important;
+  overflow-y: auto !important;
+  background: #1e1e1e !important;
+  color: #d4d4d4 !important;
+  caret-color: #ff1493 !important;
+}
+
+.css-editor .prism-editor__textarea {
+  outline: none !important;
+}
+
+.css-editor .prism-editor__textarea:focus {
+  outline: none !important;
+}
+
+/* 行号样式 */
+.css-editor .prism-editor__line-numbers {
+  padding-right: 0.75rem !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  margin-right: 0.75rem !important;
+  color: rgba(255, 255, 255, 0.35) !important;
+  user-select: none !important;
+}
+
+/* 代码高亮 - 主题色调整 */
+.css-editor .token.selector {
+  color: #d7ba7d !important;
+}
+
+.css-editor .token.property {
+  color: #9cdcfe !important;
+}
+
+.css-editor .token.punctuation {
+  color: #d4d4d4 !important;
+}
+
+.css-editor .token.string {
+  color: #ce9178 !important;
+}
+
+.css-editor .token.number,
+.css-editor .token.unit {
+  color: #b5cea8 !important;
+}
+
+.css-editor .token.function {
+  color: #dcdcaa !important;
+}
+
+.css-editor .token.comment {
+  color: #6a9955 !important;
+  font-style: italic;
+}
+
+.css-editor .token.atrule,
+.css-editor .token.keyword {
+  color: #c586c0 !important;
+}
+
+.css-editor .token.important {
+  color: #ff1493 !important;
+}
+
+/* 选中文本样式 */
+.css-editor .prism-editor__textarea::selection,
+.css-editor .prism-editor__editor *::selection {
+  background-color: rgba(255, 20, 147, 0.3) !important;
+}
+
+/* 自定义滚动条 */
+.css-editor::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.css-editor::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.css-editor::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff1493, #d946ef);
+  border-radius: 4px;
+}
+
+.css-editor::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #c71585, #c026d3);
 }
 </style>
