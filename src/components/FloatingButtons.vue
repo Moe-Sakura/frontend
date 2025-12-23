@@ -11,7 +11,7 @@
       @mouseenter="isHoveringScrollTop = true"
       @mouseleave="isHoveringScrollTop = false"
     >
-      <ArrowUp v-if="isHoveringScrollTop || scrollProgress >= 100" :size="20" />
+      <ArrowUp v-if="isHoveringScrollTop || Math.round(scrollProgress) >= 100" :size="20" />
       <span v-else class="text-sm font-bold">{{ Math.round(scrollProgress) }}%</span>
     </button>
 

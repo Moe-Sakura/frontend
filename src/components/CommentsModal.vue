@@ -284,6 +284,7 @@ onUnmounted(() => {
 .comments-modal {
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(20px) saturate(180%);
+  will-change: transform;
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
