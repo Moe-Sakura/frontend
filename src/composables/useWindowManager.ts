@@ -40,7 +40,7 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
   let initialHeight_ = 0
   let _elementRef: HTMLElement | null = null
 
-  // 计算样式
+  // 计算样式 - 使用 transform 提升性能
   const windowStyle = computed(() => {
     if (isFullscreen.value) {
       return undefined
@@ -48,15 +48,12 @@ export function useWindowManager(options: WindowManagerOptions = {}) {
     
     const style: Record<string, string> = {}
     
-    // 位置偏移
+    // 位置偏移 - 使用 transform 避免布局重排
     if (position.value.x !== 0 || position.value.y !== 0) {
-      style.left = `calc(1.5rem + ${position.value.x}px)`
-      style.right = `calc(1.5rem - ${position.value.x}px)`
-      style.top = `calc(1.5rem + ${position.value.y}px)`
-      style.bottom = `calc(1.5rem - ${position.value.y}px)`
+      style.transform = `translate(${position.value.x}px, ${position.value.y}px)`
     }
     
-    // 自定义大小 - 使用 !important 覆盖 Tailwind 类
+    // 自定义大小
     if (size.value.width > 0) {
       style.width = `${size.value.width}px`
       style.minWidth = `${minWidth}px`

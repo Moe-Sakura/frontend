@@ -374,8 +374,9 @@ watch(() => props.isOpen, (newVal) => {
 
 // API 服务器选项
 const apiOptions = [
-  { value: 'cfapi', label: 'Cloudflare' },
-  { value: 'api', label: '香港' },
+  { value: 'cfapi', label: 'Cloudflare Workers' },
+  { value: 'api', label: '中国 香港' },
+  { value: 'usapi', label: '美国 洛杉矶' },
   { value: 'custom', label: '自定义' },
 ]
 
@@ -383,6 +384,7 @@ const apiOptions = [
 const apiUrls: Record<string, string> = {
   cfapi: 'https://cf.api.searchgal.homes',
   api: 'https://api.searchgal.homes',
+  usapi: 'https://us.api.searchgal.homes',
 }
 
 // 根据 URL 判断选中的选项
@@ -392,6 +394,9 @@ function getOptionFromUrl(url: string): string {
   }
   if (url === apiUrls.api) {
     return 'api'
+  }
+  if (url === apiUrls.usapi) {
+    return 'usapi'
   }
   return 'custom'
 }
@@ -473,6 +478,7 @@ function reset() {
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
+  will-change: transform;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.12),
