@@ -221,7 +221,7 @@ export const useUIStore = defineStore('ui', () => {
       // 解析失败，使用默认值
     }
   }
-  
+
   // 从 sessionStorage 加载会话状态（刷新恢复）
   function loadSessionState() {
     try {
@@ -259,7 +259,7 @@ export const useUIStore = defineStore('ui', () => {
       // 保存失败，静默处理
     }
   }
-  
+
   // 保存会话状态到 sessionStorage（刷新恢复）
   function saveSessionState() {
     try {

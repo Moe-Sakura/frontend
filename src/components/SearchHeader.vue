@@ -390,6 +390,72 @@
         </ul>
       </div>
     </div>
+
+    <!-- 友情链接 -->
+    <div
+      v-if="friendLinks.length > 0"
+      class="w-full max-w-5xl mx-auto mt-6 sm:mt-8 px-2 sm:px-0 animate-fade-in animation-delay-1000"
+    >
+      <div
+        class="glassmorphism-card rounded-2xl sm:rounded-3xl 
+               shadow-xl shadow-theme-primary/10 dark:shadow-theme-accent/20
+               p-4 sm:p-6"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <h2
+            class="text-lg sm:text-xl font-bold 
+                   text-theme-primary dark:text-theme-accent
+                   flex items-center gap-2"
+          >
+            <Link2 :size="18" />
+            友情链接
+          </h2>
+          <a
+            href="https://github.com/Moe-Sakura/frontend/edit/dev/public/data/friends.json"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+                   text-white bg-gradient-to-r from-[#ff1493] to-[#d946ef]
+                   shadow-md shadow-pink-500/20 hover:shadow-lg hover:shadow-pink-500/30
+                   transition-all"
+          >
+            <GitPullRequestArrow :size="14" />
+            <span>交换友链</span>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <a
+            v-for="friend in friendLinks"
+            :key="friend.url"
+            :href="friend.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="friend-card group flex items-center gap-3 p-3 rounded-xl
+                   bg-white/50 dark:bg-slate-800/50
+                   border border-gray-200/50 dark:border-slate-700/50
+                   hover:border-[#ff1493]/30 dark:hover:border-[#ff69b4]/30
+                   hover:shadow-lg hover:shadow-pink-500/10
+                   transition-all duration-300"
+          >
+            <img
+              :src="friend.logo"
+              :alt="friend.name"
+              class="w-10 h-10 rounded-lg object-cover bg-gray-100 dark:bg-slate-700 flex-shrink-0"
+              loading="lazy"
+              @error="handleFriendLogoError"
+            />
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-gray-800 dark:text-white text-sm group-hover:text-[#ff1493] dark:group-hover:text-[#ff69b4] transition-colors truncate">
+                {{ friend.name }}
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-slate-400 truncate">
+                {{ friend.desc }}
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -418,6 +484,8 @@ import {
   Loader2,
   CornerDownLeft,
   XCircle,
+  Link2,
+  GitPullRequestArrow,
 } from 'lucide-vue-next'
 import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from '@/utils/urlParams'
 import { saveSearchHistory } from '@/utils/persistence'
@@ -427,6 +495,32 @@ const searchQuery = ref('')
 const customApi = ref('')
 const searchMode = ref<'game' | 'patch'>('game')
 let cleanupURLListener: (() => void) | null = null
+
+// 友情链接
+interface FriendLink {
+  name: string
+  desc: string
+  url: string
+  logo: string
+}
+const friendLinks = ref<FriendLink[]>([])
+
+// 获取友情链接数据
+async function loadFriendLinks() {
+  try {
+    const res = await fetch('/data/friends.json')
+    const data = await res.json()
+    friendLinks.value = data.friends || []
+  } catch {
+    // 静默失败
+  }
+}
+
+// 友链 logo 加载失败时的处理
+function handleFriendLogoError(e: Event) {
+  const img = e.target as HTMLImageElement
+  img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff1493"><circle cx="12" cy="12" r="10"/></svg>'
+}
 
 // 搜索防抖 - 防止 800ms 内重复触发
 const { isLocked: isSearchLocked, click: debouncedSearchTrigger } = useDebouncedClick(800)
@@ -472,6 +566,9 @@ onMounted(() => {
       isUpdatingFromURL = false
     }, 200)
   })
+  
+  // 加载友情链接
+  loadFriendLinks()
 })
 
 onUnmounted(() => {

@@ -1,0 +1,34 @@
+{
+  "friends": [
+    {
+      "name": "Jurangren",
+      "desc": "本站后端大手子！",
+      "url": "https://github.com/Jurangren",
+      "logo": "https://avatars.githubusercontent.com/u/111159360"
+    },
+    {
+      "name": "Asuna",
+      "desc": "LINK START!",
+      "url": "https://saop.cc/",
+      "logo": "https://saop.cc/avatar.webp"
+    },
+    {
+      "name": "VNDB",
+      "desc": "Visual Novel Database",
+      "url": "https://vndb.org/",
+      "logo": "https://vndb.org/favicon.ico"
+    },
+    {
+      "name": "梓澪",
+      "desc": "梓澪の妙妙屋",
+      "url": "https://zi0.cc/",
+      "logo": "https://img.mjj.today/2023/01/23/2b6331a29bf32d2af96a2537e10a5ee8.webp"
+    },
+    {
+      "name": "VNS",
+      "desc": "Visual Novel",
+      "url": "https://gal.saop.cc",
+      "logo": "https://gal.saop.cc/images/logo.svg"
+    }
+  ]
+}
