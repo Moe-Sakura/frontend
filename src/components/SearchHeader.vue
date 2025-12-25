@@ -296,98 +296,122 @@
       >
         <h2
           class="text-xl sm:text-2xl font-bold 
-                 text-theme-primary dark:text-theme-accent
-                 mb-4 sm:mb-6 flex items-center gap-2"
+                 bg-gradient-to-r from-[#ff1493] to-[#d946ef] bg-clip-text text-transparent
+                 mb-5 sm:mb-6 flex items-center gap-2"
         >
-          <Info :size="20" />
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-lg shadow-pink-500/30">
+            <Info :size="18" class="text-white" />
+          </div>
           使用须知
         </h2>
-        <ul class="space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-slate-300 leading-relaxed">
-          <li>
-            • 首先，衷心感谢
-            <a
-              href="https://saop.cc/"
-              target="_blank"
-              class="text-theme-primary dark:text-theme-accent hover:underline font-bold
-                     hover:text-theme-primary-dark dark:hover:text-theme-accent-light
-                     transition-colors duration-200"
-            >Asuna</a>
-            大佬提供的服务器和技术支持！没有大佬的魔法，咱可跑不起来！
-          </li>
-          <li>
-            • 本程序纯属
-            <strong class="text-theme-primary dark:text-theme-accent font-bold">爱发电</strong>，仅供绅士们交流学习使用，务必请大家
-            <strong class="text-theme-primary dark:text-theme-accent font-bold">支持正版 Galgame</strong>！入正不亏哦！
-          </li>
-          <li>
-            • 本站只做互联网内容的
-            <strong class="text-theme-primary dark:text-theme-accent font-bold">聚合搬运工</strong>，搜索结果均来自第三方站点，下载前请各位自行判断
-            <strong class="text-theme-primary dark:text-theme-accent font-bold">资源安全性</strong>，以免翻车。
-          </li>
-          <li>
-            • 搜索结果会显示不同的<strong class="text-theme-primary dark:text-theme-accent font-bold">标签</strong>，帮助你快速了解资源特性：
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium ml-1">
-              <CheckCircle :size="10" />直接下载
-            </span>
-            表示无需登录，
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
-              <User :size="10" />需登录
-            </span>
-            表示需要账号，
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
-              <Rocket :size="10" />不限速
-            </span>
-            表示高速网盘，
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-medium">
-              <Magnet :size="10" />BT/磁力
-            </span>
-            表示种子下载等。
-          </li>
-          <li>
-            • 搜索时请注意关键词长度！<strong class="text-theme-primary dark:text-theme-accent font-bold">关键词太短</strong>
-            可能搜不全（部分站点只显示首批结果），<strong class="text-theme-primary dark:text-theme-accent font-bold">太长</strong>
-            则可能无法精准匹配。建议尝试
-            <strong class="text-theme-primary dark:text-theme-accent font-bold">适当的关键词</strong>，效果更佳~
-          </li>
-          <li>
-            •
-            本程序每次查询完毕即断开连接，<strong class="text-theme-primary dark:text-theme-accent font-bold">严禁任何形式的爆破或恶意爬取</strong>，做个文明的绅士！
-          </li>
-          <li>
-            •
-            万一某个站点搜索挂了，先看看自己的魔法是否到位，也可能是站点维护了，或者咱这边的
-            <strong class="text-theme-primary dark:text-theme-accent font-bold">爬虫失效</strong> 了。
-          </li>
-          <li>
-            • 为了支持各 Galgame 站点能长久运营，还请各位把浏览器的
-            <strong class="text-theme-primary dark:text-theme-accent font-bold">广告屏蔽插件</strong>
-            关掉，或将这些站点加入白名单。大家建站不易，小小的支持也是大大的动力！
-          </li>
-          <li>
-            • 游戏介绍和人物信息数据由
-            <a
-              href="https://vndb.org/"
-              target="_blank"
-              class="text-theme-primary dark:text-theme-accent hover:underline font-bold
-                     hover:text-theme-primary-dark dark:hover:text-theme-accent-light
-                     transition-colors duration-200"
-            >VNDB</a>
-            提供，由AI大模型翻译，翻译结果不保证准确性，仅作为检索游戏时的参考！
-          </li>
-          <li>• 郑重呼吁：请务必<strong class="text-theme-primary dark:text-theme-accent font-bold">支持 Galgame 正版</strong>！让爱与梦想延续！</li>
-          <li>
-            • 如果您觉得咱这小工具好用，请移步
-            <a
-              href="https://github.com/Moe-Sakura"
-              target="_blank"
-              class="text-theme-primary dark:text-theme-accent hover:underline font-bold
-                     hover:text-theme-primary-dark dark:hover:text-theme-accent-light
-                     transition-colors duration-200"
-            >GitHub</a>
-            给本项目点个免费的
-            <strong>Star</strong> 吧，秋梨膏！你的支持就是咱最大的动力，比心~
-          </li>
-        </ul>
+        
+        <div class="space-y-4">
+          <!-- 重要提示 -->
+          <div class="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/30">
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <AlertTriangle :size="14" class="text-white" />
+              </div>
+              <p class="text-sm text-amber-800 dark:text-amber-200">
+                如搜索异常请进右上角的<strong class="font-semibold">设置</strong>里尝试切换聚搜 API 后端试试！
+              </p>
+            </div>
+          </div>
+
+          <!-- 标签说明 -->
+          <div class="p-3 sm:p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Tag :size="14" class="text-white" />
+              </div>
+              <div class="text-sm text-gray-700 dark:text-slate-300">
+                <p class="mb-2">搜索结果标签含义：</p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-xs font-medium">
+                    <CheckCircle :size="12" />直接下载
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                    <User :size="12" />需登录
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
+                    <Rocket :size="12" />不限速
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-medium">
+                    <Magnet :size="12" />BT/磁力
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 使用说明列表 -->
+          <div class="grid gap-3 text-sm text-gray-600 dark:text-slate-400">
+            <div class="flex items-start gap-2.5">
+              <Heart :size="16" class="text-pink-500 flex-shrink-0 mt-0.5" />
+              <p>
+                本程序纯属<strong class="text-[#ff1493] dark:text-[#ff69b4]">用爱发电</strong>，仅供绅士们交流学习使用，务必请大家<strong class="text-[#ff1493] dark:text-[#ff69b4]">支持正版 Galgame</strong>！让爱与梦想延续！
+              </p>
+            </div>
+            
+            <div class="flex items-start gap-2.5">
+              <Search :size="16" class="text-cyan-500 flex-shrink-0 mt-0.5" />
+              <p>
+                本站只做互联网内容的<strong class="text-cyan-600 dark:text-cyan-400">聚合搬运工</strong>，搜索结果均来自第三方站点，下载前请自行判断<strong class="text-cyan-600 dark:text-cyan-400">资源安全性</strong>。
+              </p>
+            </div>
+            
+            <div class="flex items-start gap-2.5">
+              <Lightbulb :size="16" class="text-yellow-500 flex-shrink-0 mt-0.5" />
+              <p>
+                搜索时请注意关键词长度！<strong class="text-yellow-600 dark:text-yellow-400">太短</strong>可能搜不全，<strong class="text-yellow-600 dark:text-yellow-400">太长</strong>则可能无法精准匹配。
+              </p>
+            </div>
+            
+            <div class="flex items-start gap-2.5">
+              <ShieldAlert :size="16" class="text-red-500 flex-shrink-0 mt-0.5" />
+              <p>
+                每次查询完毕即断开连接，<strong class="text-red-600 dark:text-red-400">严禁爆破或恶意爬取</strong>，做个文明的绅士！
+              </p>
+            </div>
+            
+            <div class="flex items-start gap-2.5">
+              <Wrench :size="16" class="text-slate-500 flex-shrink-0 mt-0.5" />
+              <p>
+                万一某个站点挂了，先看看自己的魔法是否到位，也可能是站点维护了，或者咱的<strong class="text-slate-600 dark:text-slate-300">驱动失效</strong>了。
+              </p>
+            </div>
+            
+            <div class="flex items-start gap-2.5">
+              <ShieldCheck :size="16" class="text-green-500 flex-shrink-0 mt-0.5" />
+              <p>
+                为了支持各站点长久运营，请关闭<strong class="text-green-600 dark:text-green-400">广告屏蔽插件</strong>或将站点加入白名单。
+              </p>
+            </div>
+            
+            <div class="flex items-start gap-2.5">
+              <BookOpen :size="16" class="text-indigo-500 flex-shrink-0 mt-0.5" />
+              <p>
+                游戏介绍数据由
+                <a href="https://vndb.org/" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">VNDB</a>
+                提供，AI翻译仅供参考。
+              </p>
+            </div>
+          </div>
+
+          <!-- 支持我们 -->
+          <div class="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-950/30 dark:to-purple-950/30 border border-pink-200/50 dark:border-pink-800/30">
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Star :size="14" class="text-white" />
+              </div>
+              <p class="text-sm text-pink-800 dark:text-pink-200">
+                如觉得本站好用，请移步
+                <a href="https://github.com/Moe-Sakura" target="_blank" class="font-semibold hover:underline">GitHub</a>
+                给本项目点个免费的 <strong class="font-semibold">Star</strong> 吧！你的支持就是咱最大的动力 💕
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -486,6 +510,14 @@ import {
   XCircle,
   Link2,
   GitPullRequestArrow,
+  AlertTriangle,
+  Tag,
+  Heart,
+  Lightbulb,
+  ShieldAlert,
+  ShieldCheck,
+  BookOpen,
+  Star,
 } from 'lucide-vue-next'
 import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from '@/utils/urlParams'
 import { saveSearchHistory } from '@/utils/persistence'
