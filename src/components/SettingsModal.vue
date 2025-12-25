@@ -94,8 +94,8 @@
                   <Server :size="20" class="text-white" />
                 </div>
                 <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">API 服务器</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 API 地址</p>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">聚搜 API 后端</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 URL 地址</p>
                 </div>
               </div>
 
@@ -375,8 +375,10 @@ watch(() => props.isOpen, (newVal) => {
 // API 服务器选项
 const apiOptions = [
   { value: 'cfapi', label: 'Cloudflare Workers' },
-  { value: 'api', label: '中国 香港' },
-  { value: 'usapi', label: '美国 洛杉矶' },
+  { value: 'api', label: '中国香港 雨云' },
+  { value: 'usapi', label: '美国洛杉矶 CloudCone' },
+  { value: 'jpapi', label: '日本东京 ClawCloud' },
+  { value: 'deapi', label: '德国法兰克福 ClawCloud' },
   { value: 'custom', label: '自定义' },
 ]
 
@@ -385,6 +387,8 @@ const apiUrls: Record<string, string> = {
   cfapi: 'https://cf.api.searchgal.homes',
   api: 'https://api.searchgal.homes',
   usapi: 'https://us.api.searchgal.homes',
+  jpapi: 'https://jp.api.searchgal.homes',
+  deapi: 'https://de.api.searchgal.homes',
 }
 
 // 根据 URL 判断选中的选项
@@ -397,6 +401,12 @@ function getOptionFromUrl(url: string): string {
   }
   if (url === apiUrls.usapi) {
     return 'usapi'
+  }
+  if (url === apiUrls.jpapi) {
+    return 'jpapi'
+  }
+  if (url === apiUrls.deapi) {
+    return 'deapi'
   }
   return 'custom'
 }
