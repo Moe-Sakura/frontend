@@ -61,7 +61,7 @@
       <component :is="uiStore.isHistoryModalOpen ? X : History" :size="20" />
     </button>
   </div>
-  
+
   <!-- 站点导航面板 - 独立于按钮组，避免 transform 影响 fixed 定位 -->
   <Teleport to="body">
     <Transition

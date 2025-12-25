@@ -70,7 +70,7 @@
             >
               <X :size="16" />
             </button>
-            
+          
             <!-- 移动端占位 -->
             <div class="w-8 md:hidden" />
           </div>

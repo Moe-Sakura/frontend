@@ -5,9 +5,9 @@
       <!-- Title - 艳粉主题 -->
       <h1
         class="header-title text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-6 sm:mb-8 animate-fade-in-down
-               text-white
-               drop-shadow-[0_2px_8px_rgba(255,20,147,0.6)]
-               dark:drop-shadow-[0_2px_12px_rgba(255,105,180,0.8)]"
+                 text-white
+                 drop-shadow-[0_2px_8px_rgba(255,20,147,0.6)]
+                 dark:drop-shadow-[0_2px_12px_rgba(255,105,180,0.8)]"
         style="text-shadow: 0 0 30px rgba(255, 20, 147, 0.4), 0 0 60px rgba(255, 105, 180, 0.2);"
       >
         <span class="whitespace-nowrap">Galgame 聚合搜索</span>
@@ -58,7 +58,7 @@
                   ]"
                 />
               </div>
-              
+            
               <!-- 输入框 -->
               <input
                 v-model="searchQuery"
@@ -70,7 +70,7 @@
                        text-base sm:text-lg rounded-2xl 
                        text-gray-800 dark:text-slate-100 
                        placeholder:text-gray-400/80 dark:placeholder:text-slate-400/70
-                       glassmorphism-input
+                     glassmorphism-input
                        transition-all duration-300 outline-none font-medium
                        tracking-wide
                        disabled:cursor-not-allowed"
@@ -78,7 +78,7 @@
                 @input="handleTyping"
                 @keydown.enter.prevent="triggerSearch"
               />
-              
+            
               <!-- 右侧：清除按钮 + 回车提示 / 进度指示 -->
               <div class="absolute right-3 sm:right-4 z-20 flex items-center gap-2">
                 <!-- 清除按钮 - 有输入且非搜索时显示 -->
