@@ -1,13 +1,13 @@
 <template>
-  <div v-if="searchStore.hasResults" class="w-full px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 animate-fade-in">
-    <div id="results" class="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+  <div v-if="searchStore.hasResults" class="w-full sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 animate-fade-in">
+    <div id="results" class="sm:max-w-5xl sm:mx-auto space-y-4 sm:space-y-6">
       <!-- 使用 v-memo 优化平台卡片渲染，仅在关键数据变化时重新渲染 -->
       <div
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
         v-memo="[platformName, platformData.items.length, platformData.displayedCount, platformData.error]"
         :data-platform="platformName"
-        class="result-card glassmorphism-card rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 animate-fade-in-up border-2 content-auto"
+        class="result-card glassmorphism-card rounded-none sm:rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 animate-fade-in-up border-2 content-auto"
         :class="getBorderClass(platformData.color)"
       >
         <div class="p-4 sm:p-5 md:p-6">

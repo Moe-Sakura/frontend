@@ -105,8 +105,8 @@
                 <!-- 非搜索时显示回车提示 -->
                 <kbd 
                   v-else
-                  class="enter-hint hidden sm:inline-flex items-center gap-1.5 
-                         px-2.5 py-1.5 rounded-lg text-xs font-medium
+                  class="enter-hint inline-flex items-center gap-1 sm:gap-1.5 
+                         px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-medium
                          bg-gray-100/80 dark:bg-slate-700/60
                          text-gray-500 dark:text-slate-400
                          border border-gray-200/50 dark:border-slate-600/50
@@ -116,7 +116,7 @@
                          transition-all duration-200"
                 >
                   <CornerDownLeft :size="14" />
-                  <span>Enter</span>
+                  <span class="hidden sm:inline">Enter</span>
                 </kbd>
               </div>
             </div>
@@ -286,11 +286,11 @@
     </div>
 
     <!-- Usage Notice - 独立于居中区域 - 艳粉主题 -->
-    <div class="w-full max-w-5xl mx-auto mt-8 sm:mt-12 px-2 sm:px-0 animate-fade-in animation-delay-1000">
+    <div class="-mx-4 sm:mx-auto sm:max-w-5xl mt-8 sm:mt-12 animate-fade-in animation-delay-1000">
       <div
         class="usage-notice 
                glassmorphism-card
-               rounded-2xl sm:rounded-3xl 
+               rounded-none sm:rounded-3xl 
                shadow-xl shadow-theme-primary/10 dark:shadow-theme-accent/20
                p-4 sm:p-6 lg:p-8"
       >
@@ -315,32 +315,6 @@
               <p class="text-sm text-amber-800 dark:text-amber-200">
                 如搜索异常请进右上角的<strong class="font-semibold">设置</strong>里尝试切换聚搜 API 后端试试！
               </p>
-            </div>
-          </div>
-
-          <!-- 标签说明 -->
-          <div class="p-3 sm:p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/50">
-            <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Tag :size="14" class="text-white" />
-              </div>
-              <div class="text-sm text-gray-700 dark:text-slate-300">
-                <p class="mb-2">搜索结果标签含义：</p>
-                <div class="flex flex-wrap gap-2">
-                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-xs font-medium">
-                    <CheckCircle :size="12" />直接下载
-                  </span>
-                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-medium">
-                    <User :size="12" />需登录
-                  </span>
-                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
-                    <Rocket :size="12" />不限速
-                  </span>
-                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-medium">
-                    <Magnet :size="12" />BT/磁力
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -418,10 +392,10 @@
     <!-- 友情链接 -->
     <div
       v-if="friendLinks.length > 0"
-      class="w-full max-w-5xl mx-auto mt-6 sm:mt-8 px-2 sm:px-0 animate-fade-in animation-delay-1000"
+      class="-mx-4 sm:mx-auto sm:max-w-5xl mt-6 sm:mt-8 animate-fade-in animation-delay-1000"
     >
       <div
-        class="glassmorphism-card rounded-2xl sm:rounded-3xl 
+        class="glassmorphism-card rounded-none sm:rounded-3xl 
                shadow-xl shadow-theme-primary/10 dark:shadow-theme-accent/20
                p-4 sm:p-6"
       >
@@ -491,14 +465,10 @@ import { playSwipe, playToggle, playCelebration, playCaution, playType } from '@
 import { useDebouncedClick } from '@/composables/useDebounce'
 import {
   Search,
-  CheckCircle,
   AlertCircle,
   Gamepad2,
   Wrench,
   Info,
-  User,
-  Rocket,
-  Magnet,
   X,
   RefreshCw,
   Wifi,
@@ -511,7 +481,6 @@ import {
   Link2,
   GitPullRequestArrow,
   AlertTriangle,
-  Tag,
   Heart,
   Lightbulb,
   ShieldAlert,
