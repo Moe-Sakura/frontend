@@ -23,38 +23,22 @@
           {{ countdown > 0 ? `${countdown} 秒后自动更新...` : '正在更新...' }}
         </p>
       </div>
-
-      <!-- 立即更新按钮 -->
-      <button
-        v-if="countdown > 0"
-        class="flex-shrink-0 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-xs font-medium transition-colors"
-        @click="updateNow"
-      >
-        立即更新
-      </button>
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { RefreshCw } from 'lucide-vue-next'
-import { playNotification, playTap, playSwipe } from '@/composables/useSound'
+import { playNotification } from '@/composables/useSound'
 
 const props = defineProps<{
   isVisible: boolean
   onUpdate: () => void
 }>()
 
-const countdown = ref(3)
+const countdown = ref(5)
 let timer: number | null = null
-
-function updateNow() {
-  playTap()
-  countdown.value = 0
-  playSwipe()
-  props.onUpdate()
-}
 
 function startCountdown() {
   // 先清除可能存在的旧定时器，避免创建多个并发定时器
@@ -64,7 +48,7 @@ function startCountdown() {
   }
   
   playNotification()
-  countdown.value = 3
+  countdown.value = 5
   timer = window.setInterval(() => {
     countdown.value--
     if (countdown.value <= 0) {
@@ -90,7 +74,6 @@ onUnmounted(() => {
 })
 
 // 监听 isVisible 变化
-import { watch } from 'vue'
 watch(() => props.isVisible, (visible) => {
   if (visible) {
     startCountdown()

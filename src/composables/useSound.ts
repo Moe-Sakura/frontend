@@ -43,7 +43,7 @@ async function getSnd(): Promise<Snd | null> {
   try {
     isLoading = true
     sndInstance = new Snd()
-    
+  
     // 加载音效套件
     const kit = currentKit.value === 'SND01' ? Snd.KITS.SND01 : Snd.KITS.SND02
     await sndInstance.load(kit)
