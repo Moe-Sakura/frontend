@@ -411,7 +411,7 @@
             友情链接
           </h2>
           <a
-            href="https://github.com/Moe-Sakura/frontend/edit/dev/public/data/friends.json"
+            href="https://github.com/Moe-Sakura/frontend/edit/dev/src/data/friends.json"
             target="_blank"
             rel="noopener noreferrer"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
@@ -497,24 +497,15 @@ const searchMode = ref<'game' | 'patch'>('game')
 let cleanupURLListener: (() => void) | null = null
 
 // 友情链接
+import friendsData from '@/data/friends.json'
+
 interface FriendLink {
   name: string
   desc: string
   url: string
   logo: string
 }
-const friendLinks = ref<FriendLink[]>([])
-
-// 获取友情链接数据
-async function loadFriendLinks() {
-  try {
-    const res = await fetch('/data/friends.json')
-    const data = await res.json()
-    friendLinks.value = data.friends || []
-  } catch {
-    // 静默失败
-  }
-}
+const friendLinks = ref<FriendLink[]>(friendsData.friends || [])
 
 // 友链 logo 加载失败时的处理
 function handleFriendLogoError(e: Event) {
@@ -566,9 +557,6 @@ onMounted(() => {
       isUpdatingFromURL = false
     }, 200)
   })
-  
-  // 加载友情链接
-  loadFriendLinks()
 })
 
 onUnmounted(() => {
