@@ -29,6 +29,12 @@
       "desc": "Visual Novel",
       "url": "https://gal.saop.cc",
       "logo": "https://gal.saop.cc/images/logo.svg"
+    },
+     {
+      "name": "KisuGal",
+      "desc": "galgame资源分享站",
+      "url": "https://kisugal.icu",
+      "logo": "https://kisugal.icu/wp-content/uploads/2025/11/logo-1.jpg"
     }
   ]
 }
