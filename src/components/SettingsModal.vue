@@ -705,12 +705,14 @@ function reset() {
   localCustomCSS.value = ''
   localCustomJS.value = ''
   localCustomHTML.value = ''
-  // 重置高级 API 设置
-  resetAdvancedApiSettings()
+  // 重置高级 API 设置（不播放音效，因为已经播放过）
+  resetAdvancedApiSettings(false)
 }
 
-function resetAdvancedApiSettings() {
-  playTap()
+function resetAdvancedApiSettings(playSound = true) {
+  if (playSound) {
+    playTap()
+  }
   localVndbApiBaseUrl.value = DEFAULT_API_CONFIG.vndbApiBaseUrl
   localVndbImageProxyUrl.value = DEFAULT_API_CONFIG.vndbImageProxyUrl
   localAiTranslateApiUrl.value = DEFAULT_API_CONFIG.aiTranslateApiUrl

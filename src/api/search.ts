@@ -643,6 +643,7 @@ export async function fetchVndbQuotes(vnId: string): Promise<VndbQuote[]> {
       body: JSON.stringify({
         filters: ['vn', '=', ['id', '=', vnId]],
         fields: 'id, quote, character{id, name, original}',
+        // 获取更多名言以提供更丰富的内容（用户反馈 10 条不够）
         results: 25,
       }),
     })

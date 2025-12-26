@@ -115,6 +115,10 @@ export function applyCustomJS(js: string): void {
 
 /**
  * 应用自定义HTML到页面
+ * 
+ * 注意：此功能有意允许用户注入任意 HTML（包括脚本），类似于浏览器开发者工具
+ * 或用户脚本扩展 (Tampermonkey)。用户在设置面板中已被警告安全风险。
+ * 这是高级用户功能，不需要 HTML 清理。
  */
 export function applyCustomHTML(html: string): void {
   // 移除旧的自定义 HTML 容器
@@ -127,6 +131,7 @@ export function applyCustomHTML(html: string): void {
   if (html.trim()) {
     const container = document.createElement('div')
     container.id = 'custom-user-html'
+    // 有意使用 innerHTML 允许用户完全控制（类似开发者工具）
     container.innerHTML = html
     document.body.appendChild(container)
   }

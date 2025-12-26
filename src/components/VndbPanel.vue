@@ -424,7 +424,7 @@
               </div>
               <div class="space-y-3">
                 <div
-                  v-for="(q, index) in (expandedSections.quotes ? quotes : quotes.slice(0, 5))"
+                  v-for="(q, index) in (expandedSections.quotes ? quotes : quotes.slice(0, 10))"
                   :key="index"
                   class="relative pl-4 border-l-2 border-indigo-300 dark:border-indigo-600"
                 >
@@ -437,7 +437,7 @@
                 </div>
               </div>
               <button
-                v-if="quotes.length > 5"
+                v-if="quotes.length > 10"
                 class="w-full mt-2 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
                 @click="toggleSection('quotes')"
               >
@@ -609,6 +609,8 @@ const vndbUrl = computed(() => {
 })
 
 // 监听 vndbInfo 变化，重置翻译状态并加载角色和名言
+// immediate: true 确保组件挂载时如果已有 vndbInfo（如从缓存恢复）能立即加载数据
+// 回调中使用 newInfo?.id 和 if (vnIdAtStart) 安全处理初始 null 情况
 watch(() => searchStore.vndbInfo, async (newInfo) => {
   translatedDescription.value = null
   showOriginal.value = false
