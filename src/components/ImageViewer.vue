@@ -68,8 +68,9 @@ const imageStyle = computed(() => {
 })
 
 // 进入动画时播放音效
-function onEnter() {
+function onEnter(_el: Element, done: () => void) {
   playTransitionUp()
+  done()
 }
 
 // 监听图片切换
