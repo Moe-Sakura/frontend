@@ -52,12 +52,6 @@
       <!-- 键盘快捷键帮助 -->
       <KeyboardHelpPanel />
 
-      <!-- SW 更新提示 -->
-      <UpdateToast
-        :is-visible="uiStore.showUpdateToast"
-        :on-update="handleSwUpdate"
-      />
-
       <!-- 图片预览器 -->
       <ImageViewer />
     </main>
@@ -70,9 +64,12 @@ import AnimatedBackground from '@/components/AnimatedBackground.vue'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
+import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
 import { 
   saveCustomCSS,
   applyCustomCSS,
+  applyCustomJS,
+  applyCustomHTML,
 } from '@/utils/theme'
 
 // 关键组件 - 同步加载
@@ -88,7 +85,6 @@ const VndbPanel = defineAsyncComponent(() => import('@/components/VndbPanel.vue'
 const SettingsModal = defineAsyncComponent(() => import('@/components/SettingsModal.vue'))
 const SearchHistoryModal = defineAsyncComponent(() => import('@/components/SearchHistoryModal.vue'))
 const KeyboardHelpPanel = defineAsyncComponent(() => import('@/components/KeyboardHelpPanel.vue'))
-const UpdateToast = defineAsyncComponent(() => import('@/components/UpdateToast.vue'))
 const ImageViewer = defineAsyncComponent(() => import('@/components/ImageViewer.vue'))
 
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
@@ -106,6 +102,7 @@ useClickEffect({
 
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
+const settingsStore = useSettingsStore()
 const searchHeaderRef = ref<InstanceType<typeof SearchHeader> | null>(null)
 
 // 切换设置面板
@@ -126,22 +123,6 @@ function handleHistorySelect(item: { query: string; mode: 'game' | 'patch' }) {
   uiStore.isHistoryModalOpen = false
 }
 
-// SW 更新相关
-let swRegistration: globalThis.ServiceWorkerRegistration | null = null
-
-function handleSwUpdate() {
-  if (swRegistration) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const triggerUpdate = (window as any).triggerSwUpdate
-    if (triggerUpdate) {
-      triggerUpdate(swRegistration)
-    } else {
-      window.location.reload()
-    }
-  } else {
-    window.location.reload()
-  }
-}
 const randomImageUrl = ref('')
 // 使用 shallowRef 优化大型数据结构的响应式性能
 const imageCache = shallowRef<string[]>([])
@@ -250,7 +231,8 @@ function reshuffleQueue() {
 async function fetchAndCacheImage() {
   try {
     const timestamp = Date.now()
-    const apiUrl = `https://api.illlights.com/v1/img?t=${timestamp}`
+    const baseUrl = settingsStore.settings.backgroundImageApiUrl || DEFAULT_API_CONFIG.backgroundImageApiUrl
+    const apiUrl = `${baseUrl}?t=${timestamp}`
     
     // 先通过 fetch 获取最终的图片 URL（处理重定向）
     const response = await fetch(apiUrl)
@@ -498,14 +480,16 @@ onMounted(async () => {
   if (uiStore.customCSS) {
     applyCustomCSS(uiStore.customCSS)
   }
-
-  // 监听 SW 更新事件
-  window.addEventListener('sw-update-available', (event) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const customEvent = event as any
-    swRegistration = customEvent.detail?.registration || null
-    uiStore.setShowUpdateToast(true)
-  })
+  
+  // 应用自定义 JS
+  if (settingsStore.settings.customJS) {
+    applyCustomJS(settingsStore.settings.customJS)
+  }
+  
+  // 应用自定义 HTML
+  if (settingsStore.settings.customHTML) {
+    applyCustomHTML(settingsStore.settings.customHTML)
+  }
   }, { timeout: 2000 })
   
   // === 背景图片初始化：稍后执行 ===
@@ -549,6 +533,10 @@ function saveSettings(customApi: string, newCustomCSS: string) {
   saveCustomCSS(newCustomCSS)
   // 应用到页面
   applyCustomCSS(newCustomCSS)
+  // 应用自定义 JS（settingsStore 已在 SettingsModal 中更新）
+  applyCustomJS(settingsStore.settings.customJS)
+  // 应用自定义 HTML
+  applyCustomHTML(settingsStore.settings.customHTML)
 }
 </script>
 

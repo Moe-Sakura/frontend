@@ -4,23 +4,51 @@ import { ref, watch } from 'vue'
 export interface UserSettings {
   customApi: string
   customCSS: string
+  customJS: string
+  customHTML: string
   autoLoadMore: boolean
   resultsPerPage: number
   enableAnimations: boolean
   showPlatformIcons: boolean
   compactMode: boolean
   enableNotifications: boolean
+  // API 高级配置
+  vndbApiBaseUrl: string
+  vndbImageProxyUrl: string
+  aiTranslateApiUrl: string
+  aiTranslateApiKey: string
+  aiTranslateModel: string
+  backgroundImageApiUrl: string
+}
+
+// 默认 API 配置
+export const DEFAULT_API_CONFIG = {
+  vndbApiBaseUrl: 'https://api.vndb.org/kana',
+  vndbImageProxyUrl: 'https://rp.searchgal.homes/',
+  aiTranslateApiUrl: 'https://ai.searchgal.homes/v1/chat/completions',
+  aiTranslateApiKey: 'sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e',
+  aiTranslateModel: 'Qwen/Qwen2.5-32B-Instruct',
+  backgroundImageApiUrl: 'https://api.illlights.com/v1/img',
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
   customApi: '',
   customCSS: '',
+  customJS: '',
+  customHTML: '',
   autoLoadMore: false,
   resultsPerPage: 10,
   enableAnimations: true,
   showPlatformIcons: true,
   compactMode: false,
   enableNotifications: true,
+  // API 高级配置
+  vndbApiBaseUrl: DEFAULT_API_CONFIG.vndbApiBaseUrl,
+  vndbImageProxyUrl: DEFAULT_API_CONFIG.vndbImageProxyUrl,
+  aiTranslateApiUrl: DEFAULT_API_CONFIG.aiTranslateApiUrl,
+  aiTranslateApiKey: DEFAULT_API_CONFIG.aiTranslateApiKey,
+  aiTranslateModel: DEFAULT_API_CONFIG.aiTranslateModel,
+  backgroundImageApiUrl: DEFAULT_API_CONFIG.backgroundImageApiUrl,
 }
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -100,6 +128,9 @@ export const useSettingsStore = defineStore('settings', () => {
     },
     { deep: true },
   )
+  
+  // 自动加载设置
+  loadSettings()
   
   return {
     // 状态

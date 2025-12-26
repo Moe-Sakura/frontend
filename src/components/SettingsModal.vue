@@ -212,42 +212,229 @@
               </Transition>
             </div>
 
-            <!-- 自定义样式卡片 -->
-            <div
-              class="settings-card"
-            >
+            <!-- 自定义代码卡片 - IDE 风格 -->
+            <div class="settings-card !p-0 overflow-hidden">
+              <!-- IDE 风格顶部栏 -->
+              <div class="flex items-center justify-between px-4 py-3 bg-[#252526] border-b border-[#3c3c3c]">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <Code :size="16" class="text-white" />
+                  </div>
+                  <div>
+                    <h2 class="text-sm font-semibold text-white">自定义代码</h2>
+                    <p class="text-xs text-gray-400">CSS · JavaScript · HTML</p>
+                  </div>
+                </div>
+                <!-- 窗口控制按钮装饰 -->
+                <div class="flex items-center gap-1.5">
+                  <div class="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                  <div class="w-3 h-3 rounded-full bg-[#febc2e]" />
+                  <div class="w-3 h-3 rounded-full bg-[#28c840]" />
+                </div>
+              </div>
+
+              <!-- IDE 风格 Tab 栏 -->
+              <div class="flex bg-[#2d2d2d] border-b border-[#3c3c3c]">
+                <button
+                  :class="[
+                    'group relative flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all border-r border-[#3c3c3c]',
+                    activeCodeTab === 'css'
+                      ? 'bg-[#1e1e1e] text-white'
+                      : 'text-gray-400 hover:text-gray-200 hover:bg-[#383838]'
+                  ]"
+                  @click="switchCodeTab('css')"
+                >
+                  <Paintbrush :size="14" :class="activeCodeTab === 'css' ? 'text-[#ff1493]' : 'text-gray-500 group-hover:text-[#ff1493]'" />
+                  <span>style.css</span>
+                  <div v-if="activeCodeTab === 'css'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff1493]" />
+                </button>
+                <button
+                  :class="[
+                    'group relative flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all border-r border-[#3c3c3c]',
+                    activeCodeTab === 'js'
+                      ? 'bg-[#1e1e1e] text-white'
+                      : 'text-gray-400 hover:text-gray-200 hover:bg-[#383838]'
+                  ]"
+                  @click="switchCodeTab('js')"
+                >
+                  <Terminal :size="14" :class="activeCodeTab === 'js' ? 'text-amber-400' : 'text-gray-500 group-hover:text-amber-400'" />
+                  <span>script.js</span>
+                  <div v-if="activeCodeTab === 'js'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400" />
+                </button>
+                <button
+                  :class="[
+                    'group relative flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all',
+                    activeCodeTab === 'html'
+                      ? 'bg-[#1e1e1e] text-white'
+                      : 'text-gray-400 hover:text-gray-200 hover:bg-[#383838]'
+                  ]"
+                  @click="switchCodeTab('html')"
+                >
+                  <FileCode :size="14" :class="activeCodeTab === 'html' ? 'text-cyan-400' : 'text-gray-500 group-hover:text-cyan-400'" />
+                  <span>custom.html</span>
+                  <div v-if="activeCodeTab === 'html'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400" />
+                </button>
+              </div>
+
+              <!-- 编辑器区域 -->
+              <div class="relative">
+                <!-- CSS 编辑器 -->
+                <div v-show="activeCodeTab === 'css'">
+                  <PrismEditor
+                    v-model="localCustomCSS"
+                    :highlight="highlightCSS"
+                    :line-numbers="true"
+                    class="code-editor"
+                    @input="handleTyping"
+                  />
+                </div>
+
+                <!-- JS 编辑器 -->
+                <div v-show="activeCodeTab === 'js'">
+                  <PrismEditor
+                    v-model="localCustomJS"
+                    :highlight="highlightJS"
+                    :line-numbers="true"
+                    class="code-editor"
+                    @input="handleTyping"
+                  />
+                </div>
+
+                <!-- HTML 编辑器 -->
+                <div v-show="activeCodeTab === 'html'">
+                  <PrismEditor
+                    v-model="localCustomHTML"
+                    :highlight="highlightHTML"
+                    :line-numbers="true"
+                    class="code-editor"
+                    @input="handleTyping"
+                  />
+                </div>
+              </div>
+
+              <!-- 底部状态栏 -->
+              <div class="flex items-center justify-between px-4 py-1.5 bg-[#007acc] text-white text-xs">
+                <div class="flex items-center gap-4">
+                  <span class="flex items-center gap-1">
+                    <Info :size="12" />
+                    <span v-if="activeCodeTab === 'css'">CSS 样式会覆盖现有样式</span>
+                    <span v-else-if="activeCodeTab === 'js'">脚本在页面加载时执行</span>
+                    <span v-else>HTML 添加到 body 末尾</span>
+                  </span>
+                </div>
+                <div class="flex items-center gap-3 text-white/80">
+                  <span>UTF-8</span>
+                  <span v-if="activeCodeTab === 'css'">CSS</span>
+                  <span v-else-if="activeCodeTab === 'js'">JavaScript</span>
+                  <span v-else>HTML</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 高级 API 设置卡片 -->
+            <div class="settings-card">
               <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                  <Paintbrush :size="20" class="text-white" />
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                  <Terminal :size="20" class="text-white" />
                 </div>
                 <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">自定义样式</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">添加自定义 CSS 代码</p>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">高级 API 设置</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">自定义 VNDB 和 AI 翻译 API</p>
                 </div>
               </div>
 
-              <!-- CSS 编辑器 - 带语法高亮 -->
-              <div class="css-editor-wrapper rounded-2xl overflow-hidden border-2 border-transparent focus-within:border-[#ff1493] transition-all duration-200">
-                <PrismEditor
-                  v-model="localCustomCSS"
-                  :highlight="highlightCSS"
-                  :line-numbers="true"
-                  class="css-editor"
-                  @input="handleTyping"
-                />
-              </div>
-
-              <!-- 提示信息 -->
-              <div class="mt-4 flex items-start gap-3 p-4 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-800/30">
-                <Info :size="18" class="text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                  <p class="font-medium">使用说明</p>
-                  <ul class="text-blue-600 dark:text-blue-400 space-y-0.5 text-xs">
-                    <li>• 支持标准 CSS 语法</li>
-                    <li>• 可以覆盖现有样式或添加新样式</li>
-                    <li>• 修改后点击"保存"即可应用</li>
-                  </ul>
+              <div class="space-y-4">
+                <!-- VNDB API Base URL -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                    VNDB API 地址
+                  </label>
+                  <input
+                    v-model="localVndbApiBaseUrl"
+                    type="url"
+                    placeholder="https://api.vndb.org/kana"
+                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                    @input="handleTyping"
+                  />
                 </div>
+
+                <!-- VNDB Image Proxy URL -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                    VNDB 图片代理地址
+                  </label>
+                  <input
+                    v-model="localVndbImageProxyUrl"
+                    type="url"
+                    placeholder="https://rp.searchgal.homes/"
+                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                    @input="handleTyping"
+                  />
+                </div>
+
+                <!-- AI Translate API URL -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                    AI 翻译 API 地址
+                  </label>
+                  <input
+                    v-model="localAiTranslateApiUrl"
+                    type="url"
+                    placeholder="https://ai.searchgal.homes/v1/chat/completions"
+                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                    @input="handleTyping"
+                  />
+                </div>
+
+                <!-- AI Translate API Key -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                    AI 翻译 API Key
+                  </label>
+                  <input
+                    v-model="localAiTranslateApiKey"
+                    type="password"
+                    placeholder="sk-..."
+                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 font-mono"
+                    @input="handleTyping"
+                  />
+                </div>
+
+                <!-- AI Translate Model -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                    AI 翻译模型
+                  </label>
+                  <input
+                    v-model="localAiTranslateModel"
+                    type="text"
+                    placeholder="Qwen/Qwen2.5-32B-Instruct"
+                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                    @input="handleTyping"
+                  />
+                </div>
+
+                <!-- Background Image API URL -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                    背景图片 API 地址
+                  </label>
+                  <input
+                    v-model="localBackgroundImageApiUrl"
+                    type="url"
+                    placeholder="https://api.illlights.com/v1/img"
+                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                    @input="handleTyping"
+                  />
+                </div>
+
+                <!-- 恢复默认按钮 -->
+                <button
+                  class="w-full px-4 py-2.5 rounded-xl text-cyan-600 dark:text-cyan-400 font-medium bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-[0.98] transition-all text-sm"
+                  @click="resetAdvancedApiSettings"
+                >
+                  恢复默认值
+                </button>
               </div>
             </div>
 
@@ -291,11 +478,33 @@ import 'vue-prism-editor/dist/prismeditor.min.css'
 // Prism 语法高亮
 import { highlight, languages } from 'prismjs/components/prism-core'
 import 'prismjs/components/prism-css'
+import 'prismjs/components/prism-clike'
+import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-markup'
 import 'prismjs/themes/prism-tomorrow.css'
 
 // CSS 语法高亮函数
 function highlightCSS(code: string): string {
   return highlight(code, languages.css, 'css')
+}
+
+// JS 语法高亮函数
+function highlightJS(code: string): string {
+  return highlight(code, languages.javascript, 'javascript')
+}
+
+// HTML 语法高亮函数
+function highlightHTML(code: string): string {
+  return highlight(code, languages.markup, 'markup')
+}
+
+// 代码编辑器 Tab 类型
+type CodeEditorTab = 'css' | 'js' | 'html'
+const activeCodeTab = ref<CodeEditorTab>('css')
+
+function switchCodeTab(tab: CodeEditorTab) {
+  playTap()
+  activeCodeTab.value = tab
 }
 
 // 打字音效节流
@@ -317,6 +526,9 @@ import {
   Server,
   Link as LinkIcon,
   RotateCcw,
+  Terminal,
+  Code,
+  FileCode,
   Check,
   Github,
   X,
@@ -326,8 +538,10 @@ import {
   Monitor,
 } from 'lucide-vue-next'
 import { useUIStore, type ThemeMode } from '@/stores/ui'
+import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
 
 const uiStore = useUIStore()
+const settingsStore = useSettingsStore()
 
 // 主题选项
 const themeOptions = [
@@ -401,6 +615,16 @@ const customApiInput = ref(
   selectedApiOption.value === 'custom' ? props.customApi : '',
 )
 const localCustomCSS = ref(props.customCSS)
+const localCustomJS = ref(settingsStore.settings.customJS)
+const localCustomHTML = ref(settingsStore.settings.customHTML)
+
+// 高级 API 设置状态
+const localVndbApiBaseUrl = ref(settingsStore.settings.vndbApiBaseUrl)
+const localVndbImageProxyUrl = ref(settingsStore.settings.vndbImageProxyUrl)
+const localAiTranslateApiUrl = ref(settingsStore.settings.aiTranslateApiUrl)
+const localAiTranslateApiKey = ref(settingsStore.settings.aiTranslateApiKey)
+const localAiTranslateModel = ref(settingsStore.settings.aiTranslateModel)
+const localBackgroundImageApiUrl = ref(settingsStore.settings.backgroundImageApiUrl)
 
 // 计算最终的 API 地址
 const localCustomApi = computed(() => {
@@ -440,6 +664,15 @@ watch(() => props.isOpen, (isOpen) => {
     selectedApiOption.value = getOptionFromUrl(props.customApi)
     customApiInput.value = selectedApiOption.value === 'custom' ? props.customApi : ''
     localCustomCSS.value = props.customCSS
+    localCustomJS.value = settingsStore.settings.customJS
+    localCustomHTML.value = settingsStore.settings.customHTML
+    // 同步高级 API 设置
+    localVndbApiBaseUrl.value = settingsStore.settings.vndbApiBaseUrl
+    localVndbImageProxyUrl.value = settingsStore.settings.vndbImageProxyUrl
+    localAiTranslateApiUrl.value = settingsStore.settings.aiTranslateApiUrl
+    localAiTranslateApiKey.value = settingsStore.settings.aiTranslateApiKey
+    localAiTranslateModel.value = settingsStore.settings.aiTranslateModel
+    localBackgroundImageApiUrl.value = settingsStore.settings.backgroundImageApiUrl
   }
 })
 
@@ -450,6 +683,17 @@ function close() {
 
 function save() {
   playCelebration()
+  // 保存高级 API 设置和自定义脚本/HTML
+  settingsStore.updateSettings({
+    customJS: localCustomJS.value,
+    customHTML: localCustomHTML.value,
+    vndbApiBaseUrl: localVndbApiBaseUrl.value,
+    vndbImageProxyUrl: localVndbImageProxyUrl.value,
+    aiTranslateApiUrl: localAiTranslateApiUrl.value,
+    aiTranslateApiKey: localAiTranslateApiKey.value,
+    aiTranslateModel: localAiTranslateModel.value,
+    backgroundImageApiUrl: localBackgroundImageApiUrl.value,
+  })
   emit('save', localCustomApi.value, localCustomCSS.value)
   emit('close')
 }
@@ -459,6 +703,22 @@ function reset() {
   selectedApiOption.value = 'cfapi'
   customApiInput.value = ''
   localCustomCSS.value = ''
+  localCustomJS.value = ''
+  localCustomHTML.value = ''
+  // 重置高级 API 设置（不播放音效，因为已经播放过）
+  resetAdvancedApiSettings(false)
+}
+
+function resetAdvancedApiSettings(playSound = true) {
+  if (playSound) {
+    playTap()
+  }
+  localVndbApiBaseUrl.value = DEFAULT_API_CONFIG.vndbApiBaseUrl
+  localVndbImageProxyUrl.value = DEFAULT_API_CONFIG.vndbImageProxyUrl
+  localAiTranslateApiUrl.value = DEFAULT_API_CONFIG.aiTranslateApiUrl
+  localAiTranslateApiKey.value = DEFAULT_API_CONFIG.aiTranslateApiKey
+  localAiTranslateModel.value = DEFAULT_API_CONFIG.aiTranslateModel
+  localBackgroundImageApiUrl.value = DEFAULT_API_CONFIG.backgroundImageApiUrl
 }
 </script>
 
@@ -531,105 +791,147 @@ function reset() {
   background-color: rgba(255, 20, 147, 0.3);
 }
 
-/* CSS 编辑器容器 */
-.css-editor-wrapper {
-  background: #1e1e1e;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Prism Editor 样式覆盖 */
-.css-editor {
-  font-family: "Consolas", "Monaco", "Fira Code", monospace !important;
-  font-size: 14px !important;
-  line-height: 1.6 !important;
-  padding: 1rem !important;
-  min-height: 280px !important;
-  max-height: 450px !important;
-  overflow-y: auto !important;
+/* IDE 风格代码编辑器 */
+.code-editor {
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", "Monaco", monospace !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  min-height: 240px !important;
+  max-height: 360px !important;
   background: #1e1e1e !important;
   color: #d4d4d4 !important;
-  caret-color: #ff1493 !important;
+  caret-color: #aeafad !important;
+  tab-size: 2 !important;
+  /* 外层容器只处理垂直滚动 */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
-.css-editor .prism-editor__textarea {
+/* 禁止代码换行 */
+.code-editor .prism-editor__textarea,
+.code-editor .prism-editor__editor,
+.code-editor pre,
+.code-editor code {
+  white-space: pre !important;
+  word-wrap: normal !important;
+  overflow-wrap: normal !important;
+}
+
+/* 让编辑器填满整个区域，点击空白处也能聚焦 */
+.code-editor .prism-editor__container {
+  min-height: 220px !important;
+  /* 容器启用水平滚动 */
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
+.code-editor .prism-editor__textarea,
+.code-editor .prism-editor__editor {
+  min-height: 220px !important;
+  outline: none !important;
+  /* 编辑区域内容不换行 */
+  min-width: max-content !important;
+}
+
+.code-editor .prism-editor__textarea:focus {
   outline: none !important;
 }
 
-.css-editor .prism-editor__textarea:focus {
-  outline: none !important;
-}
-
-/* 行号样式 */
-.css-editor .prism-editor__line-numbers {
-  padding-right: 0.75rem !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
-  margin-right: 0.75rem !important;
-  color: rgba(255, 255, 255, 0.35) !important;
+/* 行号样式 - VS Code 风格 */
+.code-editor .prism-editor__line-numbers {
+  padding: 0 1rem 0 0.5rem !important;
+  background: #1e1e1e !important;
+  color: #858585 !important;
   user-select: none !important;
+  text-align: right !important;
+  min-width: 2.5rem !important;
+  border-right: none !important;
+  margin-right: 0 !important;
 }
 
-/* 代码高亮 - 主题色调整 */
-.css-editor .token.selector {
+/* 当前行高亮 */
+.code-editor .prism-editor__line-number {
+  transition: color 0.1s;
+}
+
+/* VS Code Dark+ 主题色 */
+.code-editor .token.selector {
   color: #d7ba7d !important;
 }
 
-.css-editor .token.property {
+.code-editor .token.property {
   color: #9cdcfe !important;
 }
 
-.css-editor .token.punctuation {
+.code-editor .token.punctuation {
   color: #d4d4d4 !important;
 }
 
-.css-editor .token.string {
+.code-editor .token.string {
   color: #ce9178 !important;
 }
 
-.css-editor .token.number,
-.css-editor .token.unit {
+.code-editor .token.number,
+.code-editor .token.unit {
   color: #b5cea8 !important;
 }
 
-.css-editor .token.function {
+.code-editor .token.function {
   color: #dcdcaa !important;
 }
 
-.css-editor .token.comment {
+.code-editor .token.comment {
   color: #6a9955 !important;
   font-style: italic;
 }
 
-.css-editor .token.atrule,
-.css-editor .token.keyword {
+.code-editor .token.atrule,
+.code-editor .token.keyword {
   color: #c586c0 !important;
 }
 
-.css-editor .token.important {
-  color: #ff1493 !important;
+.code-editor .token.important {
+  color: #569cd6 !important;
 }
 
-/* 选中文本样式 */
-.css-editor .prism-editor__textarea::selection,
-.css-editor .prism-editor__editor *::selection {
-  background-color: rgba(255, 20, 147, 0.3) !important;
+.code-editor .token.tag {
+  color: #569cd6 !important;
 }
 
-/* 自定义滚动条 */
-.css-editor::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.code-editor .token.attr-name {
+  color: #9cdcfe !important;
 }
 
-.css-editor::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+.code-editor .token.attr-value {
+  color: #ce9178 !important;
 }
 
-.css-editor::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ff1493, #d946ef);
-  border-radius: 4px;
+/* 选中文本样式 - VS Code 风格 */
+.code-editor .prism-editor__textarea::selection,
+.code-editor .prism-editor__editor *::selection {
+  background-color: #264f78 !important;
 }
 
-.css-editor::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c71585, #c026d3);
+/* VS Code 风格滚动条 */
+.code-editor::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.code-editor::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.code-editor::-webkit-scrollbar-thumb {
+  background: #424242;
+  border-radius: 0;
+}
+
+.code-editor::-webkit-scrollbar-thumb:hover {
+  background: #4f4f4f;
+}
+
+.code-editor::-webkit-scrollbar-corner {
+  background: #1e1e1e;
 }
 </style>

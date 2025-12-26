@@ -440,6 +440,7 @@
               :alt="friend.name"
               class="w-10 h-10 rounded-lg object-cover bg-gray-100 dark:bg-slate-700 flex-shrink-0"
               loading="lazy"
+              referrerpolicy="no-referrer"
               @error="handleFriendLogoError"
             />
             <div class="flex-1 min-w-0">
@@ -508,7 +509,7 @@ interface FriendLink {
 }
 const friendLinks = ref<FriendLink[]>(friendsData.friends || [])
 
-// 友链 logo 加载失败时的处理
+// 友链 logo 加载失败时显示占位符
 function handleFriendLogoError(e: Event) {
   const img = e.target as HTMLImageElement
   img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff1493"><circle cx="12" cy="12" r="10"/></svg>'

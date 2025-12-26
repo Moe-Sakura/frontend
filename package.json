@@ -34,7 +34,7 @@
     "snd-lib": "^1.2.4",
     "vue": "^3.5.26",
     "vue-prism-editor": "2.0.0-alpha.2",
-    "@tanstack/vue-virtual": "^3.13.6"
+    "@tanstack/vue-virtual": "^3.13.13"
   },
   "packageManager": "pnpm@10.26.2"
 }

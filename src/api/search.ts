@@ -1,10 +1,53 @@
 // API 相关常量和类型
-export const VNDB_API_BASE_URL = 'https://api.vndb.org/kana'
-export const AI_TRANSLATE_API_URL = 'https://ai.searchgal.homes/v1/chat/completions'
-export const AI_TRANSLATE_API_KEY = 'sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e'
-export const AI_TRANSLATE_MODEL = 'Qwen/Qwen2.5-32B-Instruct'
+import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
+
+// 获取 API 配置的 getter 函数
+export function getVndbApiBaseUrl(): string {
+  try {
+    const settingsStore = useSettingsStore()
+    return settingsStore.settings.vndbApiBaseUrl || DEFAULT_API_CONFIG.vndbApiBaseUrl
+  } catch {
+    return DEFAULT_API_CONFIG.vndbApiBaseUrl
+  }
+}
+
+export function getAiTranslateApiUrl(): string {
+  try {
+    const settingsStore = useSettingsStore()
+    return settingsStore.settings.aiTranslateApiUrl || DEFAULT_API_CONFIG.aiTranslateApiUrl
+  } catch {
+    return DEFAULT_API_CONFIG.aiTranslateApiUrl
+  }
+}
+
+export function getAiTranslateApiKey(): string {
+  try {
+    const settingsStore = useSettingsStore()
+    return settingsStore.settings.aiTranslateApiKey || DEFAULT_API_CONFIG.aiTranslateApiKey
+  } catch {
+    return DEFAULT_API_CONFIG.aiTranslateApiKey
+  }
+}
+
+export function getAiTranslateModel(): string {
+  try {
+    const settingsStore = useSettingsStore()
+    return settingsStore.settings.aiTranslateModel || DEFAULT_API_CONFIG.aiTranslateModel
+  } catch {
+    return DEFAULT_API_CONFIG.aiTranslateModel
+  }
+}
+
+export function getVndbImageProxyUrl(): string {
+  try {
+    const settingsStore = useSettingsStore()
+    return settingsStore.settings.vndbImageProxyUrl || DEFAULT_API_CONFIG.vndbImageProxyUrl
+  } catch {
+    return DEFAULT_API_CONFIG.vndbImageProxyUrl
+  }
+}
+
 export const ENABLE_VNDB_IMAGE_PROXY = true
-export const VNDB_IMAGE_PROXY_URL = 'https://rp.searchgal.homes/'
 
 let isProxyAvailable = false
 
@@ -312,7 +355,7 @@ export async function searchGameStream(
 export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> {
   try {
     // VNDB API v2 正确的请求格式 - 获取更多字段
-    const response = await fetch(`${VNDB_API_BASE_URL}/vn`, {
+    const response = await fetch(`${getVndbApiBaseUrl()}/vn`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -524,7 +567,7 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
  */
 export async function fetchVndbCharacters(vnId: string): Promise<VndbCharacter[]> {
   try {
-    const response = await fetch(`${VNDB_API_BASE_URL}/character`, {
+    const response = await fetch(`${getVndbApiBaseUrl()}/character`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -576,7 +619,7 @@ export async function fetchVndbCharacters(vnId: string): Promise<VndbCharacter[]
     if (ENABLE_VNDB_IMAGE_PROXY && isProxyAvailable) {
       characters.forEach((char) => {
         if (char.image && char.image.startsWith('https://t.vndb.org/')) {
-          char.image = VNDB_IMAGE_PROXY_URL + char.image
+          char.image = getVndbImageProxyUrl() + char.image
         }
       })
     }
@@ -594,13 +637,14 @@ export async function fetchVndbCharacters(vnId: string): Promise<VndbCharacter[]
  */
 export async function fetchVndbQuotes(vnId: string): Promise<VndbQuote[]> {
   try {
-    const response = await fetch(`${VNDB_API_BASE_URL}/quote`, {
+    const response = await fetch(`${getVndbApiBaseUrl()}/quote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         filters: ['vn', '=', ['id', '=', vnId]],
         fields: 'id, quote, character{id, name, original}',
-        results: 10,
+        // 获取更多名言以提供更丰富的内容（用户反馈 10 条不够）
+        results: 25,
       }),
     })
 
@@ -716,14 +760,14 @@ export async function translateText(
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const response = await fetch(AI_TRANSLATE_API_URL, {
+      const response = await fetch(getAiTranslateApiUrl(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${AI_TRANSLATE_API_KEY}`,
+          Authorization: `Bearer ${getAiTranslateApiKey()}`,
         },
         body: JSON.stringify({
-          model: AI_TRANSLATE_MODEL,
+          model: getAiTranslateModel(),
           messages: [
             {
               role: 'system',
@@ -792,19 +836,19 @@ function replaceVndbUrls(vndbInfo: VndbInfo) {
 
   // 替换封面图片 URL - 代理需要完整的原始 URL
   if (vndbInfo.mainImageUrl && vndbInfo.mainImageUrl.startsWith('https://t.vndb.org/')) {
-    vndbInfo.mainImageUrl = VNDB_IMAGE_PROXY_URL + vndbInfo.mainImageUrl
+    vndbInfo.mainImageUrl = getVndbImageProxyUrl() + vndbInfo.mainImageUrl
   }
 
   // 替换主截图 URL - 代理需要完整的原始 URL
   if (vndbInfo.screenshotUrl && vndbInfo.screenshotUrl.startsWith('https://t.vndb.org/')) {
-    vndbInfo.screenshotUrl = VNDB_IMAGE_PROXY_URL + vndbInfo.screenshotUrl
+    vndbInfo.screenshotUrl = getVndbImageProxyUrl() + vndbInfo.screenshotUrl
   }
 
   // 替换所有截图 URL
   if (vndbInfo.screenshots && vndbInfo.screenshots.length > 0) {
     vndbInfo.screenshots = vndbInfo.screenshots.map((url) => {
       if (url.startsWith('https://t.vndb.org/')) {
-        return VNDB_IMAGE_PROXY_URL + url
+        return getVndbImageProxyUrl() + url
       }
       return url
     })

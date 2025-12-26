@@ -15,7 +15,7 @@ const containerRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
 onMounted(() => {
-  if (!containerRef.value) return
+  if (!containerRef.value) {return}
   
   observer = new IntersectionObserver(
     (entries) => {
@@ -33,8 +33,8 @@ onMounted(() => {
     },
     {
       rootMargin: props.rootMargin || '200px 0px', // 提前 200px 开始渲染
-      threshold: 0
-    }
+      threshold: 0,
+    },
   )
   
   observer.observe(containerRef.value)
