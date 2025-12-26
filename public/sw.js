@@ -1,13 +1,28 @@
-// Service Worker - PWA 支持（简化版）
-// 离线时仅显示联网提示，不缓存离线内容
+// Service Worker - PWA 支持（增强缓存版）
+// 尽可能多地缓存文件以提升加载速度
 const SW_VERSION = self.__SW_VERSION__ || Date.now().toString(36);
 const CACHE_NAME = `searchgal-cache-${SW_VERSION}`;
 
-// 仅缓存静态资源以提升加载速度（非离线使用）
+// 缓存静态资源（尽可能多）
 const CACHEABLE_PATTERNS = [
-  /\/assets\/.*\.(js|css)(\?.*)?$/i,  // Vite 构建的静态资源
+  /\/assets\/.*\.(js|css|mjs)(\?.*)?$/i,  // Vite 构建的静态资源
   /\.(woff2?|ttf|otf|eot)(\?.*)?$/i,  // 字体
-  /\.(png|jpg|jpeg|gif|webp|svg|ico)(\?.*)?$/i,  // 图片
+  /\.(png|jpg|jpeg|gif|webp|svg|ico|avif)(\?.*)?$/i,  // 图片
+  /\.(mp3|wav|ogg|m4a|aac|flac)(\?.*)?$/i,  // 音频（snd-lib 音效）
+  /\.(mp4|webm|ogv)(\?.*)?$/i,  // 视频
+  /\.(json|xml|txt)(\?.*)?$/i,  // 数据文件
+  /\.(wasm)(\?.*)?$/i,  // WebAssembly
+  /\/manifest\.json$/i,  // PWA manifest
+  /\/favicon/i,  // Favicon 相关
+  /\/apple-touch-icon/i,  // iOS 图标
+  /\/android-chrome/i,  // Android 图标
+];
+
+// 预缓存的核心资源（安装时缓存）
+const PRECACHE_URLS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
 ];
 
 // 永不缓存
@@ -16,14 +31,26 @@ const NO_CACHE_PATTERNS = [
   /\/sw\.js$/,
   /sockjs-node/,
   /__vite/,
+  /hot-update/,
+  /\.map$/,  // Source maps
 ];
 
 // ============================================
-// 安装事件
+// 安装事件 - 预缓存核心资源
 // ============================================
-self.addEventListener('install', () => {
+self.addEventListener('install', (event) => {
   console.log(`[SW] Installing version ${SW_VERSION}`);
-  self.skipWaiting();
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('[SW] Precaching core resources');
+        return cache.addAll(PRECACHE_URLS).catch((err) => {
+          console.warn('[SW] Precache failed:', err);
+        });
+      })
+      .then(() => self.skipWaiting())
+  );
 });
 
 // ============================================
@@ -78,23 +105,30 @@ self.addEventListener('fetch', (event) => {
   // 跳过永不缓存的模式
   if (NO_CACHE_PATTERNS.some((p) => p.test(url.href))) return;
 
-  // 仅处理同源请求
-  if (url.origin !== location.origin) return;
+  // 同源请求
+  if (url.origin === location.origin) {
+    // HTML 页面请求：网络优先，离线时显示提示
+    if (request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+      event.respondWith(handlePageRequest(request));
+      return;
+    }
 
-  // HTML 页面请求：网络优先，离线时显示提示
-  if (request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('.html')) {
-    event.respondWith(handlePageRequest(request));
+    // 可缓存的静态资源：缓存优先（加速）
+    if (CACHEABLE_PATTERNS.some((p) => p.test(url.pathname) || p.test(url.href))) {
+      event.respondWith(cacheFirst(request));
+      return;
+    }
+
+    // 同源其他资源：网络优先，但也缓存
+    event.respondWith(networkFirst(request));
     return;
   }
 
-  // 可缓存的静态资源：缓存优先（加速）
-  if (CACHEABLE_PATTERNS.some((p) => p.test(url.pathname))) {
-    event.respondWith(cacheFirst(request));
+  // 跨域资源：仅缓存可缓存的静态资源（如 CDN 资源）
+  if (CACHEABLE_PATTERNS.some((p) => p.test(url.pathname) || p.test(url.href))) {
+    event.respondWith(cacheFirstCrossOrigin(request));
     return;
   }
-
-  // 其他资源：网络优先
-  event.respondWith(networkFirst(request));
 });
 
 /**
@@ -143,6 +177,27 @@ async function networkFirst(request) {
   } catch {
     const cached = await caches.match(request);
     return cached || new Response('', { status: 503 });
+  }
+}
+
+/**
+ * 缓存优先（跨域资源）
+ */
+async function cacheFirstCrossOrigin(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  
+  try {
+    // 跨域请求需要设置 mode
+    const response = await fetch(request, { mode: 'cors', credentials: 'omit' });
+    if (response.ok && response.type !== 'opaque') {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    // 跨域失败时返回空响应
+    return new Response('', { status: 503 });
   }
 }
 
