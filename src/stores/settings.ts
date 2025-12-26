@@ -24,7 +24,7 @@ export interface UserSettings {
 // 默认 API 配置
 export const DEFAULT_API_CONFIG = {
   vndbApiBaseUrl: 'https://api.vndb.org/kana',
-  vndbImageProxyUrl: 'https://rpx.searchgal.homes/',
+  vndbImageProxyUrl: 'https://rp.searchgal.homes/',
   aiTranslateApiUrl: 'https://ai.searchgal.homes/v1/chat/completions',
   aiTranslateApiKey: 'sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e',
   aiTranslateModel: 'Qwen/Qwen2.5-32B-Instruct',
