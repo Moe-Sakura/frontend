@@ -7,29 +7,64 @@ import { useCacheStore } from './cache'
 export interface VndbVoiceActor {
   id: string
   name: string
-  character?: string
+  character?: { id: string; name: string }
 }
 
 export interface VndbTag {
   id: string
   name: string
   rating?: number
+  spoiler?: number
+  category?: string
+}
+
+export interface VndbRelation {
+  id: string
+  title: string
+  relation: string
+  relation_official?: boolean
+}
+
+export interface VndbExtLink {
+  url: string
+  label: string
+  name: string
+}
+
+export interface VndbDeveloper {
+  id?: string
+  name: string
+  original?: string
 }
 
 export interface VndbInfo {
+  id?: string
   names: string[]
   mainName: string
   originalTitle: string
   mainImageUrl: string | null
   screenshotUrl: string | null
+  screenshots: string[]
   description: string | null
+  translatedDescription: string | null
   va: VndbVoiceActor[]
-  vntags: VndbTag[]
+  tags: VndbTag[]
+  relations: VndbRelation[]
+  extlinks: VndbExtLink[]
   play_hours: number
   length_minute: number
   length_votes: number
   length_color: string
   book_length: string
+  rating?: number
+  average?: number
+  votecount?: number
+  released?: string
+  developers?: VndbDeveloper[]
+  platforms?: string[]
+  languages?: string[]
+  olang?: string
+  devstatus?: number
 }
 
 export interface SearchResult {

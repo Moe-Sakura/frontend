@@ -13,7 +13,7 @@
           'fixed z-50 flex flex-col vndb-page shadow-2xl shadow-black/20',
           isFullscreen 
             ? 'inset-0' 
-            : 'inset-0 md:inset-6 md:m-auto md:w-[600px] md:min-w-[400px] md:max-w-[800px] md:h-[500px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
+            : 'inset-0 md:inset-6 md:m-auto md:w-[800px] md:min-w-[700px] md:max-w-[1000px] md:h-[700px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
         ]"
         :style="windowStyle"
       >
@@ -88,19 +88,18 @@
             <div class="vndb-card">
               <!-- 封面图 -->
               <div v-if="searchStore.vndbInfo.mainImageUrl" class="mb-4">
-                <a
-                  :href="searchStore.vndbInfo.mainImageUrl"
-                  data-fancybox="vndb-gallery"
-                  :data-caption="searchStore.vndbInfo.mainName + ' - 游戏封面'"
+                <button
+                  class="block w-full max-w-sm mx-auto"
+                  @click="openGallery(0)"
                 >
                   <img
                     :src="searchStore.vndbInfo.mainImageUrl"
                     :alt="searchStore.vndbInfo.mainName"
-                    class="w-full max-w-sm mx-auto h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+                    class="w-full h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all"
                     loading="lazy"
                     @error="handleImageError"
                   />
-                </a>
+                </button>
               </div>
 
               <!-- 标题 -->
@@ -181,9 +180,52 @@
                     v-text-scroll 
                     class="text-base font-bold text-gray-800 dark:text-white"
                   >
-                    {{ searchStore.vndbInfo.developers.join(', ') }}
+                    {{ searchStore.vndbInfo.developers.map(d => d.name).join(', ') }}
                   </p>
                 </div>
+              </div>
+
+              <!-- 开发状态 -->
+              <div v-if="searchStore.vndbInfo.devstatus !== undefined" class="vndb-card flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  <Gamepad2 :size="24" class="text-white" />
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">开发状态</p>
+                  <p class="text-base font-bold" :class="getDevStatusColor(searchStore.vndbInfo.devstatus)">
+                    {{ formatDevStatus(searchStore.vndbInfo.devstatus) }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- 原始语言 -->
+              <div v-if="searchStore.vndbInfo.olang" class="vndb-card flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
+                  <Globe :size="24" class="text-white" />
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">原始语言</p>
+                  <p class="text-base font-bold text-gray-800 dark:text-white">
+                    {{ formatLanguage(searchStore.vndbInfo.olang) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 支持语言 -->
+            <div v-if="searchStore.vndbInfo.languages && searchStore.vndbInfo.languages.length > 0" class="vndb-card">
+              <div class="flex items-center gap-2 mb-3">
+                <Languages :size="18" class="text-rose-500" />
+                <h3 class="font-bold text-gray-800 dark:text-white">支持语言</h3>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="(lang, index) in searchStore.vndbInfo.languages"
+                  :key="index"
+                  class="px-3 py-1.5 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-sm font-medium rounded-xl"
+                >
+                  {{ formatLanguage(lang) }}
+                </span>
               </div>
             </div>
 
@@ -201,6 +243,154 @@
                 >
                   {{ formatPlatform(platform) }}
                 </span>
+              </div>
+            </div>
+
+            <!-- 标签 -->
+            <div v-if="searchStore.vndbInfo.tags && searchStore.vndbInfo.tags.length > 0" class="vndb-card">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <Tag :size="18" class="text-violet-500" />
+                  <h3 class="font-bold text-gray-800 dark:text-white">标签</h3>
+                  <span class="text-xs text-gray-400 dark:text-slate-500">(按相关性排序)</span>
+                </div>
+                <!-- 翻译按钮 -->
+                <div class="flex items-center gap-2">
+                  <!-- 切换原文/翻译 -->
+                  <button
+                    v-if="translatedTags.size > 0"
+                    class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg transition-colors"
+                    :class="showOriginalTags 
+                      ? 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300' 
+                      : 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'"
+                    @click="toggleTagsLanguage"
+                  >
+                    <Languages :size="14" />
+                    {{ showOriginalTags ? '原文' : '中文' }}
+                  </button>
+                  <!-- 翻译按钮 -->
+                  <button
+                    v-if="translatedTags.size === 0"
+                    class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg transition-colors"
+                    :class="isTranslatingTags 
+                      ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-wait' 
+                      : translateTagsError 
+                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                        : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-sm hover:shadow-md'"
+                    :disabled="isTranslatingTags"
+                    @click="handleTranslateTags"
+                  >
+                    <Loader v-if="isTranslatingTags" :size="14" class="animate-spin" />
+                    <AlertTriangle v-else-if="translateTagsError" :size="14" />
+                    <Bot v-else :size="14" />
+                    {{ isTranslatingTags ? '翻译中...' : translateTagsError ? '重试' : 'AI 翻译' }}
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="(tag, index) in searchStore.vndbInfo.tags"
+                  :key="index"
+                  class="px-2.5 py-1 text-xs font-medium rounded-lg transition-colors cursor-default"
+                  :class="getTagCategoryClass(tag.category)"
+                  :title="`${tag.name}${translatedTags.get(tag.name) ? ' → ' + translatedTags.get(tag.name) : ''} | 相关性: ${Math.round(tag.rating * 10) / 10} | 分类: ${formatTagCategory(tag.category)}`"
+                >
+                  {{ getTagDisplayName(tag) }}
+                </span>
+              </div>
+              <div class="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-gray-200/50 dark:border-slate-700/50">
+                <span class="text-xs text-gray-400 dark:text-slate-500">分类:</span>
+                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
+                  <span class="w-2 h-2 rounded-full bg-violet-500" />内容
+                </span>
+                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
+                  <span class="w-2 h-2 rounded-full bg-blue-500" />技术
+                </span>
+                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
+                  <span class="w-2 h-2 rounded-full bg-amber-500" />色情
+                </span>
+              </div>
+            </div>
+
+            <!-- 声优 -->
+            <div v-if="searchStore.vndbInfo.va && searchStore.vndbInfo.va.length > 0" class="vndb-card">
+              <div class="flex items-center gap-2 mb-3">
+                <Mic :size="18" class="text-cyan-500" />
+                <h3 class="font-bold text-gray-800 dark:text-white">声优</h3>
+                <span class="text-xs text-gray-400 dark:text-slate-500">({{ searchStore.vndbInfo.va.length }})</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <a
+                  v-for="(voiceActor, index) in searchStore.vndbInfo.va.slice(0, 10)"
+                  :key="index"
+                  :href="`https://vndb.org/${voiceActor.id}`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-2 p-2 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-colors group"
+                >
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-cyan-700 dark:text-cyan-400 truncate group-hover:underline">
+                      {{ voiceActor.name }}
+                    </p>
+                    <p v-if="voiceActor.character?.name" class="text-xs text-gray-500 dark:text-slate-400 truncate">
+                      饰 {{ voiceActor.character.name }}
+                    </p>
+                  </div>
+                  <ExternalLink :size="12" class="text-cyan-400 dark:text-cyan-600 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </a>
+              </div>
+              <p v-if="searchStore.vndbInfo.va.length > 10" class="text-xs text-gray-400 dark:text-slate-500 mt-2 text-center">
+                还有 {{ searchStore.vndbInfo.va.length - 10 }} 位声优...
+              </p>
+            </div>
+
+            <!-- 相关作品 -->
+            <div v-if="searchStore.vndbInfo.relations && searchStore.vndbInfo.relations.length > 0" class="vndb-card">
+              <div class="flex items-center gap-2 mb-3">
+                <GitBranch :size="18" class="text-amber-500" />
+                <h3 class="font-bold text-gray-800 dark:text-white">相关作品</h3>
+              </div>
+              <div class="space-y-2">
+                <a
+                  v-for="(relation, index) in searchStore.vndbInfo.relations.slice(0, 8)"
+                  :key="index"
+                  :href="`https://vndb.org/${relation.id}`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-3 p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors group"
+                >
+                  <span class="px-2 py-0.5 text-xs font-medium rounded-md bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 flex-shrink-0">
+                    {{ formatRelation(relation.relation) }}
+                  </span>
+                  <span class="text-sm text-gray-700 dark:text-slate-300 truncate group-hover:underline flex-1">
+                    {{ relation.title }}
+                  </span>
+                  <ExternalLink :size="12" class="text-amber-400 dark:text-amber-600 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </a>
+              </div>
+              <p v-if="searchStore.vndbInfo.relations.length > 8" class="text-xs text-gray-400 dark:text-slate-500 mt-2 text-center">
+                还有 {{ searchStore.vndbInfo.relations.length - 8 }} 个相关作品...
+              </p>
+            </div>
+
+            <!-- 外部链接 -->
+            <div v-if="searchStore.vndbInfo.extlinks && searchStore.vndbInfo.extlinks.length > 0" class="vndb-card">
+              <div class="flex items-center gap-2 mb-3">
+                <Link2 :size="18" class="text-sky-500" />
+                <h3 class="font-bold text-gray-800 dark:text-white">外部链接</h3>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <a
+                  v-for="(link, index) in searchStore.vndbInfo.extlinks"
+                  :key="index"
+                  :href="link.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-xl bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors"
+                >
+                  <span>{{ link.label || link.name }}</span>
+                  <ExternalLink :size="12" />
+                </a>
               </div>
             </div>
 
@@ -269,13 +459,11 @@
                 <h3 class="font-bold text-gray-800 dark:text-white">游戏截图</h3>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <a
+                <button
                   v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
                   :key="index"
-                  :href="screenshot"
-                  data-fancybox="vndb-gallery"
-                  :data-caption="`${searchStore.vndbInfo.mainName} - 截图 ${index + 1}`"
                   class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all bg-gray-100 dark:bg-slate-700"
+                  @click="openGallery(index + 1)"
                 >
                   <img
                     :src="screenshot"
@@ -284,7 +472,7 @@
                     loading="lazy"
                     @error="handleImageError"
                   />
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -301,6 +489,7 @@ import { useUIStore } from '@/stores/ui'
 import { translateText } from '@/api/search'
 import { playClick, playSuccess, playError, playToggle, playTransitionUp, playTransitionDown, playSwipe } from '@/composables/useSound'
 import { animate } from '@/composables/useAnime'
+import { useImageViewer } from '@/composables/useImageViewer'
 import {
   BookOpen,
   ChevronLeft,
@@ -321,9 +510,18 @@ import {
   Maximize2,
   Minimize2,
   X,
+  Tag,
+  Mic,
+  Link2,
+  GitBranch,
+  Globe,
+  Gamepad2,
 } from 'lucide-vue-next'
 import { useWindowManager, type ResizeDirection } from '@/composables/useWindowManager'
 import WindowResizeHandles from '@/components/WindowResizeHandles.vue'
+
+// 图片预览
+const imageViewer = useImageViewer()
 
 // 进入/离开动画
 function onEnter(el: Element, done: () => void) {
@@ -354,6 +552,12 @@ const isTranslating = ref(false)
 const translatedDescription = ref<string | null>(null)
 const showOriginal = ref(false)
 const translateError = ref(false)
+
+// 标签翻译状态
+const isTranslatingTags = ref(false)
+const translatedTags = ref<Map<string, string>>(new Map())
+const showOriginalTags = ref(false)
+const translateTagsError = ref(false)
 
 // 窗口管理
 const modalRef = ref<HTMLElement | null>(null)
@@ -395,6 +599,11 @@ watch(() => searchStore.vndbInfo, () => {
   showOriginal.value = false
   isTranslating.value = false
   translateError.value = false
+  // 重置标签翻译状态
+  translatedTags.value = new Map()
+  showOriginalTags.value = false
+  isTranslatingTags.value = false
+  translateTagsError.value = false
 })
 
 // 监听打开状态
@@ -434,6 +643,64 @@ async function handleTranslate() {
   }
 }
 
+// 翻译标签
+async function handleTranslateTags() {
+  if (!searchStore.vndbInfo?.tags || searchStore.vndbInfo.tags.length === 0 || isTranslatingTags.value) {
+    return
+  }
+
+  playClick()
+  isTranslatingTags.value = true
+  translateTagsError.value = false
+
+  try {
+    // 收集所有标签名称，用换行符分隔
+    const tagNames = searchStore.vndbInfo.tags.map(tag => tag.name)
+    const textToTranslate = tagNames.join('\n')
+    
+    const translated = await translateText(textToTranslate)
+    if (translated) {
+      // 解析翻译结果，按换行符分割
+      const translatedNames = translated.split('\n').map(s => s.trim()).filter(s => s)
+      
+      // 创建映射
+      const newMap = new Map<string, string>()
+      tagNames.forEach((original, index) => {
+        if (translatedNames[index]) {
+          newMap.set(original, translatedNames[index])
+        }
+      })
+      
+      translatedTags.value = newMap
+      showOriginalTags.value = false
+      translateTagsError.value = false
+      playSuccess()
+    } else {
+      translateTagsError.value = true
+      playError()
+    }
+  } catch {
+    translateTagsError.value = true
+    playError()
+  } finally {
+    isTranslatingTags.value = false
+  }
+}
+
+// 切换显示原始/翻译标签
+function toggleTagsLanguage() {
+  playToggle()
+  showOriginalTags.value = !showOriginalTags.value
+}
+
+// 获取标签显示名称
+function getTagDisplayName(tag: { name: string }): string {
+  if (showOriginalTags.value || translatedTags.value.size === 0) {
+    return tag.name
+  }
+  return translatedTags.value.get(tag.name) || tag.name
+}
+
 function closePanel() {
   playTransitionDown()
   // 关闭面板
@@ -444,6 +711,37 @@ function closePanel() {
 function handleImageError(event: Event) {
   const img = event.target as HTMLImageElement
   img.style.display = 'none'
+}
+
+// 打开图片画廊
+function openGallery(startIndex: number) {
+  if (!searchStore.vndbInfo) {
+    return
+  }
+  
+  const images = []
+  
+  // 添加封面
+  if (searchStore.vndbInfo.mainImageUrl) {
+    images.push({
+      src: searchStore.vndbInfo.mainImageUrl,
+      caption: `${searchStore.vndbInfo.mainName} - 游戏封面`,
+    })
+  }
+  
+  // 添加截图
+  if (searchStore.vndbInfo.screenshots) {
+    searchStore.vndbInfo.screenshots.forEach((screenshot, index) => {
+      images.push({
+        src: screenshot,
+        caption: `${searchStore.vndbInfo!.mainName} - 截图 ${index + 1}`,
+      })
+    })
+  }
+  
+  if (images.length > 0) {
+    imageViewer.open(images, startIndex)
+  }
 }
 
 // 格式化日期
@@ -496,6 +794,93 @@ function formatPlatform(platform: string): string {
   }
   
   return platformMap[platform] || platform.toUpperCase()
+}
+
+// 格式化语言名称
+function formatLanguage(lang: string): string {
+  const langMap: Record<string, string> = {
+    'ja': '日语',
+    'en': '英语',
+    'zh-Hans': '简体中文',
+    'zh-Hant': '繁体中文',
+    'zh': '中文',
+    'ko': '韩语',
+    'ru': '俄语',
+    'de': '德语',
+    'fr': '法语',
+    'es': '西班牙语',
+    'it': '意大利语',
+    'pt-br': '葡萄牙语(巴西)',
+    'pt-pt': '葡萄牙语',
+    'vi': '越南语',
+    'th': '泰语',
+    'id': '印尼语',
+    'pl': '波兰语',
+    'tr': '土耳其语',
+    'uk': '乌克兰语',
+    'cs': '捷克语',
+    'hu': '匈牙利语',
+    'ar': '阿拉伯语',
+  }
+  
+  return langMap[lang] || lang.toUpperCase()
+}
+
+// 格式化开发状态
+function formatDevStatus(status: number): string {
+  const statusMap: Record<number, string> = {
+    0: '已完成',
+    1: '开发中',
+    2: '已取消',
+  }
+  return statusMap[status] || '未知'
+}
+
+// 获取开发状态颜色
+function getDevStatusColor(status: number): string {
+  const colorMap: Record<number, string> = {
+    0: 'text-emerald-600 dark:text-emerald-400',
+    1: 'text-amber-600 dark:text-amber-400',
+    2: 'text-red-600 dark:text-red-400',
+  }
+  return colorMap[status] || 'text-gray-600 dark:text-gray-400'
+}
+
+// 获取标签分类样式
+function getTagCategoryClass(category: string): string {
+  const categoryMap: Record<string, string> = {
+    'cont': 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400',
+    'tech': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+    'ero': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+  }
+  return categoryMap[category] || 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400'
+}
+
+// 格式化标签分类名称
+function formatTagCategory(category: string): string {
+  const categoryMap: Record<string, string> = {
+    'cont': '内容',
+    'tech': '技术',
+    'ero': '色情',
+  }
+  return categoryMap[category] || category
+}
+
+// 格式化关系类型
+function formatRelation(relation: string): string {
+  const relationMap: Record<string, string> = {
+    'seq': '续作',
+    'preq': '前作',
+    'set': '同一设定',
+    'alt': '替代版本',
+    'char': '角色共享',
+    'side': '外传',
+    'par': '父作品',
+    'fan': '同人作品',
+    'orig': '原作',
+    'ser': '同系列',
+  }
+  return relationMap[relation] || relation
 }
 </script>
 

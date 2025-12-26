@@ -26,7 +26,6 @@
     "vue-tsc": "^3.2.1"
   },
   "dependencies": {
-    "@fancyapps/ui": "^6.1.7",
     "@fontsource/noto-sans-sc": "^5.2.8",
     "animejs": "^4.2.2",
     "artalk": "^2.9.1",

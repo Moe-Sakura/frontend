@@ -26,13 +26,18 @@ export interface PlatformResult {
 export interface VndbVoiceActor {
   id: string
   name: string
-  character?: string
+  character: {
+    id: string
+    name: string
+  }
 }
 
 export interface VndbTag {
   id: string
   name: string
-  rating?: number
+  rating: number
+  spoiler: number
+  category: string
 }
 
 export interface VndbTitleEntry {
@@ -48,7 +53,23 @@ export interface VndbScreenshot {
 }
 
 export interface VndbDeveloper {
+  id: string
   name: string
+  original?: string
+}
+
+export interface VndbRelation {
+  id: string
+  title: string
+  relation: string
+  relation_official: boolean
+}
+
+export interface VndbExtLink {
+  url: string
+  label: string
+  name: string
+  id?: string
 }
 
 export interface VndbApiItem {
@@ -67,17 +88,23 @@ export interface VndbInfo {
   description: string | null
   translatedDescription: string | null
   va: VndbVoiceActor[]
-  vntags: VndbTag[]
+  tags: VndbTag[]
+  relations: VndbRelation[]
+  extlinks: VndbExtLink[]
   play_hours: number
   length_minute: number
   length_votes: number
   length_color: string
   book_length: string
   rating?: number
+  average?: number
   votecount?: number
   released?: string
-  developers?: string[]
+  developers?: VndbDeveloper[]
   platforms?: string[]
+  languages?: string[]
+  olang?: string
+  devstatus?: number
 }
 
 /**
@@ -264,7 +291,7 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
       body: JSON.stringify({
         filters: ['search', '=', gameName],
         fields:
-          'id, title, titles.lang, titles.title, description, image.url, image.sexual, image.violence, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, length_minutes, length_votes, rating, votecount, released, developers.name, platforms',
+          'id, title, titles.lang, titles.title, description, image.url, image.sexual, image.violence, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, length_minutes, length_votes, rating, average, votecount, released, developers.id, developers.name, developers.original, platforms, languages, olang, devstatus, tags.id, tags.name, tags.rating, tags.spoiler, tags.category, relations.id, relations.title, relations.relation, relations.relation_official, extlinks.url, extlinks.label, extlinks.name',
         results: 1,
       }),
     })
@@ -357,8 +384,49 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
     }
 
     // 提取开发商信息
-    const developers = result.developers
-      ? result.developers.map((dev: VndbDeveloper) => dev.name).filter(Boolean)
+    const developers: VndbDeveloper[] = result.developers
+      ? result.developers.map((dev: { id: string; name: string; original?: string }) => ({
+          id: dev.id,
+          name: dev.name,
+          original: dev.original,
+        }))
+      : []
+
+    // 提取标签信息 - 按评分排序，过滤掉剧透标签
+    const tags: VndbTag[] = result.tags
+      ? result.tags
+          .filter((tag: { spoiler: number }) => tag.spoiler === 0)
+          .sort((a: { rating: number }, b: { rating: number }) => b.rating - a.rating)
+          .slice(0, 20)
+          .map((tag: { id: string; name: string; rating: number; spoiler: number; category: string }) => ({
+            id: tag.id,
+            name: tag.name,
+            rating: tag.rating,
+            spoiler: tag.spoiler,
+            category: tag.category,
+          }))
+      : []
+
+    // 声优信息暂时不从 API 获取（需要单独查询 POST /character）
+    const va: VndbVoiceActor[] = []
+
+    // 提取相关作品
+    const relations: VndbRelation[] = result.relations
+      ? result.relations.map((r: { id: string; title: string; relation: string; relation_official: boolean }) => ({
+          id: r.id,
+          title: r.title,
+          relation: r.relation,
+          relation_official: r.relation_official,
+        }))
+      : []
+
+    // 提取外部链接
+    const extlinks: VndbExtLink[] = result.extlinks
+      ? result.extlinks.map((link: { url: string; label: string; name: string }) => ({
+          url: link.url,
+          label: link.label,
+          name: link.name,
+        }))
       : []
 
     const finalResult: VndbInfo = {
@@ -371,18 +439,24 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
       screenshots,
       description: result.description || null,
       translatedDescription: null,
-      va: result.va || [],
-      vntags: [],
+      va,
+      tags,
+      relations,
+      extlinks,
       play_hours,
       length_minute,
       length_votes,
       length_color,
       book_length,
       rating: result.rating || undefined,
+      average: result.average || undefined,
       votecount: result.votecount || undefined,
       released: result.released || undefined,
       developers: developers.length > 0 ? developers : undefined,
       platforms: result.platforms || undefined,
+      languages: result.languages || undefined,
+      olang: result.olang || undefined,
+      devstatus: result.devstatus,
     }
 
     // 检查代理并替换 URL
