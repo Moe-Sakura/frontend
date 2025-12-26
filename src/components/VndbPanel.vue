@@ -536,7 +536,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { translateText, fetchVndbCharacters, fetchVndbQuotes } from '@/api/search'
@@ -634,6 +634,9 @@ const hasAnyTranslation = computed(() =>
 // 截图加载状态
 const screenshotsReady = ref(false)
 
+// 当前游戏 ID（用于防止切换游戏时数据错乱）
+const currentVnId = ref<string | null>(null)
+
 // 展开/收起状态
 const expandedSections = ref({
   names: false,
@@ -710,11 +713,36 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
     quotes: false,
   }
   
+  // 更新当前游戏 ID
+  currentVnId.value = newInfo?.id || null
+  
   // 如果有游戏 ID，加载角色和名言，然后自动翻译
   if (newInfo?.id) {
+    const vnIdAtStart = newInfo.id
     loadCharactersAndQuotes(newInfo.id).then(() => {
-      // 自动触发 AI 翻译
-      handleTranslateAll()
+      // 检查是否仍是同一个游戏（防止切换游戏时数据错乱）
+      if (currentVnId.value === vnIdAtStart) {
+        // 自动触发 AI 翻译（静默模式，不播放音效）
+        handleTranslateAllSilent()
+      }
+    })
+  }
+  
+  // 检查缓存的截图是否已加载
+  if (newInfo?.screenshots && newInfo.screenshots.length > 0) {
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        const screenshotImgs = modalRef.value?.querySelectorAll('img[alt*="截图"]')
+        if (screenshotImgs) {
+          for (let i = 0; i < screenshotImgs.length; i++) {
+            const img = screenshotImgs[i] as HTMLImageElement
+            if (img.complete && img.naturalHeight > 0) {
+              screenshotsReady.value = true
+              break
+            }
+          }
+        }
+      })
     })
   }
 })
@@ -745,117 +773,118 @@ watch(() => uiStore.isVndbPanelOpen, (isOpen) => {
   }
 })
 
-async function handleTranslate() {
+// 内部翻译函数（带游戏 ID 校验和静默模式）
+async function translateDescriptionInternal(vnIdAtStart: string | null, silent: boolean) {
   if (!searchStore.vndbInfo?.description || isTranslating.value) {
     return
   }
 
-  playClick()
   isTranslating.value = true
   translateError.value = false
 
   try {
     const translated = await translateText(searchStore.vndbInfo.description, 'description')
+    // 检查是否仍是同一个游戏
+    if (currentVnId.value !== vnIdAtStart) {
+      return
+    }
     if (translated) {
       translatedDescription.value = translated
       showOriginal.value = false
       translateError.value = false
-      playSuccess()
     } else {
       translateError.value = true
-      playError()
+      if (!silent) { playError() }
     }
   } catch {
-    translateError.value = true
-    playError()
+    if (currentVnId.value === vnIdAtStart) {
+      translateError.value = true
+      if (!silent) { playError() }
+    }
   } finally {
     isTranslating.value = false
   }
 }
 
-// 翻译标签
-async function handleTranslateTags() {
+async function translateTagsInternal(vnIdAtStart: string | null, silent: boolean) {
   if (!searchStore.vndbInfo?.tags || searchStore.vndbInfo.tags.length === 0 || isTranslatingTags.value) {
     return
   }
 
-  playClick()
   isTranslatingTags.value = true
   translateTagsError.value = false
 
   try {
-    // 收集所有标签名称，用换行符分隔
     const tagNames = searchStore.vndbInfo.tags.map(tag => tag.name)
     const textToTranslate = tagNames.join('\n')
     
     const translated = await translateText(textToTranslate, 'tags')
+    // 检查是否仍是同一个游戏
+    if (currentVnId.value !== vnIdAtStart) {
+      return
+    }
     if (translated) {
-      // 解析翻译结果，按换行符分割
       const translatedNames = translated.split('\n').map(s => s.trim()).filter(s => s)
-      
-      // 创建映射
       const newMap = new Map<string, string>()
       tagNames.forEach((original, index) => {
         if (translatedNames[index]) {
           newMap.set(original, translatedNames[index])
         }
       })
-      
       translatedTags.value = newMap
       showOriginalTags.value = false
       translateTagsError.value = false
-      playSuccess()
     } else {
       translateTagsError.value = true
-      playError()
+      if (!silent) { playError() }
     }
   } catch {
-    translateTagsError.value = true
-    playError()
+    if (currentVnId.value === vnIdAtStart) {
+      translateTagsError.value = true
+      if (!silent) { playError() }
+    }
   } finally {
     isTranslatingTags.value = false
   }
 }
 
-// 翻译名言
-async function handleTranslateQuotes() {
+async function translateQuotesInternal(vnIdAtStart: string | null, silent: boolean) {
   if (quotes.value.length === 0 || isTranslatingQuotes.value) {
     return
   }
 
-  playClick()
   isTranslatingQuotes.value = true
   translateQuotesError.value = false
 
   try {
-    // 收集所有名言，用换行符分隔
     const quoteTexts = quotes.value.map(q => q.quote)
     const textToTranslate = quoteTexts.join('\n')
     
     const translated = await translateText(textToTranslate, 'quotes')
+    // 检查是否仍是同一个游戏
+    if (currentVnId.value !== vnIdAtStart) {
+      return
+    }
     if (translated) {
-      // 解析翻译结果，按换行符分割
       const translatedTexts = translated.split('\n').map(s => s.trim()).filter(s => s)
-      
-      // 创建映射
       const newMap = new Map<string, string>()
       quoteTexts.forEach((original, index) => {
         if (translatedTexts[index]) {
           newMap.set(original, translatedTexts[index])
         }
       })
-      
       translatedQuotes.value = newMap
       showOriginalQuotes.value = false
       translateQuotesError.value = false
-      playSuccess()
     } else {
       translateQuotesError.value = true
-      playError()
+      if (!silent) { playError() }
     }
   } catch {
-    translateQuotesError.value = true
-    playError()
+    if (currentVnId.value === vnIdAtStart) {
+      translateQuotesError.value = true
+      if (!silent) { playError() }
+    }
   } finally {
     isTranslatingQuotes.value = false
   }
@@ -869,38 +898,54 @@ function getQuoteDisplayText(quote: string): string {
   return translatedQuotes.value.get(quote) || quote
 }
 
-// 一键翻译全部
-async function handleTranslateAll() {
+// 一键翻译全部（内部实现）
+async function translateAllInternal(silent = false) {
   if (isTranslatingAll.value) {
     return
   }
   
-  playClick()
+  if (!silent) {
+    playClick()
+  }
+  
+  const vnIdAtStart = currentVnId.value
   
   // 并行执行所有翻译任务
   const tasks: Promise<void>[] = []
   
   // 翻译简介
   if (searchStore.vndbInfo?.description && !translatedDescription.value) {
-    tasks.push(handleTranslate())
+    tasks.push(translateDescriptionInternal(vnIdAtStart, silent))
   }
   
   // 翻译标签
   if (searchStore.vndbInfo?.tags && searchStore.vndbInfo.tags.length > 0 && translatedTags.value.size === 0) {
-    tasks.push(handleTranslateTags())
+    tasks.push(translateTagsInternal(vnIdAtStart, silent))
   }
   
   // 翻译名言
   if (quotes.value.length > 0 && translatedQuotes.value.size === 0) {
-    tasks.push(handleTranslateQuotes())
+    tasks.push(translateQuotesInternal(vnIdAtStart, silent))
   }
   
   await Promise.all(tasks)
   
-  // 如果有任何翻译成功，播放成功音效
-  if (translatedDescription.value || translatedTags.value.size > 0 || translatedQuotes.value.size > 0) {
-    playSuccess()
+  // 如果有任何翻译成功且是当前游戏，播放成功音效
+  if (!silent && currentVnId.value === vnIdAtStart) {
+    if (translatedDescription.value || translatedTags.value.size > 0 || translatedQuotes.value.size > 0) {
+      playSuccess()
+    }
   }
+}
+
+// 一键翻译全部（用户点击）
+async function handleTranslateAll() {
+  await translateAllInternal(false)
+}
+
+// 一键翻译全部（静默模式，自动触发时使用）
+async function handleTranslateAllSilent() {
+  await translateAllInternal(true)
 }
 
 // 切换所有翻译的显示状态
