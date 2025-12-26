@@ -1109,17 +1109,12 @@ function formatRelation(relation: string): string {
 </script>
 
 <style>
-/* VNDB 面板 - WWDC 2025 液态玻璃效果 */
+/* VNDB 面板 - 半透明效果 */
 .vndb-page {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.96);
   will-change: transform;
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 0 20px rgba(255, 20, 147, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 20, 147, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 /* 移动端无底部边框 */
@@ -1129,52 +1124,27 @@ function formatRelation(relation: string): string {
   }
 }
 
-/* 液态玻璃高光 */
-.vndb-page::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 30%,
-    transparent 50%
-  );
-  pointer-events: none;
-  z-index: 100;
-}
-
 /* VNDB 面板 - 暗色模式 */
 .dark .vndb-page {
-  background: rgba(30, 30, 40, 0.5);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 -8px 24px rgba(0, 0, 0, 0.2),
-    0 0 20px rgba(255, 105, 180, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(255, 105, 180, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* VNDB 卡片 - 亮色模式 */
 .vndb-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 1.25rem;
   padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 4px 24px -4px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  border: 1px solid rgba(255, 20, 147, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 /* VNDB 卡片 - 暗色模式 */
 .dark .vndb-card {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow:
-    0 4px 24px -4px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* 自定义滚动条 */

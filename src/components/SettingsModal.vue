@@ -419,17 +419,12 @@ function reset() {
 </script>
 
 <style>
-/* 设置面板 - WWDC 2025 液态玻璃效果 */
+/* 设置面板 - 半透明效果 */
 .settings-page {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.96);
   will-change: transform;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 0 20px rgba(255, 20, 147, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 20, 147, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 /* 移动端无底部边框 */
@@ -437,22 +432,6 @@ function reset() {
   .settings-page {
     border-bottom: none;
   }
-}
-
-/* 液态玻璃高光 */
-.settings-page::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 30%,
-    transparent 50%
-  );
-  pointer-events: none;
-  z-index: 100;
 }
 
 /* 设置面板 - 暗色模式 */
