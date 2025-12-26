@@ -676,7 +676,7 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
       })
     })
   }
-})
+}, { immediate: true })
 
 // 加载角色和名言
 async function loadCharactersAndQuotes(vnId: string) {
@@ -839,25 +839,31 @@ async function translateAllInternal(silent = false) {
   
   const vnIdAtStart = currentVnId.value
   
-  // 串行执行翻译任务，避免 API 限流
+  // 在调用前捕获当前数据状态，避免翻译期间数据被重置
+  const hasDescription = !!searchStore.vndbInfo?.description && !translatedDescription.value
+  const hasTags = !!searchStore.vndbInfo?.tags && searchStore.vndbInfo.tags.length > 0 && translatedTags.value.size === 0
+  const hasQuotes = quotes.value.length > 0 && translatedQuotes.value.size === 0
+  
+  // 并行执行所有翻译任务
+  const tasks: Promise<void>[] = []
+  
   // 翻译简介
-  if (searchStore.vndbInfo?.description && !translatedDescription.value) {
-    await translateDescriptionInternal(vnIdAtStart, silent)
-    // 检查游戏是否已切换
-    if (currentVnId.value !== vnIdAtStart) { return }
+  if (hasDescription) {
+    tasks.push(translateDescriptionInternal(vnIdAtStart, silent))
   }
   
   // 翻译标签
-  if (searchStore.vndbInfo?.tags && searchStore.vndbInfo.tags.length > 0 && translatedTags.value.size === 0) {
-    await translateTagsInternal(vnIdAtStart, silent)
-    // 检查游戏是否已切换
-    if (currentVnId.value !== vnIdAtStart) { return }
+  if (hasTags) {
+    tasks.push(translateTagsInternal(vnIdAtStart, silent))
   }
   
   // 翻译名言
-  if (quotes.value.length > 0 && translatedQuotes.value.size === 0) {
-    await translateQuotesInternal(vnIdAtStart, silent)
+  if (hasQuotes) {
+    tasks.push(translateQuotesInternal(vnIdAtStart, silent))
   }
+  
+  // 使用 allSettled 确保所有任务完成，即使某些失败
+  await Promise.allSettled(tasks)
   
   // 如果有任何翻译成功且是当前游戏，播放成功音效
   if (!silent && currentVnId.value === vnIdAtStart) {
