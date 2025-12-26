@@ -1,9 +1,5 @@
 import { ref, onMounted, onUnmounted, watchEffect, type Ref } from 'vue'
 
-// 扩展 HTMLElement 类型，添加自定义属性
-interface TextScrollElement extends HTMLElement {
-  _textScrollObserver?: ResizeObserver
-}
 
 /**
  * 检测元素文本是否溢出，并设置滚动动画
@@ -65,27 +61,39 @@ export function useTextScroll(elementRef: Ref<HTMLElement | null>) {
  * 指令：自动检测溢出并添加滚动效果
  * 使用方式：v-text-scroll
  */
+// 扩展类型以存储原始内容和检查函数
+interface TextScrollElementExtended extends HTMLElement {
+  _textScrollObserver?: ResizeObserver
+  _textScrollContent?: string
+  _checkOverflow?: () => void
+}
+
 export const vTextScroll = {
   mounted(el: HTMLElement) {
+    const extEl = el as TextScrollElementExtended
+    
     // 添加滚动容器类
     el.classList.add('text-scroll')
     
-    // 包装内容
-    const content = el.innerHTML
+    // 保存并包装内容
+    const content = el.textContent || ''
+    extEl._textScrollContent = content
     el.innerHTML = `<span class="text-scroll-inner">${content}</span>`
     
     // 检查溢出
     const checkOverflow = () => {
       const inner = el.querySelector('.text-scroll-inner') as HTMLElement
-      if (!inner) {return}
+      if (!inner) { return }
       
       const isOver = inner.scrollWidth > el.clientWidth
       if (isOver) {
         el.classList.add('is-overflowing')
         // 复制内容用于无缝滚动
-        if (!el.querySelector('.text-scroll-clone')) {
-          const clone = inner.cloneNode(true) as HTMLElement
-          clone.classList.add('text-scroll-clone')
+        if (!inner.querySelector('.text-scroll-clone')) {
+          const clone = document.createElement('span')
+          clone.className = 'text-scroll-clone'
+          clone.textContent = extEl._textScrollContent || ''
+          clone.style.paddingLeft = '2rem'
           inner.appendChild(clone)
         }
         // 计算滚动时长
@@ -94,10 +102,12 @@ export const vTextScroll = {
       } else {
         el.classList.remove('is-overflowing')
         // 移除克隆
-        const clone = el.querySelector('.text-scroll-clone')
-        if (clone) {clone.remove()}
+        const clone = inner.querySelector('.text-scroll-clone')
+        if (clone) { clone.remove() }
       }
     }
+    
+    extEl._checkOverflow = checkOverflow
     
     // 初始检查
     requestAnimationFrame(checkOverflow)
@@ -106,29 +116,50 @@ export const vTextScroll = {
     if ('ResizeObserver' in window) {
       const observer = new ResizeObserver(checkOverflow)
       observer.observe(el)
-      ;(el as TextScrollElement)._textScrollObserver = observer
+      extEl._textScrollObserver = observer
     }
   },
   
   updated(el: HTMLElement) {
-    // 内容更新时重新检查
+    const extEl = el as TextScrollElementExtended
+    
+    // 检查内容是否变化
     requestAnimationFrame(() => {
+      // 获取当前实际文本内容（排除克隆的内容）
       const inner = el.querySelector('.text-scroll-inner') as HTMLElement
-      if (!inner) {return}
+      let currentContent = ''
       
-      const isOver = inner.scrollWidth > el.clientWidth
-      if (isOver) {
-        el.classList.add('is-overflowing')
+      if (inner) {
+        // 获取不包含克隆的文本
+        const clone = inner.querySelector('.text-scroll-clone')
+        if (clone) {
+          currentContent = inner.textContent?.replace(clone.textContent || '', '') || ''
+        } else {
+          currentContent = inner.textContent || ''
+        }
       } else {
-        el.classList.remove('is-overflowing')
+        // 内容被 Vue 重新渲染，需要重新包装
+        currentContent = el.textContent || ''
+      }
+      
+      // 如果内容变化或结构被破坏，重新初始化
+      if (!inner || currentContent !== extEl._textScrollContent) {
+        const newContent = el.textContent || ''
+        extEl._textScrollContent = newContent
+        el.innerHTML = `<span class="text-scroll-inner">${newContent}</span>`
+      }
+      
+      // 重新检查溢出
+      if (extEl._checkOverflow) {
+        extEl._checkOverflow()
       }
     })
   },
   
   unmounted(el: HTMLElement) {
-    const observer = (el as TextScrollElement)._textScrollObserver
-    if (observer) {
-      observer.disconnect()
+    const extEl = el as TextScrollElementExtended
+    if (extEl._textScrollObserver) {
+      extEl._textScrollObserver.disconnect()
     }
   },
 }
