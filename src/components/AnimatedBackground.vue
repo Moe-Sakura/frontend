@@ -1,8 +1,11 @@
 <template>
   <Transition
-    :css="false"
-    @enter="onEnter"
-    @leave="onLeave"
+    enter-active-class="duration-[1500ms] ease-in-out"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-active-class="duration-[1500ms] ease-in-out"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
   >
     <div
       v-if="imageUrl"
@@ -15,29 +18,9 @@
 </template>
 
 <script setup lang="ts">
-import { animate } from '@/composables/useAnime'
-
 defineProps<{
   imageUrl: string
   imageKey: string | number
   kenBurnsClass: string
 }>()
-
-function onEnter(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [0, 1],
-    duration: 1500,
-    ease: 'inOutQuad',
-    complete: done,
-  })
-}
-
-function onLeave(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [1, 0],
-    duration: 1500,
-    ease: 'inOutQuad',
-    complete: done,
-  })
-}
 </script>

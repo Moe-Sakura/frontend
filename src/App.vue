@@ -71,9 +71,6 @@ import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { 
-  getSystemTheme,
-  applyTheme, 
-  watchSystemTheme,
   saveCustomCSS,
   applyCustomCSS,
 } from '@/utils/theme'
@@ -153,7 +150,6 @@ const imageBlobUrls = shallowRef<Map<string, string>>(new Map()) // URL -> Blob 
 const shuffledQueue = shallowRef<string[]>([])
 let fetchInterval: number | null = null
 let displayInterval: number | null = null
-let systemThemeCleanup: (() => void) | null = null
 
 const MAX_CACHE_SIZE = 10000 // 最大缓存 10000 张图片
 const CLEANUP_BATCH_SIZE = 2000 // 每次清理 2000 张
@@ -492,10 +488,6 @@ onMounted(async () => {
     uiStore.isCommentsModalOpen = true
   }
 
-  // 初始化主题 - 跟随系统
-  const systemTheme = getSystemTheme()
-  applyTheme(systemTheme)
-  
   // 恢复保存的搜索状态
   searchStore.restoreState()
   
@@ -506,11 +498,6 @@ onMounted(async () => {
   if (uiStore.customCSS) {
     applyCustomCSS(uiStore.customCSS)
   }
-  
-  // 监听系统主题变化
-  systemThemeCleanup = watchSystemTheme((theme) => {
-    applyTheme(theme)
-  })
 
   // 监听 SW 更新事件
   window.addEventListener('sw-update-available', (event) => {
@@ -541,12 +528,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   stopAllIntervals()
-  
-  // 清理系统主题监听
-  if (systemThemeCleanup) {
-    systemThemeCleanup()
-    systemThemeCleanup = null
-  }
   
   // 清理所有 Blob URL
   imageBlobUrls.value.forEach(blobUrl => {

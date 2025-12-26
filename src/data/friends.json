@@ -41,6 +41,42 @@
       "desc": "一个免费分享Gal,Cos,Asmr的网站(∠・ω< )⌒★",
       "url": "https://jiuliacg.com",
       "logo": "https://img.alicdn.com/imgextra/i4/2201716776317/O1CN01kwy3QY1wXF2tUVkUx_!!2201716776317.webp"
+    },
+    {
+      "name": "御爱同萌",
+      "desc": "禦愛同萌！一個以非營利為目的的交流社區",
+      "url": "https://www.ai2.moe/",
+      "logo": "https://www.ai2.moe/uploads/monthly_2023_06/logo.png"
+    },
+    {
+      "name": "TouchGal",
+      "desc": "TouchGal 是一个一站式 Galgame 文化社区。提供Galgame 论坛、Galgame 下载等服务。承诺永久免费, 高质量。为Galgame 爱好者提供一片净土！",
+      "url": "https://www.touchgal.us/",
+      "logo": "https://www.touchgal.us/favicon.webp"
+    },
+    {
+      "name": "鲲 Galgame 论坛",
+      "desc": "世界上最萌的 Galgame 论坛! 现阶段世界上最先进的 Galgame 资源发布网站! 永远不会有广告! 永远免费! Galgame 下载, Galgame 资源网站",
+      "url": "https://www.kungal.com/",
+      "logo": "https://www.kungal.com/favicon.webp"
+    },
+    {
+      "name": "鲲 Galgame 补丁",
+      "desc": "开源, 免费, 零门槛, 纯手写, 最先进的 Galgame 补丁资源下载站, 提供 Windows, 安卓, KRKR, Tyranor 等各类平台的 Galgame 补丁资源下载。永远免费！",
+      "url": "https://www.moyu.moe/",
+      "logo": "https://www.moyu.moe/favicon.webp"
+    },
+    {
+      "name": "书音的图书馆",
+      "desc": "书音的图书馆 - 免费、开源、零门槛的 视觉小说 / Galgame 档案库",
+      "url": "https://shionlib.com/zh",
+      "logo": "https://shionlib.com/favicon.ico"
+    },
+    {
+      "name": "鸟白岛演绎厅",
+      "desc": "鸟白岛演绎厅提供最全的专辑音乐收录，在这里你可以看到ACGN相关的专辑信息及其文件下载，另有交流社区可以沟通和申请收录等，快来看看吧。",
+      "url": "https://www.summerpockets.com/",
+      "logo": "https://res.summerpockets.com/favicon.ico"
     }
   ]
 }

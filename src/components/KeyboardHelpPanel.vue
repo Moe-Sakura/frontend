@@ -2,9 +2,12 @@
   <Teleport to="body">
     <!-- 键盘快捷键面板 -->
     <Transition
-      :css="false"
-      @enter="onEnter"
-      @leave="onLeave"
+      enter-active-class="duration-200 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="duration-150 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
     >
       <div
         v-if="uiStore.isKeyboardHelpOpen"
@@ -115,32 +118,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useUIStore } from '@/stores/ui'
-import { animate } from '@/composables/useAnime'
 import { playTransitionDown } from '@/composables/useSound'
 import { Keyboard, X } from 'lucide-vue-next'
 
 const uiStore = useUIStore()
 const panelRef = ref<HTMLElement | null>(null)
-
-function onEnter(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [0, 1],
-    scale: [0.95, 1],
-    duration: 200,
-    ease: 'outCubic',
-    complete: done,
-  })
-}
-
-function onLeave(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [1, 0],
-    scale: [1, 0.95],
-    duration: 150,
-    ease: 'inCubic',
-    complete: done,
-  })
-}
 
 function close() {
   playTransitionDown()
@@ -150,13 +132,11 @@ function close() {
 
 <style scoped>
 .keyboard-help-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
 }
 
 .dark .keyboard-help-panel {
-  background: rgba(30, 41, 59, 0.9);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
 }
 
 .shortcut-row {

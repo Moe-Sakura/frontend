@@ -222,35 +222,30 @@ onUnmounted(() => {
 .history-modal {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 251, 235, 0.98) 100%
+    rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85)) 0%,
+    rgba(255, 253, 245, var(--opacity-panel-hover, 0.9)) 100%
   );
-  backdrop-filter: blur(40px) saturate(1.5);
-  -webkit-backdrop-filter: blur(40px) saturate(1.5);
-  border: 1px solid rgba(251, 191, 36, 0.2);
+  border: var(--border-thin, 1px) solid rgba(var(--color-warning, 251, 191, 36), var(--opacity-border, 0.15));
+  border-radius: var(--radius-2xl, 1.5rem);
 }
 
 /* 历史记录面板 - 右下角弹出 (暗色模式) */
 .dark .history-modal {
   background: linear-gradient(
     180deg,
-    rgba(30, 41, 59, 0.95) 0%,
-    rgba(30, 27, 17, 0.98) 100%
+    rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88)) 0%,
+    rgba(30, 27, 17, var(--opacity-panel-dark-hover, 0.92)) 100%
   ) !important;
-  backdrop-filter: blur(40px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
-  border: 1px solid rgba(251, 191, 36, 0.1) !important;
+  border: var(--border-thin, 1px) solid rgba(var(--color-warning, 251, 191, 36), var(--opacity-border-dark, 0.2)) !important;
 }
 
 /* 头部样式 */
 .history-header {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-header, 0.7));
 }
 
 .dark .history-header {
-  background: rgba(30, 41, 59, 0.8) !important;
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-header-dark, 0.7)) !important;
 }
 
 /* 历史记录项 */

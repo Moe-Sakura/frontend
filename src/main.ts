@@ -34,18 +34,11 @@ import { vRipple } from './directives/vRipple'
 // 文本滚动指令
 import { vTextScroll } from './composables/useTextScroll'
 
-// Anime.js 动画指令
-import { vAnime, vAnimeStagger, vHover, vTap } from './composables/useAnime'
-
 const app = createApp(App)
 
 // 注册全局指令
 app.directive('ripple', vRipple)
 app.directive('text-scroll', vTextScroll)
-app.directive('anime', vAnime)
-app.directive('anime-stagger', vAnimeStagger)
-app.directive('hover', vHover)
-app.directive('tap', vTap)
 const pinia = createPinia()
 
 // 配置 Pinia 插件

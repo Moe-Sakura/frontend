@@ -1,15 +1,20 @@
 <template>
   <div v-if="searchStore.hasResults" class="w-full sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 animate-fade-in">
     <div id="results" class="sm:max-w-5xl sm:mx-auto space-y-4 sm:space-y-6">
-      <!-- 使用 v-memo 优化平台卡片渲染，仅在关键数据变化时重新渲染 -->
-      <div
+      <!-- 使用 v-memo 优化平台卡片渲染 + LazyRender 懒渲染 -->
+      <LazyRender
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
-        v-memo="[platformName, platformData.items.length, platformData.displayedCount, platformData.error]"
-        :data-platform="platformName"
-        class="result-card glassmorphism-card rounded-none sm:rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 animate-fade-in-up border-2 content-auto"
-        :class="getBorderClass(platformData.color)"
+        :once="true"
+        min-height="200px"
+        root-margin="400px 0px"
       >
+        <div
+          v-memo="[platformName, platformData.name, platformData.color, platformData.items.length, platformData.displayedCount, platformData.error, platformData.url]"
+          :data-platform="platformName"
+          class="result-card rounded-none sm:rounded-2xl animate-fade-in-up border-2 content-auto"
+          :class="getBorderClass(platformData.color)"
+        >
         <div class="p-4 sm:p-5 md:p-6">
           <!-- 站点标题行：网站名称 + 推荐标签 + 资源标签 + 结果数 -->
           <div
@@ -22,7 +27,7 @@
               :href="platformData.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-xl sm:text-2xl font-bold flex items-center gap-2 hover:scale-105 transition-all cursor-pointer"
+              class="text-xl sm:text-2xl font-bold flex items-center gap-2 hover:opacity-80 cursor-pointer"
               :class="getHeaderTextColor(platformData.color)"
               :title="`访问 ${platformData.name}`"
             >
@@ -76,56 +81,25 @@
             <span class="text-red-700 dark:text-red-300 font-medium">{{ platformData.error }}</span>
           </div>
           
-          <!-- 搜索结果列表 - 使用 contain 优化布局性能 -->
-          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list space-y-2 contain-layout">
-            <div
+          <!-- 搜索结果列表 -->
+          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list contain-layout space-y-2">
+            <ResultItem
               v-for="(result, index) in getDisplayedResults(platformData)"
               :key="result.url || index"
-              class="result-item group p-3 sm:p-4 rounded-xl 
-                     bg-gradient-to-r from-white/70 to-white/50 dark:from-slate-700/70 dark:to-slate-700/50
-                     hover:from-white/90 hover:to-white/70 dark:hover:from-slate-700/90 dark:hover:to-slate-700/70
-                     border border-gray-200/50 dark:border-slate-600/50
-                     hover:border-theme-primary/40 dark:hover:border-theme-accent/40
-                     hover:shadow-lg hover:shadow-theme-primary/10 dark:hover:shadow-theme-accent/15
-                     transition-colors duration-200"
-            >
-              <!-- 标题行 -->
-              <div class="flex items-start gap-2 sm:gap-3">
-                <span class="text-theme-primary dark:text-theme-accent text-sm font-bold mt-0.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
-                  {{ index + 1 }}.
-                </span>
-                <a
-                  :href="result.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-gray-800 dark:text-slate-200 group-hover:text-theme-primary dark:group-hover:text-theme-accent font-semibold flex-1 text-sm sm:text-base break-words transition-colors leading-relaxed"
-                >
-                  {{ result.title }}
-                </a>
-              </div>
-              
-              <!-- 资源相对路径（从URL中提取） -->
-              <div v-if="result.url" class="flex items-center gap-2 mt-2 ml-6 sm:ml-8">
-                <LinkIcon :size="12" class="text-theme-primary/50 dark:text-theme-accent/50" />
-                <span class="text-xs text-gray-500 dark:text-slate-400 break-all font-mono bg-gray-100/80 dark:bg-slate-800/80 px-2 py-1 rounded">
-                  {{ extractPath(result.url) }}
-                </span>
-              </div>
-            </div>
+              :index="index"
+              :source="result"
+            />
           </div>
           
           <!-- 加载更多按钮 -->
           <div v-if="platformData.items.length > platformData.displayedCount" class="load-more mt-6 flex justify-center">
             <button
               class="px-6 py-3 rounded-xl
-                     bg-gradient-pink text-white font-bold
-                     border border-white/30 dark:border-white/20
-                     shadow-lg shadow-theme-primary/20 dark:shadow-theme-accent/25
-                     hover:shadow-xl hover:shadow-theme-primary/30 dark:hover:shadow-theme-accent/35
-                     hover:scale-105
-                     active:scale-95
-                     transition-all duration-300
-                     flex items-center gap-2 glass-gpu"
+                     bg-theme-primary/90 dark:bg-theme-accent/90 text-white font-bold
+                     border border-white/20
+                     hover:scale-105 active:scale-95
+                     transition-transform duration-200
+                     flex items-center gap-2"
               @click="loadMore(platformName)"
             >
               <ArrowDown :size="18" />
@@ -146,6 +120,7 @@
           </div>
         </div>
       </div>
+      </LazyRender>
     </div>
   </div>
 </template>
@@ -154,12 +129,13 @@
 import { useSearchStore } from '@/stores/search'
 import type { PlatformData } from '@/stores/search'
 import { playTap } from '@/composables/useSound'
+import LazyRender from '@/components/LazyRender.vue'
+import ResultItem from '@/components/ResultItem.vue'
 import {
   ExternalLink,
   AlertTriangle,
   Crown,
   List,
-  Link as LinkIcon,
   ArrowDown,
   CheckCircle,
   Star,
@@ -180,18 +156,6 @@ import {
 } from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
-
-// 从URL中提取路径
-function extractPath(url: string): string {
-  try {
-    const urlObj = new URL(url)
-    // 返回路径部分（去掉域名）
-    return urlObj.pathname + urlObj.search + urlObj.hash
-  } catch {
-    // 如果URL解析失败，返回完整URL
-    return url
-  }
-}
 
 // 获取站点所有结果的唯一标签
 function getUniqueTags(platformData: PlatformData) {
@@ -215,13 +179,13 @@ function loadMore(platformName: string) {
   searchStore.loadMoreResults(platformName, 20)
 }
 
-// 新增：卡片边框颜色
+// 新增：卡片边框颜色（去掉 hover 过渡）
 function getBorderClass(color: string) {
   const classes: Record<string, string> = {
-    lime: 'border-lime-300 dark:border-lime-700/50 hover:border-lime-400 dark:hover:border-lime-600',
-    white: 'border-gray-300 dark:border-slate-600 hover:border-gray-400 dark:hover:border-slate-500',
-    gold: 'border-yellow-300 dark:border-yellow-700/50 hover:border-yellow-400 dark:hover:border-yellow-600',
-    red: 'border-red-300 dark:border-red-700/50 hover:border-red-400 dark:hover:border-red-600',
+    lime: 'border-lime-300 dark:border-lime-700/50',
+    white: 'border-gray-300 dark:border-slate-600',
+    gold: 'border-yellow-300 dark:border-yellow-700/50',
+    red: 'border-red-300 dark:border-red-700/50',
   }
   return classes[color] || 'border-gray-300 dark:border-slate-600'
 }
@@ -248,12 +212,12 @@ function getHeaderTextColor(color: string) {
   return classes[color] || 'text-gray-700 dark:text-gray-300'
 }
 
-// 新增：推荐标签样式（更醒目）
+// 新增：推荐标签样式（使用纯色，避免渐变）
 function getRecommendChipClass(color: string) {
   const classes: Record<string, string> = {
-    lime: 'bg-gradient-to-r from-lime-400 to-green-500 text-white border-lime-500',
-    gold: 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-yellow-500',
-    red: 'bg-gradient-to-r from-red-400 to-pink-500 text-white border-red-500',
+    lime: 'bg-lime-500 text-white border-lime-600',
+    gold: 'bg-yellow-500 text-white border-yellow-600',
+    red: 'bg-red-500 text-white border-red-600',
   }
   return classes[color] || ''
 }
@@ -346,69 +310,31 @@ function getTagLabel(tag: string) {
 </script>
 
 <style scoped>
-/* 平台卡片 - WWDC 2025 液态玻璃效果 */
+/* 平台卡片 - 半透明效果 */
 .result-card {
   animation-delay: calc(var(--index, 0) * 0.1s);
   content-visibility: auto;
   contain-intrinsic-size: auto 400px;
   
-  /* WWDC 2025 液态玻璃效果 */
-  background: rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.12),
-    0 0 20px rgba(255, 20, 147, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
-}
-
-/* 液态玻璃高光 */
-.result-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.1) 30%,
-    transparent 50%
-  );
-  pointer-events: none;
-  z-index: 10;
-  opacity: 0.6;
-  transition: opacity 0.3s ease;
-}
-
-.result-card:hover::before {
-  opacity: 1;
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-card, 0.8)) !important;
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15)) !important;
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.1)) !important;
 }
 
 /* 暗色模式 */
 .dark .result-card {
-  background: rgba(30, 30, 40, 0.45) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.2),
-    0 0 20px rgba(255, 105, 180, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-dark, 0.8)) !important;
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2)) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
 }
 
-/* 结果项 - 液态玻璃效果 */
+/* 结果项 - 简化动画，仅使用 transform */
 .result-item {
-  transform: translate3d(0, 0, 0);
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-  position: relative;
+  transition: transform 0.15s ease-out, background-color 0.15s ease-out;
 }
 
 .result-item:hover {
-  transform: translate3d(4px, 0, 0);
-  box-shadow: 0 4px 16px rgba(255, 20, 147, 0.1);
-}
-
-.dark .result-item:hover {
-  box-shadow: 0 4px 16px rgba(255, 105, 180, 0.15);
+  transform: translateX(4px);
 }
 
 /* 结果列表布局隔离 */

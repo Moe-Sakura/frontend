@@ -122,12 +122,12 @@
             </div>
           </div>
 
-          <!-- Search Mode Selector - WWDC 2025 液态玻璃 -->
+          <!-- Search Mode Selector -->
           <div class="flex justify-center items-center">
             <div class="mode-switch liquid-mode-switch relative flex p-1.5 rounded-2xl">
-              <!-- 液态玻璃高光 -->
+              <!-- 高光装饰 -->
               <div class="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-                <div class="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-transparent" />
+                <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-white/5 to-transparent" />
               </div>
               
               <!-- 滑动背景指示器 -->
@@ -590,6 +590,8 @@ watch(() => searchStore.customApi, (newApi) => {
   }
 })
 
+let hasScrolledToResults = false
+
 async function handleSearch() {
   if (!searchQuery.value.trim()) {return}
 
@@ -597,12 +599,26 @@ async function handleSearch() {
   searchStore.clearResults()
   searchStore.isSearching = true
   searchStore.errorMessage = ''
+  hasScrolledToResults = false // 重置滚动标志
 
   const searchParams = new URLSearchParams()
   searchParams.set('game', searchQuery.value.trim())
   searchParams.set('mode', searchMode.value)
   if (customApi.value.trim()) {
     searchParams.set('api', customApi.value.trim())
+  }
+
+  // 在 game 模式下，搜索开始时就并行发起 VNDB 请求
+  const queryForVndb = searchQuery.value.trim()
+  if (searchMode.value === 'game') {
+    fetchVndbData(queryForVndb).then((vndbData) => {
+      // 检查搜索词是否仍匹配（防止快速切换搜索时数据错乱）
+      if (vndbData && searchStore.searchQuery === queryForVndb) {
+        searchStore.vndbInfo = vndbData
+      }
+    }).catch(() => {
+      // VNDB 请求失败不影响主搜索
+    })
   }
 
   try {
@@ -614,11 +630,11 @@ async function handleSearch() {
         searchStore.searchProgress = { current, total }
       },
       onPlatformResult: (data) => {
-        const isFirstResult = searchStore.platformResults.size === 0
         searchStore.setPlatformResult(data.name, data)
         
-        // 第一个结果出现时滚动到结果区域
-        if (isFirstResult) {
+        // 等待至少 3 个平台结果后滚动到结果区域（只滚动一次）
+        if (!hasScrolledToResults && searchStore.platformResults.size >= 3) {
+          hasScrolledToResults = true
           // 使用 requestAnimationFrame + setTimeout 确保 DOM 已更新
           window.requestAnimationFrame(() => {
             setTimeout(() => {
@@ -642,6 +658,22 @@ async function handleSearch() {
         searchStore.isSearching = false
         playCelebration() // 搜索完成音效
         
+        // 如果结果不足 3 个但有结果，且还没滚动过，则现在滚动
+        if (!hasScrolledToResults && searchStore.platformResults.size > 0) {
+          hasScrolledToResults = true
+          window.requestAnimationFrame(() => {
+            setTimeout(() => {
+              const resultsEl = document.getElementById('results')
+              if (resultsEl) {
+                const headerOffset = 80
+                const elementPosition = resultsEl.getBoundingClientRect().top
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+              }
+            }, 50)
+          })
+        }
+        
         // 保存搜索历史
         const resultCount = searchStore.totalResults
         saveSearchHistory({
@@ -657,14 +689,6 @@ async function handleSearch() {
         playCaution() // 错误音效
       },
     })
-
-    // 获取 VNDB 数据
-    if (searchMode.value === 'game') {
-      const vndbData = await fetchVndbData(searchQuery.value.trim())
-      if (vndbData) {
-        searchStore.vndbInfo = vndbData
-      }
-    }
   } catch (error) {
     searchStore.errorMessage =
       error instanceof Error ? error.message : '搜索失败'
@@ -1012,9 +1036,8 @@ defineExpose({
 
 /* 错误卡片样式 */
 .error-card {
-  background: linear-gradient(135deg, rgba(254, 242, 242, 0.95), rgba(254, 226, 226, 0.95));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, rgba(var(--color-error, 254, 242, 242), var(--opacity-panel, 0.85)), rgba(254, 226, 226, var(--opacity-panel, 0.85)));
+  border-radius: var(--radius-lg, 1rem);
   border-radius: 1rem;
   padding: 1rem;
   border: 1px solid rgba(239, 68, 68, 0.2);
@@ -1138,11 +1161,9 @@ defineExpose({
   border-radius: 1rem;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 228, 242, 0.75) 100%
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 245, 250, 0.92) 100%
   );
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
   z-index: -1;
 }
 
@@ -1209,25 +1230,17 @@ defineExpose({
   }
 }
 
-/* 液态玻璃模式切换器 */
+/* 模式切换器 - 半透明效果 */
 .liquid-mode-switch {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 6px 12px rgba(0, 0, 0, 0.12),
-    0 0 20px rgba(255, 20, 147, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
 }
 
 .dark .liquid-mode-switch {
-  background: rgba(30, 30, 40, 0.4);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 6px 12px rgba(0, 0, 0, 0.2),
-    0 0 20px rgba(255, 105, 180, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 /* 模式切换按钮 hover 效果 */

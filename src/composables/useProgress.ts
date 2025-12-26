@@ -1,9 +1,7 @@
 /**
- * 自定义进度条 - 使用 anime.js 替代 nprogress
+ * 自定义进度条 - 使用原生 CSS 动画
  * 功能：页面顶部进度条 + 右上角 spinner
  */
-
-import { animate as animeAnimate } from 'animejs'
 
 // 状态
 let progress = 0
@@ -18,7 +16,6 @@ const config = {
   minimum: 0.08,
   trickleSpeed: 200,
   speed: 300,
-  easing: 'easeOutQuad',
 }
 
 /**
@@ -68,7 +65,7 @@ function createElements() {
         box-shadow: 
           0 0 10px rgba(255, 20, 147, 0.7),
           0 0 20px rgba(217, 70, 239, 0.5);
-        transition: opacity 0.2s ease;
+        transition: width 0.3s ease-out, opacity 0.2s ease;
       }
       
       @keyframes progress-gradient {
@@ -146,11 +143,7 @@ function set(n: number) {
   progress = n
   
   if (barElement) {
-    animeAnimate(barElement, {
-      width: `${n * 100}%`,
-      duration: config.speed,
-      ease: config.easing,
-    })
+    barElement.style.width = `${n * 100}%`
   }
 }
 
@@ -235,18 +228,16 @@ export function doneProgress() {
     // 然后淡出
     setTimeout(() => {
       if (barElement) {
-        animeAnimate(barElement, {
-          opacity: 0,
-          duration: 200,
-          ease: 'easeOutQuad',
-          complete: () => {
-            if (barElement) {
-              barElement.style.width = '0%'
-            }
-            isStarted = false
-            progress = 0
-          },
-        })
+        barElement.style.opacity = '0'
+        
+        // 重置状态
+        setTimeout(() => {
+          if (barElement) {
+            barElement.style.width = '0%'
+          }
+          isStarted = false
+          progress = 0
+        }, 200)
       }
       
       if (spinnerElement) {

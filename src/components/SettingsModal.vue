@@ -1,42 +1,25 @@
 <template>
   <Teleport to="body">
-    <!-- 设置面板 - macOS 风格浮动窗口 -->
+    <!-- 设置面板 - 模态框 -->
     <Transition
-      :css="false"
-      @enter="onEnter"
-      @leave="onLeave"
+      enter-active-class="duration-300 ease-out"
+      enter-from-class="opacity-0 scale-[0.98] translate-y-10"
+      enter-to-class="opacity-100 scale-100 translate-y-0"
+      leave-active-class="duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100 translate-y-0"
+      leave-to-class="opacity-0 scale-[0.98] translate-y-10"
     >
       <div
         v-if="isOpen"
-        ref="modalRef"
-        :class="[
-          'fixed z-[100] flex flex-col settings-page shadow-2xl shadow-black/20',
-          isFullscreen 
-            ? 'inset-0' 
-            : 'inset-0 md:inset-6 md:m-auto md:w-[600px] md:min-w-[400px] md:max-w-[800px] md:h-[500px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
-        ]"
-        :style="windowStyle"
+        class="fixed z-[100] flex flex-col settings-page shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[800px] md:max-w-[calc(100%-3rem)] md:h-[700px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
       >
-        <!-- 调整大小手柄 -->
-        <WindowResizeHandles 
-          :is-fullscreen="isFullscreen" 
-          @resize="handleResize" 
-        />
-      
-        <!-- 顶部导航栏 - 可拖动 -->
+        <!-- 顶部导航栏 -->
         <div
-          v-anime:100="'slideUp'"
-          :class="[
-            'flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none',
-            isFullscreen ? '' : 'md:rounded-t-3xl md:cursor-move'
-          ]"
-          @mousedown="handleDragStart"
-          @touchstart="handleDragStart"
+          class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none md:rounded-t-3xl"
         >
           <!-- 返回按钮 - 仅移动端 -->
           <button
-            v-tap
-            class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors md:hidden"
+            class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors active:scale-95 md:hidden"
             @click="close"
           >
             <ChevronLeft :size="24" />
@@ -53,21 +36,10 @@
           <div class="flex items-center gap-2">
             <!-- 保存按钮 -->
             <button
-              v-tap
-              class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
+              class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-[#ff1493] hover:bg-[#e0117f] active:scale-95 transition-all shadow-lg shadow-pink-500/25"
               @click="save"
             >
               保存
-            </button>
-          
-            <!-- 全屏按钮 - 仅桌面端 -->
-            <button
-              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
-              title="全屏"
-              @click="handleToggleFullscreen"
-            >
-              <Maximize2 v-if="!isFullscreen" :size="16" />
-              <Minimize2 v-else :size="16" />
             </button>
           
             <!-- 关闭按钮 - 仅桌面端 -->
@@ -84,9 +56,62 @@
         <!-- 内容区域 -->
         <div class="flex-1 overflow-y-auto custom-scrollbar">
           <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+            <!-- 主题设置卡片 -->
+            <div
+              class="settings-card"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                  <Palette :size="20" class="text-white" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">外观主题</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">选择亮色、暗色或跟随系统</p>
+                </div>
+              </div>
+
+              <!-- 主题选项 -->
+              <div class="grid grid-cols-3 gap-3">
+                <button
+                  v-for="option in themeOptions"
+                  :key="option.value"
+                  type="button"
+                  :class="[
+                    'flex flex-col items-center gap-2 p-4 rounded-xl transition-all duration-200',
+                    uiStore.themeMode === option.value
+                      ? 'bg-[#ff1493]/10 border-2 border-[#ff1493] dark:border-[#ff69b4]'
+                      : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-pink-200 dark:hover:border-pink-900'
+                  ]"
+                  @click="handleThemeChange(option.value)"
+                >
+                  <!-- 图标 -->
+                  <div
+                    :class="[
+                      'w-10 h-10 rounded-xl flex items-center justify-center transition-colors',
+                      uiStore.themeMode === option.value
+                        ? 'bg-[#ff1493] text-white'
+                        : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
+                    ]"
+                  >
+                    <component :is="option.icon" :size="20" />
+                  </div>
+                  <!-- 标签 -->
+                  <span
+                    :class="[
+                      'text-sm font-medium',
+                      uiStore.themeMode === option.value
+                        ? 'text-[#ff1493] dark:text-[#ff69b4]'
+                        : 'text-gray-700 dark:text-slate-300'
+                    ]"
+                  >
+                    {{ option.label }}
+                  </span>
+                </button>
+              </div>
+            </div>
+
             <!-- API 设置卡片 -->
             <div
-              v-anime:150="'cardIn'"
               class="settings-card"
             >
               <div class="flex items-center gap-3 mb-4">
@@ -100,11 +125,10 @@
               </div>
 
               <!-- API 选项列表 -->
-              <div v-anime-stagger:50="'slideRight'" class="space-y-2">
+              <div class="space-y-2">
                 <button
                   v-for="option in apiOptions"
                   :key="option.value"
-                  v-tap
                   type="button"
                   :class="[
                     'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
@@ -136,11 +160,11 @@
                       {{ option.label }}
                     </span>
                   </div>
-                  <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧 -->
+                  <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧靠右 -->
                   <span 
                     v-if="option.value !== 'custom'" 
                     v-text-scroll
-                    class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-0 flex-1 min-w-0"
+                    class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-auto sm:text-right truncate max-w-[50%]"
                   >
                     {{ getApiUrl(option.value) }}
                   </span>
@@ -190,7 +214,6 @@
 
             <!-- 自定义样式卡片 -->
             <div
-              v-anime:200="'cardIn'"
               class="settings-card"
             >
               <div class="flex items-center gap-3 mb-4">
@@ -230,7 +253,6 @@
 
             <!-- 重置区域 -->
             <div
-              v-anime:250="'cardIn'"
               class="settings-card bg-red-50/50 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/30"
             >
               <div class="flex items-center justify-between">
@@ -244,8 +266,7 @@
                   </div>
                 </div>
                 <button
-                  v-tap
-                  class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+                  class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 active:scale-95 transition-all"
                   @click="reset"
                 >
                   重置
@@ -261,8 +282,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { animate } from '@/composables/useAnime'
-import { playTap, playCelebration, playToggle, playType, playSwipe } from '@/composables/useSound'
+import { playTap, playCelebration, playToggle, playType } from '@/composables/useSound'
 
 // Prism Editor
 import { PrismEditor } from 'vue-prism-editor'
@@ -289,8 +309,6 @@ function handleTyping() {
     lastTypingSound = now
   }
 }
-import { useWindowManager, type ResizeDirection } from '@/composables/useWindowManager'
-import WindowResizeHandles from '@/components/WindowResizeHandles.vue'
 import {
   Settings as SettingsIcon,
   ChevronLeft,
@@ -301,10 +319,27 @@ import {
   RotateCcw,
   Check,
   Github,
-  Maximize2,
-  Minimize2,
   X,
+  Palette,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-vue-next'
+import { useUIStore, type ThemeMode } from '@/stores/ui'
+
+const uiStore = useUIStore()
+
+// 主题选项
+const themeOptions = [
+  { value: 'light' as ThemeMode, label: '亮色', icon: Sun },
+  { value: 'system' as ThemeMode, label: '系统', icon: Monitor },
+  { value: 'dark' as ThemeMode, label: '暗色', icon: Moon },
+]
+
+function handleThemeChange(mode: ThemeMode) {
+  playToggle()
+  uiStore.setThemeMode(mode)
+}
 
 const props = defineProps<{
   isOpen: boolean
@@ -316,62 +351,6 @@ const emit = defineEmits<{
   close: []
   save: [customApi: string, customCSS: string]
 }>()
-
-// 窗口管理
-const modalRef = ref<HTMLElement | null>(null)
-const { isFullscreen, windowStyle, startDrag, startResize, toggleFullscreen, reset: resetWindow } = useWindowManager({
-  minWidth: 400,
-  minHeight: 300,
-})
-
-// 进入/离开动画
-function onEnter(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [0, 1],
-    scale: [0.98, 1],
-    translateY: [40, 0],
-    duration: 400,
-    ease: 'outCubic',
-    complete: done,
-  })
-}
-
-function onLeave(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [1, 0],
-    scale: [1, 0.98],
-    translateY: [0, 40],
-    duration: 300,
-    ease: 'inCubic',
-    complete: done,
-  })
-}
-
-function handleDragStart(e: MouseEvent | TouchEvent) {
-  if ((e.target as HTMLElement).closest('button')) {return}
-  if (modalRef.value) {
-    startDrag(e, modalRef.value)
-  }
-}
-
-function handleResize(e: MouseEvent | TouchEvent, direction: ResizeDirection) {
-  if (modalRef.value) {
-    startResize(e, direction, modalRef.value)
-  }
-}
-
-// 切换全屏（带音效）
-function handleToggleFullscreen() {
-  playSwipe()
-  toggleFullscreen()
-}
-
-// 关闭时重置窗口状态
-watch(() => props.isOpen, (newVal) => {
-  if (!newVal) {
-    resetWindow()
-  }
-})
 
 // API 服务器选项
 const apiOptions = [
@@ -484,27 +463,12 @@ function reset() {
 </script>
 
 <style>
-/* 设置面板 - WWDC 2025 液态玻璃效果 */
+/* 设置面板 - 半透明效果 */
 .settings-page {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 0 20px rgba(255, 20, 147, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
-  /* 窗口/全屏切换动画 */
-  transition: 
-    inset 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    min-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-xl, 0 12px 32px rgba(0, 0, 0, 0.15));
 }
 
 /* 移动端无底部边框 */
@@ -514,52 +478,27 @@ function reset() {
   }
 }
 
-/* 液态玻璃高光 */
-.settings-page::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 30%,
-    transparent 50%
-  );
-  pointer-events: none;
-  z-index: 100;
-}
-
 /* 设置面板 - 暗色模式 */
 .dark .settings-page {
-  background: rgba(30, 30, 40, 0.5);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 -8px 24px rgba(0, 0, 0, 0.2),
-    0 0 20px rgba(255, 105, 180, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* 设置卡片 - 亮色模式 */
 .settings-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 1.25rem;
-  padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 4px 24px -4px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-card-inner, 0.75));
+  border-radius: var(--radius-xl, 1.25rem);
+  padding: var(--spacing-lg, 1.25rem);
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
 }
 
 /* 设置卡片 - 暗色模式 */
 .dark .settings-card {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow:
-    0 4px 24px -4px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-inner-dark, 0.75));
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 /* 自定义滚动条 */
