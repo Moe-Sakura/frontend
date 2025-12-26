@@ -600,7 +600,7 @@ export async function fetchVndbQuotes(vnId: string): Promise<VndbQuote[]> {
       body: JSON.stringify({
         filters: ['vn', '=', ['id', '=', vnId]],
         fields: 'id, quote, character{id, name, original}',
-        results: 10,
+        results: 25,
       }),
     })
 
