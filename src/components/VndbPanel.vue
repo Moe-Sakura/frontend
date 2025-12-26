@@ -623,6 +623,7 @@ const screenshotsReady = ref(false)
 // PV 视频状态
 const pvVideoUrl = ref<string | null>(null)
 const isPvLoading = ref(false)
+// eslint-disable-next-line no-undef
 const pvVideoRef = ref<HTMLVideoElement | null>(null)
 
 // 视频加载完成后暂停在第一帧

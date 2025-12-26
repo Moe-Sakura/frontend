@@ -59,6 +59,72 @@ app.mount('#app')
 // Service Worker 注册与更新
 // ============================================
 
+// 显示更新提示
+function showUpdateToast(onUpdate: () => void) {
+  // 创建 toast 元素
+  const toast = document.createElement('div')
+  toast.id = 'sw-update-toast'
+  toast.innerHTML = `
+    <div style="
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #ff1493, #d946ef);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(255, 20, 147, 0.3);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      animation: slideUp 0.3s ease-out;
+    ">
+      <span>🎉 发现新版本，<span id="sw-countdown">5</span> 秒后自动更新</span>
+      <button id="sw-update-now" style="
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+      ">立即更新</button>
+    </div>
+    <style>
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+    </style>
+  `
+  document.body.appendChild(toast)
+
+  // 倒计时
+  let countdown = 5
+  const countdownEl = document.getElementById('sw-countdown')
+  const interval = setInterval(() => {
+    countdown--
+    if (countdownEl) {
+      countdownEl.textContent = String(countdown)
+    }
+    if (countdown <= 0) {
+      clearInterval(interval)
+      onUpdate()
+    }
+  }, 1000)
+
+  // 立即更新按钮
+  document.getElementById('sw-update-now')?.addEventListener('click', () => {
+    clearInterval(interval)
+    onUpdate()
+  })
+}
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
@@ -75,8 +141,12 @@ if ('serviceWorker' in navigator) {
         worker.addEventListener('statechange', () => {
           // 新 SW 安装完成且有旧 SW 控制页面 = 有更新
           if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[SW] Update available, activating...')
-            worker.postMessage({ type: 'SKIP_WAITING' })
+            console.log('[SW] Update available')
+            // 显示更新提示，5 秒后自动更新
+            showUpdateToast(() => {
+              console.log('[SW] Activating update...')
+              worker.postMessage({ type: 'SKIP_WAITING' })
+            })
           }
         })
       })

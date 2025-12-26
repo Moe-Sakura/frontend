@@ -69,7 +69,9 @@ export interface VideoParseResult {
  * @param vndbId VNDB ID (如 "v12345")
  */
 export async function fetchGameVideoUrl(vndbId: string): Promise<string | null> {
-  if (!vndbId) return null
+  if (!vndbId) {
+    return null
+  }
 
   try {
     const response = await fetch(getVideoParseApiUrl(), {
@@ -790,15 +792,14 @@ const COMBINED_PROMPT = `你是一名专业的视觉小说（Galgame/AVG）本�
 - 台词：保留情感色彩和语气，注意口语化
 
 【输出格式】
-严格按以下格式输出，使用相同的分隔符：
-===SECTION===
+严格按照输入的相同格式输出，使用 ===SECTION=== 分隔三部分：
 翻译后的简介
 ===SECTION===
 翻译后的标签（每行一个，与输入行数对应）
 ===SECTION===
 翻译后的台词（每行一条，与输入行数对应）
 
-仅输出翻译结果，无需任何说明`
+注意：输出不要以 ===SECTION=== 开头，直接输出翻译内容。仅输出翻译结果，无需任何说明。`
 
 /**
  * AI 翻译文本
@@ -962,7 +963,9 @@ export async function translateAllContent(
       })
 
       if (!response.ok) {
-        if (attempt === maxRetries) return result
+        if (attempt === maxRetries) {
+          return result
+        }
         await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)))
         continue
       }
@@ -971,8 +974,13 @@ export async function translateAllContent(
       const content = data.choices?.[0]?.message?.content?.trim()
 
       if (content) {
-        // 解析返回结果 - 保留空字符串以维持索引对应关系
-        const parts = content.split(/===SECTION===/).map((s: string) => s.trim())
+        // 解析返回结果
+        let parts = content.split(/===SECTION===/).map((s: string) => s.trim())
+        
+        // 如果 AI 以 ===SECTION=== 开头，第一个元素会是空字符串，需要过滤掉
+        if (parts[0] === '') {
+          parts = parts.slice(1)
+        }
         
         // 索引 0 = 描述, 索引 1 = 标签, 索引 2 = 名言
         if (parts[0] && descText) {
@@ -997,7 +1005,9 @@ export async function translateAllContent(
 
       return result
     } catch {
-      if (attempt === maxRetries) return result
+      if (attempt === maxRetries) {
+        return result
+      }
       await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)))
     }
   }
