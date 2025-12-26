@@ -2,9 +2,12 @@
   <Teleport to="body">
     <!-- 评论面板 - 模态框 -->
     <Transition
-      :css="false"
-      @enter="onEnter"
-      @leave="onLeave"
+      enter-active-class="duration-300 ease-out"
+      enter-from-class="opacity-0 scale-[0.98] translate-y-10"
+      enter-to-class="opacity-100 scale-100 translate-y-0"
+      leave-active-class="duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100 translate-y-0"
+      leave-to-class="opacity-0 scale-[0.98] translate-y-10"
     >
       <div
         v-if="uiStore.isCommentsModalOpen"
@@ -63,35 +66,11 @@
 import { watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { playTransitionUp, playTransitionDown } from '@/composables/useSound'
-import { animate } from '@/composables/useAnime'
 import Artalk from 'artalk/dist/Artalk.mjs'
 import { MessageCircle, ChevronLeft, X } from 'lucide-vue-next'
 
 interface ArtalkInstance {
   destroy(): void
-}
-
-// 进入/离开动画
-function onEnter(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [0, 1],
-    scale: [0.98, 1],
-    translateY: [40, 0],
-    duration: 300,
-    ease: 'outCubic',
-    complete: done,
-  })
-}
-
-function onLeave(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [1, 0],
-    scale: [1, 0.98],
-    translateY: [0, 40],
-    duration: 200,
-    ease: 'inCubic',
-    complete: done,
-  })
 }
 
 const uiStore = useUIStore()

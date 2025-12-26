@@ -2,9 +2,12 @@
   <Teleport to="body">
     <!-- VNDB 信息面板 - 模态框 -->
     <Transition
-      :css="false"
-      @enter="onEnter"
-      @leave="onLeave"
+      enter-active-class="duration-300 ease-out"
+      enter-from-class="opacity-0 scale-[0.98] translate-y-10"
+      enter-to-class="opacity-100 scale-100 translate-y-0"
+      leave-active-class="duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100 translate-y-0"
+      leave-to-class="opacity-0 scale-[0.98] translate-y-10"
     >
       <div
         v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
@@ -514,7 +517,6 @@ import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/sea
 import { useUIStore } from '@/stores/ui'
 import { translateText, fetchVndbCharacters, fetchVndbQuotes } from '@/api/search'
 import { playClick, playSuccess, playError, playToggle, playTransitionUp, playTransitionDown } from '@/composables/useSound'
-import { animate } from '@/composables/useAnime'
 import { useImageViewer } from '@/composables/useImageViewer'
 import {
   BookOpen,
@@ -543,29 +545,6 @@ import {
 
 // 图片预览
 const imageViewer = useImageViewer()
-
-// 进入/离开动画
-function onEnter(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [0, 1],
-    scale: [0.98, 1],
-    translateY: [40, 0],
-    duration: 300,
-    ease: 'outCubic',
-    complete: done,
-  })
-}
-
-function onLeave(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [1, 0],
-    scale: [1, 0.98],
-    translateY: [0, 40],
-    duration: 200,
-    ease: 'inCubic',
-    complete: done,
-  })
-}
 
 const searchStore = useSearchStore()
 const uiStore = useUIStore()

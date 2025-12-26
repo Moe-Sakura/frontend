@@ -81,33 +81,14 @@
             <span class="text-red-700 dark:text-red-300 font-medium">{{ platformData.error }}</span>
           </div>
           
-          <!-- 搜索结果列表 - 使用虚拟滚动优化大量结果 -->
-          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list contain-layout">
-            <!-- 结果数量少于 15 时使用普通列表 -->
-            <template v-if="getDisplayedResults(platformData).length < 15">
-              <div class="space-y-2">
-                <ResultItem
-                  v-for="(result, index) in getDisplayedResults(platformData)"
-                  :key="result.url || index"
-                  :index="index"
-                  :source="result"
-                />
-              </div>
-            </template>
-            <!-- 结果数量超过 15 时使用虚拟滚动 -->
-            <VirtualList
-              v-else
-              class="virtual-list-container"
-              :data-key="'url'"
-              :data-sources="getDisplayedResults(platformData)"
-              :estimate-size="80"
-              :keeps="20"
-              item-class="mb-2"
-            >
-              <template #default="{ item, index }">
-                <ResultItem :index="index" :source="item" />
-              </template>
-            </VirtualList>
+          <!-- 搜索结果列表 -->
+          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list contain-layout space-y-2">
+            <ResultItem
+              v-for="(result, index) in getDisplayedResults(platformData)"
+              :key="result.url || index"
+              :index="index"
+              :source="result"
+            />
           </div>
           
           <!-- 加载更多按钮 -->
@@ -150,7 +131,6 @@ import type { PlatformData } from '@/stores/search'
 import { playTap } from '@/composables/useSound'
 import LazyRender from '@/components/LazyRender.vue'
 import ResultItem from '@/components/ResultItem.vue'
-import VirtualList from 'vue-virtual-scroll-list'
 import {
   ExternalLink,
   AlertTriangle,
@@ -360,12 +340,6 @@ function getTagLabel(tag: string) {
 /* 结果列表布局隔离 */
 .results-list {
   contain: layout style;
-}
-
-/* 虚拟滚动列表容器 */
-.virtual-list-container {
-  max-height: 600px;
-  overflow-y: auto;
 }
 
 /* Tailwind 动画 - 优化为仅使用 transform 和 opacity */

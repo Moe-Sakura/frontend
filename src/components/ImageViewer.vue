@@ -354,9 +354,13 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition
-      :css="false"
+      enter-active-class="duration-250 ease-out"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
       @enter="onEnter"
-      @leave="onLeave"
     >
       <div
         v-if="isOpen"

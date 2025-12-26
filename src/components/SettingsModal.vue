@@ -2,9 +2,12 @@
   <Teleport to="body">
     <!-- 设置面板 - 模态框 -->
     <Transition
-      :css="false"
-      @enter="onEnter"
-      @leave="onLeave"
+      enter-active-class="duration-300 ease-out"
+      enter-from-class="opacity-0 scale-[0.98] translate-y-10"
+      enter-to-class="opacity-100 scale-100 translate-y-0"
+      leave-active-class="duration-200 ease-in"
+      leave-from-class="opacity-100 scale-100 translate-y-0"
+      leave-to-class="opacity-0 scale-[0.98] translate-y-10"
     >
       <div
         v-if="isOpen"
@@ -279,7 +282,6 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { animate } from '@/composables/useAnime'
 import { playTap, playCelebration, playToggle, playType } from '@/composables/useSound'
 
 // Prism Editor
@@ -349,29 +351,6 @@ const emit = defineEmits<{
   close: []
   save: [customApi: string, customCSS: string]
 }>()
-
-// 进入/离开动画
-function onEnter(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [0, 1],
-    scale: [0.98, 1],
-    translateY: [40, 0],
-    duration: 400,
-    ease: 'outCubic',
-    complete: done,
-  })
-}
-
-function onLeave(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [1, 0],
-    scale: [1, 0.98],
-    translateY: [0, 40],
-    duration: 300,
-    ease: 'inCubic',
-    complete: done,
-  })
-}
 
 // API 服务器选项
 const apiOptions = [
