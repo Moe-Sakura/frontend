@@ -97,6 +97,7 @@
                     :alt="searchStore.vndbInfo.mainName"
                     class="w-full h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all"
                     loading="lazy"
+                    referrerpolicy="no-referrer"
                     @error="handleImageError"
                   />
                 </button>
@@ -377,6 +378,7 @@
                         :alt="char.name"
                         class="absolute inset-0 w-full h-full object-cover"
                         loading="lazy"
+                        referrerpolicy="no-referrer"
                         @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
                       />
                     </template>
@@ -513,10 +515,9 @@
               </div>
             </div>
 
-            <!-- 游戏截图 (等待首张图片加载后显示) -->
+            <!-- 游戏截图 -->
             <div 
               v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0" 
-              v-show="screenshotsReady"
               class="vndb-card"
             >
               <div class="flex items-center gap-2 mb-4">
@@ -527,14 +528,15 @@
                 <button
                   v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
                   :key="index"
-                  class="group block overflow-hidden rounded-xl hover:scale-[1.02] transition-transform"
+                  class="group block overflow-hidden rounded-xl hover:scale-[1.02] transition-transform bg-gray-100 dark:bg-slate-700"
                   @click="openGallery(index + 1)"
                 >
                   <img
                     :src="screenshot"
                     :alt="`${searchStore.vndbInfo.mainName} 截图 ${index + 1}`"
                     class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
-                    @load="screenshotsReady = true"
+                    loading="lazy"
+                    referrerpolicy="no-referrer"
                     @error="handleImageError"
                   />
                 </button>
@@ -548,7 +550,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, nextTick } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { translateAllContent, fetchVndbCharacters, fetchVndbQuotes, fetchGameVideoUrl } from '@/api/search'
@@ -617,8 +619,6 @@ const hasAnyTranslation = computed(() =>
   translatedDescription.value || translatedTags.value.size > 0 || translatedQuotes.value.size > 0,
 )
 
-// 截图加载状态
-const screenshotsReady = ref(false)
 
 // PV 视频状态
 const pvVideoUrl = ref<string | null>(null)
@@ -680,8 +680,6 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   translateQuotesError.value = false
   // 重置一键翻译状态
   isTranslatingAllRef.value = false
-  // 重置截图加载状态
-  screenshotsReady.value = false
   // 重置角色和名言
   characters.value = []
   quotes.value = []
@@ -698,7 +696,6 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   
   // 先捕获游戏 ID，用于后续竞态检查
   const vnIdAtStart = newInfo?.id || null
-  const vnIdForScreenshots = newInfo?.id
   
   // 更新当前游戏 ID
   currentVnId.value = vnIdAtStart
@@ -711,28 +708,6 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
         // 自动触发 AI 翻译（静默模式，不播放音效）
         handleTranslateAllSilent()
       }
-    })
-  }
-  
-  // 检查缓存的截图是否已加载
-  if (newInfo?.screenshots && newInfo.screenshots.length > 0) {
-    nextTick(() => {
-      requestAnimationFrame(() => {
-        // 竞态检查：如果用户已切换到其他游戏，跳过处理
-        if (vnIdForScreenshots && currentVnId.value !== vnIdForScreenshots) {
-          return
-        }
-        const screenshotImgs = modalRef.value?.querySelectorAll('img[alt*="截图"]')
-        if (screenshotImgs) {
-          for (let i = 0; i < screenshotImgs.length; i++) {
-            const img = screenshotImgs[i] as HTMLImageElement
-            if (img.complete && img.naturalHeight > 0) {
-              screenshotsReady.value = true
-              break
-            }
-          }
-        }
-      })
     })
   }
 }, { immediate: true })
