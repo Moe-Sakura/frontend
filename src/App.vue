@@ -57,6 +57,9 @@
         :is-visible="uiStore.showUpdateToast"
         :on-update="handleSwUpdate"
       />
+
+      <!-- 图片预览器 -->
+      <ImageViewer />
     </main>
   </div>
 </template>
@@ -89,6 +92,7 @@ const SettingsModal = defineAsyncComponent(() => import('@/components/SettingsMo
 const SearchHistoryModal = defineAsyncComponent(() => import('@/components/SearchHistoryModal.vue'))
 const KeyboardHelpPanel = defineAsyncComponent(() => import('@/components/KeyboardHelpPanel.vue'))
 const UpdateToast = defineAsyncComponent(() => import('@/components/UpdateToast.vue'))
+const ImageViewer = defineAsyncComponent(() => import('@/components/ImageViewer.vue'))
 
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import { useClickEffect } from '@/composables/useClickEffect'

@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@fancyapps/ui':
-        specifier: ^6.1.7
-        version: 6.1.7
       '@fontsource/noto-sans-sc':
         specifier: ^5.2.8
         version: 5.2.8
@@ -291,9 +288,6 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@fancyapps/ui@6.1.7':
-    resolution: {integrity: sha512-KHOvuy90JBFDgbNa2V1N9Jg7PE/lSQMXN9VbhR+WQSIxIEi4PV7kndeao7ezir5WeJ8OZRyDelNKJVLicXfBIg==}
 
   '@fontsource/noto-sans-sc@5.2.8':
     resolution: {integrity: sha512-8T8HxIS3uAMCfaQawKRH/6yYZ1oRnJZB/CrGwfxGgJa+zAOBgx2lqZMiTY/WbQpLGlPRqX4zHXJYI09CI2q6tA==}
@@ -1463,8 +1457,6 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
-
-  '@fancyapps/ui@6.1.7': {}
 
   '@fontsource/noto-sans-sc@5.2.8': {}
 

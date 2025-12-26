@@ -28,9 +28,6 @@ import { createProgressFetch } from './composables/useProgress'
 // Artalk 评论系统
 import 'artalk/dist/Artalk.css'
 
-// Fancybox - 图片灯箱（懒加载）
-import { initFancyboxLazy } from './composables/useFancybox'
-
 // 点击涟漪指令
 import { vRipple } from './directives/vRipple'
 
@@ -64,9 +61,6 @@ app.use(pinia)
 createProgressFetch()
 
 app.mount('#app')
-
-// 初始化 Fancybox 懒加载（首次点击图片时才加载）
-initFancyboxLazy()
 
 // Service Worker 更新检测
 // 当前激活的 SW 版本（运行时获取）
