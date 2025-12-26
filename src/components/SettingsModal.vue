@@ -436,34 +436,25 @@ function reset() {
 
 /* 设置面板 - 暗色模式 */
 .dark .settings-page {
-  background: rgba(30, 30, 40, 0.5);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 -8px 24px rgba(0, 0, 0, 0.2),
-    0 0 20px rgba(255, 105, 180, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(255, 105, 180, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* 设置卡片 - 亮色模式 */
 .settings-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 1.25rem;
   padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 4px 24px -4px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  border: 1px solid rgba(255, 20, 147, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 /* 设置卡片 - 暗色模式 */
 .dark .settings-card {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow:
-    0 4px 24px -4px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(255, 105, 180, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* 自定义滚动条 */

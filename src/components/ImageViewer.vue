@@ -546,8 +546,7 @@ onUnmounted(() => {
 .image-viewer-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.92);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.95);
 }
 
 .image-viewer-container {
@@ -596,9 +595,8 @@ onUnmounted(() => {
   font-size: 14px;
   font-weight: 500;
   padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 20px;
-  backdrop-filter: blur(4px);
 }
 
 .toolbar-btn {
@@ -613,7 +611,6 @@ onUnmounted(() => {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
 }
 
 .toolbar-btn:hover {
@@ -704,7 +701,6 @@ onUnmounted(() => {
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
 }
 
 .nav-prev {
@@ -733,9 +729,8 @@ onUnmounted(() => {
   text-align: center;
   max-width: 80%;
   padding: 6px 16px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 8px;
-  backdrop-filter: blur(4px);
 }
 
 /* 缩略图 */
@@ -745,9 +740,8 @@ onUnmounted(() => {
   padding: 8px;
   max-width: 90vw;
   overflow-x: auto;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 12px;
-  backdrop-filter: blur(4px);
 }
 
 .thumbnail {

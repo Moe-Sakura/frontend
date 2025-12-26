@@ -8,7 +8,7 @@
     >
       <div
         v-if="uiStore.isCommentsModalOpen"
-        class="comments-modal fixed z-[100] flex flex-col shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[800px] md:max-w-[calc(100%-3rem)] md:h-[600px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
+        class="comments-modal fixed z-[100] flex flex-col shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[900px] md:max-w-[calc(100%-3rem)] md:h-[760px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
       >
         <!-- 顶部导航栏 -->
         <div 
@@ -222,17 +222,12 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* 评论面板 - WWDC 2025 液态玻璃效果 */
+/* 评论面板 - 半透明效果 */
 .comments-modal {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.96);
   will-change: transform;
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 0 20px rgba(255, 20, 147, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 20, 147, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 /* 移动端无底部边框 */
@@ -242,48 +237,25 @@ onUnmounted(() => {
   }
 }
 
-/* 液态玻璃高光 */
-.comments-modal::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 30%,
-    transparent 50%
-  );
-  pointer-events: none;
-  z-index: 100;
-}
-
 /* 评论面板 - 暗色模式 */
 .dark .comments-modal {
-  background: rgba(30, 30, 40, 0.5);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 -8px 24px rgba(0, 0, 0, 0.2),
-    0 0 20px rgba(255, 105, 180, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(255, 105, 180, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* 头部样式 */
 .comments-header {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .dark .comments-header {
-  background: rgba(30, 41, 59, 0.8) !important;
+  background: rgba(30, 41, 59, 0.95);
 }
 
 /* 评论容器样式 */
 .comments-container {
-  background: rgba(248, 250, 252, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(248, 250, 252, 0.95);
   border-radius: 1rem;
   padding: 1rem;
   border: 1px solid rgba(226, 232, 240, 0.5);
@@ -291,7 +263,6 @@ onUnmounted(() => {
 
 @media (min-width: 640px) {
   .comments-container {
-    background: rgba(248, 250, 252, 0.5);
     padding: 1.25rem;
     border-radius: 1.25rem;
   }
@@ -299,8 +270,8 @@ onUnmounted(() => {
 
 /* 暗色模式评论容器 */
 .dark .comments-container {
-  background: rgba(51, 65, 85, 0.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: rgba(51, 65, 85, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* 自定义滚动条 */

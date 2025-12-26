@@ -307,61 +307,22 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   
-  /* WWDC 2025 液态玻璃效果 */
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  box-shadow: 
-    0 6px 12px rgba(0, 0, 0, 0.15),
-    0 0 20px rgba(255, 20, 147, 0.1),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* 半透明效果 */
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 20, 147, 0.1);
   
   /* 性能优化 */
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
   transform: translate3d(0, 0, 0);
 }
 
-/* 液态玻璃高光 */
-.fab-button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 40%,
-    transparent 60%
-  );
-  pointer-events: none;
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
-}
-
-.fab-button:hover::before {
-  opacity: 1;
-}
-
 .dark .fab-button {
-  background: rgba(30, 30, 40, 0.4);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 6px 12px rgba(0, 0, 0, 0.25),
-    0 0 20px rgba(255, 105, 180, 0.12),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 105, 180, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-.dark .fab-button::before {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.03) 40%,
-    transparent 60%
-  );
-}
 
 @media (min-width: 640px) {
   .fab-button {
@@ -485,50 +446,17 @@ onUnmounted(() => {
 /* 站点导航面板 - 液态玻璃效果 */
 .nav-panel {
   /* 不设置 position，使用模板中的 fixed */
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.15),
-    0 0 20px rgba(255, 20, 147, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 20, 147, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-}
-
-/* 液态玻璃高光 */
-.nav-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 30%,
-    transparent 50%
-  );
-  pointer-events: none;
 }
 
 /* 站点导航面板 - 暗色模式 */
 .dark .nav-panel {
-  background: rgba(30, 30, 40, 0.4);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 0 20px rgba(255, 105, 180, 0.1),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
-}
-
-.dark .nav-panel::before {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0.03) 30%,
-    transparent 50%
-  );
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(255, 105, 180, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 /* 标题栏 */

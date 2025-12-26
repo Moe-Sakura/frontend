@@ -150,13 +150,11 @@ function close() {
 
 <style scoped>
 .keyboard-help-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.98);
 }
 
 .dark .keyboard-help-panel {
-  background: rgba(30, 41, 59, 0.9);
+  background: rgba(30, 41, 59, 0.98);
 }
 
 .shortcut-row {

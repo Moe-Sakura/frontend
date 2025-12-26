@@ -122,12 +122,12 @@
             </div>
           </div>
 
-          <!-- Search Mode Selector - WWDC 2025 液态玻璃 -->
+          <!-- Search Mode Selector -->
           <div class="flex justify-center items-center">
             <div class="mode-switch liquid-mode-switch relative flex p-1.5 rounded-2xl">
-              <!-- 液态玻璃高光 -->
+              <!-- 高光装饰 -->
               <div class="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-                <div class="absolute inset-0 bg-gradient-to-br from-white/40 via-white/10 to-transparent" />
+                <div class="absolute inset-0 bg-gradient-to-br from-white/30 via-white/5 to-transparent" />
               </div>
               
               <!-- 滑动背景指示器 -->
@@ -1036,9 +1036,7 @@ defineExpose({
 
 /* 错误卡片样式 */
 .error-card {
-  background: linear-gradient(135deg, rgba(254, 242, 242, 0.95), rgba(254, 226, 226, 0.95));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.98), rgba(254, 226, 226, 0.98));
   border-radius: 1rem;
   padding: 1rem;
   border: 1px solid rgba(239, 68, 68, 0.2);
@@ -1162,11 +1160,9 @@ defineExpose({
   border-radius: 1rem;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 228, 242, 0.75) 100%
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 245, 250, 0.92) 100%
   );
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
   z-index: -1;
 }
 
@@ -1233,25 +1229,17 @@ defineExpose({
   }
 }
 
-/* 液态玻璃模式切换器 */
+/* 模式切换器 - 半透明效果 */
 .liquid-mode-switch {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 6px 12px rgba(0, 0, 0, 0.12),
-    0 0 20px rgba(255, 20, 147, 0.06),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 20, 147, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dark .liquid-mode-switch {
-  background: rgba(30, 30, 40, 0.4);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 6px 12px rgba(0, 0, 0, 0.2),
-    0 0 20px rgba(255, 105, 180, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(255, 105, 180, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* 模式切换按钮 hover 效果 */

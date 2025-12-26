@@ -222,11 +222,9 @@ onUnmounted(() => {
 .history-modal {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 251, 235, 0.98) 100%
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 253, 245, 0.99) 100%
   );
-  backdrop-filter: blur(40px) saturate(1.5);
-  -webkit-backdrop-filter: blur(40px) saturate(1.5);
   border: 1px solid rgba(251, 191, 36, 0.2);
 }
 
@@ -234,23 +232,19 @@ onUnmounted(() => {
 .dark .history-modal {
   background: linear-gradient(
     180deg,
-    rgba(30, 41, 59, 0.95) 0%,
-    rgba(30, 27, 17, 0.98) 100%
+    rgba(30, 41, 59, 0.98) 0%,
+    rgba(30, 27, 17, 0.99) 100%
   ) !important;
-  backdrop-filter: blur(40px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
   border: 1px solid rgba(251, 191, 36, 0.1) !important;
 }
 
 /* 头部样式 */
 .history-header {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .dark .history-header {
-  background: rgba(30, 41, 59, 0.8) !important;
+  background: rgba(30, 41, 59, 0.95) !important;
 }
 
 /* 历史记录项 */
