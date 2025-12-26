@@ -55,117 +55,54 @@ createProgressFetch()
 
 app.mount('#app')
 
-// Service Worker 更新检测
-// 当前激活的 SW 版本（运行时获取）
-let activatedSwVersion: string | null = null
+// ============================================
+// Service Worker 注册与更新
+// ============================================
 
-// 获取 SW 版本
-async function getSwVersion(sw: ServiceWorker): Promise<string | null> {
-  return new Promise((resolve) => {
-    const messageChannel = new MessageChannel()
-    messageChannel.port1.onmessage = (event) => {
-      resolve(event.data?.version || null)
-    }
-    sw.postMessage({ type: 'GET_VERSION' }, [messageChannel.port2])
-
-    // 超时处理
-    setTimeout(() => resolve(null), 2000)
-  })
-}
-
-// 检查是否有新版本
-async function checkForNewVersion(registration: ServiceWorkerRegistration): Promise<boolean> {
-  const sw = registration.active
-  if (!sw) {return false}
-
-  const currentVersion = await getSwVersion(sw)
-  
-  // 首次获取版本时记录
-  if (!activatedSwVersion && currentVersion) {
-    activatedSwVersion = currentVersion
-    console.log(`[SW] Current version: ${activatedSwVersion}`)
-    return false
-  }
-  
-  // 版本不同则有更新
-  if (currentVersion && activatedSwVersion && currentVersion !== activatedSwVersion) {
-    console.log(`[SW] New version available: ${currentVersion} (was: ${activatedSwVersion})`)
-    return true
-  }
-  
-  return false
-}
-
-// 触发 SW 更新
-function triggerSwUpdate(registration: ServiceWorkerRegistration) {
-  const waitingSw = registration.waiting
-  if (waitingSw) {
-    waitingSw.postMessage({ type: 'SKIP_WAITING' })
-  }
-  // 刷新页面
-  window.location.reload()
-}
-
-// 自动应用更新（不显示弹窗）
-function autoApplyUpdate(registration: ServiceWorkerRegistration) {
-  console.log('[SW] Auto-applying update...')
-  triggerSwUpdate(registration)
-}
-
-// 注册 Service Worker (PWA 支持)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js')
+      const reg = await navigator.serviceWorker.register('/sw.js')
+      console.log('[SW] Registered')
 
-      // 检查更新
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // 有新版本可用，自动更新
-              autoApplyUpdate(registration)
-            }
-          })
+      // 新版本检测
+      reg.addEventListener('updatefound', () => {
+        const worker = reg.installing
+        if (!worker) {
+          return
         }
+
+        worker.addEventListener('statechange', () => {
+          // 新 SW 安装完成且有旧 SW 控制页面 = 有更新
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            console.log('[SW] Update available, activating...')
+            worker.postMessage({ type: 'SKIP_WAITING' })
+          }
+        })
       })
 
-      // 首次获取当前版本
-      if (registration.active) {
-        activatedSwVersion = await getSwVersion(registration.active)
-        console.log(`[SW] Registered, version: ${activatedSwVersion || 'unknown'}`)
-      }
-
-      // 定期检查版本（每 5 分钟）
-      setInterval(async () => {
-        try {
-          await registration.update()
-          const hasNewVersion = await checkForNewVersion(registration)
-          if (hasNewVersion) {
-            autoApplyUpdate(registration)
-          }
-        } catch {
-          // 静默处理检查失败
+      // 新 SW 激活后刷新页面
+      let refreshing = false
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) {
+          return
         }
-      }, 5 * 60 * 1000)
+        refreshing = true
+        console.log('[SW] New version activated, reloading...')
+        window.location.reload()
+      })
+
+      // 定期检查更新（5 分钟）
+      setInterval(() => reg.update().catch(() => {}), 5 * 60 * 1000)
 
       // 页面可见时检查更新
-      document.addEventListener('visibilitychange', async () => {
+      document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-          try {
-            await registration.update()
-          } catch {
-            // 静默处理
-          }
+          reg.update().catch(() => {})
         }
       })
-
     } catch {
-        // 静默处理注册失败
+      // 静默处理
     }
   })
 }
-
-// 导出更新函数供组件使用
-;(window as Window & { triggerSwUpdate?: typeof triggerSwUpdate }).triggerSwUpdate = triggerSwUpdate
