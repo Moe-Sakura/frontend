@@ -379,6 +379,7 @@ onUnmounted(() => {
             
             <!-- 右侧：操作按钮 -->
             <div class="toolbar-right">
+              <!-- 缩放按钮 -->
               <button
                 class="toolbar-btn"
                 title="放大 (+)"
@@ -394,7 +395,7 @@ onUnmounted(() => {
                 <ZoomOut :size="20" />
               </button>
               <button
-                class="toolbar-btn"
+                class="toolbar-btn hidden-mobile"
                 title="1:1"
                 @click="handleToggleZoom"
               >
@@ -403,29 +404,30 @@ onUnmounted(() => {
               
               <div class="toolbar-divider" />
               
+              <!-- 旋转翻转按钮 - 仅桌面端显示 -->
               <button
-                class="toolbar-btn"
+                class="toolbar-btn hidden-mobile"
                 title="逆时针旋转 (Shift+R)"
                 @click="handleRotateCCW"
               >
                 <RotateCcw :size="20" />
               </button>
               <button
-                class="toolbar-btn"
+                class="toolbar-btn hidden-mobile"
                 title="顺时针旋转 (R)"
                 @click="handleRotateCW"
               >
                 <RotateCw :size="20" />
               </button>
               <button
-                class="toolbar-btn"
+                class="toolbar-btn hidden-mobile"
                 title="水平翻转"
                 @click="handleFlipH"
               >
                 <FlipHorizontal :size="20" />
               </button>
               <button
-                class="toolbar-btn"
+                class="toolbar-btn hidden-mobile"
                 title="垂直翻转"
                 @click="handleFlipV"
               >
@@ -434,8 +436,9 @@ onUnmounted(() => {
               
               <div class="toolbar-divider" />
               
+              <!-- 下载和关闭 -->
               <button
-                class="toolbar-btn"
+                class="toolbar-btn hidden-mobile"
                 title="下载"
                 @click="handleDownload"
               >
@@ -570,6 +573,7 @@ onUnmounted(() => {
 
 .image-viewer-toolbar.top {
   top: 0;
+  padding-top: max(12px, env(safe-area-inset-top));
 }
 
 .image-viewer-toolbar.bottom {
@@ -777,13 +781,34 @@ onUnmounted(() => {
 
 /* 移动端适配 */
 @media (max-width: 768px) {
+  .image-viewer-toolbar {
+    padding: 8px 12px;
+  }
+  
+  .image-viewer-toolbar.top {
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+  
   .toolbar-btn {
     width: 36px;
     height: 36px;
   }
   
+  .toolbar-btn.hidden-mobile {
+    display: none;
+  }
+  
   .toolbar-divider {
     display: none;
+  }
+  
+  .toolbar-right {
+    gap: 6px;
+  }
+  
+  .image-counter {
+    font-size: 12px;
+    padding: 3px 10px;
   }
   
   .nav-btn {
@@ -798,6 +823,11 @@ onUnmounted(() => {
   
   .image-caption {
     font-size: 13px;
+    max-width: 90%;
+  }
+  
+  .image-viewer-content {
+    padding: 50px 0;
   }
 }
 

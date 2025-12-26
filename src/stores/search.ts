@@ -5,9 +5,9 @@ import { useHistoryStore } from './history'
 import { useCacheStore } from './cache'
 
 export interface VndbVoiceActor {
-  id: string
-  name: string
-  character?: { id: string; name: string }
+  note: string | null
+  character: { id: string; name: string; original?: string }
+  staff: { id: string; name: string; original?: string }
 }
 
 export interface VndbTag {
@@ -37,11 +37,33 @@ export interface VndbDeveloper {
   original?: string
 }
 
+export interface VndbCharacter {
+  id: string
+  name: string
+  original?: string
+  image?: string
+  sex?: string
+  description?: string
+  age?: number
+}
+
+export interface VndbQuote {
+  id: string
+  quote: string
+  character?: {
+    id: string
+    name: string
+    original?: string
+  }
+}
+
 export interface VndbInfo {
   id?: string
   names: string[]
+  aliases?: string[]
   mainName: string
   originalTitle: string
+  alttitle?: string
   mainImageUrl: string | null
   screenshotUrl: string | null
   screenshots: string[]
@@ -65,6 +87,8 @@ export interface VndbInfo {
   languages?: string[]
   olang?: string
   devstatus?: number
+  characters?: VndbCharacter[]
+  quotes?: VndbQuote[]
 }
 
 export interface SearchResult {

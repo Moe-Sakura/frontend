@@ -49,6 +49,30 @@
 
           <!-- 右侧按钮组 -->
           <div class="flex items-center gap-2">
+            <!-- 一键翻译按钮 -->
+            <button
+              v-if="!hasAnyTranslation"
+              class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
+              :class="isTranslatingAll 
+                ? 'bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 cursor-wait' 
+                : 'text-white bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25 hover:shadow-xl'"
+              :disabled="isTranslatingAll"
+              @click="handleTranslateAll"
+            >
+              <Loader v-if="isTranslatingAll" :size="14" class="animate-spin" />
+              <Bot v-else :size="14" />
+              <span class="hidden sm:inline">{{ isTranslatingAll ? '翻译中...' : 'AI 翻译' }}</span>
+            </button>
+            <!-- 翻译完成后的切换按钮 -->
+            <button
+              v-else
+              class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-900/30 hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors"
+              @click="toggleAllTranslations"
+            >
+              <ArrowLeftRight :size="14" />
+              <span class="hidden sm:inline">{{ showOriginal ? '译文' : '原文' }}</span>
+            </button>
+            
             <!-- VNDB 链接按钮 -->
             <a
               :href="vndbUrl"
@@ -108,19 +132,32 @@
               </h2>
 
               <!-- 原名 -->
-              <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 dark:text-slate-400 text-center mb-4">
+              <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 dark:text-slate-400 text-center mb-1">
                 {{ searchStore.vndbInfo.originalTitle }}
               </p>
+              
+              <!-- 罗马音 -->
+              <p v-if="searchStore.vndbInfo.alttitle && searchStore.vndbInfo.alttitle !== searchStore.vndbInfo.originalTitle" class="text-xs text-gray-400 dark:text-slate-500 text-center mb-4 italic">
+                {{ searchStore.vndbInfo.alttitle }}
+              </p>
+              <div v-else class="mb-3" />
 
               <!-- 别名标签 -->
               <div v-if="searchStore.vndbInfo.names.length > 1" class="flex flex-wrap justify-center gap-2">
                 <span
-                  v-for="(name, index) in searchStore.vndbInfo.names.slice(0, 5)"
+                  v-for="(name, index) in (expandedSections.names ? searchStore.vndbInfo.names : searchStore.vndbInfo.names.slice(0, 5))"
                   :key="index"
                   class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-[#ff1493] dark:text-[#ff69b4] text-xs rounded-full"
                 >
                   {{ name }}
                 </span>
+                <button
+                  v-if="searchStore.vndbInfo.names.length > 5"
+                  class="px-3 py-1 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 text-xs rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+                  @click="toggleSection('names')"
+                >
+                  {{ expandedSections.names ? '收起' : `+${searchStore.vndbInfo.names.length - 5}` }}
+                </button>
               </div>
             </div>
 
@@ -254,38 +291,8 @@
                   <h3 class="font-bold text-gray-800 dark:text-white">标签</h3>
                   <span class="text-xs text-gray-400 dark:text-slate-500">(按相关性排序)</span>
                 </div>
-                <!-- 翻译按钮 -->
-                <div class="flex items-center gap-2">
-                  <!-- 切换原文/翻译 -->
-                  <button
-                    v-if="translatedTags.size > 0"
-                    class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg transition-colors"
-                    :class="showOriginalTags 
-                      ? 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300' 
-                      : 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'"
-                    @click="toggleTagsLanguage"
-                  >
-                    <Languages :size="14" />
-                    {{ showOriginalTags ? '原文' : '中文' }}
-                  </button>
-                  <!-- 翻译按钮 -->
-                  <button
-                    v-if="translatedTags.size === 0"
-                    class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg transition-colors"
-                    :class="isTranslatingTags 
-                      ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-wait' 
-                      : translateTagsError 
-                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                        : 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-sm hover:shadow-md'"
-                    :disabled="isTranslatingTags"
-                    @click="handleTranslateTags"
-                  >
-                    <Loader v-if="isTranslatingTags" :size="14" class="animate-spin" />
-                    <AlertTriangle v-else-if="translateTagsError" :size="14" />
-                    <Bot v-else :size="14" />
-                    {{ isTranslatingTags ? '翻译中...' : translateTagsError ? '重试' : 'AI 翻译' }}
-                  </button>
-                </div>
+                <!-- 翻译中指示器 -->
+                <Loader v-if="isTranslatingTags" :size="14" class="animate-spin text-violet-500" />
               </div>
               <div class="flex flex-wrap gap-2">
                 <span
@@ -321,27 +328,31 @@
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <a
-                  v-for="(voiceActor, index) in searchStore.vndbInfo.va.slice(0, 10)"
+                  v-for="(voiceActor, index) in (expandedSections.va ? searchStore.vndbInfo.va : searchStore.vndbInfo.va.slice(0, 10))"
                   :key="index"
-                  :href="`https://vndb.org/${voiceActor.id}`"
+                  :href="`https://vndb.org/${voiceActor.staff?.id}`"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="flex items-center gap-2 p-2 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-colors group"
                 >
                   <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-cyan-700 dark:text-cyan-400 truncate group-hover:underline">
-                      {{ voiceActor.name }}
+                      {{ voiceActor.staff?.original || voiceActor.staff?.name }}
                     </p>
                     <p v-if="voiceActor.character?.name" class="text-xs text-gray-500 dark:text-slate-400 truncate">
-                      饰 {{ voiceActor.character.name }}
+                      饰 {{ voiceActor.character.original || voiceActor.character.name }}
                     </p>
                   </div>
                   <ExternalLink :size="12" class="text-cyan-400 dark:text-cyan-600 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
               </div>
-              <p v-if="searchStore.vndbInfo.va.length > 10" class="text-xs text-gray-400 dark:text-slate-500 mt-2 text-center">
-                还有 {{ searchStore.vndbInfo.va.length - 10 }} 位声优...
-              </p>
+              <button
+                v-if="searchStore.vndbInfo.va.length > 10"
+                class="w-full mt-2 py-1.5 text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
+                @click="toggleSection('va')"
+              >
+                {{ expandedSections.va ? '收起' : `显示全部 ${searchStore.vndbInfo.va.length} 位声优` }}
+              </button>
             </div>
 
             <!-- 相关作品 -->
@@ -352,7 +363,7 @@
               </div>
               <div class="space-y-2">
                 <a
-                  v-for="(relation, index) in searchStore.vndbInfo.relations.slice(0, 8)"
+                  v-for="(relation, index) in (expandedSections.relations ? searchStore.vndbInfo.relations : searchStore.vndbInfo.relations.slice(0, 8))"
                   :key="index"
                   :href="`https://vndb.org/${relation.id}`"
                   target="_blank"
@@ -368,9 +379,13 @@
                   <ExternalLink :size="12" class="text-amber-400 dark:text-amber-600 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
               </div>
-              <p v-if="searchStore.vndbInfo.relations.length > 8" class="text-xs text-gray-400 dark:text-slate-500 mt-2 text-center">
-                还有 {{ searchStore.vndbInfo.relations.length - 8 }} 个相关作品...
-              </p>
+              <button
+                v-if="searchStore.vndbInfo.relations.length > 8"
+                class="w-full mt-2 py-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
+                @click="toggleSection('relations')"
+              >
+                {{ expandedSections.relations ? '收起' : `显示全部 ${searchStore.vndbInfo.relations.length} 个相关作品` }}
+              </button>
             </div>
 
             <!-- 外部链接 -->
@@ -394,6 +409,97 @@
               </div>
             </div>
 
+            <!-- 角色 -->
+            <div v-if="characters.length > 0" class="vndb-card">
+              <div class="flex items-center gap-2 mb-3">
+                <Users :size="18" class="text-rose-500" />
+                <h3 class="font-bold text-gray-800 dark:text-white">角色</h3>
+                <span class="text-xs text-gray-400 dark:text-slate-500">({{ characters.length }})</span>
+              </div>
+              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                <a
+                  v-for="(char, index) in (expandedSections.characters ? characters : characters.slice(0, 10))"
+                  :key="index"
+                  :href="`https://vndb.org/${char.id}`"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex flex-col items-center p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-all hover:scale-105 group"
+                >
+                  <div class="relative w-16 h-20 sm:w-20 sm:h-24 mb-2 rounded-lg overflow-hidden shadow-md">
+                    <img 
+                      v-if="char.image" 
+                      :src="char.image" 
+                      :alt="char.name"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div v-else class="w-full h-full bg-gradient-to-br from-rose-200 to-rose-300 dark:from-rose-800 dark:to-rose-900 flex items-center justify-center">
+                      <Users :size="24" class="text-rose-400 dark:text-rose-600" />
+                    </div>
+                  </div>
+                  <p class="text-xs font-medium text-rose-700 dark:text-rose-400 text-center truncate w-full group-hover:underline">
+                    {{ char.original || char.name }}
+                  </p>
+                  <p v-if="char.sex" class="text-[10px] text-gray-500 dark:text-slate-400 text-center">
+                    {{ formatSex(char.sex) }}{{ char.age ? ` · ${char.age}岁` : '' }}
+                  </p>
+                </a>
+              </div>
+              <button
+                v-if="characters.length > 10"
+                class="w-full mt-2 py-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
+                @click="toggleSection('characters')"
+              >
+                {{ expandedSections.characters ? '收起' : `显示全部 ${characters.length} 个角色` }}
+              </button>
+            </div>
+            <div v-else-if="isLoadingCharacters" class="vndb-card">
+              <div class="flex items-center gap-2">
+                <Loader :size="18" class="animate-spin text-rose-500" />
+                <span class="text-sm text-gray-500 dark:text-slate-400">加载角色中...</span>
+              </div>
+            </div>
+
+            <!-- 名言 -->
+            <div v-if="quotes.length > 0" class="vndb-card">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <Quote :size="18" class="text-indigo-500" />
+                  <h3 class="font-bold text-gray-800 dark:text-white">名言</h3>
+                  <span class="text-xs text-gray-400 dark:text-slate-500">({{ quotes.length }})</span>
+                </div>
+                <!-- 翻译中指示器 -->
+                <Loader v-if="isTranslatingQuotes" :size="14" class="animate-spin text-indigo-500" />
+              </div>
+              <div class="space-y-3">
+                <div
+                  v-for="(q, index) in (expandedSections.quotes ? quotes : quotes.slice(0, 5))"
+                  :key="index"
+                  class="relative pl-4 border-l-2 border-indigo-300 dark:border-indigo-600"
+                >
+                  <p class="text-sm text-gray-700 dark:text-gray-300 italic leading-relaxed">
+                    "{{ getQuoteDisplayText(q.quote) }}"
+                  </p>
+                  <p v-if="q.character" class="text-xs text-indigo-500 dark:text-indigo-400 mt-1 font-medium">
+                    — {{ q.character.original || q.character.name }}
+                  </p>
+                </div>
+              </div>
+              <button
+                v-if="quotes.length > 5"
+                class="w-full mt-2 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                @click="toggleSection('quotes')"
+              >
+                {{ expandedSections.quotes ? '收起' : `显示全部 ${quotes.length} 条名言` }}
+              </button>
+            </div>
+            <div v-else-if="isLoadingQuotes" class="vndb-card">
+              <div class="flex items-center gap-2">
+                <Loader :size="18" class="animate-spin text-indigo-500" />
+                <span class="text-sm text-gray-500 dark:text-slate-400">加载名言中...</span>
+              </div>
+            </div>
+
             <!-- 简介 -->
             <div v-if="searchStore.vndbInfo.description" class="vndb-card">
               <div class="flex items-center justify-between mb-3">
@@ -401,44 +507,12 @@
                   <AlignLeft :size="18" class="text-[#ff1493]" />
                   <h3 class="font-bold text-gray-800 dark:text-white">简介</h3>
                 </div>
-                <!-- 翻译按钮 -->
-                <button
-                  v-if="!isTranslating && !translatedDescription"
-                  class="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-[#ff1493] to-[#d946ef] rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-1"
-                  @click="handleTranslate"
-                >
-                  <Languages :size="14" />
-                  <span>AI 翻译</span>
-                </button>
-                <button
-                  v-if="translatedDescription && !isTranslating"
-                  class="px-3 py-1.5 text-xs font-medium text-[#ff1493] dark:text-[#ff69b4] bg-pink-100 dark:bg-pink-900/30 rounded-full hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors flex items-center gap-1"
-                  @click="showOriginal = !showOriginal; playToggle()"
-                >
-                  <ArrowLeftRight :size="14" />
-                  <span>{{ showOriginal ? '显示译文' : '显示原文' }}</span>
-                </button>
+                <!-- 翻译中指示器 -->
+                <Loader v-if="isTranslating" :size="14" class="animate-spin text-[#ff1493]" />
               </div>
 
-              <!-- 翻译中 -->
-              <div v-if="isTranslating" class="flex flex-col items-center justify-center gap-2 text-[#ff1493] py-8">
-                <Loader :size="24" class="animate-spin" />
-                <span>AI 翻译中，请稍候...</span>
-              </div>
-              <!-- 翻译失败 -->
-              <div v-else-if="translateError" class="flex flex-col items-center justify-center gap-2 text-red-500 py-8">
-                <AlertTriangle :size="24" />
-                <span>翻译服务暂时不可用</span>
-                <button
-                  class="mt-2 px-3 py-1 text-xs bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors flex items-center gap-1"
-                  @click="handleTranslate"
-                >
-                  <RotateCcw :size="12" />
-                  <span>重试</span>
-                </button>
-              </div>
               <!-- 显示内容 -->
-              <div v-else class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+              <div class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
                 <template v-if="showOriginal || !translatedDescription">
                   {{ searchStore.vndbInfo.description }}
                 </template>
@@ -484,9 +558,9 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useSearchStore } from '@/stores/search'
+import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
-import { translateText } from '@/api/search'
+import { translateText, fetchVndbCharacters, fetchVndbQuotes } from '@/api/search'
 import { playClick, playSuccess, playError, playToggle, playTransitionUp, playTransitionDown, playSwipe } from '@/composables/useSound'
 import { animate } from '@/composables/useAnime'
 import { useImageViewer } from '@/composables/useImageViewer'
@@ -503,8 +577,6 @@ import {
   Languages,
   ArrowLeftRight,
   Loader,
-  AlertTriangle,
-  RotateCcw,
   Bot,
   Image,
   Maximize2,
@@ -516,6 +588,8 @@ import {
   GitBranch,
   Globe,
   Gamepad2,
+  Users,
+  Quote,
 } from 'lucide-vue-next'
 import { useWindowManager, type ResizeDirection } from '@/composables/useWindowManager'
 import WindowResizeHandles from '@/components/WindowResizeHandles.vue'
@@ -559,6 +633,40 @@ const translatedTags = ref<Map<string, string>>(new Map())
 const showOriginalTags = ref(false)
 const translateTagsError = ref(false)
 
+// 角色和名言
+const characters = ref<VndbCharacter[]>([])
+const quotes = ref<VndbQuote[]>([])
+const isLoadingCharacters = ref(false)
+const isLoadingQuotes = ref(false)
+
+// 名言翻译状态
+const translatedQuotes = ref<Map<string, string>>(new Map())
+const isTranslatingQuotes = ref(false)
+const translateQuotesError = ref(false)
+const showOriginalQuotes = ref(false)
+
+// 一键翻译状态
+const isTranslatingAll = computed(() => 
+  isTranslating.value || isTranslatingTags.value || isTranslatingQuotes.value,
+)
+const hasAnyTranslation = computed(() => 
+  translatedDescription.value || translatedTags.value.size > 0 || translatedQuotes.value.size > 0,
+)
+
+// 展开/收起状态
+const expandedSections = ref({
+  names: false,
+  va: false,
+  relations: false,
+  characters: false,
+  quotes: false,
+})
+
+function toggleSection(section: keyof typeof expandedSections.value) {
+  playClick()
+  expandedSections.value[section] = !expandedSections.value[section]
+}
+
 // 窗口管理
 const modalRef = ref<HTMLElement | null>(null)
 const { isFullscreen, windowStyle, startDrag, startResize, toggleFullscreen, reset } = useWindowManager({
@@ -593,8 +701,8 @@ const vndbUrl = computed(() => {
   return 'https://vndb.org/'
 })
 
-// 监听 vndbInfo 变化，重置翻译状态
-watch(() => searchStore.vndbInfo, () => {
+// 监听 vndbInfo 变化，重置翻译状态并加载角色和名言
+watch(() => searchStore.vndbInfo, async (newInfo) => {
   translatedDescription.value = null
   showOriginal.value = false
   isTranslating.value = false
@@ -604,7 +712,45 @@ watch(() => searchStore.vndbInfo, () => {
   showOriginalTags.value = false
   isTranslatingTags.value = false
   translateTagsError.value = false
+  // 重置名言翻译状态
+  translatedQuotes.value = new Map()
+  showOriginalQuotes.value = false
+  isTranslatingQuotes.value = false
+  translateQuotesError.value = false
+  // 重置角色和名言
+  characters.value = []
+  quotes.value = []
+  // 重置展开状态
+  expandedSections.value = {
+    names: false,
+    va: false,
+    relations: false,
+    characters: false,
+    quotes: false,
+  }
+  
+  // 如果有游戏 ID，加载角色和名言
+  if (newInfo?.id) {
+    loadCharactersAndQuotes(newInfo.id)
+  }
 })
+
+// 加载角色和名言
+async function loadCharactersAndQuotes(vnId: string) {
+  // 并行加载角色和名言
+  isLoadingCharacters.value = true
+  isLoadingQuotes.value = true
+  
+  const [chars, quoteList] = await Promise.all([
+    fetchVndbCharacters(vnId),
+    fetchVndbQuotes(vnId),
+  ])
+  
+  characters.value = chars
+  quotes.value = quoteList
+  isLoadingCharacters.value = false
+  isLoadingQuotes.value = false
+}
 
 // 监听打开状态
 watch(() => uiStore.isVndbPanelOpen, (isOpen) => {
@@ -625,7 +771,7 @@ async function handleTranslate() {
   translateError.value = false
 
   try {
-    const translated = await translateText(searchStore.vndbInfo.description)
+    const translated = await translateText(searchStore.vndbInfo.description, 'description')
     if (translated) {
       translatedDescription.value = translated
       showOriginal.value = false
@@ -658,7 +804,7 @@ async function handleTranslateTags() {
     const tagNames = searchStore.vndbInfo.tags.map(tag => tag.name)
     const textToTranslate = tagNames.join('\n')
     
-    const translated = await translateText(textToTranslate)
+    const translated = await translateText(textToTranslate, 'tags')
     if (translated) {
       // 解析翻译结果，按换行符分割
       const translatedNames = translated.split('\n').map(s => s.trim()).filter(s => s)
@@ -687,10 +833,95 @@ async function handleTranslateTags() {
   }
 }
 
-// 切换显示原始/翻译标签
-function toggleTagsLanguage() {
+// 翻译名言
+async function handleTranslateQuotes() {
+  if (quotes.value.length === 0 || isTranslatingQuotes.value) {
+    return
+  }
+
+  isTranslatingQuotes.value = true
+  translateQuotesError.value = false
+
+  try {
+    // 收集所有名言，用换行符分隔
+    const quoteTexts = quotes.value.map(q => q.quote)
+    const textToTranslate = quoteTexts.join('\n')
+    
+    const translated = await translateText(textToTranslate, 'quotes')
+    if (translated) {
+      // 解析翻译结果，按换行符分割
+      const translatedTexts = translated.split('\n').map(s => s.trim()).filter(s => s)
+      
+      // 创建映射
+      const newMap = new Map<string, string>()
+      quoteTexts.forEach((original, index) => {
+        if (translatedTexts[index]) {
+          newMap.set(original, translatedTexts[index])
+        }
+      })
+      
+      translatedQuotes.value = newMap
+      showOriginalQuotes.value = false
+      translateQuotesError.value = false
+    } else {
+      translateQuotesError.value = true
+    }
+  } catch {
+    translateQuotesError.value = true
+  } finally {
+    isTranslatingQuotes.value = false
+  }
+}
+
+// 获取名言显示文本
+function getQuoteDisplayText(quote: string): string {
+  if (showOriginalQuotes.value || translatedQuotes.value.size === 0) {
+    return quote
+  }
+  return translatedQuotes.value.get(quote) || quote
+}
+
+// 一键翻译全部
+async function handleTranslateAll() {
+  if (isTranslatingAll.value) {
+    return
+  }
+  
+  playClick()
+  
+  // 并行执行所有翻译任务
+  const tasks: Promise<void>[] = []
+  
+  // 翻译简介
+  if (searchStore.vndbInfo?.description && !translatedDescription.value) {
+    tasks.push(handleTranslate())
+  }
+  
+  // 翻译标签
+  if (searchStore.vndbInfo?.tags && searchStore.vndbInfo.tags.length > 0 && translatedTags.value.size === 0) {
+    tasks.push(handleTranslateTags())
+  }
+  
+  // 翻译名言
+  if (quotes.value.length > 0 && translatedQuotes.value.size === 0) {
+    tasks.push(handleTranslateQuotes())
+  }
+  
+  await Promise.all(tasks)
+  
+  // 如果有任何翻译成功，播放成功音效
+  if (translatedDescription.value || translatedTags.value.size > 0 || translatedQuotes.value.size > 0) {
+    playSuccess()
+  }
+}
+
+// 切换所有翻译的显示状态
+function toggleAllTranslations() {
   playToggle()
-  showOriginalTags.value = !showOriginalTags.value
+  const newState = !showOriginal.value
+  showOriginal.value = newState
+  showOriginalTags.value = newState
+  showOriginalQuotes.value = newState
 }
 
 // 获取标签显示名称
@@ -742,6 +973,17 @@ function openGallery(startIndex: number) {
   if (images.length > 0) {
     imageViewer.open(images, startIndex)
   }
+}
+
+// 格式化性别
+function formatSex(sex: string): string {
+  const sexMap: Record<string, string> = {
+    'm': '男性',
+    'f': '女性',
+    'b': '双性',
+    'n': '无性',
+  }
+  return sexMap[sex] || sex
 }
 
 // 格式化日期
