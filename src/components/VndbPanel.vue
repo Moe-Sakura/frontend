@@ -319,39 +319,48 @@
               </div>
             </div>
 
-            <!-- 声优 -->
+            <!-- 角色配音 -->
             <div v-if="searchStore.vndbInfo.va && searchStore.vndbInfo.va.length > 0" class="vndb-card">
               <div class="flex items-center gap-2 mb-3">
                 <Mic :size="18" class="text-cyan-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">声优</h3>
+                <h3 class="font-bold text-gray-800 dark:text-white">角色配音</h3>
                 <span class="text-xs text-gray-400 dark:text-slate-500">({{ searchStore.vndbInfo.va.length }})</span>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 <a
-                  v-for="(voiceActor, index) in (expandedSections.va ? searchStore.vndbInfo.va : searchStore.vndbInfo.va.slice(0, 10))"
+                  v-for="(voiceActor, index) in (expandedSections.va ? searchStore.vndbInfo.va : searchStore.vndbInfo.va.slice(0, 8))"
                   :key="index"
-                  :href="`https://vndb.org/${voiceActor.staff?.id}`"
+                  :href="`https://vndb.org/${voiceActor.character?.id}`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex items-center gap-2 p-2 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-colors group"
+                  class="flex flex-col items-center p-2 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-all hover:scale-105 group"
                 >
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-cyan-700 dark:text-cyan-400 truncate group-hover:underline">
-                      {{ voiceActor.staff?.original || voiceActor.staff?.name }}
-                    </p>
-                    <p v-if="voiceActor.character?.name" class="text-xs text-gray-500 dark:text-slate-400 truncate">
-                      饰 {{ voiceActor.character.original || voiceActor.character.name }}
-                    </p>
+                  <div class="relative w-14 h-18 sm:w-16 sm:h-20 mb-2 rounded-lg overflow-hidden shadow-md">
+                    <img 
+                      v-if="getCharacterImage(voiceActor.character?.id)" 
+                      :src="getCharacterImage(voiceActor.character?.id)!" 
+                      :alt="voiceActor.character?.name"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div v-else class="w-full h-full bg-gradient-to-br from-cyan-200 to-cyan-300 dark:from-cyan-800 dark:to-cyan-900 flex items-center justify-center">
+                      <Users :size="20" class="text-cyan-400 dark:text-cyan-600" />
+                    </div>
                   </div>
-                  <ExternalLink :size="12" class="text-cyan-400 dark:text-cyan-600 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <p class="text-xs font-medium text-cyan-700 dark:text-cyan-400 text-center truncate w-full group-hover:underline">
+                    {{ voiceActor.character?.original || voiceActor.character?.name }}
+                  </p>
+                  <p class="text-[10px] text-gray-500 dark:text-slate-400 text-center truncate w-full">
+                    CV: {{ voiceActor.staff?.original || voiceActor.staff?.name }}
+                  </p>
                 </a>
               </div>
               <button
-                v-if="searchStore.vndbInfo.va.length > 10"
+                v-if="searchStore.vndbInfo.va.length > 8"
                 class="w-full mt-2 py-1.5 text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
                 @click="toggleSection('va')"
               >
-                {{ expandedSections.va ? '收起' : `显示全部 ${searchStore.vndbInfo.va.length} 位声优` }}
+                {{ expandedSections.va ? '收起' : `显示全部 ${searchStore.vndbInfo.va.length} 个角色` }}
               </button>
             </div>
 
@@ -973,6 +982,15 @@ function openGallery(startIndex: number) {
   if (images.length > 0) {
     imageViewer.open(images, startIndex)
   }
+}
+
+// 根据角色ID获取角色图片
+function getCharacterImage(characterId: string | undefined): string | undefined {
+  if (!characterId) {
+    return undefined
+  }
+  const char = characters.value.find(c => c.id === characterId)
+  return char?.image
 }
 
 // 格式化性别
