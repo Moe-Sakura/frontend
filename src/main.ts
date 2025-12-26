@@ -106,11 +106,10 @@ function triggerSwUpdate(registration: ServiceWorkerRegistration) {
   window.location.reload()
 }
 
-// 派发更新事件
-function dispatchUpdateEvent(registration: ServiceWorkerRegistration) {
-  window.dispatchEvent(new CustomEvent('sw-update-available', {
-    detail: { registration },
-  }))
+// 自动应用更新（不显示弹窗）
+function autoApplyUpdate(registration: ServiceWorkerRegistration) {
+  console.log('[SW] Auto-applying update...')
+  triggerSwUpdate(registration)
 }
 
 // 注册 Service Worker (PWA 支持)
@@ -125,8 +124,8 @@ if ('serviceWorker' in navigator) {
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // 有新版本可用
-              dispatchUpdateEvent(registration)
+              // 有新版本可用，自动更新
+              autoApplyUpdate(registration)
             }
           })
         }
@@ -144,7 +143,7 @@ if ('serviceWorker' in navigator) {
           await registration.update()
           const hasNewVersion = await checkForNewVersion(registration)
           if (hasNewVersion) {
-            dispatchUpdateEvent(registration)
+            autoApplyUpdate(registration)
           }
         } catch {
           // 静默处理检查失败

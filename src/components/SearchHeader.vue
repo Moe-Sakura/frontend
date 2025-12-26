@@ -438,7 +438,6 @@
             <img
               :src="friend.logo"
               :alt="friend.name"
-              :data-friend-url="friend.url"
               class="w-10 h-10 rounded-lg object-cover bg-gray-100 dark:bg-slate-700 flex-shrink-0"
               loading="lazy"
               referrerpolicy="no-referrer"
@@ -510,32 +509,9 @@ interface FriendLink {
 }
 const friendLinks = ref<FriendLink[]>(friendsData.friends || [])
 
-// 从 URL 提取域名
-function getDomainFromUrl(url: string): string {
-  try {
-    return new URL(url).hostname
-  } catch {
-    return ''
-  }
-}
-
-// 友链 logo 加载失败时，使用 Google Favicon 服务作为备选
+// 友链 logo 加载失败时显示占位符
 function handleFriendLogoError(e: Event) {
   const img = e.target as HTMLImageElement
-  const friendUrl = img.dataset.friendUrl
-  
-  // 如果还没尝试过 Google Favicon 服务
-  if (friendUrl && !img.dataset.triedFavicon) {
-    img.dataset.triedFavicon = 'true'
-    const domain = getDomainFromUrl(friendUrl)
-    if (domain) {
-      // 使用 Google Favicon 服务（支持 CORS）
-      img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
-      return
-    }
-  }
-  
-  // 最终备选：粉色圆形占位符
   img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff1493"><circle cx="12" cy="12" r="10"/></svg>'
 }
 

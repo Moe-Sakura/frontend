@@ -52,12 +52,6 @@
       <!-- 键盘快捷键帮助 -->
       <KeyboardHelpPanel />
 
-      <!-- SW 更新提示 -->
-      <UpdateToast
-        :is-visible="uiStore.showUpdateToast"
-        :on-update="handleSwUpdate"
-      />
-
       <!-- 图片预览器 -->
       <ImageViewer />
     </main>
@@ -91,7 +85,6 @@ const VndbPanel = defineAsyncComponent(() => import('@/components/VndbPanel.vue'
 const SettingsModal = defineAsyncComponent(() => import('@/components/SettingsModal.vue'))
 const SearchHistoryModal = defineAsyncComponent(() => import('@/components/SearchHistoryModal.vue'))
 const KeyboardHelpPanel = defineAsyncComponent(() => import('@/components/KeyboardHelpPanel.vue'))
-const UpdateToast = defineAsyncComponent(() => import('@/components/UpdateToast.vue'))
 const ImageViewer = defineAsyncComponent(() => import('@/components/ImageViewer.vue'))
 
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
@@ -130,22 +123,6 @@ function handleHistorySelect(item: { query: string; mode: 'game' | 'patch' }) {
   uiStore.isHistoryModalOpen = false
 }
 
-// SW 更新相关
-let swRegistration: globalThis.ServiceWorkerRegistration | null = null
-
-function handleSwUpdate() {
-  if (swRegistration) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const triggerUpdate = (window as any).triggerSwUpdate
-    if (triggerUpdate) {
-      triggerUpdate(swRegistration)
-    } else {
-      window.location.reload()
-    }
-  } else {
-    window.location.reload()
-  }
-}
 const randomImageUrl = ref('')
 // 使用 shallowRef 优化大型数据结构的响应式性能
 const imageCache = shallowRef<string[]>([])
@@ -513,14 +490,6 @@ onMounted(async () => {
   if (settingsStore.settings.customHTML) {
     applyCustomHTML(settingsStore.settings.customHTML)
   }
-
-  // 监听 SW 更新事件
-  window.addEventListener('sw-update-available', (event) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const customEvent = event as any
-    swRegistration = customEvent.detail?.registration || null
-    uiStore.setShowUpdateToast(true)
-  })
   }, { timeout: 2000 })
   
   // === 背景图片初始化：稍后执行 ===
