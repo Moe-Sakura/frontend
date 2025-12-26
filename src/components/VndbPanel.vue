@@ -772,11 +772,13 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
     nextTick(() => {
       // 延迟一帧确保 DOM 已渲染
       requestAnimationFrame(() => {
-        const vndbContent = document.querySelector('.vndb-content')
-        if (vndbContent) {
-          const firstScreenshot = vndbContent.querySelector('img[loading="lazy"]') as HTMLImageElement
-          if (firstScreenshot?.complete && firstScreenshot.naturalHeight > 0) {
+        // 查找截图区域的图片（通过 alt 属性特征定位）
+        const screenshotImgs = document.querySelectorAll('img[alt*="截图"]')
+        for (let i = 0; i < screenshotImgs.length; i++) {
+          const img = screenshotImgs[i] as HTMLImageElement
+          if (img.complete && img.naturalHeight > 0) {
             screenshotsReady.value = true
+            break
           }
         }
       })
