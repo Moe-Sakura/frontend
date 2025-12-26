@@ -68,9 +68,9 @@ const imageStyle = computed(() => {
 })
 
 // 进入动画时播放音效
-function onEnter(_el: Element, done: () => void) {
+// 不声明 done 参数，让 Vue 自动等待 CSS 动画完成
+function onEnter() {
   playTransitionUp()
-  done()
 }
 
 // 监听图片切换
