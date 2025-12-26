@@ -12,13 +12,11 @@
       >
         <!-- 顶部导航栏 -->
         <div
-          v-anime:100="'slideUp'"
           class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none md:rounded-t-3xl"
         >
           <!-- 返回按钮 - 仅移动端 -->
           <button
-            v-tap
-            class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors md:hidden"
+            class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors active:scale-95 md:hidden"
             @click="close"
           >
             <ChevronLeft :size="24" />
@@ -35,8 +33,7 @@
           <div class="flex items-center gap-2">
             <!-- 保存按钮 -->
             <button
-              v-tap
-              class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25"
+              class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-[#ff1493] hover:bg-[#e0117f] active:scale-95 transition-all shadow-lg shadow-pink-500/25"
               @click="save"
             >
               保存
@@ -58,7 +55,6 @@
           <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
             <!-- 主题设置卡片 -->
             <div
-              v-anime:100="'cardIn'"
               class="settings-card"
             >
               <div class="flex items-center gap-3 mb-4">
@@ -113,7 +109,6 @@
 
             <!-- API 设置卡片 -->
             <div
-              v-anime:150="'cardIn'"
               class="settings-card"
             >
               <div class="flex items-center gap-3 mb-4">
@@ -127,11 +122,10 @@
               </div>
 
               <!-- API 选项列表 -->
-              <div v-anime-stagger:50="'slideRight'" class="space-y-2">
+              <div class="space-y-2">
                 <button
                   v-for="option in apiOptions"
                   :key="option.value"
-                  v-tap
                   type="button"
                   :class="[
                     'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
@@ -217,7 +211,6 @@
 
             <!-- 自定义样式卡片 -->
             <div
-              v-anime:200="'cardIn'"
               class="settings-card"
             >
               <div class="flex items-center gap-3 mb-4">
@@ -257,7 +250,6 @@
 
             <!-- 重置区域 -->
             <div
-              v-anime:250="'cardIn'"
               class="settings-card bg-red-50/50 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/30"
             >
               <div class="flex items-center justify-between">
@@ -271,8 +263,7 @@
                   </div>
                 </div>
                 <button
-                  v-tap
-                  class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+                  class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 active:scale-95 transition-all"
                   @click="reset"
                 >
                   重置

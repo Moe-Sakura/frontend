@@ -81,46 +81,33 @@
             <span class="text-red-700 dark:text-red-300 font-medium">{{ platformData.error }}</span>
           </div>
           
-          <!-- 搜索结果列表 - 使用 contain 优化布局性能 + 懒渲染 -->
-          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list space-y-2 contain-layout">
-            <LazyRender
-              v-for="(result, index) in getDisplayedResults(platformData)"
-              :key="result.url || index"
-              :once="true"
-              min-height="72px"
-              root-margin="300px 0px"
-            >
-              <div
-                class="result-item group p-3 sm:p-4 rounded-xl 
-                       bg-white/60 dark:bg-slate-700/60
-                       hover:bg-white/80 dark:hover:bg-slate-700/80
-                       border border-gray-200/40 dark:border-slate-600/40
-                       hover:border-theme-primary/30 dark:hover:border-theme-accent/30"
-              >
-                <!-- 标题行 -->
-                <div class="flex items-start gap-2 sm:gap-3">
-                  <span class="text-theme-primary dark:text-theme-accent text-sm font-bold mt-0.5 shrink-0 opacity-60 group-hover:opacity-100">
-                    {{ index + 1 }}.
-                  </span>
-                  <a
-                    :href="result.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-gray-800 dark:text-slate-200 group-hover:text-theme-primary dark:group-hover:text-theme-accent font-semibold flex-1 text-sm sm:text-base break-words leading-relaxed"
-                  >
-                    {{ result.title }}
-                  </a>
-                </div>
-                
-                <!-- 资源相对路径（从URL中提取） -->
-                <div v-if="result.url" class="flex items-center gap-2 mt-2 ml-6 sm:ml-8">
-                  <LinkIcon :size="12" class="text-theme-primary/50 dark:text-theme-accent/50" />
-                  <span class="text-xs text-gray-500 dark:text-slate-400 break-all font-mono bg-gray-100/80 dark:bg-slate-800/80 px-2 py-1 rounded">
-                    {{ extractPath(result.url) }}
-                  </span>
-                </div>
+          <!-- 搜索结果列表 - 使用虚拟滚动优化大量结果 -->
+          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list contain-layout">
+            <!-- 结果数量少于 15 时使用普通列表 -->
+            <template v-if="getDisplayedResults(platformData).length < 15">
+              <div class="space-y-2">
+                <ResultItem
+                  v-for="(result, index) in getDisplayedResults(platformData)"
+                  :key="result.url || index"
+                  :index="index"
+                  :source="result"
+                />
               </div>
-            </LazyRender>
+            </template>
+            <!-- 结果数量超过 15 时使用虚拟滚动 -->
+            <VirtualList
+              v-else
+              class="virtual-list-container"
+              :data-key="'url'"
+              :data-sources="getDisplayedResults(platformData)"
+              :estimate-size="80"
+              :keeps="20"
+              item-class="mb-2"
+            >
+              <template #default="{ item, index }">
+                <ResultItem :index="index" :source="item" />
+              </template>
+            </VirtualList>
           </div>
           
           <!-- 加载更多按钮 -->
@@ -162,12 +149,13 @@ import { useSearchStore } from '@/stores/search'
 import type { PlatformData } from '@/stores/search'
 import { playTap } from '@/composables/useSound'
 import LazyRender from '@/components/LazyRender.vue'
+import ResultItem from '@/components/ResultItem.vue'
+import VirtualList from 'vue-virtual-scroll-list'
 import {
   ExternalLink,
   AlertTriangle,
   Crown,
   List,
-  Link as LinkIcon,
   ArrowDown,
   CheckCircle,
   Star,
@@ -188,18 +176,6 @@ import {
 } from 'lucide-vue-next'
 
 const searchStore = useSearchStore()
-
-// 从URL中提取路径
-function extractPath(url: string): string {
-  try {
-    const urlObj = new URL(url)
-    // 返回路径部分（去掉域名）
-    return urlObj.pathname + urlObj.search + urlObj.hash
-  } catch {
-    // 如果URL解析失败，返回完整URL
-    return url
-  }
-}
 
 // 获取站点所有结果的唯一标签
 function getUniqueTags(platformData: PlatformData) {
@@ -384,6 +360,12 @@ function getTagLabel(tag: string) {
 /* 结果列表布局隔离 */
 .results-list {
   contain: layout style;
+}
+
+/* 虚拟滚动列表容器 */
+.virtual-list-container {
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 /* Tailwind 动画 - 优化为仅使用 transform 和 opacity */

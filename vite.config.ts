@@ -90,10 +90,6 @@ export default defineConfig({
             if (id.includes('/lucide-vue-next/')) {
               return 'ui-libs';
             }
-            // 动画库
-            if (id.includes('/animejs/')) {
-              return 'anime';
-            }
             // Artalk 评论
             if (id.includes('/artalk/')) {
               return 'artalk';
@@ -125,7 +121,6 @@ export default defineConfig({
       'vue',
       'pinia',
       'lucide-vue-next',
-      'animejs',
     ],
     // 排除不需要预构建的
     exclude: ['artalk'],
