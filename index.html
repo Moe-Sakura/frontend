@@ -9,17 +9,27 @@
     // 立即检测主题，在任何内容渲染前执行
     (function() {
       var d = document.documentElement;
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var isDark = prefersDark; // 默认跟随系统
+      
       try {
         var saved = localStorage.getItem('ui-state');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var isDark = saved ? JSON.parse(saved).isDarkMode : prefersDark;
-        if (isDark) d.classList.add('dark');
-      } catch (e) {
-        // 默认跟随系统
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          d.classList.add('dark');
+        if (saved) {
+          var state = JSON.parse(saved);
+          var themeMode = state.themeMode || 'system';
+          
+          if (themeMode === 'dark') {
+            isDark = true;
+          } else if (themeMode === 'light') {
+            isDark = false;
+          }
+          // themeMode === 'system' 时使用 prefersDark
         }
+      } catch (e) {
+        // 解析失败，使用系统偏好
       }
+      
+      if (isDark) d.classList.add('dark');
     })();
   </script>
   <style>
