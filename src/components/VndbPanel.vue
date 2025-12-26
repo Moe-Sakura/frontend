@@ -113,14 +113,17 @@
               <!-- 封面图 -->
               <div v-if="searchStore.vndbInfo.mainImageUrl" class="mb-4">
                 <button
-                  class="block w-full max-w-sm mx-auto"
+                  class="block w-full max-w-sm mx-auto relative"
                   @click="openGallery(0)"
                 >
+                  <!-- 占位符 -->
+                  <div class="w-full aspect-[2/3] rounded-2xl bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 animate-pulse absolute inset-0" />
                   <img
                     :src="searchStore.vndbInfo.mainImageUrl"
                     :alt="searchStore.vndbInfo.mainName"
-                    class="w-full h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all"
+                    class="relative w-full h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all"
                     loading="lazy"
+                    @load="($event.target as HTMLElement).parentElement?.querySelector('.animate-pulse')?.classList.add('hidden')"
                     @error="handleImageError"
                   />
                 </button>
@@ -326,37 +329,44 @@
                 <h3 class="font-bold text-gray-800 dark:text-white">角色配音</h3>
                 <span class="text-xs text-gray-400 dark:text-slate-500">({{ searchStore.vndbInfo.va.length }})</span>
               </div>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 <a
-                  v-for="(voiceActor, index) in (expandedSections.va ? searchStore.vndbInfo.va : searchStore.vndbInfo.va.slice(0, 8))"
+                  v-for="(voiceActor, index) in (expandedSections.va ? searchStore.vndbInfo.va : searchStore.vndbInfo.va.slice(0, 10))"
                   :key="index"
                   :href="`https://vndb.org/${voiceActor.character?.id}`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex flex-col items-center p-2 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-all hover:scale-105 group"
+                  class="relative rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:scale-105 transition-all group"
                 >
-                  <div class="relative w-14 h-18 sm:w-16 sm:h-20 mb-2 rounded-lg overflow-hidden shadow-md">
+                  <!-- 图片区域 -->
+                  <div class="aspect-[3/4] w-full">
+                    <!-- 占位符 -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-200 to-cyan-300 dark:from-cyan-800 dark:to-cyan-900 animate-pulse" />
                     <img 
                       v-if="getCharacterImage(voiceActor.character?.id)" 
                       :src="getCharacterImage(voiceActor.character?.id)!" 
                       :alt="voiceActor.character?.name"
-                      class="w-full h-full object-cover"
+                      class="absolute inset-0 w-full h-full object-cover"
                       loading="lazy"
+                      @load="($event.target as HTMLElement).parentElement?.querySelector('.animate-pulse')?.classList.add('hidden')"
                     />
-                    <div v-else class="w-full h-full bg-gradient-to-br from-cyan-200 to-cyan-300 dark:from-cyan-800 dark:to-cyan-900 flex items-center justify-center">
-                      <Users :size="20" class="text-cyan-400 dark:text-cyan-600" />
+                    <div v-else class="absolute inset-0 flex items-center justify-center">
+                      <Users :size="24" class="text-cyan-400 dark:text-cyan-600" />
                     </div>
                   </div>
-                  <p class="text-xs font-medium text-cyan-700 dark:text-cyan-400 text-center truncate w-full group-hover:underline">
-                    {{ voiceActor.character?.original || voiceActor.character?.name }}
-                  </p>
-                  <p class="text-[10px] text-gray-500 dark:text-slate-400 text-center truncate w-full">
-                    CV: {{ voiceActor.staff?.original || voiceActor.staff?.name }}
-                  </p>
+                  <!-- 文字覆盖层 -->
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-2 pt-6">
+                    <p class="text-xs font-medium text-white text-center truncate group-hover:underline">
+                      {{ voiceActor.character?.original || voiceActor.character?.name }}
+                    </p>
+                    <p class="text-[10px] text-white/70 text-center truncate">
+                      CV: {{ voiceActor.staff?.original || voiceActor.staff?.name }}
+                    </p>
+                  </div>
                 </a>
               </div>
               <button
-                v-if="searchStore.vndbInfo.va.length > 8"
+                v-if="searchStore.vndbInfo.va.length > 10"
                 class="w-full mt-2 py-1.5 text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
                 @click="toggleSection('va')"
               >
@@ -425,33 +435,40 @@
                 <h3 class="font-bold text-gray-800 dark:text-white">角色</h3>
                 <span class="text-xs text-gray-400 dark:text-slate-500">({{ characters.length }})</span>
               </div>
-              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 <a
                   v-for="(char, index) in (expandedSections.characters ? characters : characters.slice(0, 10))"
                   :key="index"
                   :href="`https://vndb.org/${char.id}`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex flex-col items-center p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-all hover:scale-105 group"
+                  class="relative rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:scale-105 transition-all group"
                 >
-                  <div class="relative w-16 h-20 sm:w-20 sm:h-24 mb-2 rounded-lg overflow-hidden shadow-md">
+                  <!-- 图片区域 -->
+                  <div class="aspect-[3/4] w-full">
+                    <!-- 占位符 -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-rose-200 to-rose-300 dark:from-rose-800 dark:to-rose-900 animate-pulse" />
                     <img 
                       v-if="char.image" 
                       :src="char.image" 
                       :alt="char.name"
-                      class="w-full h-full object-cover"
+                      class="absolute inset-0 w-full h-full object-cover"
                       loading="lazy"
+                      @load="($event.target as HTMLElement).parentElement?.querySelector('.animate-pulse')?.classList.add('hidden')"
                     />
-                    <div v-else class="w-full h-full bg-gradient-to-br from-rose-200 to-rose-300 dark:from-rose-800 dark:to-rose-900 flex items-center justify-center">
+                    <div v-else class="absolute inset-0 flex items-center justify-center">
                       <Users :size="24" class="text-rose-400 dark:text-rose-600" />
                     </div>
                   </div>
-                  <p class="text-xs font-medium text-rose-700 dark:text-rose-400 text-center truncate w-full group-hover:underline">
-                    {{ char.original || char.name }}
-                  </p>
-                  <p v-if="char.sex" class="text-[10px] text-gray-500 dark:text-slate-400 text-center">
-                    {{ formatSex(char.sex) }}{{ char.age ? ` · ${char.age}岁` : '' }}
-                  </p>
+                  <!-- 文字覆盖层 -->
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-2 pt-6">
+                    <p class="text-xs font-medium text-white text-center truncate group-hover:underline">
+                      {{ char.original || char.name }}
+                    </p>
+                    <p v-if="char.sex" class="text-[10px] text-white/70 text-center">
+                      {{ formatSex(char.sex) }}{{ char.age ? ` · ${char.age}岁` : '' }}
+                    </p>
+                  </div>
                 </a>
               </div>
               <button
@@ -545,14 +562,17 @@
                 <button
                   v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
                   :key="index"
-                  class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all bg-gray-100 dark:bg-slate-700"
+                  class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all"
                   @click="openGallery(index + 1)"
                 >
+                  <!-- 占位符 -->
+                  <div class="aspect-video w-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 animate-pulse" />
                   <img
                     :src="screenshot"
                     :alt="`${searchStore.vndbInfo.mainName} 截图 ${index + 1}`"
-                    class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
+                    class="absolute inset-0 w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
+                    @load="($event.target as HTMLElement).parentElement?.querySelector('.animate-pulse')?.classList.add('hidden')"
                     @error="handleImageError"
                   />
                 </button>
