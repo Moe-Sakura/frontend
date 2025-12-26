@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Link as LinkIcon } from 'lucide-vue-next'
+import { Link as LinkIcon, ExternalLink, FileText, Copy, Check } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { playTap, playNotification } from '@/composables/useSound'
 
 defineProps<{
   index: number
@@ -9,6 +11,8 @@ defineProps<{
   }
 }>()
 
+const copied = ref(false)
+
 // 从URL中提取路径
 function extractPath(url: string): string {
   try {
@@ -16,6 +20,21 @@ function extractPath(url: string): string {
     return urlObj.pathname + urlObj.search + urlObj.hash
   } catch {
     return url
+  }
+}
+
+// 复制链接
+async function copyLink(url: string) {
+  playTap()
+  try {
+    await navigator.clipboard.writeText(url)
+    playNotification()
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  } catch {
+    // 静默处理
   }
 }
 </script>
@@ -30,22 +49,42 @@ function extractPath(url: string): string {
   >
     <!-- 标题行 -->
     <div class="flex items-start gap-2 sm:gap-3">
-      <span class="text-theme-primary dark:text-theme-accent text-sm font-bold mt-0.5 shrink-0 opacity-60 group-hover:opacity-100">
-        {{ index + 1 }}.
-      </span>
+      <!-- 序号 + 文件图标 -->
+      <div class="flex items-center gap-1.5 shrink-0 mt-0.5">
+        <FileText :size="14" class="text-theme-primary/60 dark:text-theme-accent/60 group-hover:text-theme-primary dark:group-hover:text-theme-accent transition-colors" />
+        <span class="text-theme-primary dark:text-theme-accent text-sm font-bold opacity-60 group-hover:opacity-100 transition-opacity">
+          {{ index + 1 }}
+        </span>
+      </div>
+      
+      <!-- 标题链接 -->
       <a
         :href="source.url"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-gray-800 dark:text-slate-200 group-hover:text-theme-primary dark:group-hover:text-theme-accent font-semibold flex-1 text-sm sm:text-base break-words leading-relaxed"
+        class="flex-1 flex items-start gap-1.5 text-gray-800 dark:text-slate-200 group-hover:text-theme-primary dark:group-hover:text-theme-accent font-semibold text-sm sm:text-base break-words leading-relaxed transition-colors"
       >
-        {{ source.title }}
+        <span class="flex-1">{{ source.title }}</span>
+        <ExternalLink :size="14" class="shrink-0 mt-1 opacity-0 group-hover:opacity-70 transition-opacity" />
       </a>
+      
+      <!-- 复制按钮 -->
+      <button
+        class="shrink-0 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 
+               text-gray-400 hover:text-theme-primary dark:hover:text-theme-accent
+               hover:bg-theme-primary/10 dark:hover:bg-theme-accent/10
+               transition-all"
+        :class="{ '!opacity-100 !text-green-500': copied }"
+        :title="copied ? '已复制' : '复制链接'"
+        @click.stop="copyLink(source.url)"
+      >
+        <component :is="copied ? Check : Copy" :size="14" />
+      </button>
     </div>
     
     <!-- 资源相对路径（从URL中提取） -->
-    <div v-if="source.url" class="flex items-center gap-2 mt-2 ml-6 sm:ml-8">
-      <LinkIcon :size="12" class="text-theme-primary/50 dark:text-theme-accent/50" />
+    <div v-if="source.url" class="flex items-center gap-2 mt-2 ml-7 sm:ml-9">
+      <LinkIcon :size="12" class="text-theme-primary/50 dark:text-theme-accent/50 shrink-0" />
       <span class="text-xs text-gray-500 dark:text-slate-400 break-all font-mono bg-gray-100/80 dark:bg-slate-800/80 px-2 py-1 rounded">
         {{ extractPath(source.url) }}
       </span>

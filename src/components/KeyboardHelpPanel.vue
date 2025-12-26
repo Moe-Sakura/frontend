@@ -42,34 +42,58 @@
           <div class="px-5 py-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
             <!-- 导航 -->
             <div class="mb-4">
-              <h3 class="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">导航</h3>
+              <h3 class="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Navigation :size="12" />
+                导航
+              </h3>
               <div class="space-y-2">
                 <div class="shortcut-row">
-                  <span>关闭当前面板</span>
+                  <span class="flex items-center gap-2">
+                    <X :size="14" class="text-gray-400" />
+                    关闭当前面板
+                  </span>
                   <kbd>Esc</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>返回首页</span>
+                  <span class="flex items-center gap-2">
+                    <Home :size="14" class="text-blue-400" />
+                    返回首页
+                  </span>
                   <kbd>H</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>打开/关闭设置</span>
+                  <span class="flex items-center gap-2">
+                    <Settings :size="14" class="text-gray-400" />
+                    打开/关闭设置
+                  </span>
                   <kbd>,</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>打开/关闭评论</span>
+                  <span class="flex items-center gap-2">
+                    <MessageSquare :size="14" class="text-pink-400" />
+                    打开/关闭评论
+                  </span>
                   <kbd>C</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>打开/关闭作品介绍</span>
+                  <span class="flex items-center gap-2">
+                    <BookOpen :size="14" class="text-purple-400" />
+                    打开/关闭作品介绍
+                  </span>
                   <kbd>V</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>打开/关闭搜索历史</span>
+                  <span class="flex items-center gap-2">
+                    <History :size="14" class="text-amber-400" />
+                    打开/关闭搜索历史
+                  </span>
                   <kbd>Y</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>站点导航</span>
+                  <span class="flex items-center gap-2">
+                    <Grid3x3 :size="14" class="text-cyan-400" />
+                    站点导航
+                  </span>
                   <kbd>N</kbd>
                 </div>
               </div>
@@ -77,14 +101,23 @@
 
             <!-- 操作 -->
             <div class="mb-4">
-              <h3 class="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">操作</h3>
+              <h3 class="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Zap :size="12" />
+                操作
+              </h3>
               <div class="space-y-2">
                 <div class="shortcut-row">
-                  <span>聚焦搜索框</span>
+                  <span class="flex items-center gap-2">
+                    <Search :size="14" class="text-green-400" />
+                    聚焦搜索框
+                  </span>
                   <kbd>/</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>显示/隐藏快捷键帮助</span>
+                  <span class="flex items-center gap-2">
+                    <HelpCircle :size="14" class="text-indigo-400" />
+                    显示/隐藏快捷键帮助
+                  </span>
                   <kbd>?</kbd>
                 </div>
               </div>
@@ -92,18 +125,30 @@
 
             <!-- 滚动 -->
             <div>
-              <h3 class="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">滚动</h3>
+              <h3 class="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Command :size="12" />
+                滚动
+              </h3>
               <div class="space-y-2">
                 <div class="shortcut-row">
-                  <span>回到顶部</span>
+                  <span class="flex items-center gap-2">
+                    <ArrowUp :size="14" class="text-rose-400" />
+                    回到顶部
+                  </span>
                   <kbd>T</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>上一个平台</span>
+                  <span class="flex items-center gap-2">
+                    <ChevronLeft :size="14" class="text-orange-400" />
+                    上一个平台
+                  </span>
                   <kbd>[</kbd>
                 </div>
                 <div class="shortcut-row">
-                  <span>下一个平台</span>
+                  <span class="flex items-center gap-2">
+                    <ChevronRight :size="14" class="text-orange-400" />
+                    下一个平台
+                  </span>
                   <kbd>]</kbd>
                 </div>
               </div>
@@ -119,7 +164,12 @@
 import { ref } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { playTransitionDown } from '@/composables/useSound'
-import { Keyboard, X } from 'lucide-vue-next'
+import { 
+  Keyboard, X, 
+  Home, Settings, MessageSquare, BookOpen, History, Grid3x3, Search, HelpCircle,
+  ArrowUp, ChevronLeft, ChevronRight,
+  Navigation, Command, Zap
+} from 'lucide-vue-next'
 
 const uiStore = useUIStore()
 const panelRef = ref<HTMLElement | null>(null)

@@ -3,7 +3,7 @@
   <div class="fixed top-4 left-4 z-40 flex items-center gap-2">
     <!-- Gamepad 图标 - 品牌标识 -->
     <div class="glassmorphism-card rounded-2xl shadow-lg p-2.5 flex items-center justify-center">
-      <GamepadDirectional 
+      <Gamepad2 
         :size="22" 
         class="text-theme-primary dark:text-theme-accent"
       />
@@ -23,6 +23,19 @@
             : 'text-red-600 dark:text-red-400'
       ]"
     >
+      <!-- 状态图标 -->
+      <component
+        :is="statusOnline === null ? Activity : statusOnline ? Wifi : WifiOff"
+        :size="14"
+        :class="[
+          statusOnline === null ? 'animate-pulse' : '',
+          statusOnline === null 
+            ? 'text-gray-400' 
+            : statusOnline
+              ? 'text-green-500'
+              : 'text-red-500'
+        ]"
+      />
       <span 
         class="w-2 h-2 rounded-full"
         :class="[
@@ -45,15 +58,17 @@
   >
     <div class="stats-card glassmorphism-card rounded-2xl shadow-lg px-4 py-3 flex flex-col gap-2">
       <!-- 访问量 -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2" title="总访问量">
         <Eye :size="16" class="text-theme-primary dark:text-theme-accent" />
+        <span class="text-xs text-gray-500 dark:text-slate-400">PV</span>
         <span id="busuanzi_value_site_pv" class="font-semibold text-gray-800 dark:text-slate-100">0</span>
       </div>
       <!-- 分隔线 -->
-      <div class="h-px bg-gray-300 dark:bg-slate-600" />
+      <div class="h-px bg-gray-300/50 dark:bg-slate-600/50" />
       <!-- 访客数 -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2" title="独立访客">
         <Users :size="16" class="text-theme-primary dark:text-theme-accent" />
+        <span class="text-xs text-gray-500 dark:text-slate-400">UV</span>
         <span id="busuanzi_value_site_uv" class="font-semibold text-gray-800 dark:text-slate-100">0</span>
       </div>
     </div>
@@ -62,7 +77,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { GamepadDirectional, Eye, Users } from 'lucide-vue-next'
+import { Gamepad2, Eye, Users, Activity, Wifi, WifiOff } from 'lucide-vue-next'
 
 const statusOnline = ref<boolean | null>(null)
 const showStats = ref(false)
