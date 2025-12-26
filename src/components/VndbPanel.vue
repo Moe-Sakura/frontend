@@ -275,8 +275,8 @@
                   v-for="(tag, index) in searchStore.vndbInfo.tags"
                   :key="index"
                   class="px-2.5 py-1 text-xs font-medium rounded-lg transition-colors cursor-default"
-                  :class="getTagCategoryClass(tag.category)"
-                  :title="`${tag.name}${translatedTags.get(tag.name) ? ' → ' + translatedTags.get(tag.name) : ''} | 相关性: ${Math.round(tag.rating * 10) / 10} | 分类: ${formatTagCategory(tag.category)}`"
+                  :class="getTagCategoryClass(tag.category || '')"
+                  :title="`${tag.name}${translatedTags.get(tag.name) ? ' → ' + translatedTags.get(tag.name) : ''} | 相关性: ${Math.round((tag.rating || 0) * 10) / 10} | 分类: ${formatTagCategory(tag.category || '')}`"
                 >
                   {{ getTagDisplayName(tag) }}
                 </span>
@@ -477,6 +477,42 @@
               </div>
             </div>
 
+            <!-- PV 鉴赏 -->
+            <div v-if="pvVideoUrl" class="vndb-card">
+              <div class="flex items-center gap-2 mb-4">
+                <Play :size="18" class="text-rose-500" />
+                <h3 class="font-bold text-gray-800 dark:text-white">PV 鉴赏</h3>
+              </div>
+              <div class="relative rounded-xl overflow-hidden bg-black">
+                <video
+                  ref="pvVideoRef"
+                  :src="pvVideoUrl"
+                  controls
+                  playsinline
+                  preload="auto"
+                  class="w-full h-auto max-h-[400px] object-contain"
+                  @loadeddata="handleVideoLoaded"
+                >
+                  您的浏览器不支持视频播放
+                </video>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-slate-400 mt-2 text-center">
+                视频来源：TouchGal
+              </p>
+            </div>
+
+            <!-- PV 加载中 -->
+            <div v-else-if="isPvLoading" class="vndb-card">
+              <div class="flex items-center gap-2 mb-4">
+                <Play :size="18" class="text-rose-500" />
+                <h3 class="font-bold text-gray-800 dark:text-white">PV 鉴赏</h3>
+              </div>
+              <div class="flex items-center justify-center py-8 text-gray-400">
+                <Loader :size="20" class="animate-spin mr-2" />
+                <span class="text-sm">正在获取视频...</span>
+              </div>
+            </div>
+
             <!-- 游戏截图 (等待首张图片加载后显示) -->
             <div 
               v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0" 
@@ -515,7 +551,7 @@
 import { ref, watch, computed, nextTick } from 'vue'
 import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
-import { translateText, fetchVndbCharacters, fetchVndbQuotes } from '@/api/search'
+import { translateAllContent, fetchVndbCharacters, fetchVndbQuotes, fetchGameVideoUrl } from '@/api/search'
 import { playClick, playSuccess, playError, playToggle, playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import { useImageViewer } from '@/composables/useImageViewer'
 import {
@@ -541,6 +577,7 @@ import {
   Gamepad2,
   Users,
   Quote,
+  Play,
 } from 'lucide-vue-next'
 
 // 图片预览
@@ -572,8 +609,9 @@ const translateQuotesError = ref(false)
 const showOriginalQuotes = ref(false)
 
 // 一键翻译状态
+const isTranslatingAllRef = ref(false)
 const isTranslatingAll = computed(() => 
-  isTranslating.value || isTranslatingTags.value || isTranslatingQuotes.value,
+  isTranslatingAllRef.value || isTranslating.value || isTranslatingTags.value || isTranslatingQuotes.value,
 )
 const hasAnyTranslation = computed(() => 
   translatedDescription.value || translatedTags.value.size > 0 || translatedQuotes.value.size > 0,
@@ -581,6 +619,19 @@ const hasAnyTranslation = computed(() =>
 
 // 截图加载状态
 const screenshotsReady = ref(false)
+
+// PV 视频状态
+const pvVideoUrl = ref<string | null>(null)
+const isPvLoading = ref(false)
+const pvVideoRef = ref<HTMLVideoElement | null>(null)
+
+// 视频加载完成后暂停在第一帧
+function handleVideoLoaded() {
+  if (pvVideoRef.value) {
+    pvVideoRef.value.currentTime = 0
+    pvVideoRef.value.pause()
+  }
+}
 
 // 当前游戏 ID（用于防止切换游戏时数据错乱）
 const currentVnId = ref<string | null>(null)
@@ -626,11 +677,16 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   showOriginalQuotes.value = false
   isTranslatingQuotes.value = false
   translateQuotesError.value = false
+  // 重置一键翻译状态
+  isTranslatingAllRef.value = false
   // 重置截图加载状态
   screenshotsReady.value = false
   // 重置角色和名言
   characters.value = []
   quotes.value = []
+  // 重置 PV 视频状态
+  pvVideoUrl.value = null
+  isPvLoading.value = false
   // 重置展开状态
   expandedSections.value = {
     names: false,
@@ -680,21 +736,25 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   }
 }, { immediate: true })
 
-// 加载角色和名言
+// 加载角色、名言和 PV 视频
 async function loadCharactersAndQuotes(vnId: string) {
-  // 并行加载角色和名言
+  // 并行加载角色、名言和 PV 视频
   isLoadingCharacters.value = true
   isLoadingQuotes.value = true
+  isPvLoading.value = true
   
-  const [chars, quoteList] = await Promise.all([
+  const [chars, quoteList, videoUrl] = await Promise.all([
     fetchVndbCharacters(vnId),
     fetchVndbQuotes(vnId),
+    fetchGameVideoUrl(vnId),
   ])
   
   characters.value = chars
   quotes.value = quoteList
+  pvVideoUrl.value = videoUrl
   isLoadingCharacters.value = false
   isLoadingQuotes.value = false
+  isPvLoading.value = false
 }
 
 // 监听打开状态
@@ -704,123 +764,6 @@ watch(() => uiStore.isVndbPanelOpen, (isOpen) => {
   }
 })
 
-// 内部翻译函数（带游戏 ID 校验和静默模式）
-async function translateDescriptionInternal(vnIdAtStart: string | null, silent: boolean) {
-  if (!searchStore.vndbInfo?.description || isTranslating.value) {
-    return
-  }
-
-  isTranslating.value = true
-  translateError.value = false
-
-  try {
-    const translated = await translateText(searchStore.vndbInfo.description, 'description')
-    // 检查是否仍是同一个游戏
-    if (currentVnId.value !== vnIdAtStart) {
-      return
-    }
-    if (translated) {
-      translatedDescription.value = translated
-      showOriginal.value = false
-      translateError.value = false
-    } else {
-      translateError.value = true
-      if (!silent) { playError() }
-    }
-  } catch {
-    if (currentVnId.value === vnIdAtStart) {
-      translateError.value = true
-      if (!silent) { playError() }
-    }
-  } finally {
-    isTranslating.value = false
-  }
-}
-
-async function translateTagsInternal(vnIdAtStart: string | null, silent: boolean) {
-  if (!searchStore.vndbInfo?.tags || searchStore.vndbInfo.tags.length === 0 || isTranslatingTags.value) {
-    return
-  }
-
-  isTranslatingTags.value = true
-  translateTagsError.value = false
-
-  try {
-    const tagNames = searchStore.vndbInfo.tags.map(tag => tag.name)
-    const textToTranslate = tagNames.join('\n')
-    
-    const translated = await translateText(textToTranslate, 'tags')
-    // 检查是否仍是同一个游戏
-    if (currentVnId.value !== vnIdAtStart) {
-      return
-    }
-    if (translated) {
-      const translatedNames = translated.split('\n').map(s => s.trim()).filter(s => s)
-      const newMap = new Map<string, string>()
-      tagNames.forEach((original, index) => {
-        if (translatedNames[index]) {
-          newMap.set(original, translatedNames[index])
-        }
-      })
-      translatedTags.value = newMap
-      showOriginalTags.value = false
-      translateTagsError.value = false
-    } else {
-      translateTagsError.value = true
-      if (!silent) { playError() }
-    }
-  } catch {
-    if (currentVnId.value === vnIdAtStart) {
-      translateTagsError.value = true
-      if (!silent) { playError() }
-    }
-  } finally {
-    isTranslatingTags.value = false
-  }
-}
-
-async function translateQuotesInternal(vnIdAtStart: string | null, silent: boolean) {
-  if (quotes.value.length === 0 || isTranslatingQuotes.value) {
-    return
-  }
-
-  isTranslatingQuotes.value = true
-  translateQuotesError.value = false
-
-  try {
-    const quoteTexts = quotes.value.map(q => q.quote)
-    const textToTranslate = quoteTexts.join('\n')
-    
-    const translated = await translateText(textToTranslate, 'quotes')
-    // 检查是否仍是同一个游戏
-    if (currentVnId.value !== vnIdAtStart) {
-      return
-    }
-    if (translated) {
-      const translatedTexts = translated.split('\n').map(s => s.trim()).filter(s => s)
-      const newMap = new Map<string, string>()
-      quoteTexts.forEach((original, index) => {
-        if (translatedTexts[index]) {
-          newMap.set(original, translatedTexts[index])
-        }
-      })
-      translatedQuotes.value = newMap
-      showOriginalQuotes.value = false
-      translateQuotesError.value = false
-    } else {
-      translateQuotesError.value = true
-      if (!silent) { playError() }
-    }
-  } catch {
-    if (currentVnId.value === vnIdAtStart) {
-      translateQuotesError.value = true
-      if (!silent) { playError() }
-    }
-  } finally {
-    isTranslatingQuotes.value = false
-  }
-}
-
 // 获取名言显示文本
 function getQuoteDisplayText(quote: string): string {
   if (showOriginalQuotes.value || translatedQuotes.value.size === 0) {
@@ -829,7 +772,7 @@ function getQuoteDisplayText(quote: string): string {
   return translatedQuotes.value.get(quote) || quote
 }
 
-// 一键翻译全部（内部实现）
+// 一键翻译全部（内部实现）- 合并为单次 API 请求
 async function translateAllInternal(silent = false) {
   if (isTranslatingAll.value) {
     return
@@ -839,39 +782,86 @@ async function translateAllInternal(silent = false) {
     playClick()
   }
   
+  isTranslatingAllRef.value = true
   const vnIdAtStart = currentVnId.value
   
-  // 在调用前捕获当前数据状态，避免翻译期间数据被重置
-  const hasDescription = !!searchStore.vndbInfo?.description && !translatedDescription.value
-  const hasTags = !!searchStore.vndbInfo?.tags && searchStore.vndbInfo.tags.length > 0 && translatedTags.value.size === 0
-  const hasQuotes = quotes.value.length > 0 && translatedQuotes.value.size === 0
-  
-  // 并行执行所有翻译任务
-  const tasks: Promise<void>[] = []
-  
-  // 翻译简介
-  if (hasDescription) {
-    tasks.push(translateDescriptionInternal(vnIdAtStart, silent))
-  }
-  
-  // 翻译标签
-  if (hasTags) {
-    tasks.push(translateTagsInternal(vnIdAtStart, silent))
-  }
-  
-  // 翻译名言
-  if (hasQuotes) {
-    tasks.push(translateQuotesInternal(vnIdAtStart, silent))
-  }
-  
-  // 使用 allSettled 确保所有任务完成，即使某些失败
-  await Promise.allSettled(tasks)
-  
-  // 如果有任何翻译成功且是当前游戏，播放成功音效
-  if (!silent && currentVnId.value === vnIdAtStart) {
-    if (translatedDescription.value || translatedTags.value.size > 0 || translatedQuotes.value.size > 0) {
-      playSuccess()
+  try {
+    // 收集需要翻译的内容
+    const descText = (!translatedDescription.value && searchStore.vndbInfo?.description) 
+      ? searchStore.vndbInfo.description 
+      : null
+    
+    const tagNames = (translatedTags.value.size === 0 && searchStore.vndbInfo?.tags?.length) 
+      ? searchStore.vndbInfo.tags.map(t => t.name)
+      : null
+    
+    const quoteTexts = (translatedQuotes.value.size === 0 && quotes.value.length > 0)
+      ? quotes.value.map(q => q.quote)
+      : null
+    
+    // 如果没有任何需要翻译的内容
+    if (!descText && !tagNames && !quoteTexts) {
+      return
     }
+    
+    // 单次 API 请求翻译所有内容
+    const result = await translateAllContent(descText, tagNames, quoteTexts)
+    
+    // 检查是否仍是同一个游戏
+    if (currentVnId.value !== vnIdAtStart) {
+      return
+    }
+    
+    // 应用翻译结果
+    let hasSuccess = false
+    
+    if (result.description && descText) {
+      translatedDescription.value = result.description
+      showOriginal.value = false
+      hasSuccess = true
+    }
+    
+    if (result.tags && tagNames) {
+      const newMap = new Map<string, string>()
+      tagNames.forEach((original, index) => {
+        if (result.tags![index]) {
+          newMap.set(original, result.tags![index])
+        }
+      })
+      if (newMap.size > 0) {
+        translatedTags.value = newMap
+        showOriginalTags.value = false
+        hasSuccess = true
+      }
+    }
+    
+    if (result.quotes && quoteTexts) {
+      const newMap = new Map<string, string>()
+      quoteTexts.forEach((original, index) => {
+        if (result.quotes![index]) {
+          newMap.set(original, result.quotes![index])
+        }
+      })
+      if (newMap.size > 0) {
+        translatedQuotes.value = newMap
+        showOriginalQuotes.value = false
+        hasSuccess = true
+      }
+    }
+    
+    if (!silent && hasSuccess) {
+      playSuccess()
+    } else if (!silent && !hasSuccess) {
+      translateError.value = true
+      playError()
+    }
+  } catch {
+    if (!silent) {
+      translateError.value = true
+      playError()
+    }
+  } finally {
+    isTranslatingAllRef.value = false
   }
 }
 

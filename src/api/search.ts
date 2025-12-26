@@ -47,6 +47,55 @@ export function getVndbImageProxyUrl(): string {
   }
 }
 
+// TouchGal 视频解析 API
+export function getVideoParseApiUrl(): string {
+  try {
+    const settingsStore = useSettingsStore()
+    return settingsStore.settings.videoParseApiUrl || DEFAULT_API_CONFIG.videoParseApiUrl
+  } catch {
+    return DEFAULT_API_CONFIG.videoParseApiUrl
+  }
+}
+
+export interface VideoParseResult {
+  success: boolean
+  game_result: number
+  video_url: string
+  error: string
+}
+
+/**
+ * 获取游戏 PV 视频 URL
+ * @param vndbId VNDB ID (如 "v12345")
+ */
+export async function fetchGameVideoUrl(vndbId: string): Promise<string | null> {
+  if (!vndbId) return null
+
+  try {
+    const response = await fetch(getVideoParseApiUrl(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ vndb_id: vndbId }),
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data: VideoParseResult = await response.json()
+    
+    if (data.success && data.video_url) {
+      return data.video_url
+    }
+    
+    return null
+  } catch {
+    return null
+  }
+}
+
 export const ENABLE_VNDB_IMAGE_PROXY = true
 
 let isProxyAvailable = false
@@ -619,7 +668,7 @@ export async function fetchVndbCharacters(vnId: string): Promise<VndbCharacter[]
     if (ENABLE_VNDB_IMAGE_PROXY && isProxyAvailable) {
       characters.forEach((char) => {
         if (char.image && char.image.startsWith('https://t.vndb.org/')) {
-          char.image = getVndbImageProxyUrl() + char.image
+          char.image = proxyUrl(char.image)
         }
       })
     }
@@ -727,6 +776,30 @@ const QUOTES_PROMPT = `你是一名专业的视觉小说（Galgame/AVG）本地�
 每行输出一条翻译结果，与输入行数严格一一对应
 仅输出译文，无需编号、原文或解释`
 
+// 合并翻译提示词
+const COMBINED_PROMPT = `你是一名专业的视觉小说（Galgame/AVG）本地化专家。请将以下内容翻译为简体中文。
+
+输入格式使用 ===SECTION=== 分隔三个部分：
+1. 游戏简介
+2. 游戏标签（每行一个）
+3. 经典台词（每行一条）
+
+【翻译规范】
+- 简介：清除HTML标记，保持段落结构，使用通用中文术语
+- 标签：使用二次元圈常用说法，保持简洁
+- 台词：保留情感色彩和语气，注意口语化
+
+【输出格式】
+严格按以下格式输出，使用相同的分隔符：
+===SECTION===
+翻译后的简介
+===SECTION===
+翻译后的标签（每行一个，与输入行数对应）
+===SECTION===
+翻译后的台词（每行一条，与输入行数对应）
+
+仅输出翻译结果，无需任何说明`
+
 /**
  * AI 翻译文本
  * @param text - 要翻译的文本
@@ -743,11 +816,11 @@ export async function translateText(
     return null
   }
 
-  // 根据模式选择提示词和参数
+  // 根据模式选择提示词和参数（针对 Qwen2.5 优化）
   const modeConfig = {
-    description: { prompt: DESCRIPTION_PROMPT, maxLength: 3000, maxTokens: 2000, temperature: 0.3 },
-    tags: { prompt: TAGS_PROMPT, maxLength: 1500, maxTokens: 1000, temperature: 0.2 },
-    quotes: { prompt: QUOTES_PROMPT, maxLength: 2000, maxTokens: 1500, temperature: 0.4 },
+    description: { prompt: DESCRIPTION_PROMPT, maxLength: 3000, maxTokens: 2000, temperature: 0.1 },
+    tags: { prompt: TAGS_PROMPT, maxLength: 1500, maxTokens: 1000, temperature: 0.05 },
+    quotes: { prompt: QUOTES_PROMPT, maxLength: 2000, maxTokens: 1500, temperature: 0.2 },
   }
   
   const config = modeConfig[mode]
@@ -780,6 +853,9 @@ export async function translateText(
           ],
           temperature,
           max_tokens: maxTokens,
+          top_p: 0.9,
+          top_k: 50,
+          repetition_penalty: 1.05,
           stream: false,
         }),
       })
@@ -823,10 +899,121 @@ export async function translateText(
   return null
 }
 
+/**
+ * 合并翻译：一次 API 请求翻译描述、标签和名言
+ */
+export interface TranslateAllResult {
+  description: string | null
+  tags: string[] | null
+  quotes: string[] | null
+}
+
+export async function translateAllContent(
+  description: string | null,
+  tags: string[] | null,
+  quotes: string[] | null,
+  maxRetries: number = 2,
+): Promise<TranslateAllResult> {
+  const result: TranslateAllResult = {
+    description: null,
+    tags: null,
+    quotes: null,
+  }
+
+  // 构建输入文本
+  const descText = description?.trim() || ''
+  const tagsText = tags?.join('\n') || ''
+  const quotesText = quotes?.join('\n') || ''
+
+  // 如果没有任何内容需要翻译
+  if (!descText && !tagsText && !quotesText) {
+    return result
+  }
+
+  const inputText = [descText, tagsText, quotesText].join('\n===SECTION===\n')
+
+  // 限制总长度
+  const maxLength = 6000
+  const textToTranslate = inputText.length > maxLength 
+    ? inputText.substring(0, maxLength) + '...' 
+    : inputText
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(getAiTranslateApiUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAiTranslateApiKey()}`,
+        },
+        body: JSON.stringify({
+          model: getAiTranslateModel(),
+          messages: [
+            { role: 'system', content: COMBINED_PROMPT },
+            { role: 'user', content: textToTranslate },
+          ],
+          temperature: 0.15,      // 低温度保证翻译准确性
+          max_tokens: 4000,
+          top_p: 0.9,             // 核采样，平衡多样性和准确性
+          top_k: 50,              // 限制候选词范围
+          repetition_penalty: 1.05, // 轻微惩罚重复
+          stream: false,
+        }),
+      })
+
+      if (!response.ok) {
+        if (attempt === maxRetries) return result
+        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)))
+        continue
+      }
+
+      const data = await response.json()
+      const content = data.choices?.[0]?.message?.content?.trim()
+
+      if (content) {
+        // 解析返回结果 - 保留空字符串以维持索引对应关系
+        const parts = content.split(/===SECTION===/).map((s: string) => s.trim())
+        
+        // 索引 0 = 描述, 索引 1 = 标签, 索引 2 = 名言
+        if (parts[0] && descText) {
+          result.description = parts[0]
+        }
+        if (parts[1] && tagsText) {
+          const parsedTags = parts[1].split('\n').map((s: string) => s.trim()).filter((s: string) => s)
+          result.tags = parsedTags.length > 0 ? parsedTags : null
+        }
+        if (parts[2] && quotesText) {
+          const parsedQuotes = parts[2].split('\n').map((s: string) => s.trim()).filter((s: string) => s)
+          result.quotes = parsedQuotes.length > 0 ? parsedQuotes : null
+        }
+        
+        return result
+      }
+
+      if (attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)))
+        continue
+      }
+
+      return result
+    } catch {
+      if (attempt === maxRetries) return result
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)))
+    }
+  }
+
+  return result
+}
+
 async function checkProxyAvailability() {
   // 始终启用代理，不进行可用性检查
   // 因为代理服务器可能不支持 HEAD 请求
   isProxyAvailable = true
+}
+
+// 生成代理 URL
+function proxyUrl(url: string): string {
+  return getVndbImageProxyUrl() + url
 }
 
 function replaceVndbUrls(vndbInfo: VndbInfo) {
@@ -834,21 +1021,21 @@ function replaceVndbUrls(vndbInfo: VndbInfo) {
     return
   }
 
-  // 替换封面图片 URL - 代理需要完整的原始 URL
+  // 替换封面图片 URL
   if (vndbInfo.mainImageUrl && vndbInfo.mainImageUrl.startsWith('https://t.vndb.org/')) {
-    vndbInfo.mainImageUrl = getVndbImageProxyUrl() + vndbInfo.mainImageUrl
+    vndbInfo.mainImageUrl = proxyUrl(vndbInfo.mainImageUrl)
   }
 
-  // 替换主截图 URL - 代理需要完整的原始 URL
+  // 替换主截图 URL
   if (vndbInfo.screenshotUrl && vndbInfo.screenshotUrl.startsWith('https://t.vndb.org/')) {
-    vndbInfo.screenshotUrl = getVndbImageProxyUrl() + vndbInfo.screenshotUrl
+    vndbInfo.screenshotUrl = proxyUrl(vndbInfo.screenshotUrl)
   }
 
   // 替换所有截图 URL
   if (vndbInfo.screenshots && vndbInfo.screenshots.length > 0) {
     vndbInfo.screenshots = vndbInfo.screenshots.map((url) => {
       if (url.startsWith('https://t.vndb.org/')) {
-        return getVndbImageProxyUrl() + url
+        return proxyUrl(url)
       }
       return url
     })

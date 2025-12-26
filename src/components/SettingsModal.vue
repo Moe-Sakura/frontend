@@ -428,35 +428,26 @@
                   />
                 </div>
 
+                <!-- Video Parse API URL -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                    视频解析 API 地址
+                  </label>
+                  <input
+                    v-model="localVideoParseApiUrl"
+                    type="url"
+                    placeholder="https://vp.searchgal.homes/"
+                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                    @input="handleTyping"
+                  />
+                </div>
+
                 <!-- 恢复默认按钮 -->
                 <button
                   class="w-full px-4 py-2.5 rounded-xl text-cyan-600 dark:text-cyan-400 font-medium bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-[0.98] transition-all text-sm"
                   @click="resetAdvancedApiSettings"
                 >
                   恢复默认值
-                </button>
-              </div>
-            </div>
-
-            <!-- 重置区域 -->
-            <div
-              class="settings-card bg-red-50/50 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/30"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg shadow-red-500/30">
-                    <RotateCcw :size="20" class="text-white" />
-                  </div>
-                  <div>
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white">重置设置</h2>
-                    <p class="text-sm text-gray-500 dark:text-slate-400">恢复所有设置为默认值</p>
-                  </div>
-                </div>
-                <button
-                  class="px-4 py-2 rounded-xl text-red-600 dark:text-red-400 font-medium bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800/50 hover:bg-red-50 dark:hover:bg-red-950/50 active:scale-95 transition-all"
-                  @click="reset"
-                >
-                  重置
                 </button>
               </div>
             </div>
@@ -525,7 +516,6 @@ import {
   Info,
   Server,
   Link as LinkIcon,
-  RotateCcw,
   Terminal,
   Code,
   FileCode,
@@ -625,6 +615,7 @@ const localAiTranslateApiUrl = ref(settingsStore.settings.aiTranslateApiUrl)
 const localAiTranslateApiKey = ref(settingsStore.settings.aiTranslateApiKey)
 const localAiTranslateModel = ref(settingsStore.settings.aiTranslateModel)
 const localBackgroundImageApiUrl = ref(settingsStore.settings.backgroundImageApiUrl)
+const localVideoParseApiUrl = ref(settingsStore.settings.videoParseApiUrl)
 
 // 计算最终的 API 地址
 const localCustomApi = computed(() => {
@@ -673,6 +664,7 @@ watch(() => props.isOpen, (isOpen) => {
     localAiTranslateApiKey.value = settingsStore.settings.aiTranslateApiKey
     localAiTranslateModel.value = settingsStore.settings.aiTranslateModel
     localBackgroundImageApiUrl.value = settingsStore.settings.backgroundImageApiUrl
+    localVideoParseApiUrl.value = settingsStore.settings.videoParseApiUrl
   }
 })
 
@@ -693,32 +685,21 @@ function save() {
     aiTranslateApiKey: localAiTranslateApiKey.value,
     aiTranslateModel: localAiTranslateModel.value,
     backgroundImageApiUrl: localBackgroundImageApiUrl.value,
+    videoParseApiUrl: localVideoParseApiUrl.value,
   })
   emit('save', localCustomApi.value, localCustomCSS.value)
   emit('close')
 }
 
-function reset() {
+function resetAdvancedApiSettings() {
   playTap()
-  selectedApiOption.value = 'cfapi'
-  customApiInput.value = ''
-  localCustomCSS.value = ''
-  localCustomJS.value = ''
-  localCustomHTML.value = ''
-  // 重置高级 API 设置（不播放音效，因为已经播放过）
-  resetAdvancedApiSettings(false)
-}
-
-function resetAdvancedApiSettings(playSound = true) {
-  if (playSound) {
-    playTap()
-  }
   localVndbApiBaseUrl.value = DEFAULT_API_CONFIG.vndbApiBaseUrl
   localVndbImageProxyUrl.value = DEFAULT_API_CONFIG.vndbImageProxyUrl
   localAiTranslateApiUrl.value = DEFAULT_API_CONFIG.aiTranslateApiUrl
   localAiTranslateApiKey.value = DEFAULT_API_CONFIG.aiTranslateApiKey
   localAiTranslateModel.value = DEFAULT_API_CONFIG.aiTranslateModel
   localBackgroundImageApiUrl.value = DEFAULT_API_CONFIG.backgroundImageApiUrl
+  localVideoParseApiUrl.value = DEFAULT_API_CONFIG.videoParseApiUrl
 }
 </script>
 
