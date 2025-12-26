@@ -267,7 +267,21 @@ export const useUIStore = defineStore('ui', () => {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
         const parsed: Partial<PersistedUIState> = JSON.parse(saved)
-        themeMode.value = parsed.themeMode ?? DEFAULT_PERSISTED_STATE.themeMode
+        
+        // 迁移旧版格式：如果没有 themeMode 但有 isDarkMode，转换为新格式
+        let savedThemeMode = parsed.themeMode
+        if (!savedThemeMode && typeof parsed.isDarkMode === 'boolean') {
+          savedThemeMode = parsed.isDarkMode ? 'dark' : 'light'
+          // 立即保存迁移后的格式，避免下次再迁移
+          try {
+            const migrated = { ...parsed, themeMode: savedThemeMode }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
+          } catch {
+            // 保存失败，忽略
+          }
+        }
+        
+        themeMode.value = savedThemeMode ?? DEFAULT_PERSISTED_STATE.themeMode
         customCSS.value = parsed.customCSS ?? DEFAULT_PERSISTED_STATE.customCSS
         showSearchHistory.value = parsed.showSearchHistory ?? DEFAULT_PERSISTED_STATE.showSearchHistory
       }

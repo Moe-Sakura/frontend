@@ -16,7 +16,14 @@
         var saved = localStorage.getItem('ui-state');
         if (saved) {
           var state = JSON.parse(saved);
-          var themeMode = state.themeMode || 'system';
+          var themeMode = state.themeMode;
+          
+          // 迁移旧版格式：如果没有 themeMode 但有 isDarkMode，转换为新格式
+          if (!themeMode && typeof state.isDarkMode === 'boolean') {
+            themeMode = state.isDarkMode ? 'dark' : 'light';
+          }
+          
+          themeMode = themeMode || 'system';
           
           if (themeMode === 'dark') {
             isDark = true;

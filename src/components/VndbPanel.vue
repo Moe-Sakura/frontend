@@ -637,13 +637,16 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
     quotes: false,
   }
   
+  // 先捕获游戏 ID，用于后续竞态检查
+  const vnIdAtStart = newInfo?.id || null
+  const vnIdForScreenshots = newInfo?.id
+  
   // 更新当前游戏 ID
-  currentVnId.value = newInfo?.id || null
+  currentVnId.value = vnIdAtStart
   
   // 如果有游戏 ID，加载角色和名言，然后自动翻译
-  if (newInfo?.id) {
-    const vnIdAtStart = newInfo.id
-    loadCharactersAndQuotes(newInfo.id).then(() => {
+  if (vnIdAtStart) {
+    loadCharactersAndQuotes(vnIdAtStart).then(() => {
       // 检查是否仍是同一个游戏（防止切换游戏时数据错乱）
       if (currentVnId.value === vnIdAtStart) {
         // 自动触发 AI 翻译（静默模式，不播放音效）
@@ -654,11 +657,9 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   
   // 检查缓存的截图是否已加载
   if (newInfo?.screenshots && newInfo.screenshots.length > 0) {
-    const vnIdForScreenshots = newInfo?.id
     nextTick(() => {
       requestAnimationFrame(() => {
-        // 只有当有有效的游戏 ID 时才进行竞态检查
-        // 如果没有 ID，则无法进行有意义的检查，直接处理截图
+        // 竞态检查：如果用户已切换到其他游戏，跳过处理
         if (vnIdForScreenshots && currentVnId.value !== vnIdForScreenshots) {
           return
         }

@@ -555,6 +555,9 @@ function saveSettings(customApi: string, newCustomCSS: string) {
 <style>
 @import "tailwindcss";
 
+/* Tailwind v4: 配置 dark 变体使用 .dark 类 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Ken Burns 动画效果 - 使用 CSS 动画实现更流畅的背景切换 */
 .ken-burns {
   /* 初始状态 - 稍微放大以便动画有空间 */
