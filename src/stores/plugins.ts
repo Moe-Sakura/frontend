@@ -1,4 +1,4 @@
-import type { PiniaPluginContext, StateTree, Store, StoreDefinition } from 'pinia'
+import type { PiniaPluginContext, StateTree, Store } from 'pinia'
 
 // ============================================
 // 类型定义
@@ -21,7 +21,7 @@ export interface PersistOptions {
 
 // 扩展 DefineStoreOptionsBase 类型
 declare module 'pinia' {
-  export interface DefineStoreOptionsBase<S extends StateTree, Store> {
+  export interface DefineStoreOptionsBase<_S extends StateTree, _Store> {
     persist?: boolean | PersistOptions
   }
   
@@ -57,7 +57,7 @@ function getValueByPath(obj: Record<string, unknown>, path: string): unknown {
 function setValueByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
   const keys = path.split('.')
   const lastKey = keys.pop()
-  if (!lastKey) return
+  if (!lastKey) {return}
   
   let current = obj
   for (const key of keys) {
@@ -108,13 +108,13 @@ export function piniaPersistedState(context: PiniaPluginContext) {
   
   // 获取持久化配置
   const persistOption = options.persist
-  if (!persistOption) return
+  if (!persistOption) {return}
   
   const config: PersistOptions = typeof persistOption === 'boolean'
     ? { enabled: persistOption }
     : persistOption
   
-  if (!config.enabled) return
+  if (!config.enabled) {return}
   
   const prefix = config.prefix ?? 'pinia'
   const storageKey = `${prefix}-${store.$id}`
@@ -152,7 +152,7 @@ export function piniaPersistedState(context: PiniaPluginContext) {
  */
 export function piniaLogger(context: PiniaPluginContext) {
   // 仅在开发环境启用
-  if (import.meta.env.PROD) return
+  if (import.meta.env.PROD) {return}
   
   const { store } = context
   
@@ -266,7 +266,7 @@ export function piniaUndoRedo(context: PiniaPluginContext) {
   const { store, options } = context
   
   // 只对配置了 undoRedo 的 store 启用
-  if (!(options as { undoRedo?: boolean }).undoRedo) return
+  if (!(options as { undoRedo?: boolean }).undoRedo) {return}
   
   const history: StateTree[] = []
   let currentIndex = -1
@@ -356,7 +356,7 @@ export function piniaSyncTabs(context: PiniaPluginContext) {
   const { store, options } = context
   
   // 只对配置了 syncTabs 的 store 启用
-  if (!(options as { syncTabs?: boolean }).syncTabs) return
+  if (!(options as { syncTabs?: boolean }).syncTabs) {return}
   
   const channelName = `pinia-sync-${store.$id}`
   

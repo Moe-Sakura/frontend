@@ -168,7 +168,7 @@ import {
   Keyboard, X, 
   Home, Settings, MessageSquare, BookOpen, History, Grid3x3, Search, HelpCircle,
   ArrowUp, ChevronLeft, ChevronRight,
-  Navigation, Command, Zap
+  Navigation, Command, Zap,
 } from 'lucide-vue-next'
 
 const uiStore = useUIStore()

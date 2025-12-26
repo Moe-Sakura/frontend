@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useHistoryStore } from './history'
 import { useCacheStore } from './cache'
 import { useSearchStore } from './search'
@@ -117,7 +117,7 @@ export const useStatsStore = defineStore('stats', () => {
   
   // 搜索效率评分
   const searchEfficiencyScore = computed(() => {
-    if (appStats.value.totalSearches === 0) return 0
+    if (appStats.value.totalSearches === 0) {return 0}
     
     const cacheHitRate = (appStats.value.vndbCacheHits + appStats.value.searchCacheHits) / 
                          (appStats.value.totalSearches * 2)
@@ -146,7 +146,7 @@ export const useStatsStore = defineStore('stats', () => {
   // 检查单个服务状态
   async function checkServiceStatus(serviceKey: string) {
     const service = serviceStatuses.value.get(serviceKey)
-    if (!service || !service.url) return
+    if (!service || !service.url) {return}
     
     // 设置为检测中
     serviceStatuses.value.set(serviceKey, {

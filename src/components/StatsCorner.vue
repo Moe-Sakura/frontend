@@ -98,35 +98,35 @@ const responseTime = computed(() => apiService.value?.responseTime)
 
 // 状态文本
 const statusText = computed(() => {
-  if (isChecking.value) return '检测中'
-  if (isOnline.value) return '正常'
-  if (isOffline.value) return '异常'
+  if (isChecking.value) {return '检测中'}
+  if (isOnline.value) {return '正常'}
+  if (isOffline.value) {return '异常'}
   return '未知'
 })
 
 // 状态图标
 const statusIcon = computed(() => {
-  if (isChecking.value) return Activity
-  if (isOnline.value) return Wifi
+  if (isChecking.value) {return Activity}
+  if (isOnline.value) {return Wifi}
   return WifiOff
 })
 
 // 状态样式类
 const statusClass = computed(() => {
-  if (isChecking.value) return 'text-gray-600 dark:text-gray-400'
-  if (isOnline.value) return 'text-green-600 dark:text-green-400'
+  if (isChecking.value) {return 'text-gray-600 dark:text-gray-400'}
+  if (isOnline.value) {return 'text-green-600 dark:text-green-400'}
   return 'text-red-600 dark:text-red-400'
 })
 
 const statusIconClass = computed(() => {
-  if (isChecking.value) return 'text-gray-400'
-  if (isOnline.value) return 'text-green-500'
+  if (isChecking.value) {return 'text-gray-400'}
+  if (isOnline.value) {return 'text-green-500'}
   return 'text-red-500'
 })
 
 const statusDotClass = computed(() => {
-  if (isChecking.value) return 'bg-gray-400 animate-pulse'
-  if (isOnline.value) return 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'
+  if (isChecking.value) {return 'bg-gray-400 animate-pulse'}
+  if (isOnline.value) {return 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'}
   return 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]'
 })
 
@@ -162,7 +162,7 @@ function setupObserver() {
   const pvElement = document.getElementById('busuanzi_value_site_pv')
   const uvElement = document.getElementById('busuanzi_value_site_uv')
   
-  if (!pvElement || !uvElement) return
+  if (!pvElement || !uvElement) {return}
   
   observer = new MutationObserver(() => {
     checkBusuanziData()

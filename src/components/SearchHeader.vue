@@ -609,7 +609,7 @@ async function handleSearch() {
   searchStore.isSearching = true
   searchStore.errorMessage = ''
   hasScrolledToResults = false // 重置滚动标志
-  searchStartTime = performance.now() // 记录搜索开始时间
+  searchStartTime = window.performance.now() // 记录搜索开始时间
 
   const searchParams = new URLSearchParams()
   searchParams.set('game', searchQuery.value.trim())
@@ -678,7 +678,7 @@ async function handleSearch() {
         playCelebration() // 搜索完成音效
         
         // 计算搜索耗时并记录统计
-        const searchDuration = Math.round(performance.now() - searchStartTime)
+        const searchDuration = Math.round(window.performance.now() - searchStartTime)
         const resultCount = searchStore.totalResults
         statsStore.recordSearch(searchMode.value, resultCount, searchDuration)
         
