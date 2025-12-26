@@ -391,16 +391,20 @@
                 >
                   <!-- 图片区域 -->
                   <div class="w-full relative">
-                    <!-- 骨架屏占位 (padding-bottom: 133.33% = 3:4 比例) -->
-                    <div class="w-full pb-[133.33%] skeleton bg-rose-100 dark:bg-rose-900/30" />
-                    <img 
-                      v-if="char.image" 
-                      :src="char.image" 
-                      :alt="char.name"
-                      class="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                      @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
-                    />
+                    <!-- 占位 (padding-bottom: 133.33% = 3:4 比例) -->
+                    <div class="w-full pb-[133.33%]" />
+                    <!-- 有图片时：骨架屏 + 图片 -->
+                    <template v-if="char.image">
+                      <div class="absolute inset-0 skeleton bg-rose-100 dark:bg-rose-900/30" />
+                      <img 
+                        :src="char.image" 
+                        :alt="char.name"
+                        class="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                        @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
+                      />
+                    </template>
+                    <!-- 无图片时：占位符 -->
                     <div v-else class="absolute inset-0 flex items-center justify-center bg-rose-50 dark:bg-rose-900/30">
                       <Users :size="24" class="text-rose-400 dark:text-rose-600" />
                     </div>
