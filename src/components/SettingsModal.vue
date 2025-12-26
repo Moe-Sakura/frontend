@@ -793,7 +793,7 @@ function resetAdvancedApiSettings(playSound = true) {
 
 /* IDE 风格代码编辑器 */
 .code-editor {
-  font-family: "JetBrains Mono", "Fira Code", "Consolas", "Monaco", monospace !important;
+  font-family: Consolas, "Monaco", "JetBrains Mono", "Fira Code", monospace !important;
   font-size: 13px !important;
   line-height: 1.5 !important;
   min-height: 240px !important;
