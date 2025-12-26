@@ -590,6 +590,8 @@ watch(() => searchStore.customApi, (newApi) => {
   }
 })
 
+let hasScrolledToResults = false
+
 async function handleSearch() {
   if (!searchQuery.value.trim()) {return}
 
@@ -597,12 +599,26 @@ async function handleSearch() {
   searchStore.clearResults()
   searchStore.isSearching = true
   searchStore.errorMessage = ''
+  hasScrolledToResults = false // 重置滚动标志
 
   const searchParams = new URLSearchParams()
   searchParams.set('game', searchQuery.value.trim())
   searchParams.set('mode', searchMode.value)
   if (customApi.value.trim()) {
     searchParams.set('api', customApi.value.trim())
+  }
+
+  // 在 game 模式下，搜索开始时就并行发起 VNDB 请求
+  const queryForVndb = searchQuery.value.trim()
+  if (searchMode.value === 'game') {
+    fetchVndbData(queryForVndb).then((vndbData) => {
+      // 检查搜索词是否仍匹配（防止快速切换搜索时数据错乱）
+      if (vndbData && searchStore.searchQuery === queryForVndb) {
+        searchStore.vndbInfo = vndbData
+      }
+    }).catch(() => {
+      // VNDB 请求失败不影响主搜索
+    })
   }
 
   try {
@@ -614,11 +630,11 @@ async function handleSearch() {
         searchStore.searchProgress = { current, total }
       },
       onPlatformResult: (data) => {
-        const isFirstResult = searchStore.platformResults.size === 0
         searchStore.setPlatformResult(data.name, data)
         
-        // 第一个结果出现时滚动到结果区域
-        if (isFirstResult) {
+        // 等待至少 3 个平台结果后滚动到结果区域（只滚动一次）
+        if (!hasScrolledToResults && searchStore.platformResults.size >= 3) {
+          hasScrolledToResults = true
           // 使用 requestAnimationFrame + setTimeout 确保 DOM 已更新
           window.requestAnimationFrame(() => {
             setTimeout(() => {
@@ -642,6 +658,22 @@ async function handleSearch() {
         searchStore.isSearching = false
         playCelebration() // 搜索完成音效
         
+        // 如果结果不足 3 个但有结果，且还没滚动过，则现在滚动
+        if (!hasScrolledToResults && searchStore.platformResults.size > 0) {
+          hasScrolledToResults = true
+          window.requestAnimationFrame(() => {
+            setTimeout(() => {
+              const resultsEl = document.getElementById('results')
+              if (resultsEl) {
+                const headerOffset = 80
+                const elementPosition = resultsEl.getBoundingClientRect().top
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+              }
+            }, 50)
+          })
+        }
+        
         // 保存搜索历史
         const resultCount = searchStore.totalResults
         saveSearchHistory({
@@ -657,14 +689,6 @@ async function handleSearch() {
         playCaution() // 错误音效
       },
     })
-
-    // 获取 VNDB 数据
-    if (searchMode.value === 'game') {
-      const vndbData = await fetchVndbData(searchQuery.value.trim())
-      if (vndbData) {
-        searchStore.vndbInfo = vndbData
-      }
-    }
   } catch (error) {
     searchStore.errorMessage =
       error instanceof Error ? error.message : '搜索失败'
