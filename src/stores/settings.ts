@@ -19,6 +19,7 @@ export interface UserSettings {
   aiTranslateApiKey: string
   aiTranslateModel: string
   backgroundImageApiUrl: string
+  videoParseApiUrl: string
 }
 
 // 默认 API 配置
@@ -29,6 +30,7 @@ export const DEFAULT_API_CONFIG = {
   aiTranslateApiKey: 'sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e',
   aiTranslateModel: 'Qwen/Qwen2.5-32B-Instruct',
   backgroundImageApiUrl: 'https://api.illlights.com/v1/img',
+  videoParseApiUrl: 'https://vp.searchgal.homes/',
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -49,6 +51,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   aiTranslateApiKey: DEFAULT_API_CONFIG.aiTranslateApiKey,
   aiTranslateModel: DEFAULT_API_CONFIG.aiTranslateModel,
   backgroundImageApiUrl: DEFAULT_API_CONFIG.backgroundImageApiUrl,
+  videoParseApiUrl: DEFAULT_API_CONFIG.videoParseApiUrl,
 }
 
 export const useSettingsStore = defineStore('settings', () => {

@@ -677,6 +677,8 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   showOriginalQuotes.value = false
   isTranslatingQuotes.value = false
   translateQuotesError.value = false
+  // 重置一键翻译状态
+  isTranslatingAllRef.value = false
   // 重置截图加载状态
   screenshotsReady.value = false
   // 重置角色和名言

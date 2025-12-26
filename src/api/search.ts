@@ -48,7 +48,14 @@ export function getVndbImageProxyUrl(): string {
 }
 
 // TouchGal 视频解析 API
-const VIDEO_PARSE_API_URL = 'https://vp.searchgal.homes/'
+export function getVideoParseApiUrl(): string {
+  try {
+    const settingsStore = useSettingsStore()
+    return settingsStore.settings.videoParseApiUrl || DEFAULT_API_CONFIG.videoParseApiUrl
+  } catch {
+    return DEFAULT_API_CONFIG.videoParseApiUrl
+  }
+}
 
 export interface VideoParseResult {
   success: boolean
@@ -65,7 +72,7 @@ export async function fetchGameVideoUrl(vndbId: string): Promise<string | null> 
   if (!vndbId) return null
 
   try {
-    const response = await fetch(VIDEO_PARSE_API_URL, {
+    const response = await fetch(getVideoParseApiUrl(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -964,17 +971,20 @@ export async function translateAllContent(
       const content = data.choices?.[0]?.message?.content?.trim()
 
       if (content) {
-        // 解析返回结果
-        const parts = content.split(/===SECTION===/).map((s: string) => s.trim()).filter((s: string) => s)
+        // 解析返回结果 - 保留空字符串以维持索引对应关系
+        const parts = content.split(/===SECTION===/).map((s: string) => s.trim())
         
-        if (parts.length >= 1 && descText) {
-          result.description = parts[0] || null
+        // 索引 0 = 描述, 索引 1 = 标签, 索引 2 = 名言
+        if (parts[0] && descText) {
+          result.description = parts[0]
         }
-        if (parts.length >= 2 && tagsText) {
-          result.tags = parts[1]?.split('\n').map((s: string) => s.trim()).filter((s: string) => s) || null
+        if (parts[1] && tagsText) {
+          const parsedTags = parts[1].split('\n').map((s: string) => s.trim()).filter((s: string) => s)
+          result.tags = parsedTags.length > 0 ? parsedTags : null
         }
-        if (parts.length >= 3 && quotesText) {
-          result.quotes = parts[2]?.split('\n').map((s: string) => s.trim()).filter((s: string) => s) || null
+        if (parts[2] && quotesText) {
+          const parsedQuotes = parts[2].split('\n').map((s: string) => s.trim()).filter((s: string) => s)
+          result.quotes = parsedQuotes.length > 0 ? parsedQuotes : null
         }
         
         return result
