@@ -319,58 +319,6 @@
               </div>
             </div>
 
-            <!-- 角色配音 -->
-            <div v-if="searchStore.vndbInfo.va && searchStore.vndbInfo.va.length > 0" class="vndb-card">
-              <div class="flex items-center gap-2 mb-3">
-                <Mic :size="18" class="text-cyan-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">角色配音</h3>
-                <span class="text-xs text-gray-400 dark:text-slate-500">({{ searchStore.vndbInfo.va.length }})</span>
-              </div>
-              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                <a
-                  v-for="(voiceActor, index) in (expandedSections.va ? searchStore.vndbInfo.va : searchStore.vndbInfo.va.slice(0, 10))"
-                  :key="index"
-                  :href="`https://vndb.org/${voiceActor.character?.id}`"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="relative rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:scale-105 transition-all group"
-                >
-                  <!-- 图片区域 -->
-                  <div class="w-full relative">
-                    <!-- 骨架屏占位 (padding-bottom: 133.33% = 3:4 比例) -->
-                    <div class="w-full pb-[133.33%] skeleton bg-cyan-100 dark:bg-cyan-900/30" />
-                    <img 
-                      v-if="getCharacterImage(voiceActor.character?.id)" 
-                      :src="getCharacterImage(voiceActor.character?.id)!" 
-                      :alt="voiceActor.character?.name"
-                      class="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                      @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
-                    />
-                    <div v-else class="absolute inset-0 flex items-center justify-center bg-cyan-50 dark:bg-cyan-900/30">
-                      <Users :size="24" class="text-cyan-400 dark:text-cyan-600" />
-                    </div>
-                  </div>
-                  <!-- 文字覆盖层 -->
-                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-2 pt-6">
-                    <p class="text-xs font-medium text-white text-center truncate group-hover:underline">
-                      {{ voiceActor.character?.original || voiceActor.character?.name }}
-                    </p>
-                    <p class="text-[10px] text-white/70 text-center truncate">
-                      CV: {{ voiceActor.staff?.original || voiceActor.staff?.name }}
-                    </p>
-                  </div>
-                </a>
-              </div>
-              <button
-                v-if="searchStore.vndbInfo.va.length > 10"
-                class="w-full mt-2 py-1.5 text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
-                @click="toggleSection('va')"
-              >
-                {{ expandedSections.va ? '收起' : `显示全部 ${searchStore.vndbInfo.va.length} 个角色` }}
-              </button>
-            </div>
-
             <!-- 相关作品 -->
             <div v-if="searchStore.vndbInfo.relations && searchStore.vndbInfo.relations.length > 0" class="vndb-card">
               <div class="flex items-center gap-2 mb-3">
@@ -453,7 +401,7 @@
                       loading="lazy"
                       @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
                     />
-                    <div v-else class="absolute inset-0 flex items-center justify-center">
+                    <div v-else class="absolute inset-0 flex items-center justify-center bg-rose-50 dark:bg-rose-900/30">
                       <Users :size="24" class="text-rose-400 dark:text-rose-600" />
                     </div>
                   </div>
@@ -611,7 +559,6 @@ import {
   Minimize2,
   X,
   Tag,
-  Mic,
   Link2,
   GitBranch,
   Globe,
@@ -687,7 +634,6 @@ const screenshotsReady = ref(false)
 // 展开/收起状态
 const expandedSections = ref({
   names: false,
-  va: false,
   relations: false,
   characters: false,
   quotes: false,
@@ -756,7 +702,6 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   // 重置展开状态
   expandedSections.value = {
     names: false,
-    va: false,
     relations: false,
     characters: false,
     quotes: false,
@@ -772,13 +717,15 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
     nextTick(() => {
       // 延迟一帧确保 DOM 已渲染
       requestAnimationFrame(() => {
-        // 查找截图区域的图片（通过 alt 属性特征定位）
-        const screenshotImgs = document.querySelectorAll('img[alt*="截图"]')
-        for (let i = 0; i < screenshotImgs.length; i++) {
-          const img = screenshotImgs[i] as HTMLImageElement
-          if (img.complete && img.naturalHeight > 0) {
-            screenshotsReady.value = true
-            break
+        // 在当前面板内查找截图图片
+        const screenshotImgs = modalRef.value?.querySelectorAll('img[alt*="截图"]')
+        if (screenshotImgs) {
+          for (let i = 0; i < screenshotImgs.length; i++) {
+            const img = screenshotImgs[i] as HTMLImageElement
+            if (img.complete && img.naturalHeight > 0) {
+              screenshotsReady.value = true
+              break
+            }
           }
         }
       })
@@ -1028,15 +975,6 @@ function openGallery(startIndex: number) {
   if (images.length > 0) {
     imageViewer.open(images, startIndex)
   }
-}
-
-// 根据角色ID获取角色图片
-function getCharacterImage(characterId: string | undefined): string | undefined {
-  if (!characterId) {
-    return undefined
-  }
-  const char = characters.value.find(c => c.id === characterId)
-  return char?.image
 }
 
 // 格式化性别
