@@ -64,32 +64,26 @@ self.addEventListener('fetch', (e) => {
   const { request } = e
   const url = new URL(request.url)
 
-  // 跳过：非 GET、非 HTTP、永不缓存、跨域图片
+  // 只处理同源 GET 请求，跨域请求全部跳过（避免 CORS 问题）
   if (
     request.method !== 'GET' ||
     !url.protocol.startsWith('http') ||
-    NO_CACHE.test(url.href) ||
-    (url.origin !== location.origin && request.destination === 'image')
+    url.origin !== location.origin ||
+    NO_CACHE.test(url.href)
   ) return
 
-  const isSameOrigin = url.origin === location.origin
   const isDocument = request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('.html')
   const isCacheable = CACHEABLE_EXTS.test(url.pathname) || CACHEABLE_PATHS.test(url.pathname)
 
-  if (isSameOrigin) {
-    if (isDocument) {
-      // HTML：网络优先，离线返回提示页
-      e.respondWith(networkFirstWithOffline(request))
-    } else if (isCacheable) {
-      // 静态资源：缓存优先
-      e.respondWith(cacheFirst(request))
-    } else {
-      // 其他：网络优先
-      e.respondWith(networkFirst(request))
-    }
+  if (isDocument) {
+    // HTML：网络优先，离线返回提示页
+    e.respondWith(networkFirstWithOffline(request))
   } else if (isCacheable) {
-    // 跨域可缓存资源
-    e.respondWith(cacheFirstCrossOrigin(request))
+    // 静态资源：缓存优先
+    e.respondWith(cacheFirst(request))
+  } else {
+    // 其他：网络优先
+    e.respondWith(networkFirst(request))
   }
 })
 
@@ -133,20 +127,6 @@ async function networkFirstWithOffline(req) {
   }
 }
 
-async function cacheFirstCrossOrigin(req) {
-  const cached = await caches.match(req)
-  if (cached) return cached
-  try {
-    const res = await fetch(req, { mode: 'cors', credentials: 'omit' })
-    if (res.ok && res.type !== 'opaque') {
-      const cache = await caches.open(CACHE_NAME)
-      cache.put(req, res.clone())
-    }
-    return res
-  } catch {
-    return new Response('', { status: 503 })
-  }
-}
 
 // ============================================
 // 离线页面
