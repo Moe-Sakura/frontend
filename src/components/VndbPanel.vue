@@ -872,11 +872,14 @@ async function handleTranslateQuotes() {
       translatedQuotes.value = newMap
       showOriginalQuotes.value = false
       translateQuotesError.value = false
+      playSuccess()
     } else {
       translateQuotesError.value = true
+      playError()
     }
   } catch {
     translateQuotesError.value = true
+    playError()
   } finally {
     isTranslatingQuotes.value = false
   }
