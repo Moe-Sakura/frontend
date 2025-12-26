@@ -43,7 +43,10 @@ export interface VndbTag {
 export interface VndbTitleEntry {
   lang: string
   title: string
+  official?: boolean
+  main?: boolean
 }
+
 
 export interface VndbScreenshot {
   url: string
@@ -80,8 +83,10 @@ export interface VndbApiItem {
 export interface VndbInfo {
   id?: string
   names: string[]
+  aliases?: string[]
   mainName: string
   originalTitle: string
+  alttitle?: string
   mainImageUrl: string | null
   screenshotUrl: string | null
   screenshots: string[]
@@ -105,6 +110,28 @@ export interface VndbInfo {
   languages?: string[]
   olang?: string
   devstatus?: number
+  characters?: VndbCharacter[]
+  quotes?: VndbQuote[]
+}
+
+export interface VndbCharacter {
+  id: string
+  name: string
+  original?: string
+  image?: string
+  sex?: string
+  description?: string
+  age?: number
+}
+
+export interface VndbQuote {
+  id: string
+  quote: string
+  character?: {
+    id: string
+    name: string
+    original?: string
+  }
 }
 
 /**
@@ -291,7 +318,7 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
       body: JSON.stringify({
         filters: ['search', '=', gameName],
         fields:
-          'id, title, titles.lang, titles.title, description, image.url, image.sexual, image.violence, screenshots.url, screenshots.sexual, screenshots.violence, screenshots.votecount, length_minutes, length_votes, rating, average, votecount, released, developers.id, developers.name, developers.original, platforms, languages, olang, devstatus, tags.id, tags.name, tags.rating, tags.spoiler, tags.category, relations.id, relations.title, relations.relation, relations.relation_official, extlinks.url, extlinks.label, extlinks.name',
+          'id, title, alttitle, aliases, titles{lang, title, official, main}, description, image{url, sexual, violence}, screenshots{url, sexual, violence, votecount}, length_minutes, length_votes, rating, average, votecount, released, developers{id, name, original}, platforms, languages, olang, devstatus, tags{id, name, rating, spoiler, category}, relations{id, title, relation, relation_official}, extlinks{url, label, name}, va{note, character{id, name, original}, staff{id, name, original}}',
         results: 1,
       }),
     })
@@ -407,8 +434,20 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
           }))
       : []
 
-    // 声优信息暂时不从 API 获取（需要单独查询 POST /character）
-    const va: VndbVoiceActor[] = []
+    // 提取声优信息
+    const va: VndbVoiceActor[] = result.va
+      ? result.va.map(
+          (v: {
+            note: string | null
+            character: { id: string; name: string; original?: string }
+            staff: { id: string; name: string; original?: string }
+          }) => ({
+            note: v.note,
+            character: v.character,
+            staff: v.staff,
+          }),
+        )
+      : []
 
     // 提取相关作品
     const relations: VndbRelation[] = result.relations
@@ -429,11 +468,16 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
         }))
       : []
 
+    // 提取别名
+    const aliases: string[] = result.aliases || []
+
     const finalResult: VndbInfo = {
       id: result.id || undefined,
       names: [...new Set(names)],
+      aliases: aliases.length > 0 ? aliases : undefined,
       mainName,
       originalTitle: result.title,
+      alttitle: result.alttitle || undefined,
       mainImageUrl,
       screenshotUrl,
       screenshots,
@@ -474,18 +518,200 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
 }
 
 /**
+ * 获取 VNDB 角色列表
+ * @param vnId - 游戏 ID（如 "v19073"）
+ * @returns 角色列表
+ */
+export async function fetchVndbCharacters(vnId: string): Promise<VndbCharacter[]> {
+  try {
+    const response = await fetch(`${VNDB_API_BASE_URL}/character`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filters: ['vn', '=', ['id', '=', vnId]],
+        fields: 'id, name, original, image{url, sexual, violence}, sex, description, age',
+        results: 15,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`VNDB Character API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (!data.results || data.results.length === 0) {
+      return []
+    }
+
+    // 转换角色数据，过滤不安全图片
+    const characters: VndbCharacter[] = data.results.map(
+      (c: {
+        id: string
+        name: string
+        original?: string
+        image?: { url: string; sexual: number; violence: number }
+        sex?: [string, string]
+        description?: string
+        age?: number
+      }) => {
+        let imageUrl: string | undefined
+        if (c.image && c.image.url && c.image.sexual <= 1 && c.image.violence === 0) {
+          imageUrl = c.image.url
+        }
+
+        return {
+          id: c.id,
+          name: c.name,
+          original: c.original,
+          image: imageUrl,
+          sex: c.sex?.[0],
+          description: c.description,
+          age: c.age,
+        }
+      },
+    )
+
+    // 使用代理替换 URL
+    if (ENABLE_VNDB_IMAGE_PROXY && isProxyAvailable) {
+      characters.forEach((char) => {
+        if (char.image) {
+          char.image = char.image.replace('https://t.vndb.org/', VNDB_IMAGE_PROXY)
+        }
+      })
+    }
+
+    return characters
+  } catch (error) {
+    return []
+  }
+}
+
+/**
+ * 获取 VNDB 名言列表
+ * @param vnId - 游戏 ID（如 "v19073"）
+ * @returns 名言列表
+ */
+export async function fetchVndbQuotes(vnId: string): Promise<VndbQuote[]> {
+  try {
+    const response = await fetch(`${VNDB_API_BASE_URL}/quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filters: ['vn', '=', ['id', '=', vnId]],
+        fields: 'id, quote, character{id, name, original}',
+        results: 10,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`VNDB Quote API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (!data.results || data.results.length === 0) {
+      return []
+    }
+
+    // 转换名言数据
+    const quotes: VndbQuote[] = data.results.map(
+      (q: {
+        id: string
+        quote: string
+        character?: { id: string; name: string; original?: string }
+      }) => ({
+        id: q.id,
+        quote: q.quote,
+        character: q.character,
+      }),
+    )
+
+    return quotes
+  } catch (error) {
+    return []
+  }
+}
+
+// 翻译模式类型
+export type TranslateMode = 'description' | 'tags' | 'quotes'
+
+// 简介翻译提示词
+const DESCRIPTION_PROMPT = `你是一名专业的视觉小说（Galgame/AVG）本地化专家。请将游戏简介精准翻译为简体中文。
+
+【翻译规范】
+1. 格式净化：清除所有 HTML、Markdown、BBCode 等标记，仅保留纯文本
+2. 结构保留：保持原文段落划分，段落间用换行分隔
+3. 术语处理：使用视觉小说领域通用的中文术语
+4. 人名处理：优先使用中文圈广泛接受的译名，无通用译名时保留原名
+5. 内容控制：禁止添加剧透、解释性文字或主观评价
+
+【输出要求】
+仅输出翻译后的纯文本，无需任何说明`
+
+// 标签翻译提示词
+const TAGS_PROMPT = `你是一名视觉小说（Galgame/AVG）专家，精通 VNDB 标签体系。请将以下游戏标签翻译为简体中文。
+
+【输入格式】
+每行一个英文标签
+
+【翻译规范】
+1. 使用 VNDB 中文社区或 Bangumi 等平台的通用译法
+2. 游戏机制类标签直译（如 Multiple Endings → 多结局）
+3. 角色属性类标签使用二次元圈常用说法（如 Tsundere → 傲娇）
+4. 无通用译法的专有名词可保留英文或音译
+5. 保持简洁，每个标签译文不超过 10 个字
+
+【输出要求】
+每行输出一个翻译结果，与输入行数严格一一对应
+仅输出译文，无需编号、原文或解释`
+
+// 名言翻译提示词
+const QUOTES_PROMPT = `你是一名专业的视觉小说（Galgame/AVG）本地化专家。请将游戏中的经典台词/名言翻译为简体中文。
+
+【输入格式】
+每行一条英文/日文台词
+
+【翻译规范】
+1. 保留原文的情感色彩和语气特点
+2. 台词中的人名保留原文或使用通用译名
+3. 注意口语化表达，符合角色说话习惯
+4. 保持原文的文学性和感染力
+5. 不要添加引号或其他标点修饰
+
+【输出要求】
+每行输出一条翻译结果，与输入行数严格一一对应
+仅输出译文，无需编号、原文或解释`
+
+/**
  * AI 翻译文本
  * @param text - 要翻译的文本
+ * @param mode - 翻译模式：description（简介）、tags（标签）或 quotes（名言）
  * @param maxRetries - 最大重试次数
  * @returns 翻译后的文本，失败返回 null
  */
-export async function translateText(text: string, maxRetries: number = 2): Promise<string | null> {
+export async function translateText(
+  text: string, 
+  mode: TranslateMode = 'description',
+  maxRetries: number = 2,
+): Promise<string | null> {
   if (!text || text.trim().length === 0) {
     return null
   }
 
-  // 限制文本长度，避免超出 API 限制
-  const maxLength = 3000
+  // 根据模式选择提示词和参数
+  const modeConfig = {
+    description: { prompt: DESCRIPTION_PROMPT, maxLength: 3000, maxTokens: 2000, temperature: 0.3 },
+    tags: { prompt: TAGS_PROMPT, maxLength: 1500, maxTokens: 1000, temperature: 0.2 },
+    quotes: { prompt: QUOTES_PROMPT, maxLength: 2000, maxTokens: 1500, temperature: 0.4 },
+  }
+  
+  const config = modeConfig[mode]
+  const systemPrompt = config.prompt
+  const maxLength = config.maxLength
+  const maxTokens = config.maxTokens
+  const temperature = config.temperature
+
   const textToTranslate = text.length > maxLength ? text.substring(0, maxLength) + '...' : text
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -501,35 +727,15 @@ export async function translateText(text: string, maxRetries: number = 2): Promi
           messages: [
             {
               role: 'system',
-              content: `你是一名专业的视觉小说游戏本地化专家，请将提供的游戏简介精准翻译为简体中文。
-
-【翻译规范】
-
-1. 格式净化：翻译前完全清除所有HTML、Markdown、XML等非内容格式标记，仅保留原始文本内容
-
-2. 结构保留：完整保持原文段落划分，段落间以自然换行分隔
-
-3. 术语统一：准确处理视觉小说领域的专业术语，确保表述一致
-
-4. 人名规范：
-   - 保留原名拼写
-   - 或采用中文圈广泛接受的译名
-   - 同一作品内译名保持统一
-
-5. 内容控制：
-   - 严禁添加原文未包含的剧透信息
-   - 禁止插入解释性文字或主观评价
-   - 杜绝文化偏见性表述
-
-6. 输出要求：仅输出翻译后的纯文本内容，无需任何说明性文字`,
+              content: systemPrompt,
             },
             {
               role: 'user',
               content: textToTranslate,
             },
           ],
-          temperature: 0.3,
-          max_tokens: 2000,
+          temperature,
+          max_tokens: maxTokens,
           stream: false,
         }),
       })
