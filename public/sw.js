@@ -41,15 +41,18 @@ const NO_CACHE_PATTERNS = [
 self.addEventListener('install', (event) => {
   console.log(`[SW] Installing version ${SW_VERSION}`);
   
+  // 预缓存失败不应阻止 service worker 安装
+  const precachePromise = caches.open(CACHE_NAME)
+    .then((cache) => {
+      console.log('[SW] Precaching core resources');
+      return cache.addAll(PRECACHE_URLS);
+    })
+    .catch((err) => {
+      console.warn('[SW] Precache failed:', err);
+    });
+  
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[SW] Precaching core resources');
-        return cache.addAll(PRECACHE_URLS).catch((err) => {
-          console.warn('[SW] Precache failed:', err);
-        });
-      })
-      .then(() => self.skipWaiting())
+    precachePromise.then(() => self.skipWaiting())
   );
 });
 

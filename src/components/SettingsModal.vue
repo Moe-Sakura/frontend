@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <!-- 设置面板 - macOS 风格浮动窗口 -->
+    <!-- 设置面板 - 模态框 -->
     <Transition
       :css="false"
       @enter="onEnter"
@@ -8,30 +8,12 @@
     >
       <div
         v-if="isOpen"
-        ref="modalRef"
-        :class="[
-          'fixed z-[100] flex flex-col settings-page shadow-2xl shadow-black/20',
-          isFullscreen 
-            ? 'inset-0' 
-            : 'inset-0 md:inset-6 md:m-auto md:w-[600px] md:min-w-[400px] md:max-w-[800px] md:h-[500px] md:max-h-[calc(100%-3rem)] md:rounded-3xl'
-        ]"
-        :style="windowStyle"
+        class="fixed z-[100] flex flex-col settings-page shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[800px] md:max-w-[calc(100%-3rem)] md:h-[700px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
       >
-        <!-- 调整大小手柄 -->
-        <WindowResizeHandles 
-          :is-fullscreen="isFullscreen" 
-          @resize="handleResize" 
-        />
-      
-        <!-- 顶部导航栏 - 可拖动 -->
+        <!-- 顶部导航栏 -->
         <div
           v-anime:100="'slideUp'"
-          :class="[
-            'flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none',
-            isFullscreen ? '' : 'md:rounded-t-3xl md:cursor-move'
-          ]"
-          @mousedown="handleDragStart"
-          @touchstart="handleDragStart"
+          class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none md:rounded-t-3xl"
         >
           <!-- 返回按钮 - 仅移动端 -->
           <button
@@ -58,16 +40,6 @@
               @click="save"
             >
               保存
-            </button>
-          
-            <!-- 全屏按钮 - 仅桌面端 -->
-            <button
-              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
-              title="全屏"
-              @click="handleToggleFullscreen"
-            >
-              <Maximize2 v-if="!isFullscreen" :size="16" />
-              <Minimize2 v-else :size="16" />
             </button>
           
             <!-- 关闭按钮 - 仅桌面端 -->
@@ -262,7 +234,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { animate } from '@/composables/useAnime'
-import { playTap, playCelebration, playToggle, playType, playSwipe } from '@/composables/useSound'
+import { playTap, playCelebration, playToggle, playType } from '@/composables/useSound'
 
 // Prism Editor
 import { PrismEditor } from 'vue-prism-editor'
@@ -289,8 +261,6 @@ function handleTyping() {
     lastTypingSound = now
   }
 }
-import { useWindowManager, type ResizeDirection } from '@/composables/useWindowManager'
-import WindowResizeHandles from '@/components/WindowResizeHandles.vue'
 import {
   Settings as SettingsIcon,
   ChevronLeft,
@@ -301,8 +271,6 @@ import {
   RotateCcw,
   Check,
   Github,
-  Maximize2,
-  Minimize2,
   X,
 } from 'lucide-vue-next'
 
@@ -316,13 +284,6 @@ const emit = defineEmits<{
   close: []
   save: [customApi: string, customCSS: string]
 }>()
-
-// 窗口管理
-const modalRef = ref<HTMLElement | null>(null)
-const { isFullscreen, windowStyle, startDrag, startResize, toggleFullscreen, reset: resetWindow } = useWindowManager({
-  minWidth: 400,
-  minHeight: 300,
-})
 
 // 进入/离开动画
 function onEnter(el: Element, done: () => void) {
@@ -346,32 +307,6 @@ function onLeave(el: Element, done: () => void) {
     complete: done,
   })
 }
-
-function handleDragStart(e: MouseEvent | TouchEvent) {
-  if ((e.target as HTMLElement).closest('button')) {return}
-  if (modalRef.value) {
-    startDrag(e, modalRef.value)
-  }
-}
-
-function handleResize(e: MouseEvent | TouchEvent, direction: ResizeDirection) {
-  if (modalRef.value) {
-    startResize(e, direction, modalRef.value)
-  }
-}
-
-// 切换全屏（带音效）
-function handleToggleFullscreen() {
-  playSwipe()
-  toggleFullscreen()
-}
-
-// 关闭时重置窗口状态
-watch(() => props.isOpen, (newVal) => {
-  if (!newVal) {
-    resetWindow()
-  }
-})
 
 // API 服务器选项
 const apiOptions = [
@@ -495,16 +430,6 @@ function reset() {
     0 8px 32px rgba(0, 0, 0, 0.12),
     0 0 20px rgba(255, 20, 147, 0.06),
     inset 0 1px 1px rgba(255, 255, 255, 0.6);
-  /* 窗口/全屏切换动画 */
-  transition: 
-    inset 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    min-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 移动端无底部边框 */
