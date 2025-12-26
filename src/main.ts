@@ -1,7 +1,16 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
-import { piniaLogger, piniaPerformance, piniaErrorHandler } from './stores/plugins'
+import { 
+  piniaLogger, 
+  piniaPerformance, 
+  piniaErrorHandler, 
+  piniaPersistedState,
+  piniaSnapshot,
+  piniaSyncTabs,
+} from './stores/plugins'
+import { useUIStore } from './stores/ui'
+import { useStatsStore } from './stores/stats'
 
 // Noto Sans SC 字体（本地安装）
 import '@fontsource/noto-sans-sc/300.css'
@@ -42,11 +51,15 @@ app.directive('text-scroll', vTextScroll)
 const pinia = createPinia()
 
 // 配置 Pinia 插件
+pinia.use(piniaPersistedState) // 自动持久化
+pinia.use(piniaPerformance)    // 性能监控
+pinia.use(piniaErrorHandler)   // 错误处理
+pinia.use(piniaSnapshot)       // 状态快照
+pinia.use(piniaSyncTabs)       // 跨标签页同步
+
 if (import.meta.env.DEV) {
-  pinia.use(piniaLogger) // 开发环境日志
+  pinia.use(piniaLogger)       // 开发环境日志
 }
-pinia.use(piniaPerformance) // 性能监控
-pinia.use(piniaErrorHandler) // 错误处理
 
 app.use(pinia)
 
@@ -56,12 +69,29 @@ createProgressFetch()
 app.mount('#app')
 
 // ============================================
+// Pinia Stores 初始化
+// ============================================
+
+// 获取 UI Store 用于 SW 更新通知
+const uiStore = useUIStore()
+const statsStore = useStatsStore()
+
+// 初始化 UI Store
+uiStore.init()
+
+// 记录页面浏览
+statsStore.incrementPageView()
+
+// ============================================
 // Service Worker 注册与更新
 // ============================================
 
-// 显示更新提示
+// 显示更新提示 - 使用 UIStore 管理
 function showUpdateToast(onUpdate: () => void) {
-  // 创建 toast 元素
+  // 通过 UIStore 显示更新通知
+  uiStore.setShowUpdateToast(true)
+  
+  // 也创建 DOM toast 作为备份（如果 Vue 组件未加载）
   const toast = document.createElement('div')
   toast.id = 'sw-update-toast'
   toast.innerHTML = `
@@ -114,6 +144,7 @@ function showUpdateToast(onUpdate: () => void) {
     }
     if (countdown <= 0) {
       clearInterval(interval)
+      uiStore.setShowUpdateToast(false)
       onUpdate()
     }
   }, 1000)
@@ -121,6 +152,7 @@ function showUpdateToast(onUpdate: () => void) {
   // 立即更新按钮
   document.getElementById('sw-update-now')?.addEventListener('click', () => {
     clearInterval(interval)
+    uiStore.setShowUpdateToast(false)
     onUpdate()
   })
 }

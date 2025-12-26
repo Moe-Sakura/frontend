@@ -59,6 +59,11 @@ export const useSettingsStore = defineStore('settings', () => {
   const settings = ref<UserSettings>({ ...DEFAULT_SETTINGS })
   const isInitialized = ref(false)
   
+  // 设置变更历史（用于撤销）
+  const settingsHistory = ref<UserSettings[]>([])
+  const historyIndex = ref(-1)
+  const maxHistoryLength = 20
+  
   // 从 localStorage 加载设置
   function loadSettings() {
     try {
@@ -71,6 +76,10 @@ export const useSettingsStore = defineStore('settings', () => {
       console.error('Failed to load settings:', error)
     }
     isInitialized.value = true
+    
+    // 初始化历史记录
+    settingsHistory.value = [{ ...settings.value }]
+    historyIndex.value = 0
   }
   
   // 保存设置到 localStorage
@@ -82,6 +91,24 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
   
+  // 记录设置变更历史
+  function recordHistory() {
+    // 如果不在最新位置，删除后面的历史
+    if (historyIndex.value < settingsHistory.value.length - 1) {
+      settingsHistory.value = settingsHistory.value.slice(0, historyIndex.value + 1)
+    }
+    
+    // 添加新记录
+    settingsHistory.value.push({ ...settings.value })
+    historyIndex.value = settingsHistory.value.length - 1
+    
+    // 限制历史记录数量
+    if (settingsHistory.value.length > maxHistoryLength) {
+      settingsHistory.value.shift()
+      historyIndex.value--
+    }
+  }
+  
   // 更新单个设置
   function updateSetting<K extends keyof UserSettings>(
     key: K,
@@ -89,18 +116,59 @@ export const useSettingsStore = defineStore('settings', () => {
   ) {
     settings.value[key] = value
     saveSettings()
+    recordHistory()
   }
   
   // 批量更新设置
   function updateSettings(newSettings: Partial<UserSettings>) {
     settings.value = { ...settings.value, ...newSettings }
     saveSettings()
+    recordHistory()
   }
   
   // 重置设置
   function resetSettings() {
     settings.value = { ...DEFAULT_SETTINGS }
     saveSettings()
+    recordHistory()
+  }
+  
+  // 重置单个设置
+  function resetSetting<K extends keyof UserSettings>(key: K) {
+    settings.value[key] = DEFAULT_SETTINGS[key]
+    saveSettings()
+    recordHistory()
+  }
+  
+  // 撤销设置变更
+  function undoSettings(): boolean {
+    if (historyIndex.value > 0) {
+      historyIndex.value--
+      settings.value = { ...settingsHistory.value[historyIndex.value] }
+      saveSettings()
+      return true
+    }
+    return false
+  }
+  
+  // 重做设置变更
+  function redoSettings(): boolean {
+    if (historyIndex.value < settingsHistory.value.length - 1) {
+      historyIndex.value++
+      settings.value = { ...settingsHistory.value[historyIndex.value] }
+      saveSettings()
+      return true
+    }
+    return false
+  }
+  
+  // 检查是否可以撤销/重做
+  function canUndo(): boolean {
+    return historyIndex.value > 0
+  }
+  
+  function canRedo(): boolean {
+    return historyIndex.value < settingsHistory.value.length - 1
   }
   
   // 导出设置
@@ -114,11 +182,33 @@ export const useSettingsStore = defineStore('settings', () => {
       const imported = JSON.parse(jsonString)
       settings.value = { ...DEFAULT_SETTINGS, ...imported }
       saveSettings()
+      recordHistory()
       return true
     } catch (error) {
       console.error('Failed to import settings:', error)
       return false
     }
+  }
+  
+  // 获取设置差异（与默认值比较）
+  function getSettingsDiff(): Partial<UserSettings> {
+    const diff: Partial<UserSettings> = {}
+    for (const key of Object.keys(DEFAULT_SETTINGS) as (keyof UserSettings)[]) {
+      if (JSON.stringify(settings.value[key]) !== JSON.stringify(DEFAULT_SETTINGS[key])) {
+        (diff as Record<string, unknown>)[key] = settings.value[key]
+      }
+    }
+    return diff
+  }
+  
+  // 检查设置是否为默认值
+  function isDefault<K extends keyof UserSettings>(key: K): boolean {
+    return JSON.stringify(settings.value[key]) === JSON.stringify(DEFAULT_SETTINGS[key])
+  }
+  
+  // 检查是否所有设置都是默认值
+  function isAllDefault(): boolean {
+    return Object.keys(getSettingsDiff()).length === 0
   }
   
   // 监听设置变化，自动保存
@@ -139,6 +229,8 @@ export const useSettingsStore = defineStore('settings', () => {
     // 状态
     settings,
     isInitialized,
+    settingsHistory,
+    historyIndex,
     
     // 方法
     loadSettings,
@@ -146,8 +238,16 @@ export const useSettingsStore = defineStore('settings', () => {
     updateSetting,
     updateSettings,
     resetSettings,
+    resetSetting,
+    undoSettings,
+    redoSettings,
+    canUndo,
+    canRedo,
     exportSettings,
     importSettings,
+    getSettingsDiff,
+    isDefault,
+    isAllDefault,
   }
 })
 

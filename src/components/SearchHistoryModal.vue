@@ -24,7 +24,7 @@
             </div>
             <div>
               <h1 class="text-sm font-bold text-gray-800 dark:text-white">搜索历史</h1>
-              <p v-if="history.length > 0" class="text-xs text-gray-500 dark:text-slate-400">{{ history.length }} 条记录</p>
+              <p v-if="historyStore.historyCount > 0" class="text-xs text-gray-500 dark:text-slate-400">{{ historyStore.historyCount }} 条记录</p>
             </div>
           </div>
 
@@ -140,14 +140,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed, watch, onMounted, onUnmounted } from 'vue'
 import { useUIStore } from '@/stores/ui'
-import { loadSearchHistory, clearSearchHistory as clearHistoryStorage, type SearchHistory } from '@/utils/persistence'
+import { useHistoryStore } from '@/stores/history'
+import type { SearchHistory } from '@/utils/persistence'
 import { playSelect, playTap, playCaution, playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import { History, Trash2, X, Gamepad2, Wrench, Hash, Clock, Search } from 'lucide-vue-next'
 
 const uiStore = useUIStore()
-const history = ref<SearchHistory[]>([])
+const historyStore = useHistoryStore()
+
+// 使用 historyStore 的响应式数据
+const history = computed(() => historyStore.searchHistory)
 
 const emit = defineEmits<{
   select: [history: SearchHistory]
@@ -155,7 +159,7 @@ const emit = defineEmits<{
 
 // 加载历史记录
 function loadHistory() {
-  history.value = loadSearchHistory()
+  historyStore.loadHistory()
 }
 
 // 选择历史记录
@@ -173,21 +177,14 @@ function handleSelectHistory(item: SearchHistory) {
 function handleClearHistory() {
   playCaution()
   if (confirm('确定要清空所有搜索历史吗？')) {
-    clearHistoryStorage()
-    history.value = []
+    historyStore.clearHistory()
   }
 }
 
 // 删除单条记录
 function handleRemoveItem(index: number) {
   playTap()
-  history.value.splice(index, 1)
-  if (history.value.length > 0) {
-    // 使用与 persistence.ts 一致的 key
-    window.localStorage.setItem('searchgal_history', JSON.stringify(history.value))
-  } else {
-    clearHistoryStorage()
-  }
+  historyStore.removeHistory(index)
 }
 
 // 关闭模态框

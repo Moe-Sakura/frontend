@@ -461,6 +461,9 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
+import { useStatsStore } from '@/stores/stats'
+import { useCacheStore } from '@/stores/cache'
+import { useHistoryStore } from '@/stores/history'
 import { searchGameStream, fetchVndbData } from '@/api/search'
 import { playSwipe, playToggle, playCelebration, playCaution, playType } from '@/composables/useSound'
 import { useDebouncedClick } from '@/composables/useDebounce'
@@ -493,10 +496,15 @@ import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from '@/ut
 import { saveSearchHistory } from '@/utils/persistence'
 
 const searchStore = useSearchStore()
+const statsStore = useStatsStore()
+const cacheStore = useCacheStore()
+const historyStore = useHistoryStore()
+
 const searchQuery = ref('')
 const customApi = ref('')
 const searchMode = ref<'game' | 'patch'>('game')
 let cleanupURLListener: (() => void) | null = null
+let searchStartTime = 0
 
 // 友情链接
 import friendsData from '@/data/friends.json'
@@ -601,6 +609,7 @@ async function handleSearch() {
   searchStore.isSearching = true
   searchStore.errorMessage = ''
   hasScrolledToResults = false // 重置滚动标志
+  searchStartTime = performance.now() // 记录搜索开始时间
 
   const searchParams = new URLSearchParams()
   searchParams.set('game', searchQuery.value.trim())
@@ -612,14 +621,23 @@ async function handleSearch() {
   // 在 game 模式下，搜索开始时就并行发起 VNDB 请求
   const queryForVndb = searchQuery.value.trim()
   if (searchMode.value === 'game') {
-    fetchVndbData(queryForVndb).then((vndbData) => {
-      // 检查搜索词是否仍匹配（防止快速切换搜索时数据错乱）
-      if (vndbData && searchStore.searchQuery === queryForVndb) {
-        searchStore.vndbInfo = vndbData
-      }
-    }).catch(() => {
-      // VNDB 请求失败不影响主搜索
-    })
+    // 先检查缓存
+    const cachedVndb = cacheStore.getVndbInfo(queryForVndb)
+    if (cachedVndb) {
+      searchStore.vndbInfo = cachedVndb
+      statsStore.recordCacheHit('vndb')
+    } else {
+      fetchVndbData(queryForVndb).then((vndbData) => {
+        // 检查搜索词是否仍匹配（防止快速切换搜索时数据错乱）
+        if (vndbData && searchStore.searchQuery === queryForVndb) {
+          searchStore.vndbInfo = vndbData
+          // 缓存 VNDB 数据
+          cacheStore.cacheVndbInfo(queryForVndb, vndbData)
+        }
+      }).catch(() => {
+        // VNDB 请求失败不影响主搜索
+      })
+    }
   }
 
   try {
@@ -659,6 +677,11 @@ async function handleSearch() {
         searchStore.isSearching = false
         playCelebration() // 搜索完成音效
         
+        // 计算搜索耗时并记录统计
+        const searchDuration = Math.round(performance.now() - searchStartTime)
+        const resultCount = searchStore.totalResults
+        statsStore.recordSearch(searchMode.value, resultCount, searchDuration)
+        
         // 如果结果不足 3 个但有结果，且还没滚动过，则现在滚动
         if (!hasScrolledToResults && searchStore.platformResults.size > 0) {
           hasScrolledToResults = true
@@ -675,12 +698,18 @@ async function handleSearch() {
           })
         }
         
-        // 保存搜索历史
-        const resultCount = searchStore.totalResults
+        // 保存搜索历史到持久化存储
         saveSearchHistory({
           query: searchQuery.value.trim(),
           mode: searchMode.value,
           timestamp: Date.now(),
+          resultCount,
+        })
+        
+        // 同时添加到 historyStore
+        historyStore.addHistory({
+          query: searchQuery.value.trim(),
+          mode: searchMode.value,
           resultCount,
         })
       },
