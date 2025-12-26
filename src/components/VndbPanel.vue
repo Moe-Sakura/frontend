@@ -730,8 +730,13 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   
   // 检查缓存的截图是否已加载
   if (newInfo?.screenshots && newInfo.screenshots.length > 0) {
+    const vnIdForScreenshots = newInfo.id
     nextTick(() => {
       requestAnimationFrame(() => {
+        // 检查是否仍是同一个游戏
+        if (currentVnId.value !== vnIdForScreenshots) {
+          return
+        }
         const screenshotImgs = modalRef.value?.querySelectorAll('img[alt*="截图"]')
         if (screenshotImgs) {
           for (let i = 0; i < screenshotImgs.length; i++) {

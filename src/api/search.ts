@@ -598,7 +598,7 @@ export async function fetchVndbQuotes(vnId: string): Promise<VndbQuote[]> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        filters: ['vn', '=', ['id', '=', vnId]],
+        filters: ['vn', '=', vnId],
         fields: 'id, quote, character{id, name, original}',
         results: 10,
       }),
