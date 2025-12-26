@@ -56,6 +56,61 @@
         <!-- 内容区域 -->
         <div class="flex-1 overflow-y-auto custom-scrollbar">
           <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+            <!-- 主题设置卡片 -->
+            <div
+              v-anime:100="'cardIn'"
+              class="settings-card"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                  <Palette :size="20" class="text-white" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">外观主题</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">选择亮色、暗色或跟随系统</p>
+                </div>
+              </div>
+
+              <!-- 主题选项 -->
+              <div class="grid grid-cols-3 gap-3">
+                <button
+                  v-for="option in themeOptions"
+                  :key="option.value"
+                  type="button"
+                  :class="[
+                    'flex flex-col items-center gap-2 p-4 rounded-xl transition-all duration-200',
+                    uiStore.themeMode === option.value
+                      ? 'bg-[#ff1493]/10 border-2 border-[#ff1493] dark:border-[#ff69b4]'
+                      : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-pink-200 dark:hover:border-pink-900'
+                  ]"
+                  @click="handleThemeChange(option.value)"
+                >
+                  <!-- 图标 -->
+                  <div
+                    :class="[
+                      'w-10 h-10 rounded-xl flex items-center justify-center transition-colors',
+                      uiStore.themeMode === option.value
+                        ? 'bg-[#ff1493] text-white'
+                        : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
+                    ]"
+                  >
+                    <component :is="option.icon" :size="20" />
+                  </div>
+                  <!-- 标签 -->
+                  <span
+                    :class="[
+                      'text-sm font-medium',
+                      uiStore.themeMode === option.value
+                        ? 'text-[#ff1493] dark:text-[#ff69b4]'
+                        : 'text-gray-700 dark:text-slate-300'
+                    ]"
+                  >
+                    {{ option.label }}
+                  </span>
+                </button>
+              </div>
+            </div>
+
             <!-- API 设置卡片 -->
             <div
               v-anime:150="'cardIn'"
@@ -108,11 +163,11 @@
                       {{ option.label }}
                     </span>
                   </div>
-                  <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧 -->
+                  <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧靠右 -->
                   <span 
                     v-if="option.value !== 'custom'" 
                     v-text-scroll
-                    class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-0 flex-1 min-w-0"
+                    class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-auto sm:text-right truncate max-w-[50%]"
                   >
                     {{ getApiUrl(option.value) }}
                   </span>
@@ -272,7 +327,26 @@ import {
   Check,
   Github,
   X,
+  Palette,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-vue-next'
+import { useUIStore, type ThemeMode } from '@/stores/ui'
+
+const uiStore = useUIStore()
+
+// 主题选项
+const themeOptions = [
+  { value: 'light' as ThemeMode, label: '亮色', icon: Sun },
+  { value: 'system' as ThemeMode, label: '系统', icon: Monitor },
+  { value: 'dark' as ThemeMode, label: '暗色', icon: Moon },
+]
+
+function handleThemeChange(mode: ThemeMode) {
+  playToggle()
+  uiStore.setThemeMode(mode)
+}
 
 const props = defineProps<{
   isOpen: boolean

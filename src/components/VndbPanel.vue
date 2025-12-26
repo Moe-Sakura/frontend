@@ -38,7 +38,7 @@
               class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
               :class="isTranslatingAll 
                 ? 'bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 cursor-wait' 
-                : 'text-white bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25 hover:shadow-xl'"
+                : 'text-white bg-violet-500 hover:bg-violet-600'"
               :disabled="isTranslatingAll"
               @click="handleTranslateAll"
             >
@@ -61,7 +61,7 @@
               :href="vndbUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-white bg-gradient-to-r from-[#ff1493] to-[#d946ef] shadow-lg shadow-pink-500/25 hover:shadow-xl transition-shadow"
+              class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-white bg-[#ff1493] hover:bg-[#e6007f]"
             >
               <ExternalLink :size="14" />
               <span class="hidden sm:inline">VNDB</span>
@@ -488,7 +488,7 @@
                 <button
                   v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
                   :key="index"
-                  class="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all"
+                  class="group block overflow-hidden rounded-xl hover:scale-[1.02] transition-transform"
                   @click="openGallery(index + 1)"
                 >
                   <img

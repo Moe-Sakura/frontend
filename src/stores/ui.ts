@@ -1,9 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 
+// 主题模式类型
+export type ThemeMode = 'system' | 'light' | 'dark'
+
 // 持久化的 UI 状态类型
 export interface PersistedUIState {
   // 主题
+  themeMode: ThemeMode
   isDarkMode: boolean
   customCSS: string
   
@@ -30,6 +34,7 @@ const SESSION_KEY = 'ui-session-state'
 
 // 默认持久化状态
 const DEFAULT_PERSISTED_STATE: PersistedUIState = {
+  themeMode: 'system',
   isDarkMode: false,
   customCSS: '',
   isCommentsModalOpen: false,
@@ -48,8 +53,10 @@ export const useUIStore = defineStore('ui', () => {
   const isInitialized = ref(false)
 
   // 主题相关
+  const themeMode = ref<ThemeMode>('system')
   const isDarkMode = ref(false)
   const customCSS = ref('')
+  let systemThemeCleanup: (() => void) | null = null
   
   // 模态框状态
   const isCommentsModalOpen = ref(false)
@@ -105,16 +112,63 @@ export const useUIStore = defineStore('ui', () => {
   })
   
   // 方法 - 主题
+  
+  /**
+   * 获取系统主题偏好
+   */
+  function getSystemTheme(): boolean {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
+  
+  /**
+   * 应用主题到 DOM
+   */
+  function applyTheme(dark: boolean) {
+    isDarkMode.value = dark
+    document.documentElement.classList.toggle('dark', dark)
+  }
+  
+  /**
+   * 设置主题模式
+   */
+  function setThemeMode(mode: ThemeMode) {
+    themeMode.value = mode
+    
+    // 清理之前的系统主题监听
+    if (systemThemeCleanup) {
+      systemThemeCleanup()
+      systemThemeCleanup = null
+    }
+    
+    if (mode === 'system') {
+      // 应用系统主题
+      applyTheme(getSystemTheme())
+      
+      // 监听系统主题变化
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handler = (e: MediaQueryListEvent) => {
+        if (themeMode.value === 'system') {
+          applyTheme(e.matches)
+        }
+      }
+      mediaQuery.addEventListener('change', handler)
+      systemThemeCleanup = () => mediaQuery.removeEventListener('change', handler)
+    } else {
+      // 应用固定主题
+      applyTheme(mode === 'dark')
+    }
+  }
+  
   function toggleDarkMode() {
-    isDarkMode.value = !isDarkMode.value
-    document.documentElement.classList.toggle('dark', isDarkMode.value)
-    localStorage.setItem('darkMode', isDarkMode.value ? 'true' : 'false')
+    // 切换主题模式：system -> light -> dark -> system
+    const modes: ThemeMode[] = ['system', 'light', 'dark']
+    const currentIndex = modes.indexOf(themeMode.value)
+    const nextIndex = (currentIndex + 1) % modes.length
+    setThemeMode(modes[nextIndex])
   }
   
   function setDarkMode(value: boolean) {
-    isDarkMode.value = value
-    document.documentElement.classList.toggle('dark', value)
-    localStorage.setItem('darkMode', value ? 'true' : 'false')
+    setThemeMode(value ? 'dark' : 'light')
   }
   
   function setCustomCSS(css: string) {
@@ -213,7 +267,7 @@ export const useUIStore = defineStore('ui', () => {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
         const parsed: Partial<PersistedUIState> = JSON.parse(saved)
-        isDarkMode.value = parsed.isDarkMode ?? DEFAULT_PERSISTED_STATE.isDarkMode
+        themeMode.value = parsed.themeMode ?? DEFAULT_PERSISTED_STATE.themeMode
         customCSS.value = parsed.customCSS ?? DEFAULT_PERSISTED_STATE.customCSS
         showSearchHistory.value = parsed.showSearchHistory ?? DEFAULT_PERSISTED_STATE.showSearchHistory
       }
@@ -249,7 +303,7 @@ export const useUIStore = defineStore('ui', () => {
   function savePersistedState() {
     try {
       const state: Partial<PersistedUIState> = {
-        isDarkMode: isDarkMode.value,
+        themeMode: themeMode.value,
         customCSS: customCSS.value,
         showSearchHistory: showSearchHistory.value,
         lastVisitTime: Date.now(),
@@ -280,7 +334,7 @@ export const useUIStore = defineStore('ui', () => {
 
   // 监听需要持久化的状态变化（localStorage - 长期偏好）
   watch(
-    [isDarkMode, customCSS, showSearchHistory],
+    [themeMode, customCSS, showSearchHistory],
     () => {
       if (isInitialized.value) {
         savePersistedState()
@@ -313,15 +367,8 @@ export const useUIStore = defineStore('ui', () => {
     // 加载会话状态（刷新恢复）
     loadSessionState()
 
-    // 如果没有保存的主题偏好，跟随系统
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (!saved) {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      isDarkMode.value = prefersDark
-    }
-
-    // 应用主题
-    document.documentElement.classList.toggle('dark', isDarkMode.value)
+    // 应用主题模式
+    setThemeMode(themeMode.value)
     
     isInitialized.value = true
     
@@ -362,6 +409,7 @@ export const useUIStore = defineStore('ui', () => {
   return {
     // 状态
     isInitialized,
+    themeMode,
     isDarkMode,
     customCSS,
     isCommentsModalOpen,
@@ -385,6 +433,7 @@ export const useUIStore = defineStore('ui', () => {
     activeModalsCount,
     
     // 方法
+    setThemeMode,
     toggleDarkMode,
     setDarkMode,
     setCustomCSS,
