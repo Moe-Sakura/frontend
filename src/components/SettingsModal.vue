@@ -139,7 +139,8 @@
                   <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧 -->
                   <span 
                     v-if="option.value !== 'custom'" 
-                    class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-0 truncate"
+                    v-text-scroll
+                    class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-0 flex-1 min-w-0"
                   >
                     {{ getApiUrl(option.value) }}
                   </span>

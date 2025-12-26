@@ -326,37 +326,44 @@
                 <h3 class="font-bold text-gray-800 dark:text-white">角色配音</h3>
                 <span class="text-xs text-gray-400 dark:text-slate-500">({{ searchStore.vndbInfo.va.length }})</span>
               </div>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 <a
-                  v-for="(voiceActor, index) in (expandedSections.va ? searchStore.vndbInfo.va : searchStore.vndbInfo.va.slice(0, 8))"
+                  v-for="(voiceActor, index) in (expandedSections.va ? searchStore.vndbInfo.va : searchStore.vndbInfo.va.slice(0, 10))"
                   :key="index"
                   :href="`https://vndb.org/${voiceActor.character?.id}`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex flex-col items-center p-2 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-all hover:scale-105 group"
+                  class="relative rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:scale-105 transition-all group"
                 >
-                  <div class="relative w-14 h-18 sm:w-16 sm:h-20 mb-2 rounded-lg overflow-hidden shadow-md">
+                  <!-- 图片区域 -->
+                  <div class="w-full relative">
+                    <!-- 骨架屏占位 (padding-bottom: 133.33% = 3:4 比例) -->
+                    <div class="w-full pb-[133.33%] skeleton bg-cyan-100 dark:bg-cyan-900/30" />
                     <img 
                       v-if="getCharacterImage(voiceActor.character?.id)" 
                       :src="getCharacterImage(voiceActor.character?.id)!" 
                       :alt="voiceActor.character?.name"
-                      class="w-full h-full object-cover"
+                      class="absolute inset-0 w-full h-full object-cover"
                       loading="lazy"
+                      @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
                     />
-                    <div v-else class="w-full h-full bg-gradient-to-br from-cyan-200 to-cyan-300 dark:from-cyan-800 dark:to-cyan-900 flex items-center justify-center">
-                      <Users :size="20" class="text-cyan-400 dark:text-cyan-600" />
+                    <div v-else class="absolute inset-0 flex items-center justify-center bg-cyan-50 dark:bg-cyan-900/30">
+                      <Users :size="24" class="text-cyan-400 dark:text-cyan-600" />
                     </div>
                   </div>
-                  <p class="text-xs font-medium text-cyan-700 dark:text-cyan-400 text-center truncate w-full group-hover:underline">
-                    {{ voiceActor.character?.original || voiceActor.character?.name }}
-                  </p>
-                  <p class="text-[10px] text-gray-500 dark:text-slate-400 text-center truncate w-full">
-                    CV: {{ voiceActor.staff?.original || voiceActor.staff?.name }}
-                  </p>
+                  <!-- 文字覆盖层 -->
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-2 pt-6">
+                    <p class="text-xs font-medium text-white text-center truncate group-hover:underline">
+                      {{ voiceActor.character?.original || voiceActor.character?.name }}
+                    </p>
+                    <p class="text-[10px] text-white/70 text-center truncate">
+                      CV: {{ voiceActor.staff?.original || voiceActor.staff?.name }}
+                    </p>
+                  </div>
                 </a>
               </div>
               <button
-                v-if="searchStore.vndbInfo.va.length > 8"
+                v-if="searchStore.vndbInfo.va.length > 10"
                 class="w-full mt-2 py-1.5 text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
                 @click="toggleSection('va')"
               >
@@ -425,33 +432,40 @@
                 <h3 class="font-bold text-gray-800 dark:text-white">角色</h3>
                 <span class="text-xs text-gray-400 dark:text-slate-500">({{ characters.length }})</span>
               </div>
-              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 <a
                   v-for="(char, index) in (expandedSections.characters ? characters : characters.slice(0, 10))"
                   :key="index"
                   :href="`https://vndb.org/${char.id}`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex flex-col items-center p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-all hover:scale-105 group"
+                  class="relative rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:scale-105 transition-all group"
                 >
-                  <div class="relative w-16 h-20 sm:w-20 sm:h-24 mb-2 rounded-lg overflow-hidden shadow-md">
+                  <!-- 图片区域 -->
+                  <div class="w-full relative">
+                    <!-- 骨架屏占位 (padding-bottom: 133.33% = 3:4 比例) -->
+                    <div class="w-full pb-[133.33%] skeleton bg-rose-100 dark:bg-rose-900/30" />
                     <img 
                       v-if="char.image" 
                       :src="char.image" 
                       :alt="char.name"
-                      class="w-full h-full object-cover"
+                      class="absolute inset-0 w-full h-full object-cover"
                       loading="lazy"
+                      @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
                     />
-                    <div v-else class="w-full h-full bg-gradient-to-br from-rose-200 to-rose-300 dark:from-rose-800 dark:to-rose-900 flex items-center justify-center">
+                    <div v-else class="absolute inset-0 flex items-center justify-center">
                       <Users :size="24" class="text-rose-400 dark:text-rose-600" />
                     </div>
                   </div>
-                  <p class="text-xs font-medium text-rose-700 dark:text-rose-400 text-center truncate w-full group-hover:underline">
-                    {{ char.original || char.name }}
-                  </p>
-                  <p v-if="char.sex" class="text-[10px] text-gray-500 dark:text-slate-400 text-center">
-                    {{ formatSex(char.sex) }}{{ char.age ? ` · ${char.age}岁` : '' }}
-                  </p>
+                  <!-- 文字覆盖层 -->
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-2 pt-6">
+                    <p class="text-xs font-medium text-white text-center truncate group-hover:underline">
+                      {{ char.original || char.name }}
+                    </p>
+                    <p v-if="char.sex" class="text-[10px] text-white/70 text-center">
+                      {{ formatSex(char.sex) }}{{ char.age ? ` · ${char.age}岁` : '' }}
+                    </p>
+                  </div>
                 </a>
               </div>
               <button
@@ -535,8 +549,12 @@
               </div>
             </div>
 
-            <!-- 游戏截图 -->
-            <div v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0" class="vndb-card">
+            <!-- 游戏截图 (等待首张图片加载后显示) -->
+            <div 
+              v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0" 
+              v-show="screenshotsReady"
+              class="vndb-card"
+            >
               <div class="flex items-center gap-2 mb-4">
                 <Image :size="18" class="text-[#d946ef]" />
                 <h3 class="font-bold text-gray-800 dark:text-white">游戏截图</h3>
@@ -545,7 +563,7 @@
                 <button
                   v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
                   :key="index"
-                  class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all bg-gray-100 dark:bg-slate-700"
+                  class="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all"
                   @click="openGallery(index + 1)"
                 >
                   <img
@@ -553,6 +571,7 @@
                     :alt="`${searchStore.vndbInfo.mainName} 截图 ${index + 1}`"
                     class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
+                    @load="screenshotsReady = true"
                     @error="handleImageError"
                   />
                 </button>
@@ -566,7 +585,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { translateText, fetchVndbCharacters, fetchVndbQuotes } from '@/api/search'
@@ -662,6 +681,9 @@ const hasAnyTranslation = computed(() =>
   translatedDescription.value || translatedTags.value.size > 0 || translatedQuotes.value.size > 0,
 )
 
+// 截图加载状态
+const screenshotsReady = ref(false)
+
 // 展开/收起状态
 const expandedSections = ref({
   names: false,
@@ -726,6 +748,8 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   showOriginalQuotes.value = false
   isTranslatingQuotes.value = false
   translateQuotesError.value = false
+  // 重置截图加载状态
+  screenshotsReady.value = false
   // 重置角色和名言
   characters.value = []
   quotes.value = []
@@ -741,6 +765,22 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   // 如果有游戏 ID，加载角色和名言
   if (newInfo?.id) {
     loadCharactersAndQuotes(newInfo.id)
+  }
+  
+  // 检查缓存的截图是否已加载（nextTick 后检查 img.complete）
+  if (newInfo?.screenshots && newInfo.screenshots.length > 0) {
+    nextTick(() => {
+      // 延迟一帧确保 DOM 已渲染
+      requestAnimationFrame(() => {
+        const vndbContent = document.querySelector('.vndb-content')
+        if (vndbContent) {
+          const firstScreenshot = vndbContent.querySelector('img[loading="lazy"]') as HTMLImageElement
+          if (firstScreenshot?.complete && firstScreenshot.naturalHeight > 0) {
+            screenshotsReady.value = true
+          }
+        }
+      })
+    })
   }
 })
 
@@ -848,6 +888,7 @@ async function handleTranslateQuotes() {
     return
   }
 
+  playClick()
   isTranslatingQuotes.value = true
   translateQuotesError.value = false
 

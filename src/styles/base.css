@@ -314,5 +314,67 @@
       animation: none !important;
     }
   }
+
+  /* ============================================
+     骨架屏加载动画
+     ============================================ */
+  
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+      90deg,
+      rgba(200, 200, 200, 0.1) 0%,
+      rgba(200, 200, 200, 0.3) 50%,
+      rgba(200, 200, 200, 0.1) 100%
+    );
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 100%
+    );
+    animation: skeleton-shimmer 1.5s infinite;
+  }
+
+  .dark .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(100, 100, 100, 0.1) 0%,
+      rgba(100, 100, 100, 0.3) 50%,
+      rgba(100, 100, 100, 0.1) 100%
+    );
+  }
+
+  .dark .skeleton::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%
+    );
+  }
+
+  @keyframes skeleton-shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* 减少动画偏好时禁用骨架屏动画 */
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      animation: none;
+    }
+  }
 }
 

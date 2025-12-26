@@ -575,8 +575,8 @@ export async function fetchVndbCharacters(vnId: string): Promise<VndbCharacter[]
     // 使用代理替换 URL
     if (ENABLE_VNDB_IMAGE_PROXY && isProxyAvailable) {
       characters.forEach((char) => {
-        if (char.image) {
-          char.image = char.image.replace('https://t.vndb.org/', VNDB_IMAGE_PROXY)
+        if (char.image && char.image.startsWith('https://t.vndb.org/')) {
+          char.image = VNDB_IMAGE_PROXY_URL + char.image
         }
       })
     }
