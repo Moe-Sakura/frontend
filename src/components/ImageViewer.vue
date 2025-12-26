@@ -5,7 +5,6 @@
  */
 
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { animate } from '@/composables/useAnime'
 import {
   X,
   ChevronLeft,
@@ -68,26 +67,9 @@ const imageStyle = computed(() => {
   }
 })
 
-// 动画函数
-function onEnter(el: Element, done: () => void) {
+// 进入动画时播放音效
+function onEnter() {
   playTransitionUp()
-  animate(el as HTMLElement, {
-    opacity: [0, 1],
-    scale: [0.95, 1],
-    duration: 250,
-    ease: 'outCubic',
-    complete: done,
-  })
-}
-
-function onLeave(el: Element, done: () => void) {
-  animate(el as HTMLElement, {
-    opacity: [1, 0],
-    scale: [1, 0.95],
-    duration: 200,
-    ease: 'inCubic',
-    complete: done,
-  })
 }
 
 // 监听图片切换
