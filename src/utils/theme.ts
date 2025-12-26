@@ -91,3 +91,44 @@ export function applyCustomCSS(css: string): void {
   }
 }
 
+/**
+ * 应用自定义JS到页面
+ */
+export function applyCustomJS(js: string): void {
+  // 移除旧的自定义脚本
+  const oldScript = document.getElementById('custom-user-scripts')
+  if (oldScript) {
+    oldScript.remove()
+  }
+  
+  // 如果有新的JS，执行脚本
+  if (js.trim()) {
+    try {
+      // 使用 Function 构造器创建并执行脚本
+      const script = new Function(js)
+      script()
+    } catch (error) {
+      console.error('自定义脚本执行失败:', error)
+    }
+  }
+}
+
+/**
+ * 应用自定义HTML到页面
+ */
+export function applyCustomHTML(html: string): void {
+  // 移除旧的自定义 HTML 容器
+  const oldContainer = document.getElementById('custom-user-html')
+  if (oldContainer) {
+    oldContainer.remove()
+  }
+  
+  // 如果有新的 HTML，添加到页面
+  if (html.trim()) {
+    const container = document.createElement('div')
+    container.id = 'custom-user-html'
+    container.innerHTML = html
+    document.body.appendChild(container)
+  }
+}
+

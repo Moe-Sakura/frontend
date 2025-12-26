@@ -5,121 +5,121 @@
       <LazyRender
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
+        v-memo="[platformName, platformData.name, platformData.color, platformData.items.length, platformData.displayedCount, platformData.error, platformData.url]"
         :once="true"
         min-height="200px"
         root-margin="400px 0px"
       >
         <div
-          v-memo="[platformName, platformData.name, platformData.color, platformData.items.length, platformData.displayedCount, platformData.error, platformData.url]"
           :data-platform="platformName"
           class="result-card rounded-none sm:rounded-2xl animate-fade-in-up border-2 content-auto"
           :class="getBorderClass(platformData.color)"
         >
-        <div class="p-4 sm:p-5 md:p-6">
-          <!-- 站点标题行：网站名称 + 推荐标签 + 资源标签 + 结果数 -->
-          <div
-            class="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 pb-3 border-b"
-            :class="getBorderBottomClass(platformData.color)"
-          >
-            <!-- 网站名称（可点击） -->
-            <a
-              v-if="platformData.url"
-              :href="platformData.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-xl sm:text-2xl font-bold flex items-center gap-2 hover:opacity-80 cursor-pointer"
-              :class="getHeaderTextColor(platformData.color)"
-              :title="`访问 ${platformData.name}`"
-            >
-              <component :is="getPlatformIconComponent(platformData.color)" :size="24" />
-              {{ platformData.name }}
-              <ExternalLink :size="16" class="opacity-70" />
-            </a>
+          <div class="p-4 sm:p-5 md:p-6">
+            <!-- 站点标题行：网站名称 + 推荐标签 + 资源标签 + 结果数 -->
             <div
-              v-else
-              class="text-xl sm:text-2xl font-bold flex items-center gap-2"
-              :class="getHeaderTextColor(platformData.color)"
+              class="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 pb-3 border-b"
+              :class="getBorderBottomClass(platformData.color)"
             >
-              <component :is="getPlatformIconComponent(platformData.color)" :size="24" />
-              {{ platformData.name }}
-            </div>
-            
-            <!-- 推荐/付费标签 -->
-            <span
-              v-if="getRecommendText(platformData.color)"
-              class="px-3 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-1.5"
-              :class="getRecommendChipClass(platformData.color)"
-            >
-              <component :is="platformData.color === 'red' ? AlertTriangle : Crown" :size="14" />
-              {{ getRecommendText(platformData.color) }}
-            </span>
-            
-            <!-- 站点的所有标签（去重） -->
-            <template v-for="tag in getUniqueTags(platformData)" :key="tag">
-              <span
-                :class="getTagClass(tag)"
-                class="px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 border"
+              <!-- 网站名称（可点击） -->
+              <a
+                v-if="platformData.url"
+                :href="platformData.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-xl sm:text-2xl font-bold flex items-center gap-2 hover:opacity-80 cursor-pointer"
+                :class="getHeaderTextColor(platformData.color)"
+                :title="`访问 ${platformData.name}`"
               >
-                <component :is="getTagIconComponent(tag)" :size="12" />
-                <span>{{ getTagLabel(tag) }}</span>
-              </span>
-            </template>
+                <component :is="getPlatformIconComponent(platformData.color)" :size="24" />
+                {{ platformData.name }}
+                <ExternalLink :size="16" class="opacity-70" />
+              </a>
+              <div
+                v-else
+                class="text-xl sm:text-2xl font-bold flex items-center gap-2"
+                :class="getHeaderTextColor(platformData.color)"
+              >
+                <component :is="getPlatformIconComponent(platformData.color)" :size="24" />
+                {{ platformData.name }}
+              </div>
             
-            <!-- 结果数量 -->
-            <span
-              class="ml-auto px-3 py-1.5 rounded-full font-bold text-sm shadow-md flex items-center gap-2 shrink-0"
-              :class="getCountBadgeClass(platformData.color)"
-            >
-              <List :size="16" />
-              {{ platformData.items.length }}
-            </span>
-          </div>
+              <!-- 推荐/付费标签 -->
+              <span
+                v-if="getRecommendText(platformData.color)"
+                class="px-3 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-1.5"
+                :class="getRecommendChipClass(platformData.color)"
+              >
+                <component :is="platformData.color === 'red' ? AlertTriangle : Crown" :size="14" />
+                {{ getRecommendText(platformData.color) }}
+              </span>
+            
+              <!-- 站点的所有标签（去重） -->
+              <template v-for="tag in getUniqueTags(platformData)" :key="tag">
+                <span
+                  :class="getTagClass(tag)"
+                  class="px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 border"
+                >
+                  <component :is="getTagIconComponent(tag)" :size="12" />
+                  <span>{{ getTagLabel(tag) }}</span>
+                </span>
+              </template>
+            
+              <!-- 结果数量 -->
+              <span
+                class="ml-auto px-3 py-1.5 rounded-full font-bold text-sm shadow-md flex items-center gap-2 shrink-0"
+                :class="getCountBadgeClass(platformData.color)"
+              >
+                <List :size="16" />
+                {{ platformData.items.length }}
+              </span>
+            </div>
           
-          <!-- 错误信息 -->
-          <div v-if="platformData.error" class="flex items-center gap-3 p-4 mb-4 bg-red-50/90 dark:bg-red-900/50 border-2 border-red-300 dark:border-red-700 rounded-xl">
-            <AlertTriangle :size="20" class="text-red-600 dark:text-red-400" />
-            <span class="text-red-700 dark:text-red-300 font-medium">{{ platformData.error }}</span>
-          </div>
+            <!-- 错误信息 -->
+            <div v-if="platformData.error" class="flex items-center gap-3 p-4 mb-4 bg-red-50/90 dark:bg-red-900/50 border-2 border-red-300 dark:border-red-700 rounded-xl">
+              <AlertTriangle :size="20" class="text-red-600 dark:text-red-400" />
+              <span class="text-red-700 dark:text-red-300 font-medium">{{ platformData.error }}</span>
+            </div>
           
-          <!-- 搜索结果列表 -->
-          <div v-if="getDisplayedResults(platformData).length > 0" class="results-list contain-layout space-y-2">
-            <ResultItem
-              v-for="(result, index) in getDisplayedResults(platformData)"
-              :key="result.url || index"
-              :index="index"
-              :source="result"
-            />
-          </div>
+            <!-- 搜索结果列表 -->
+            <div v-if="getDisplayedResults(platformData).length > 0" class="results-list contain-layout space-y-2">
+              <ResultItem
+                v-for="(result, index) in getDisplayedResults(platformData)"
+                :key="result.url || index"
+                :index="index"
+                :source="result"
+              />
+            </div>
           
-          <!-- 加载更多按钮 -->
-          <div v-if="platformData.items.length > platformData.displayedCount" class="load-more mt-6 flex justify-center">
-            <button
-              class="px-6 py-3 rounded-xl
+            <!-- 加载更多按钮 -->
+            <div v-if="platformData.items.length > platformData.displayedCount" class="load-more mt-6 flex justify-center">
+              <button
+                class="px-6 py-3 rounded-xl
                      bg-theme-primary/90 dark:bg-theme-accent/90 text-white font-bold
                      border border-white/20
                      hover:scale-105 active:scale-95
                      transition-transform duration-200
                      flex items-center gap-2"
-              @click="loadMore(platformName)"
-            >
-              <ArrowDown :size="18" />
-              <span>加载更多 ({{ Math.min(20, platformData.items.length - platformData.displayedCount) }})</span>
-            </button>
-          </div>
+                @click="loadMore(platformName)"
+              >
+                <ArrowDown :size="18" />
+                <span>加载更多 ({{ Math.min(20, platformData.items.length - platformData.displayedCount) }})</span>
+              </button>
+            </div>
           
-          <!-- 已加载全部提示 -->
-          <div v-else-if="platformData.items.length > 10" class="all-loaded mt-6 text-center">
-            <span class="text-sm text-gray-500 dark:text-slate-400 flex items-center justify-center gap-2">
-              <CheckCircle :size="16" class="text-theme-primary dark:text-theme-accent" />
-              <span>已加载全部 {{ platformData.items.length }} 条结果</span>
-            </span>
-          </div>
+            <!-- 已加载全部提示 -->
+            <div v-else-if="platformData.items.length > 10" class="all-loaded mt-6 text-center">
+              <span class="text-sm text-gray-500 dark:text-slate-400 flex items-center justify-center gap-2">
+                <CheckCircle :size="16" class="text-theme-primary dark:text-theme-accent" />
+                <span>已加载全部 {{ platformData.items.length }} 条结果</span>
+              </span>
+            </div>
           
-          <div v-else-if="platformData.items.length === 0" class="no-results text-gray-500 text-center py-4">
-            该平台暂无搜索结果
+            <div v-else-if="platformData.items.length === 0" class="no-results text-gray-500 text-center py-4">
+              该平台暂无搜索结果
+            </div>
           </div>
         </div>
-      </div>
       </LazyRender>
     </div>
   </div>

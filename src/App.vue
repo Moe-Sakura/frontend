@@ -70,9 +70,12 @@ import AnimatedBackground from '@/components/AnimatedBackground.vue'
 import { imageDB } from '@/utils/imageDB'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
+import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
 import { 
   saveCustomCSS,
   applyCustomCSS,
+  applyCustomJS,
+  applyCustomHTML,
 } from '@/utils/theme'
 
 // 关键组件 - 同步加载
@@ -106,6 +109,7 @@ useClickEffect({
 
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
+const settingsStore = useSettingsStore()
 const searchHeaderRef = ref<InstanceType<typeof SearchHeader> | null>(null)
 
 // 切换设置面板
@@ -250,7 +254,8 @@ function reshuffleQueue() {
 async function fetchAndCacheImage() {
   try {
     const timestamp = Date.now()
-    const apiUrl = `https://api.illlights.com/v1/img?t=${timestamp}`
+    const baseUrl = settingsStore.settings.backgroundImageApiUrl || DEFAULT_API_CONFIG.backgroundImageApiUrl
+    const apiUrl = `${baseUrl}?t=${timestamp}`
     
     // 先通过 fetch 获取最终的图片 URL（处理重定向）
     const response = await fetch(apiUrl)
@@ -498,6 +503,16 @@ onMounted(async () => {
   if (uiStore.customCSS) {
     applyCustomCSS(uiStore.customCSS)
   }
+  
+  // 应用自定义 JS
+  if (settingsStore.settings.customJS) {
+    applyCustomJS(settingsStore.settings.customJS)
+  }
+  
+  // 应用自定义 HTML
+  if (settingsStore.settings.customHTML) {
+    applyCustomHTML(settingsStore.settings.customHTML)
+  }
 
   // 监听 SW 更新事件
   window.addEventListener('sw-update-available', (event) => {
@@ -549,6 +564,10 @@ function saveSettings(customApi: string, newCustomCSS: string) {
   saveCustomCSS(newCustomCSS)
   // 应用到页面
   applyCustomCSS(newCustomCSS)
+  // 应用自定义 JS（settingsStore 已在 SettingsModal 中更新）
+  applyCustomJS(settingsStore.settings.customJS)
+  // 应用自定义 HTML
+  applyCustomHTML(settingsStore.settings.customHTML)
 }
 </script>
 
