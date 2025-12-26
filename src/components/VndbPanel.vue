@@ -522,7 +522,6 @@
                     :src="screenshot"
                     :alt="`${searchStore.vndbInfo.mainName} 截图 ${index + 1}`"
                     class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
                     @load="screenshotsReady = true"
                     @error="handleImageError"
                   />
@@ -537,7 +536,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, nextTick } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { translateText, fetchVndbCharacters, fetchVndbQuotes } from '@/api/search'
@@ -711,28 +710,11 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
     quotes: false,
   }
   
-  // 如果有游戏 ID，加载角色和名言
+  // 如果有游戏 ID，加载角色和名言，然后自动翻译
   if (newInfo?.id) {
-    loadCharactersAndQuotes(newInfo.id)
-  }
-  
-  // 检查缓存的截图是否已加载（nextTick 后检查 img.complete）
-  if (newInfo?.screenshots && newInfo.screenshots.length > 0) {
-    nextTick(() => {
-      // 延迟一帧确保 DOM 已渲染
-      requestAnimationFrame(() => {
-        // 在当前面板内查找截图图片
-        const screenshotImgs = modalRef.value?.querySelectorAll('img[alt*="截图"]')
-        if (screenshotImgs) {
-          for (let i = 0; i < screenshotImgs.length; i++) {
-            const img = screenshotImgs[i] as HTMLImageElement
-            if (img.complete && img.naturalHeight > 0) {
-              screenshotsReady.value = true
-              break
-            }
-          }
-        }
-      })
+    loadCharactersAndQuotes(newInfo.id).then(() => {
+      // 自动触发 AI 翻译
+      handleTranslateAll()
     })
   }
 })
