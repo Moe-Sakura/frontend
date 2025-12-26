@@ -220,9 +220,9 @@ async function saveBackgroundImage() {
   overflow: hidden;
   
   /* 半透明效果 */
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 20, 147, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12));
   
   color: rgb(199, 21, 133);
   cursor: pointer;
@@ -252,10 +252,10 @@ async function saveBackgroundImage() {
 
 /* 暗色主题 */
 .dark .toolbar-button {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 105, 180, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  color: rgb(255, 179, 217);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  color: rgb(var(--color-primary-light, 255, 179, 217));
 }
 
 .toolbar-button:hover {

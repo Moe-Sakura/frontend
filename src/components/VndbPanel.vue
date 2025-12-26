@@ -1111,10 +1111,10 @@ function formatRelation(relation: string): string {
 <style>
 /* VNDB 面板 - 半透明效果 */
 .vndb-page {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
-  border: 1px solid rgba(255, 20, 147, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-xl, 0 12px 32px rgba(0, 0, 0, 0.15));
 }
 
 /* 移动端无底部边框 */
@@ -1126,25 +1126,25 @@ function formatRelation(relation: string): string {
 
 /* VNDB 面板 - 暗色模式 */
 .dark .vndb-page {
-  background: rgba(30, 41, 59, 0.98);
-  border-color: rgba(255, 105, 180, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* VNDB 卡片 - 亮色模式 */
 .vndb-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 1.25rem;
-  padding: 1.25rem;
-  border: 1px solid rgba(255, 20, 147, 0.08);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-card-inner, 0.75));
+  border-radius: var(--radius-xl, 1.25rem);
+  padding: var(--spacing-lg, 1.25rem);
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
 }
 
 /* VNDB 卡片 - 暗色模式 */
 .dark .vndb-card {
-  background: rgba(30, 41, 59, 0.95);
-  border: 1px solid rgba(255, 105, 180, 0.1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-inner-dark, 0.75));
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 /* 自定义滚动条 */

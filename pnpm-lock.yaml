@@ -35,6 +35,9 @@ importers:
       vue-prism-editor:
         specifier: 2.0.0-alpha.2
         version: 2.0.0-alpha.2(vue@3.5.26(typescript@5.9.3))
+      vue-virtual-scroller:
+        specifier: ^1.1.2
+        version: 1.1.2(vue@3.5.26(typescript@5.9.3))
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.2
@@ -1143,6 +1146,9 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  scrollparent@2.1.0:
+    resolution: {integrity: sha512-bnnvJL28/Rtz/kz2+4wpBjHzWoEzXhVg/TE8BeVGJHUqE8THNIRnDxDWMktwM+qahvlRdvlLdsQfYe+cuqfZeA==}
+
   semver@7.7.3:
     resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
     engines: {node: '>=10'}
@@ -1282,17 +1288,30 @@ packages:
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
 
+  vue-observe-visibility@0.4.6:
+    resolution: {integrity: sha512-xo0CEVdkjSjhJoDdLSvoZoQrw/H2BlzB5jrCBKGZNXN2zdZgMuZ9BKrxXDjNP2AxlcCoKc8OahI3F3r3JGLv2Q==}
+
   vue-prism-editor@2.0.0-alpha.2:
     resolution: {integrity: sha512-Gu42ba9nosrE+gJpnAEuEkDMqG9zSUysIR8SdXUw8MQKDjBnnNR9lHC18uOr/ICz7yrA/5c7jHJr9lpElODC7w==}
     engines: {node: '>=10'}
     peerDependencies:
       vue: ^3.0.0
 
+  vue-resize@0.4.5:
+    resolution: {integrity: sha512-bhP7MlgJQ8TIkZJXAfDf78uJO+mEI3CaLABLjv0WNzr4CcGRGPIAItyWYnP6LsPA4Oq0WE+suidNs6dgpO4RHg==}
+    peerDependencies:
+      vue: ^2.3.0
+
   vue-tsc@3.2.1:
     resolution: {integrity: sha512-I23Rk8dkQfmcSbxDO0dmg9ioMLjKA1pjlU3Lz6Jfk2pMGu3Uryu9810XkcZH24IzPbhzPCnkKo2rEMRX0skSrw==}
     hasBin: true
     peerDependencies:
       typescript: '>=5.0.0'
+
+  vue-virtual-scroller@1.1.2:
+    resolution: {integrity: sha512-SkUyc7QHCJFB5h1Fya7LxVizlVzOZZuFVipBGHYoTK8dwLs08bIz/tclvRApYhksaJIm/nn51inzO2UjpGJPMQ==}
+    peerDependencies:
+      vue: ^2.6.11
 
   vue@3.5.26:
     resolution: {integrity: sha512-SJ/NTccVyAoNUJmkM9KUqPcYlY+u8OVL1X5EW9RIs3ch5H2uERxyyIUI4MRxVCSOiEcupX9xNGde1tL9ZKpimA==}
@@ -2298,6 +2317,8 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.53.2
       fsevents: 2.3.3
 
+  scrollparent@2.1.0: {}
+
   semver@7.7.3: {}
 
   shebang-command@2.0.0:
@@ -2408,7 +2429,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  vue-observe-visibility@0.4.6: {}
+
   vue-prism-editor@2.0.0-alpha.2(vue@3.5.26(typescript@5.9.3)):
+    dependencies:
+      vue: 3.5.26(typescript@5.9.3)
+
+  vue-resize@0.4.5(vue@3.5.26(typescript@5.9.3)):
     dependencies:
       vue: 3.5.26(typescript@5.9.3)
 
@@ -2417,6 +2444,13 @@ snapshots:
       '@volar/typescript': 2.4.27
       '@vue/language-core': 3.2.1
       typescript: 5.9.3
+
+  vue-virtual-scroller@1.1.2(vue@3.5.26(typescript@5.9.3)):
+    dependencies:
+      scrollparent: 2.1.0
+      vue: 3.5.26(typescript@5.9.3)
+      vue-observe-visibility: 0.4.6
+      vue-resize: 0.4.5(vue@3.5.26(typescript@5.9.3))
 
   vue@3.5.26(typescript@5.9.3):
     dependencies:

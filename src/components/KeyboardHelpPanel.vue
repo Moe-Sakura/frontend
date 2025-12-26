@@ -150,11 +150,11 @@ function close() {
 
 <style scoped>
 .keyboard-help-panel {
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
 }
 
 .dark .keyboard-help-panel {
-  background: rgba(30, 41, 59, 0.98);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
 }
 
 .shortcut-row {

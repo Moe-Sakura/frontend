@@ -1036,7 +1036,8 @@ defineExpose({
 
 /* 错误卡片样式 */
 .error-card {
-  background: linear-gradient(135deg, rgba(254, 242, 242, 0.98), rgba(254, 226, 226, 0.98));
+  background: linear-gradient(135deg, rgba(var(--color-error, 254, 242, 242), var(--opacity-panel, 0.85)), rgba(254, 226, 226, var(--opacity-panel, 0.85)));
+  border-radius: var(--radius-lg, 1rem);
   border-radius: 1rem;
   padding: 1rem;
   border: 1px solid rgba(239, 68, 68, 0.2);
@@ -1231,15 +1232,15 @@ defineExpose({
 
 /* 模式切换器 - 半透明效果 */
 .liquid-mode-switch {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 20, 147, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
 }
 
 .dark .liquid-mode-switch {
-  background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(255, 105, 180, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 /* 模式切换按钮 hover 效果 */

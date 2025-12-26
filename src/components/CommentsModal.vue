@@ -224,10 +224,10 @@ onUnmounted(() => {
 <style>
 /* 评论面板 - 半透明效果 */
 .comments-modal {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
-  border: 1px solid rgba(255, 20, 147, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-xl, 0 12px 32px rgba(0, 0, 0, 0.15));
 }
 
 /* 移动端无底部边框 */
@@ -239,39 +239,39 @@ onUnmounted(() => {
 
 /* 评论面板 - 暗色模式 */
 .dark .comments-modal {
-  background: rgba(30, 41, 59, 0.98);
-  border-color: rgba(255, 105, 180, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* 头部样式 */
 .comments-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-header, 0.7));
 }
 
 .dark .comments-header {
-  background: rgba(30, 41, 59, 0.95);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-header-dark, 0.7));
 }
 
 /* 评论容器样式 */
 .comments-container {
-  background: rgba(248, 250, 252, 0.95);
-  border-radius: 1rem;
-  padding: 1rem;
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  background: rgba(248, 250, 252, var(--opacity-header, 0.7));
+  border-radius: var(--radius-lg, 1rem);
+  padding: var(--spacing-md, 1rem);
+  border: var(--border-thin, 1px) solid rgba(226, 232, 240, 0.4);
 }
 
 @media (min-width: 640px) {
   .comments-container {
-    padding: 1.25rem;
-    border-radius: 1.25rem;
+    padding: var(--spacing-lg, 1.25rem);
+    border-radius: var(--radius-xl, 1.25rem);
   }
 }
 
 /* 暗色模式评论容器 */
 .dark .comments-container {
-  background: rgba(51, 65, 85, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(51, 65, 85, var(--opacity-header-dark, 0.7));
+  border: var(--border-thin, 1px) solid rgba(255, 255, 255, 0.05);
 }
 
 /* 自定义滚动条 */

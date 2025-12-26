@@ -308,9 +308,9 @@ onUnmounted(() => {
   overflow: hidden;
   
   /* 半透明效果 */
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(255, 20, 147, 0.1);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12));
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
   
   /* 性能优化 */
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
@@ -318,9 +318,9 @@ onUnmounted(() => {
 }
 
 .dark .fab-button {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 105, 180, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 
@@ -446,17 +446,17 @@ onUnmounted(() => {
 /* 站点导航面板 - 液态玻璃效果 */
 .nav-panel {
   /* 不设置 position，使用模板中的 fixed */
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 20, 147, 0.1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
+  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));
   overflow: hidden;
 }
 
 /* 站点导航面板 - 暗色模式 */
 .dark .nav-panel {
-  background: rgba(30, 41, 59, 0.98);
-  border-color: rgba(255, 105, 180, 0.15);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
+  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* 标题栏 */

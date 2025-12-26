@@ -10,22 +10,125 @@
  */
 
 :root {
-  /* 主题色 - 艳粉 */
-  --glass-pink: 255, 20, 147;
-  --glass-pink-light: 255, 105, 180;
-  --glass-pink-pale: 255, 228, 242;
+  /* ========== 主题色 ========== */
+  /* 主色调 - 艳粉 (可修改此处切换主题色) */
+  --color-primary: 255, 20, 147;        /* 主色 #ff1493 */
+  --color-primary-light: 255, 105, 180; /* 浅主色 #ff69b4 */
+  --color-primary-pale: 255, 228, 242;  /* 极浅主色 #ffe4f2 */
   
-  /* 亮色模式背景 */
-  --glass-bg-light: rgba(255, 255, 255, 0.92);
-  --glass-bg-light-hover: rgba(255, 255, 255, 0.96);
-  --glass-border-light: rgba(var(--glass-pink), 0.12);
-  --glass-border-light-hover: rgba(var(--glass-pink), 0.22);
+  /* 背景色 */
+  --color-bg-light: 255, 255, 255;      /* 亮色背景 #ffffff */
+  --color-bg-dark: 30, 41, 59;          /* 暗色背景 #1e293b */
+  --color-bg-dark-alt: 40, 51, 69;      /* 暗色背景变体 */
+  --color-bg-dark-deep: 15, 23, 42;     /* 深暗色背景 #0f172a */
   
-  /* 暗色模式背景 */
-  --glass-bg-dark: rgba(30, 41, 59, 0.95);
-  --glass-bg-dark-hover: rgba(30, 41, 59, 0.98);
-  --glass-border-dark: rgba(var(--glass-pink-light), 0.18);
-  --glass-border-dark-hover: rgba(var(--glass-pink-light), 0.28);
+  /* 文字色 */
+  --color-text-light: 51, 51, 51;       /* 亮色模式文字 */
+  --color-text-dark: 255, 255, 255;     /* 暗色模式文字 */
+  --color-text-muted: 148, 163, 184;    /* 次要文字 */
+  
+  /* 功能色 */
+  --color-success: 34, 197, 94;         /* 成功 #22c55e */
+  --color-warning: 251, 191, 36;        /* 警告 #fbbf24 */
+  --color-error: 239, 68, 68;           /* 错误 #ef4444 */
+  --color-info: 59, 130, 246;           /* 信息 #3b82f6 */
+  
+  /* 兼容旧变量名 */
+  --glass-pink: var(--color-primary);
+  --glass-pink-light: var(--color-primary-light);
+  --glass-pink-pale: var(--color-primary-pale);
+  
+  /* ========== 透明度变量 ========== */
+  /* 基础透明度 - 亮色模式 */
+  --opacity-panel: 0.85;          /* 面板/模态框背景 */
+  --opacity-panel-hover: 0.9;     /* 面板悬停 */
+  --opacity-card: 0.8;            /* 卡片背景 */
+  --opacity-card-inner: 0.75;     /* 内部卡片 */
+  --opacity-button: 0.75;         /* 按钮背景 */
+  --opacity-button-hover: 0.88;   /* 按钮悬停 */
+  --opacity-input: 0.85;          /* 输入框背景 */
+  --opacity-input-hover: 0.9;     /* 输入框悬停 */
+  --opacity-header: 0.7;          /* 头部区域 */
+  --opacity-overlay: 0.35;        /* 遮罩层 */
+  
+  /* 基础透明度 - 暗色模式 */
+  --opacity-panel-dark: 0.88;
+  --opacity-panel-dark-hover: 0.92;
+  --opacity-card-dark: 0.8;
+  --opacity-card-inner-dark: 0.75;
+  --opacity-button-dark: 0.75;
+  --opacity-button-dark-hover: 0.85;
+  --opacity-input-dark: 0.85;
+  --opacity-input-dark-hover: 0.9;
+  --opacity-header-dark: 0.7;
+  --opacity-overlay-dark: 0.5;
+  
+  /* 边框透明度 */
+  --opacity-border: 0.15;
+  --opacity-border-hover: 0.25;
+  --opacity-border-dark: 0.2;
+  --opacity-border-dark-hover: 0.3;
+  
+  /* ========== 圆角变量 ========== */
+  --radius-xs: 0.375rem;          /* 6px - 小按钮 */
+  --radius-sm: 0.5rem;            /* 8px - 小元素 */
+  --radius-md: 0.75rem;           /* 12px - 按钮/输入框 */
+  --radius-lg: 1rem;              /* 16px - 卡片 */
+  --radius-xl: 1.25rem;           /* 20px - 面板 */
+  --radius-2xl: 1.5rem;           /* 24px - 模态框 */
+  --radius-3xl: 2rem;             /* 32px - 大圆角 */
+  --radius-full: 9999px;          /* 完全圆角 */
+  
+  /* ========== 阴影变量 ========== */
+  /* 亮色模式阴影 */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 16px 48px rgba(0, 0, 0, 0.18);
+  
+  /* 主题色阴影 */
+  --shadow-primary-sm: 0 2px 8px rgba(var(--color-primary), 0.1);
+  --shadow-primary-md: 0 4px 16px rgba(var(--color-primary), 0.12);
+  --shadow-primary-lg: 0 8px 24px rgba(var(--color-primary), 0.15);
+  
+  /* ========== 过渡时间 ========== */
+  --transition-fast: 0.15s;
+  --transition-normal: 0.25s;
+  --transition-slow: 0.35s;
+  --transition-slower: 0.5s;
+  
+  /* 过渡曲线 */
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  
+  /* ========== 间距变量 ========== */
+  --spacing-xs: 0.25rem;          /* 4px */
+  --spacing-sm: 0.5rem;           /* 8px */
+  --spacing-md: 1rem;             /* 16px */
+  --spacing-lg: 1.5rem;           /* 24px */
+  --spacing-xl: 2rem;             /* 32px */
+  --spacing-2xl: 3rem;            /* 48px */
+  
+  /* ========== 边框宽度 ========== */
+  --border-thin: 1px;
+  --border-medium: 1.5px;
+  --border-thick: 2px;
+  
+  /* ========== 组合变量 ========== */
+  /* 亮色模式背景 - 半透明 */
+  --glass-bg-light: rgba(var(--color-bg-light), var(--opacity-card));
+  --glass-bg-light-hover: rgba(var(--color-bg-light), var(--opacity-button-hover));
+  --glass-border-light: rgba(var(--color-primary), var(--opacity-border));
+  --glass-border-light-hover: rgba(var(--color-primary), var(--opacity-border-hover));
+  
+  /* 暗色模式背景 - 半透明 */
+  --glass-bg-dark: rgba(var(--color-bg-dark), var(--opacity-card-dark));
+  --glass-bg-dark-hover: rgba(var(--color-bg-dark), var(--opacity-button-dark-hover));
+  --glass-border-dark: rgba(var(--color-primary-light), var(--opacity-border-dark));
+  --glass-border-dark-hover: rgba(var(--color-primary-light), var(--opacity-border-dark-hover));
 }
 
 /* ========== 基础半透明效果 ========== */
@@ -43,13 +146,13 @@
 .glassmorphism-input {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 245, 250, 0.92) 100%
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 248, 252, 0.8) 100%
   );
   border: 2px solid rgba(var(--glass-pink), 0.15);
   box-shadow: 
-    0 4px 16px rgba(var(--glass-pink), 0.06),
-    0 1px 2px rgba(0, 0, 0, 0.03);
+    0 4px 16px rgba(var(--glass-pink), 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04);
   transition: 
     transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
     box-shadow 0.3s ease-out, 
@@ -61,17 +164,17 @@
   border-color: rgba(var(--glass-pink), 0.25);
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 248, 252, 0.95) 100%
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 250, 253, 0.85) 100%
   );
   box-shadow: 
-    0 6px 20px rgba(var(--glass-pink), 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.03);
+    0 6px 20px rgba(var(--glass-pink), 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .glassmorphism-input:focus {
   border-color: rgba(var(--glass-pink), 0.45);
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.92);
   box-shadow: 
     0 8px 24px rgba(var(--glass-pink), 0.15),
     0 0 0 4px rgba(var(--glass-pink), 0.1);
@@ -81,27 +184,27 @@
 .dark .glassmorphism-input {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.95) 0%,
-    rgba(45, 55, 75, 0.92) 100%
+    rgba(30, 41, 59, 0.85) 0%,
+    rgba(45, 55, 75, 0.8) 100%
   );
   border: 2px solid rgba(var(--glass-pink-light), 0.2);
   box-shadow: 
-    0 4px 16px rgba(var(--glass-pink-light), 0.1),
-    0 1px 2px rgba(0, 0, 0, 0.15);
+    0 4px 16px rgba(var(--glass-pink-light), 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .dark .glassmorphism-input:hover {
   border-color: rgba(var(--glass-pink-light), 0.3);
   background: linear-gradient(
     135deg,
-    rgba(35, 46, 64, 0.98) 0%,
-    rgba(50, 60, 80, 0.95) 100%
+    rgba(35, 46, 64, 0.9) 0%,
+    rgba(50, 60, 80, 0.85) 100%
   );
 }
 
 .dark .glassmorphism-input:focus {
   border-color: rgba(var(--glass-pink-light), 0.5);
-  background: rgba(40, 51, 69, 0.98);
+  background: rgba(40, 51, 69, 0.88);
   box-shadow: 
     0 8px 28px rgba(var(--glass-pink-light), 0.2),
     0 0 0 4px rgba(var(--glass-pink-light), 0.12);
@@ -112,8 +215,8 @@
 .glassmorphism-button {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(var(--glass-pink-pale), 0.85) 100%
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(var(--glass-pink-pale), 0.75) 100%
   );
   border: 1.5px solid rgba(var(--glass-pink), 0.25);
   box-shadow: 0 4px 12px rgba(var(--glass-pink), 0.12);
@@ -139,8 +242,8 @@
 .dark .glassmorphism-button {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.92) 0%,
-    rgba(51, 65, 85, 0.88) 100%
+    rgba(30, 41, 59, 0.8) 0%,
+    rgba(51, 65, 85, 0.75) 100%
   );
   border-color: rgba(var(--glass-pink-light), 0.3);
   box-shadow: 0 4px 12px rgba(var(--glass-pink-light), 0.15);
@@ -153,7 +256,7 @@
 
 /* ========== 内嵌搜索按钮 ========== */
 .glassmorphism-search-button {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(var(--glass-pink), 0.2);
   box-shadow: 0 2px 6px rgba(var(--glass-pink), 0.08);
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
@@ -175,7 +278,7 @@
 }
 
 .dark .glassmorphism-search-button {
-  background: rgba(30, 41, 59, 0.9);
+  background: rgba(30, 41, 59, 0.75);
   border-color: rgba(var(--glass-pink-light), 0.25);
   box-shadow: 0 2px 6px rgba(var(--glass-pink-light), 0.1);
 }
@@ -189,161 +292,161 @@
 .glassmorphism-mode-switch {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 248, 252, 0.9) 100%
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 248, 252, 0.75) 100%
   );
-  border: 2px solid rgba(var(--glass-pink), 0.12);
-  box-shadow: 0 4px 12px rgba(var(--glass-pink), 0.08);
+  border: 2px solid rgba(var(--glass-pink), 0.15);
+  box-shadow: 0 4px 12px rgba(var(--glass-pink), 0.1);
   transition: all 0.3s ease-out;
 }
 
 .glassmorphism-mode-switch:hover {
-  border-color: rgba(var(--glass-pink), 0.2);
-  box-shadow: 0 6px 18px rgba(var(--glass-pink), 0.12);
+  border-color: rgba(var(--glass-pink), 0.25);
+  box-shadow: 0 6px 18px rgba(var(--glass-pink), 0.14);
 }
 
 .dark .glassmorphism-mode-switch {
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.95) 0%,
-    rgba(45, 55, 75, 0.9) 100%
+    rgba(30, 41, 59, 0.8) 0%,
+    rgba(45, 55, 75, 0.75) 100%
   );
-  border: 2px solid rgba(var(--glass-pink-light), 0.18);
-  box-shadow: 0 4px 12px rgba(var(--glass-pink-light), 0.1);
+  border: 2px solid rgba(var(--glass-pink-light), 0.2);
+  box-shadow: 0 4px 12px rgba(var(--glass-pink-light), 0.12);
 }
 
 .dark .glassmorphism-mode-switch:hover {
-  border-color: rgba(var(--glass-pink-light), 0.28);
-  box-shadow: 0 6px 18px rgba(var(--glass-pink-light), 0.16);
+  border-color: rgba(var(--glass-pink-light), 0.3);
+  box-shadow: 0 6px 18px rgba(var(--glass-pink-light), 0.18);
 }
 
 /* ========== 模态框效果 ========== */
 .glassmorphism-modal {
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.96) 0%,
-    rgba(255, 250, 252, 0.94) 100%
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 250, 252, 0.82) 100%
   );
   border: 1.5px solid var(--glass-border-light);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   border-radius: 24px;
   transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
 }
 
 .glassmorphism-modal:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
 }
 
 .dark .glassmorphism-modal {
   background: linear-gradient(
     145deg,
-    rgba(30, 41, 59, 0.98) 0%,
-    rgba(40, 51, 69, 0.96) 100%
+    rgba(30, 41, 59, 0.88) 0%,
+    rgba(40, 51, 69, 0.85) 100%
   );
   border-color: var(--glass-border-dark);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .dark .glassmorphism-modal:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 /* ========== 面板效果 ========== */
 .glassmorphism-panel {
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.96) 0%,
-    rgba(255, 252, 254, 0.94) 100%
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 252, 254, 0.82) 100%
   );
   border: 1.5px solid var(--glass-border-light);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
   border-radius: 20px;
   transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
 }
 
 .glassmorphism-panel:hover {
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 
 .dark .glassmorphism-panel {
   background: linear-gradient(
     145deg,
-    rgba(30, 41, 59, 0.98) 0%,
-    rgba(40, 51, 69, 0.96) 100%
+    rgba(30, 41, 59, 0.88) 0%,
+    rgba(40, 51, 69, 0.85) 100%
   );
   border-color: var(--glass-border-dark);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
 }
 
 .dark .glassmorphism-panel:hover {
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
   transform: translateY(-2px);
 }
 
 /* ========== 工具栏按钮效果 ========== */
 .glassmorphism-toolbar-button {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.75);
   border: 1px solid var(--glass-border-light);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   border-radius: 12px;
   transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .glassmorphism-toolbar-button:hover {
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.88);
   border-color: var(--glass-border-light-hover);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
 .glassmorphism-toolbar-button:active {
   transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .dark .glassmorphism-toolbar-button {
-  background: rgba(30, 41, 59, 0.9);
+  background: rgba(30, 41, 59, 0.75);
   border-color: var(--glass-border-dark);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .dark .glassmorphism-toolbar-button:hover {
-  background: rgba(40, 51, 69, 0.95);
+  background: rgba(40, 51, 69, 0.85);
   border-color: var(--glass-border-dark-hover);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* ========== 卡片效果 ========== */
 .glassmorphism-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--glass-border-light);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
 .glassmorphism-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
 .dark .glassmorphism-card {
-  background: rgba(30, 41, 59, 0.95);
+  background: rgba(30, 41, 59, 0.8);
   border-color: var(--glass-border-dark);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .dark .glassmorphism-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
   transform: translateY(-2px);
 }
 
 /* ========== 悬浮按钮效果 ========== */
 .glassmorphism-fab {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--glass-border-light);
-  box-shadow: 0 4px 14px rgba(var(--glass-pink), 0.1);
+  box-shadow: 0 4px 14px rgba(var(--glass-pink), 0.12);
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
@@ -357,35 +460,35 @@
 }
 
 .dark .glassmorphism-fab {
-  background: rgba(30, 41, 59, 0.95);
+  background: rgba(30, 41, 59, 0.8);
   border-color: var(--glass-border-dark);
-  box-shadow: 0 4px 14px rgba(var(--glass-pink-light), 0.15);
+  box-shadow: 0 4px 14px rgba(var(--glass-pink-light), 0.18);
 }
 
 .dark .glassmorphism-fab:hover {
-  box-shadow: 0 6px 20px rgba(var(--glass-pink-light), 0.25);
+  box-shadow: 0 6px 20px rgba(var(--glass-pink-light), 0.28);
 }
 
 /* ========== 遮罩层效果 ========== */
 .glassmorphism-overlay {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .dark .glassmorphism-overlay {
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 /* ========== 导航栏效果 ========== */
 .glassmorphism-navbar {
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid rgba(var(--glass-pink), 0.08);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(var(--glass-pink), 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .dark .glassmorphism-navbar {
-  background: rgba(15, 23, 42, 0.98);
-  border-bottom-color: rgba(var(--glass-pink-light), 0.12);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  background: rgba(15, 23, 42, 0.85);
+  border-bottom-color: rgba(var(--glass-pink-light), 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* ========== 性能优化工具类 ========== */
