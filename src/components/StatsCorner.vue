@@ -28,7 +28,7 @@
   </div>
 
   <!-- 隐藏的 busuanzi 元素（让 busuanzi 脚本更新） -->
-  <div id="busuanzi_container_site_pv" class="hidden">
+  <div id="busuanzi_container_site_pv" style="display: none !important; visibility: hidden !important; position: absolute; left: -9999px;">
     <span id="busuanzi_value_site_pv" />
     <span id="busuanzi_value_site_uv" />
   </div>
@@ -51,22 +51,13 @@
         <Users :size="16" class="text-theme-primary dark:text-theme-accent" />
         <span class="font-semibold text-gray-800 dark:text-slate-100">{{ statsStore.visitorStats.uv }}</span>
       </div>
-      
-      <!-- 搜索统计（有搜索记录时显示） -->
-      <template v-if="statsStore.appStats.totalSearches > 0">
-        <div class="h-px bg-gray-300/50 dark:bg-slate-600/50" />
-        <div class="flex items-center gap-2" title="本次会话搜索次数">
-          <Search :size="16" class="text-theme-primary dark:text-theme-accent" />
-          <span class="font-semibold text-gray-800 dark:text-slate-100">{{ statsStore.appStats.totalSearches }}</span>
-        </div>
-      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { Eye, Users, Activity, Wifi, WifiOff, Search } from 'lucide-vue-next'
+import { Eye, Users, Activity, Wifi, WifiOff } from 'lucide-vue-next'
 import { useStatsStore } from '@/stores/stats'
 
 const statsStore = useStatsStore()

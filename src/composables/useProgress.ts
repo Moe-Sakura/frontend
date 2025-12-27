@@ -62,9 +62,6 @@ function createElements() {
         position: absolute;
         top: 0;
         left: 0;
-        box-shadow: 
-          0 0 10px rgba(255, 20, 147, 0.7),
-          0 0 20px rgba(217, 70, 239, 0.5);
         transition: width 0.3s ease-out, opacity 0.2s ease;
       }
       
@@ -80,7 +77,6 @@ function createElements() {
         top: 0;
         width: 100px;
         height: 3px;
-        box-shadow: 0 0 10px #ff1493, 0 0 5px #ff1493;
         opacity: 1;
         transform: rotate(3deg) translate(0px, -4px);
       }
@@ -111,9 +107,7 @@ function createElements() {
       
       /* 暗色模式 */
       .dark #progress-bar .progress-bar {
-        box-shadow: 
-          0 0 15px rgba(255, 20, 147, 0.9),
-          0 0 30px rgba(217, 70, 239, 0.7);
+        /* 无额外阴影 */
       }
       
       .dark #progress-bar .spinner-icon {
