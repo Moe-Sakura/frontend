@@ -493,7 +493,6 @@ import {
   Star,
 } from 'lucide-vue-next'
 import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from '@/utils/urlParams'
-import { saveSearchHistory } from '@/utils/persistence'
 
 const searchStore = useSearchStore()
 const statsStore = useStatsStore()
@@ -698,15 +697,7 @@ async function handleSearch() {
           })
         }
         
-        // 保存搜索历史到持久化存储
-        saveSearchHistory({
-          query: searchQuery.value.trim(),
-          mode: searchMode.value,
-          timestamp: Date.now(),
-          resultCount,
-        })
-        
-        // 同时添加到 historyStore
+        // 保存搜索历史（通过 historyStore 统一管理）
         historyStore.addHistory({
           query: searchQuery.value.trim(),
           mode: searchMode.value,
