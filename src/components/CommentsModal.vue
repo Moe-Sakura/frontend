@@ -29,10 +29,17 @@
 
           <!-- 标题 -->
           <div class="flex items-center gap-2 md:ml-0">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-lg shadow-pink-500/30">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-lg shadow-pink-500/30 relative">
               <MessageCircle :size="16" class="text-white" />
+              <Send :size="8" class="text-white/80 absolute -bottom-0.5 -right-0.5" />
             </div>
-            <h1 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white">评论区</h1>
+            <div>
+              <h1 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white flex items-center gap-1.5">
+                评论区
+                <Sparkles :size="14" class="text-amber-400" />
+              </h1>
+              <p class="text-xs text-gray-500 dark:text-slate-400 hidden md:block">欢迎留下你的想法 💬</p>
+            </div>
           </div>
 
           <!-- 右侧按钮组 -->
@@ -67,7 +74,7 @@ import { watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import Artalk from 'artalk/dist/Artalk.mjs'
-import { MessageCircle, ChevronLeft, X } from 'lucide-vue-next'
+import { MessageCircle, ChevronLeft, X, Sparkles, Send } from 'lucide-vue-next'
 
 interface ArtalkInstance {
   destroy(): void

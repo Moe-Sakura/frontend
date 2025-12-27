@@ -1,93 +1,113 @@
 <template>
-  <!-- 左上角品牌标识和状态 -->
-  <div class="fixed top-4 left-4 z-40 flex items-center gap-2">
-    <!-- Gamepad 图标 - 品牌标识 -->
-    <div class="glassmorphism-card rounded-2xl shadow-lg p-2.5 flex items-center justify-center">
-      <GamepadDirectional 
-        :size="22" 
-        class="text-theme-primary dark:text-theme-accent"
-      />
-    </div>
-    
-    <!-- 状态指示器 -->
+  <!-- 左上角状态指示器 -->
+  <div class="fixed top-4 left-4 z-40">
     <a
       href="https://status.searchgal.homes"
       target="_blank"
       rel="noopener noreferrer"
       :class="[
-        'status-link glassmorphism-card rounded-2xl shadow-lg px-3 py-2 flex items-center gap-2 text-sm font-medium transition-all duration-300 hover:scale-105',
-        statusOnline === null 
-          ? 'text-gray-600 dark:text-gray-400' 
-          : statusOnline
-            ? 'text-green-600 dark:text-green-400'
-            : 'text-red-600 dark:text-red-400'
+        'status-link glassmorphism-card rounded-2xl shadow-lg px-3 py-2 flex items-center gap-2 transition-all duration-300 hover:scale-105',
+        statusClass
       ]"
+      :title="statusText"
     >
-      <span 
-        class="w-2 h-2 rounded-full"
+      <!-- 状态图标 -->
+      <component
+        :is="statusIcon"
+        :size="16"
         :class="[
-          statusOnline === null 
-            ? 'bg-gray-400 animate-pulse' 
-            : statusOnline
-              ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]'
-              : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]'
+          isChecking ? 'animate-pulse' : '',
+          statusIconClass
         ]"
       />
-      <span>{{ statusOnline === null ? '检测中' : statusOnline ? '正常' : '异常' }}</span>
+      <!-- 延迟显示 -->
+      <span class="text-sm font-medium tabular-nums">
+        {{ isChecking ? '...' : (responseTime ? `${responseTime}ms` : '--') }}
+      </span>
     </a>
   </div>
 
-  <!-- 左下角不蒜子统计 -->
+  <!-- 隐藏的 busuanzi 元素（让 busuanzi 脚本更新） -->
+  <div id="busuanzi_container_site_pv" class="hidden">
+    <span id="busuanzi_value_site_pv" />
+    <span id="busuanzi_value_site_uv" />
+  </div>
+
+  <!-- 左下角统计（Vue 控制显示） -->
   <div
-    id="busuanzi_container_site_pv"
     class="fixed bottom-4 left-4 z-40 transition-all duration-300"
     :class="showStats ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'"
   >
     <div class="stats-card glassmorphism-card rounded-2xl shadow-lg px-4 py-3 flex flex-col gap-2">
       <!-- 访问量 -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2" title="总访问量 (PV)">
         <Eye :size="16" class="text-theme-primary dark:text-theme-accent" />
-        <span id="busuanzi_value_site_pv" class="font-semibold text-gray-800 dark:text-slate-100">0</span>
+        <span class="font-semibold text-gray-800 dark:text-slate-100">{{ statsStore.visitorStats.pv }}</span>
       </div>
       <!-- 分隔线 -->
-      <div class="h-px bg-gray-300 dark:bg-slate-600" />
+      <div class="h-px bg-gray-300/50 dark:bg-slate-600/50" />
       <!-- 访客数 -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2" title="独立访客 (UV)">
         <Users :size="16" class="text-theme-primary dark:text-theme-accent" />
-        <span id="busuanzi_value_site_uv" class="font-semibold text-gray-800 dark:text-slate-100">0</span>
+        <span class="font-semibold text-gray-800 dark:text-slate-100">{{ statsStore.visitorStats.uv }}</span>
       </div>
+      
+      <!-- 搜索统计（有搜索记录时显示） -->
+      <template v-if="statsStore.appStats.totalSearches > 0">
+        <div class="h-px bg-gray-300/50 dark:bg-slate-600/50" />
+        <div class="flex items-center gap-2" title="本次会话搜索次数">
+          <Search :size="16" class="text-theme-primary dark:text-theme-accent" />
+          <span class="font-semibold text-gray-800 dark:text-slate-100">{{ statsStore.appStats.totalSearches }}</span>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { GamepadDirectional, Eye, Users } from 'lucide-vue-next'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { Eye, Users, Activity, Wifi, WifiOff, Search } from 'lucide-vue-next'
+import { useStatsStore } from '@/stores/stats'
 
-const statusOnline = ref<boolean | null>(null)
+const statsStore = useStatsStore()
 const showStats = ref(false)
-let statusCheckInterval: number | null = null
 let checkInterval: number | null = null
 let observer: MutationObserver | null = null
 
-// 检查状态页面是否在线
-async function checkStatus() {
-  try {
-    const controller = new window.AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000)
-    
-    await fetch('https://status.searchgal.homes', {
-      method: 'HEAD',
-      mode: 'no-cors',
-      signal: controller.signal,
-    })
-    
-    clearTimeout(timeoutId)
-    statusOnline.value = true
-  } catch (_error) {
-    statusOnline.value = false
-  }
-}
+// 计算属性 - 从 statsStore 获取状态
+const apiService = computed(() => statsStore.serviceStatuses.get('api'))
+const isChecking = computed(() => apiService.value?.status === 'checking')
+const isOnline = computed(() => apiService.value?.status === 'online')
+const isOffline = computed(() => apiService.value?.status === 'offline')
+const responseTime = computed(() => apiService.value?.responseTime)
+
+// 状态文本
+const statusText = computed(() => {
+  if (isChecking.value) {return '检测中'}
+  if (isOnline.value) {return '正常'}
+  if (isOffline.value) {return '异常'}
+  return '未知'
+})
+
+// 状态图标
+const statusIcon = computed(() => {
+  if (isChecking.value) {return Activity}
+  if (isOnline.value) {return Wifi}
+  return WifiOff
+})
+
+// 状态样式类
+const statusClass = computed(() => {
+  if (isChecking.value) {return 'text-gray-600 dark:text-gray-400'}
+  if (isOnline.value) {return 'text-green-600 dark:text-green-400'}
+  return 'text-red-600 dark:text-red-400'
+})
+
+const statusIconClass = computed(() => {
+  if (isChecking.value) {return 'text-gray-400'}
+  if (isOnline.value) {return 'text-green-500'}
+  return 'text-red-500'
+})
 
 // 检查不蒜子数据是否加载
 function checkBusuanziData() {
@@ -99,6 +119,8 @@ function checkBusuanziData() {
     const uvValue = parseInt(uvElement.textContent || '0', 10)
     
     if (pvValue > 0 && uvValue > 0) {
+      // 更新 statsStore
+      statsStore.updateVisitorStats(pvValue, uvValue)
       showStats.value = true
       
       if (checkInterval !== null) {
@@ -129,12 +151,16 @@ function setupObserver() {
   observer.observe(uvElement, { childList: true, characterData: true, subtree: true })
 }
 
+// 监听 visitorStats 变化，自动显示统计
+watch(() => statsStore.visitorStats.pv, (pv) => {
+  if (pv > 0) {
+    showStats.value = true
+  }
+})
+
 onMounted(() => {
-  // 状态检测
-  checkStatus()
-  statusCheckInterval = window.setInterval(() => {
-    checkStatus()
-  }, 30000)
+  // 使用 statsStore 进行状态检测
+  statsStore.startStatusCheck(30000)
 
   // 不蒜子统计
   setupObserver()
@@ -157,10 +183,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (statusCheckInterval !== null) {
-    clearInterval(statusCheckInterval)
-    statusCheckInterval = null
-  }
+  // 停止状态检测
+  statsStore.stopStatusCheck()
   
   if (checkInterval !== null) {
     clearInterval(checkInterval)

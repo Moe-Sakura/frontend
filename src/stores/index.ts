@@ -5,7 +5,9 @@ export { useSettingsStore } from './settings'
 export { useHistoryStore } from './history'
 export { useCacheStore } from './cache'
 export { useLazyLoadStore } from './lazyLoad'
+export { useStatsStore } from './stats'
 
 export type { VndbInfo, SearchResult, PlatformData } from './search'
 export type { UserSettings } from './settings'
+export type { ServiceStatus, VisitorStats, AppStats } from './stats'
 

@@ -24,7 +24,7 @@
             </div>
             <div>
               <h1 class="text-sm font-bold text-gray-800 dark:text-white">搜索历史</h1>
-              <p v-if="history.length > 0" class="text-xs text-gray-500 dark:text-slate-400">{{ history.length }} 条记录</p>
+              <p v-if="historyStore.historyCount > 0" class="text-xs text-gray-500 dark:text-slate-400">{{ historyStore.historyCount }} 条记录</p>
             </div>
           </div>
 
@@ -57,10 +57,13 @@
               class="flex flex-col items-center justify-center py-8 text-center"
             >
               <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-3">
-                <History :size="24" class="text-amber-400/50" />
+                <Clock :size="24" class="text-amber-400/50" />
               </div>
               <p class="text-sm text-gray-500 dark:text-gray-400">
                 暂无搜索历史
+              </p>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                搜索后会自动记录
               </p>
             </div>
 
@@ -86,29 +89,35 @@
                   @keydown.enter="handleSelectHistory(item)"
                   @keydown.space.prevent="handleSelectHistory(item)"
                 >
-                  <!-- 模式标签 -->
+                  <!-- 模式标签 + 图标 -->
                   <span
-                    class="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide flex-shrink-0"
+                    class="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide flex-shrink-0"
                     :class="item.mode === 'game' 
                       ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
                       : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'"
                   >
+                    <component :is="item.mode === 'game' ? Gamepad2 : Wrench" :size="10" />
                     {{ item.mode === 'game' ? '游戏' : '补丁' }}
                   </span>
                   
-                  <!-- 搜索关键词 -->
-                  <span 
-                    v-text-scroll 
-                    class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 text-left group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
-                  >
-                    {{ item.query }}
-                  </span>
+                  <!-- 搜索图标 + 关键词 -->
+                  <div class="flex-1 flex items-center gap-1.5 min-w-0">
+                    <Search :size="12" class="text-gray-400 dark:text-slate-500 shrink-0 group-hover:text-amber-500 transition-colors" />
+                    <span 
+                      v-text-scroll 
+                      class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 text-left group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
+                    >
+                      {{ item.query }}
+                    </span>
+                  </div>
 
-                  <!-- 结果数 -->
+                  <!-- 结果数 + 图标 -->
                   <span 
                     v-if="item.resultCount" 
-                    class="text-[10px] text-gray-400 dark:text-gray-500 flex-shrink-0"
+                    class="flex items-center gap-1 text-[10px] text-gray-400 dark:text-gray-500 flex-shrink-0"
+                    :title="`${item.resultCount} 条结果`"
                   >
+                    <Hash :size="10" />
                     {{ item.resultCount }}
                   </span>
 
@@ -131,14 +140,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed, watch, onMounted, onUnmounted } from 'vue'
 import { useUIStore } from '@/stores/ui'
-import { loadSearchHistory, clearSearchHistory as clearHistoryStorage, type SearchHistory } from '@/utils/persistence'
+import { useHistoryStore } from '@/stores/history'
+import type { SearchHistory } from '@/utils/persistence'
 import { playSelect, playTap, playCaution, playTransitionUp, playTransitionDown } from '@/composables/useSound'
-import { History, Trash2, X } from 'lucide-vue-next'
+import { History, Trash2, X, Gamepad2, Wrench, Hash, Clock, Search } from 'lucide-vue-next'
 
 const uiStore = useUIStore()
-const history = ref<SearchHistory[]>([])
+const historyStore = useHistoryStore()
+
+// 使用 historyStore 的响应式数据
+const history = computed(() => historyStore.searchHistory)
 
 const emit = defineEmits<{
   select: [history: SearchHistory]
@@ -146,7 +159,7 @@ const emit = defineEmits<{
 
 // 加载历史记录
 function loadHistory() {
-  history.value = loadSearchHistory()
+  historyStore.loadHistory()
 }
 
 // 选择历史记录
@@ -164,21 +177,14 @@ function handleSelectHistory(item: SearchHistory) {
 function handleClearHistory() {
   playCaution()
   if (confirm('确定要清空所有搜索历史吗？')) {
-    clearHistoryStorage()
-    history.value = []
+    historyStore.clearHistory()
   }
 }
 
 // 删除单条记录
 function handleRemoveItem(index: number) {
   playTap()
-  history.value.splice(index, 1)
-  if (history.value.length > 0) {
-    // 使用与 persistence.ts 一致的 key
-    window.localStorage.setItem('searchgal_history', JSON.stringify(history.value))
-  } else {
-    clearHistoryStorage()
-  }
+  historyStore.removeHistory(index)
 }
 
 // 关闭模态框
