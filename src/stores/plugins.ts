@@ -358,23 +358,41 @@ export function piniaSyncTabs(context: PiniaPluginContext) {
   // 只对配置了 syncTabs 的 store 启用
   if (!(options as { syncTabs?: boolean }).syncTabs) {return}
   
-  const channelName = `pinia-sync-${store.$id}`
-  
-  // 创建广播频道
-  const channel = new BroadcastChannel(channelName)
-  
-  // 监听其他标签页的状态变化
-  channel.onmessage = (event) => {
-    if (event.data.type === 'state-update') {
-      store.$patch(event.data.state)
+  // 检查浏览器是否支持 BroadcastChannel
+  if (typeof BroadcastChannel === 'undefined') {
+    if (import.meta.env.DEV) {
+      console.warn(`[pinia-sync-tabs] BroadcastChannel not supported, skipping sync for store: ${store.$id}`)
     }
+    return
   }
   
-  // 当前标签页状态变化时广播
-  store.$subscribe((_mutation, state) => {
-    channel.postMessage({
-      type: 'state-update',
-      state: JSON.parse(JSON.stringify(state)),
+  const channelName = `pinia-sync-${store.$id}`
+  
+  try {
+    // 创建广播频道
+    const channel = new BroadcastChannel(channelName)
+    
+    // 监听其他标签页的状态变化
+    channel.onmessage = (event) => {
+      if (event.data?.type === 'state-update') {
+        store.$patch(event.data.state)
+      }
+    }
+    
+    // 当前标签页状态变化时广播
+    store.$subscribe((_mutation, state) => {
+      try {
+        channel.postMessage({
+          type: 'state-update',
+          state: JSON.parse(JSON.stringify(state)),
+        })
+      } catch {
+        // 静默处理序列化错误
+      }
     })
-  })
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.warn(`[pinia-sync-tabs] Failed to create BroadcastChannel for store: ${store.$id}`, error)
+    }
+  }
 }

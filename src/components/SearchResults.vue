@@ -95,10 +95,10 @@
             <div v-if="platformData.items.length > platformData.displayedCount" class="load-more mt-6 flex justify-center">
               <button
                 class="px-6 py-3 rounded-xl
-                     bg-theme-primary/90 dark:bg-theme-accent/90 text-white font-bold
-                     border border-white/20
+                     bg-pink-500 hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-500
+                     text-white font-bold shadow-lg shadow-pink-500/30 dark:shadow-pink-600/30
                      hover:scale-105 active:scale-95
-                     transition-transform duration-200
+                     transition-all duration-200
                      flex items-center gap-2"
                 @click="loadMore(platformName)"
               >

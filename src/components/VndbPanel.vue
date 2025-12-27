@@ -97,7 +97,6 @@
                     :alt="searchStore.vndbInfo.mainName"
                     class="w-full h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all"
                     loading="lazy"
-                    referrerpolicy="no-referrer"
                     @error="handleImageError"
                   />
                 </button>
@@ -378,7 +377,6 @@
                         :alt="char.name"
                         class="absolute inset-0 w-full h-full object-cover"
                         loading="lazy"
-                        referrerpolicy="no-referrer"
                         @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
                       />
                     </template>
@@ -536,7 +534,6 @@
                     :alt="`${searchStore.vndbInfo.mainName} 截图 ${index + 1}`"
                     class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
-                    referrerpolicy="no-referrer"
                     @error="handleImageError"
                   />
                 </button>
