@@ -54,8 +54,8 @@ function handlePrev(e: Event) {
 // 下一张
 function handleNext(e: Event) {
   e.stopPropagation()
-  next()
   playSwipe()
+  next()
 }
 
 // 键盘事件
