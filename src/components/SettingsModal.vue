@@ -159,6 +159,13 @@
                     >
                       {{ option.label }}
                     </span>
+                    <!-- 延迟显示 -->
+                    <span 
+                      v-if="option.value !== 'custom'"
+                      :class="['text-xs font-mono tabular-nums', getLatencyClass(option.value)]"
+                    >
+                      {{ getLatencyText(option.value) }}
+                    </span>
                   </div>
                   <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧靠右 -->
                   <span 
@@ -558,11 +565,12 @@ const emit = defineEmits<{
 
 // API 服务器选项
 const apiOptions = [
-  { value: 'cfapi', label: 'Cloudflare Workers' },
-  { value: 'api', label: '中国香港 雨云' },
-  { value: 'usapi', label: '美国洛杉矶 CloudCone' },
-  { value: 'jpapi', label: '日本东京 ClawCloud' },
-  { value: 'deapi', label: '德国法兰克福 ClawCloud' },
+  { value: 'cfapi', label: 'Cloudflare' },
+  { value: 'api', label: '香港 雨云' },
+  { value: 'gzapi', label: '广州 腾讯云' },
+  { value: 'usapi', label: '洛杉矶 CloudCone' },
+  { value: 'jpapi', label: '东京 ClawCloud' },
+  { value: 'deapi', label: '法兰克福 ClawCloud' },
   { value: 'custom', label: '自定义' },
 ]
 
@@ -570,6 +578,7 @@ const apiOptions = [
 const apiUrls: Record<string, string> = {
   cfapi: 'https://cf.api.searchgal.homes',
   api: 'https://api.searchgal.homes',
+  gzapi: 'https://gz.api.searchgal.homes',
   usapi: 'https://us.api.searchgal.homes',
   jpapi: 'https://jp.api.searchgal.homes',
   deapi: 'https://de.api.searchgal.homes',
@@ -583,6 +592,9 @@ function getOptionFromUrl(url: string): string {
   if (url === apiUrls.api) {
     return 'api'
   }
+  if (url === apiUrls.gzapi) {
+    return 'gzapi'
+  }
   if (url === apiUrls.usapi) {
     return 'usapi'
   }
@@ -593,6 +605,77 @@ function getOptionFromUrl(url: string): string {
     return 'deapi'
   }
   return 'custom'
+}
+
+// API 延迟测量
+const apiLatencies = ref<Record<string, number | null | 'error'>>({})
+
+// 测量单个 API 延迟（使用 no-cors 模式绕过 CORS 限制）
+async function measureApiLatency(apiKey: string): Promise<void> {
+  const url = apiUrls[apiKey]
+  if (!url) { return }
+  
+  apiLatencies.value[apiKey] = null // 测量中
+  
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10秒超时
+    
+    const start = Date.now()
+    // no-cors 模式：无法读取响应内容，但可以测量网络延迟
+    await fetch(url, {
+      method: 'GET',
+      mode: 'no-cors',
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+    const end = Date.now()
+    
+    clearTimeout(timeoutId)
+    
+    // 请求完成即视为成功（no-cors 模式无法读取状态码）
+    apiLatencies.value[apiKey] = Math.round(end - start)
+  } catch {
+    apiLatencies.value[apiKey] = 'error'
+  }
+}
+
+// 测量所有 API 延迟
+function measureAllApiLatencies() {
+  const keys = Object.keys(apiUrls)
+  keys.forEach((key) => {
+    void measureApiLatency(key)
+  })
+}
+
+// 获取延迟显示文本
+function getLatencyText(apiKey: string): string {
+  const latency = apiLatencies.value[apiKey]
+  if (latency === undefined || latency === null) {
+    return '...'
+  }
+  if (latency === 'error') {
+    return '超时'
+  }
+  return `${latency}ms`
+}
+
+// 获取延迟颜色类
+function getLatencyClass(apiKey: string): string {
+  const latency = apiLatencies.value[apiKey]
+  if (latency === undefined || latency === null) {
+    return 'text-gray-400 dark:text-slate-500'
+  }
+  if (latency === 'error') {
+    return 'text-red-500 dark:text-red-400'
+  }
+  if (latency < 100) {
+    return 'text-green-500 dark:text-green-400'
+  }
+  if (latency < 300) {
+    return 'text-yellow-500 dark:text-yellow-400'
+  }
+  return 'text-orange-500 dark:text-orange-400'
 }
 
 // 获取 API URL
@@ -661,12 +744,14 @@ watch(() => props.isOpen, (isOpen) => {
     localVndbApiBaseUrl.value = settingsStore.settings.vndbApiBaseUrl
     localVndbImageProxyUrl.value = settingsStore.settings.vndbImageProxyUrl
     localAiTranslateApiUrl.value = settingsStore.settings.aiTranslateApiUrl
+    // 异步测量 API 延迟（不阻塞面板打开）
+    setTimeout(measureAllApiLatencies, 100)
     localAiTranslateApiKey.value = settingsStore.settings.aiTranslateApiKey
     localAiTranslateModel.value = settingsStore.settings.aiTranslateModel
     localBackgroundImageApiUrl.value = settingsStore.settings.backgroundImageApiUrl
     localVideoParseApiUrl.value = settingsStore.settings.videoParseApiUrl
   }
-})
+}, { immediate: true })
 
 function close() {
   playTap()
