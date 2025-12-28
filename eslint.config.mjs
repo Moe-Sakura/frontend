@@ -11,6 +11,7 @@ export default tseslint.config(
       '**/.pnpm-store/**',
       '**/public/**',
       '**/*.config.js',
+      '**/*.config.mjs',
       '**/*.config.ts',
       '**/.history/**', // 忽略编辑器历史文件
       '**/.vscode/**',
@@ -22,11 +23,22 @@ export default tseslint.config(
   // JavaScript 基础规则
   js.configs.recommended,
 
-  // TypeScript 推荐规则
-  ...tseslint.configs.recommended,
+  // TypeScript 最严格规则（带类型检查）
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
 
   // Vue 推荐规则
   ...pluginVue.configs['flat/recommended'],
+
+  // TypeScript 类型检查配置
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
 
   // 自定义规则
   {
@@ -76,25 +88,48 @@ export default tseslint.config(
       },
     },
     rules: {
-      // TypeScript 规则
-      '@typescript-eslint/no-explicit-any': 'warn', // 允许 any，但给出警告
+      // TypeScript 规则（严格但实用）
+      '@typescript-eslint/no-explicit-any': 'warn', // any 警告（允许但不推荐）
       '@typescript-eslint/no-unused-vars': [
-        'warn',
+        'error',
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
           caughtErrors: 'none', // 忽略 catch 块中未使用的错误变量
         },
       ],
-      '@typescript-eslint/no-non-null-assertion': 'off', // 允许非空断言（IndexedDB 需要）
+      '@typescript-eslint/no-non-null-assertion': 'warn', // 非空断言警告
+      '@typescript-eslint/no-floating-promises': 'warn', // Promise 未处理警告
+      '@typescript-eslint/no-misused-promises': 'error', // Promise 误用检查
+      '@typescript-eslint/await-thenable': 'error', // await 必须用于 Promise
+      '@typescript-eslint/require-await': 'off', // 允许空 async 函数
+      '@typescript-eslint/restrict-template-expressions': 'off', // 允许模板字符串中使用任意类型
+      '@typescript-eslint/no-confusing-void-expression': 'off', // 允许 void 表达式
+      '@typescript-eslint/no-unnecessary-condition': 'off', // 关闭，避免误报
+      // 关闭过于严格的 unsafe 规则（实际项目中误报太多）
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off', // || 和 ?? 各有用途
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'off', // catch 变量类型
+      '@typescript-eslint/no-deprecated': 'warn', // 弃用 API 警告而非错误
+      '@typescript-eslint/no-extraneous-class': 'off', // 允许静态类（类型定义需要）
+      '@typescript-eslint/no-unnecessary-type-parameters': 'off', // 允许单次使用的泛型参数
+      '@typescript-eslint/restrict-plus-operands': 'off', // + 操作符类型检查
+      '@typescript-eslint/no-implied-eval': 'warn', // 隐式 eval 警告
+      '@typescript-eslint/no-empty-function': 'off', // 允许空函数
+      '@typescript-eslint/no-misused-promises': 'warn', // Promise 误用降为警告
 
       // Vue 规则
       'vue/multi-word-component-names': 'off', // 允许单词组件名
-      'vue/no-v-html': 'warn', // v-html 警告而非错误
+      'vue/no-v-html': 'warn', // v-html 警告（XSS 风险）
       'vue/require-default-prop': 'off', // 不强制要求默认 prop
-      'vue/require-prop-types': 'warn',
+      'vue/require-prop-types': 'error', // 必须定义 prop 类型
       'vue/html-self-closing': [
-        'warn',
+        'error',
         {
           html: {
             void: 'always',
@@ -107,24 +142,24 @@ export default tseslint.config(
       ],
       'vue/max-attributes-per-line': 'off', // 不限制每行属性数量
       'vue/singleline-html-element-content-newline': 'off',
-      'vue/html-indent': ['warn', 2],
+      'vue/html-indent': ['error', 2],
 
-      // 通用规则
-      'no-console': 'off', // 允许 console（开发时有用）
-      'no-debugger': 'warn',
+      // 通用规则（严格模式）
+      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }], // 允许 warn/error/info
+      'no-debugger': 'error',
       'no-unused-vars': 'off', // 使用 TypeScript 的规则
-      'prefer-const': 'warn',
+      'prefer-const': 'error',
       'no-var': 'error',
-      'eqeqeq': ['warn', 'always'],
-      'curly': ['warn', 'all'],
-      'semi': ['warn', 'never'], // 不使用分号
-      'quotes': ['warn', 'single', { avoidEscape: true }],
-      'comma-dangle': ['warn', 'always-multiline'],
-      'arrow-spacing': 'warn',
-      'object-curly-spacing': ['warn', 'always'],
-      'array-bracket-spacing': ['warn', 'never'],
+      'eqeqeq': ['error', 'always'],
+      'curly': ['error', 'all'],
+      'semi': ['error', 'never'], // 不使用分号
+      'quotes': ['error', 'single', { avoidEscape: true }],
+      'comma-dangle': ['error', 'always-multiline'],
+      'arrow-spacing': 'error',
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'never'],
       'space-before-function-paren': [
-        'warn',
+        'error',
         {
           anonymous: 'always',
           named: 'never',
