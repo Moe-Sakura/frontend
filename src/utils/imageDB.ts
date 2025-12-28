@@ -3,6 +3,9 @@
  * 用于存储随机背景图片
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+// IndexedDB 事务回调中 result 在 onsuccess 时必定存在
+
 const DB_NAME = 'RandomImageCache'
 const DB_VERSION = 1
 const STORE_NAME = 'images'

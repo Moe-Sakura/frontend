@@ -105,9 +105,9 @@ const uiStore = useUIStore()
 const settingsStore = useSettingsStore()
 const searchHeaderRef = ref<InstanceType<typeof SearchHeader> | null>(null)
 
-// 切换设置面板
+// 切换设置面板（互斥）
 function openSettings() {
-  uiStore.isSettingsModalOpen = !uiStore.isSettingsModalOpen
+  uiStore.toggleSettingsModal()
 }
 
 // 处理历史记录选择
@@ -342,6 +342,7 @@ function cleanupBlobUrls(currentUrl: string) {
   
   // 创建新 Map，保留当前使用的 URL
   const newBlobUrls = new Map<string, string>()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   newBlobUrls.set(currentUrl, blobUrls.get(currentUrl)!)
   
   // 保留最近添加的 URL（Map 保持插入顺序）
@@ -408,12 +409,12 @@ async function displayNextImage() {
     }
     preloadImg.onerror = () => {
       // 加载失败，尝试下一张
-      displayNextImage()
+      void displayNextImage()
     }
     preloadImg.src = blobUrl || nextImageUrl
-  } catch (error) {
+  } catch {
     // 加载失败，尝试下一张
-    displayNextImage()
+    void displayNextImage()
   }
 }
 
@@ -424,10 +425,10 @@ function startFetchInterval() {
   }
   
   // 立即获取第一张
-  fetchAndCacheImage()
+  void fetchAndCacheImage()
   
   fetchInterval = window.setInterval(() => {
-    fetchAndCacheImage()
+    void fetchAndCacheImage()
   }, FETCH_INTERVAL)
 }
 
@@ -438,10 +439,10 @@ function startDisplayInterval() {
   }
   
   // 立即显示第一张
-  displayNextImage()
+  void displayNextImage()
   
   displayInterval = window.setInterval(() => {
-    displayNextImage()
+    void displayNextImage()
   }, DISPLAY_INTERVAL)
 }
 
@@ -466,8 +467,8 @@ onMounted(async () => {
   // URL hash 优先级最高 - 覆盖会话状态
   const hash = window.location.hash
   if (hash.startsWith('#atk-comment-')) {
-    // 评论链接：打开评论面板
-    uiStore.isCommentsModalOpen = true
+    // 评论链接：打开评论面板（互斥）
+    uiStore.openCommentsModal()
   }
 
   // 恢复保存的搜索状态

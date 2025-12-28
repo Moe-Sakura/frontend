@@ -15,7 +15,7 @@ export interface SearchState {
   searchQuery: string
   searchMode: 'game' | 'patch'
   customApi: string
-  platformResults: Array<[string, PlatformData]>
+  platformResults: [string, PlatformData][]
   vndbInfo: VndbInfo | null
   // 输入状态
   inputQuery?: string

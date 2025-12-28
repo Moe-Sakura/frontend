@@ -60,7 +60,8 @@ export function useKeyboardShortcuts() {
 
   // 聚焦搜索框
   function focusSearch() {
-    const searchInput = document.querySelector('input[type="search"], input[placeholder*="搜索"]') as HTMLInputElement
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const searchInput = document.querySelector('input[type="search"], input[placeholder*="搜索"]')!
     if (searchInput) {
       searchInput.focus()
       searchInput.select()
@@ -74,7 +75,7 @@ export function useKeyboardShortcuts() {
 
   // 获取平台列表
   function getPlatformElements(): HTMLElement[] {
-    return Array.from(document.querySelectorAll('[data-platform]')) as HTMLElement[]
+    return Array.from(document.querySelectorAll('[data-platform]'))
   }
 
   // 跳转到指定平台
@@ -122,7 +123,8 @@ export function useKeyboardShortcuts() {
   // 切换站点导航
   function toggleNav() {
     // 模拟点击站点导航按钮
-    const navBtn = document.querySelector('.nav-btn') as HTMLButtonElement
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const navBtn = document.querySelector('.nav-btn')!
     if (navBtn) {
       navBtn.click()
     }
@@ -142,20 +144,20 @@ export function useKeyboardShortcuts() {
     uiStore.closeAllModals()
   }
 
-  // 切换面板
+  // 切换面板（使用 store 中的互斥方法）
   function togglePanel(panel: 'settings' | 'comments' | 'vndb' | 'history') {
     switch (panel) {
       case 'settings':
-        uiStore.isSettingsModalOpen = !uiStore.isSettingsModalOpen
+        uiStore.toggleSettingsModal()
         break
       case 'comments':
-        uiStore.isCommentsModalOpen = !uiStore.isCommentsModalOpen
+        uiStore.toggleCommentsModal()
         break
       case 'vndb':
-        uiStore.isVndbPanelOpen = !uiStore.isVndbPanelOpen
+        uiStore.toggleVndbPanel()
         break
       case 'history':
-        uiStore.isHistoryModalOpen = !uiStore.isHistoryModalOpen
+        uiStore.toggleHistoryModal()
         break
     }
   }
@@ -269,7 +271,7 @@ export function useKeyboardShortcuts() {
         // 显示/隐藏快捷键帮助
         event.preventDefault()
         playButton()
-        uiStore.isKeyboardHelpOpen = !uiStore.isKeyboardHelpOpen
+        uiStore.toggleKeyboardHelp()
         break
     }
   }

@@ -100,6 +100,6 @@ export type AppConfig = typeof CONFIG
 
 // 开发环境下打印配置（方便调试）
 if (DEV_CONFIG.isDev && FEATURE_FLAGS.enableDevLogs) {
-  console.log('📦 Application Config:', CONFIG)
+  console.info('📦 Application Config:', CONFIG)
 }
 

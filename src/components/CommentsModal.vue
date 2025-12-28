@@ -10,7 +10,7 @@
       leave-to-class="opacity-0 scale-[0.98] translate-y-10"
     >
       <div
-        v-if="uiStore.isCommentsModalOpen"
+        v-show="uiStore.isCommentsModalOpen"
         class="comments-modal fixed z-[100] flex flex-col shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[900px] md:max-w-[calc(100%-3rem)] md:h-[760px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
       >
         <!-- 顶部导航栏 -->
@@ -140,7 +140,7 @@ function initArtalk() {
     }
   }
 
-  nextTick(() => {
+  void nextTick(() => {
     const commentsEl = document.getElementById('Comments')
     if (commentsEl) {
       try {

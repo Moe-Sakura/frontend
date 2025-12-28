@@ -51,7 +51,7 @@ export function updateURLParams(params: SearchParams): void {
   searchParams.delete('api')
   
   // 设置新参数
-  if (params.s && params.s.trim()) {
+  if (params.s?.trim()) {
     searchParams.set('s', encodeURIComponent(params.s.trim()))
   }
   
@@ -60,7 +60,7 @@ export function updateURLParams(params: SearchParams): void {
     searchParams.set('mode', params.mode)
   }
   
-  if (params.api && params.api.trim()) {
+  if (params.api?.trim()) {
     searchParams.set('api', encodeURIComponent(params.api.trim()))
   }
   
@@ -86,7 +86,7 @@ export function generateShareURL(params: SearchParams): string {
   const url = new URL(window.location.origin)
   const searchParams = url.searchParams
   
-  if (params.s && params.s.trim()) {
+  if (params.s?.trim()) {
     searchParams.set('s', encodeURIComponent(params.s.trim()))
   }
   
@@ -94,7 +94,7 @@ export function generateShareURL(params: SearchParams): string {
     searchParams.set('mode', params.mode)
   }
   
-  if (params.api && params.api.trim()) {
+  if (params.api?.trim()) {
     searchParams.set('api', encodeURIComponent(params.api.trim()))
   }
   

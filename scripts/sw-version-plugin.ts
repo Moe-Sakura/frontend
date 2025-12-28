@@ -81,13 +81,13 @@ export function swVersionPlugin(options: SwVersionPluginOptions = {}): Plugin {
       version = generateVersion(includeGitHash, prefix)
       const buildInfo = getBuildInfo()
       
-      console.log('\n📦 SW Version Plugin')
-      console.log(`   Version: ${version}`)
-      console.log(`   Build Time: ${buildInfo.buildTime}`)
+      console.info('\n📦 SW Version Plugin')
+      console.info(`   Version: ${version}`)
+      console.info(`   Build Time: ${buildInfo.buildTime}`)
       if (buildInfo.gitCommit) {
-        console.log(`   Git: ${buildInfo.gitBranch}@${buildInfo.gitCommit}`)
+        console.info(`   Git: ${buildInfo.gitBranch}@${buildInfo.gitCommit}`)
       }
-      console.log('')
+      console.info('')
     },
     
     // 构建完成后注入版本到 sw.js
@@ -116,7 +116,7 @@ export function swVersionPlugin(options: SwVersionPluginOptions = {}): Plugin {
       
       writeFileSync(swFilePath, content)
       
-      console.log(`✅ SW version injected: ${version}`)
+      console.info(`✅ SW version injected: ${version}`)
     },
   }
 }

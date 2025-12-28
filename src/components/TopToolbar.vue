@@ -108,6 +108,7 @@ async function shareSearch() {
     textarea.select()
     
     try {
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       document.execCommand('copy')
       showCopiedTip.value = true
       
@@ -125,7 +126,7 @@ async function shareSearch() {
 // 切换键盘快捷键帮助
 function toggleKeyboardHelp() {
   playTap()
-  uiStore.isKeyboardHelpOpen = !uiStore.isKeyboardHelpOpen
+  uiStore.toggleKeyboardHelp()
 }
 
 // 打开设置
@@ -153,7 +154,7 @@ async function saveBackgroundImage() {
       const parts = pathname.split('/')
       const lastPart = parts[parts.length - 1]
       
-      if (lastPart && lastPart.includes('.')) {
+      if (lastPart?.includes('.')) {
         // 有文件名和扩展名
         const nameParts = lastPart.split('.')
         extension = nameParts.pop() || 'jpg'

@@ -220,7 +220,7 @@ export const useSearchStore = defineStore('search', () => {
     clearResults()
   }
   
-  function endSearch(success: boolean = true) {
+  function endSearch(success = true) {
     isSearching.value = false
     lastSearchTime.value = Date.now()
     

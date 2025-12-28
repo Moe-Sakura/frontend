@@ -194,7 +194,7 @@ export const mode = import.meta.env.MODE
  */
 export function devLog(...args: unknown[]) {
   if (config.dev.debug && isDev) {
-    console.log('[Dev]', ...args)
+    console.info('[Dev]', ...args)
   }
 }
 
@@ -218,6 +218,6 @@ export function devError(...args: unknown[]) {
 
 // 开发环境打印配置信息
 if (isDev && config.dev.debug) {
-  console.log('🔧 Application Config:', config)
-  console.log('🌍 Environment:', mode)
+  console.info('🔧 Application Config:', config)
+  console.info('🌍 Environment:', mode)
 }

@@ -160,11 +160,11 @@ export function piniaLogger(context: PiniaPluginContext) {
   store.$onAction(({ name, args, after, onError }) => {
     const startTime = Date.now()
     
-    console.log(`🚀 [${store.$id}] Action "${name}" called with:`, args)
+    console.info(`🚀 [${store.$id}] Action "${name}" called with:`, args)
     
     after((result) => {
       const duration = Date.now() - startTime
-      console.log(`✅ [${store.$id}] Action "${name}" completed in ${duration}ms`, result)
+      console.info(`✅ [${store.$id}] Action "${name}" completed in ${duration}ms`, result)
     })
     
     onError((error) => {
@@ -175,7 +175,7 @@ export function piniaLogger(context: PiniaPluginContext) {
   
   // 监听状态变化
   store.$subscribe((mutation, state) => {
-    console.log(`📝 [${store.$id}] State changed:`, {
+    console.info(`📝 [${store.$id}] State changed:`, {
       type: mutation.type,
       storeId: mutation.storeId,
       events: mutation.events,
@@ -210,6 +210,7 @@ export function piniaPerformance(context: PiniaPluginContext) {
       if (!stats.actionDurations.has(name)) {
         stats.actionDurations.set(name, [])
       }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       stats.actionDurations.get(name)!.push(duration)
     })
   })
