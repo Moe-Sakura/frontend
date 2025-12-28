@@ -99,7 +99,6 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-non-null-assertion': 'warn', // 非空断言警告
       '@typescript-eslint/no-floating-promises': 'warn', // Promise 未处理警告
-      '@typescript-eslint/no-misused-promises': 'error', // Promise 误用检查
       '@typescript-eslint/await-thenable': 'error', // await 必须用于 Promise
       '@typescript-eslint/require-await': 'off', // 允许空 async 函数
       '@typescript-eslint/restrict-template-expressions': 'off', // 允许模板字符串中使用任意类型
