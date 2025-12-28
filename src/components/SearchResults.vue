@@ -2,6 +2,7 @@
   <div v-if="searchStore.hasResults" class="w-full sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 animate-fade-in">
     <div id="results" class="sm:max-w-5xl sm:mx-auto space-y-4 sm:space-y-6">
       <!-- 使用 v-memo 优化平台卡片渲染 + LazyRender 懒渲染 -->
+      <!-- data-platform 放在 LazyRender 容器上，确保即使内容未渲染也能被站点导航找到 -->
       <LazyRender
         v-for="[platformName, platformData] in searchStore.platformResults"
         :key="platformName"
@@ -9,9 +10,9 @@
         :once="true"
         min-height="200px"
         root-margin="400px 0px"
+        :data-platform="platformName"
       >
         <div
-          :data-platform="platformName"
           class="result-card rounded-none sm:rounded-2xl animate-fade-in-up border-2 content-auto"
           :class="getBorderClass(platformData.color)"
         >
@@ -234,8 +235,8 @@ function getCountBadgeClass(color: string) {
 }
 
 // 获取平台图标组件
-function getPlatformIconComponent(color: string): typeof Star | typeof Circle | typeof DollarSign | typeof XCircle {
-  const icons: Record<string, typeof Star | typeof Circle | typeof DollarSign | typeof XCircle> = {
+function getPlatformIconComponent(color: string): typeof Star       {
+  const icons: Record<string, typeof Star      > = {
     lime: Star,
     white: Circle,
     gold: DollarSign,
@@ -245,8 +246,8 @@ function getPlatformIconComponent(color: string): typeof Star | typeof Circle | 
 }
 
 // 获取标签图标组件
-function getTagIconComponent(tag: string): typeof CheckCircle | typeof User | typeof Coins | typeof MessageCircle | typeof Reply | typeof Server | typeof Rocket | typeof Turtle | typeof Layers | typeof Magnet | typeof Wand2 | typeof TagIcon {
-  const icons: Record<string, typeof CheckCircle | typeof User | typeof Coins | typeof MessageCircle | typeof Reply | typeof Server | typeof Rocket | typeof Turtle | typeof Layers | typeof Magnet | typeof Wand2 | typeof TagIcon> = {
+function getTagIconComponent(tag: string): typeof CheckCircle                       {
+  const icons: Record<string, typeof CheckCircle                      > = {
     'NoReq': CheckCircle,
     'Login': User,
     'LoginPay': Coins,

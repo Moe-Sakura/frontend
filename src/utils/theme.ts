@@ -43,8 +43,10 @@ export function watchSystemTheme(callback: (theme: 'light' | 'dark') => void): (
     mediaQuery.addEventListener('change', handler)
     return () => mediaQuery.removeEventListener('change', handler)
   } else {
-    // 降级到旧的 API
+    // 降级到旧的 API（兼容旧浏览器）
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     mediaQuery.addListener(handler)
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     return () => mediaQuery.removeListener(handler)
   }
 }
@@ -104,7 +106,8 @@ export function applyCustomJS(js: string): void {
   // 如果有新的JS，执行脚本
   if (js.trim()) {
     try {
-      // 使用 Function 构造器创建并执行脚本
+      // 使用 Function 构造器创建并执行脚本（用户自定义脚本功能）
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval
       const script = new Function(js)
       script()
     } catch (error) {

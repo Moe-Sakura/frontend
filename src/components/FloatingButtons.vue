@@ -195,15 +195,15 @@ function scrollToTop() {
 }
 
 function toggleComments() {
-  uiStore.isCommentsModalOpen = !uiStore.isCommentsModalOpen
+  uiStore.toggleCommentsModal()
 }
 
 function toggleVndbPanel() {
-  uiStore.isVndbPanelOpen = !uiStore.isVndbPanelOpen
+  uiStore.toggleVndbPanel()
 }
 
 function toggleHistory() {
-  uiStore.isHistoryModalOpen = !uiStore.isHistoryModalOpen
+  uiStore.toggleHistoryModal()
 }
 
 function togglePlatformNav(withSound = false) {
@@ -257,15 +257,19 @@ function handleScrollToPlatform(platformName: string) {
 }
 
 function scrollToPlatform(platformName: string) {
-  const platformElements = document.querySelectorAll('[data-platform]')
-  const targetElement = Array.from(platformElements).find(
-    el => el.getAttribute('data-platform') === platformName,
-  ) as HTMLElement
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const targetElement = document.querySelector(`[data-platform="${platformName}"]`)!
 
   if (targetElement) {
-    const yOffset = -80
-    const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset
-    window.scrollTo({ top: y, behavior: 'smooth' })
+    // 先瞬间滚动到目标位置附近，触发途中的 LazyRender 渲染
+    targetElement.scrollIntoView({ behavior: 'instant', block: 'start' })
+    
+    // 等待渲染完成后，再平滑滚动到精确位置
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 50)
+    })
     
     // 滚动后关闭导航
     playTransitionDown()

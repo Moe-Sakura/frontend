@@ -87,12 +87,12 @@ export const useUIStore = defineStore('ui', () => {
   const scrollPosition = ref(0)
   
   // Toast 通知
-  const toasts = ref<Array<{
+  const toasts = ref<{
     id: string
     type: 'success' | 'error' | 'info' | 'warning'
     message: string
     duration: number
-  }>>([])
+  }[]>([])
   
   // 计算属性
   const hasOpenModal = computed(() => 
@@ -175,19 +175,9 @@ export const useUIStore = defineStore('ui', () => {
     customCSS.value = css
   }
   
-  // 方法 - 模态框
-  function toggleCommentsModal() {
-    isCommentsModalOpen.value = !isCommentsModalOpen.value
-  }
+  // 方法 - 模态框（互斥：打开一个会关闭其他）
   
-  function toggleVndbPanel() {
-    isVndbPanelOpen.value = !isVndbPanelOpen.value
-  }
-  
-  function toggleSettingsModal() {
-    isSettingsModalOpen.value = !isSettingsModalOpen.value
-  }
-  
+  // 关闭所有模态框（内部使用，不触发互斥逻辑）
   function closeAllModals() {
     isCommentsModalOpen.value = false
     isVndbPanelOpen.value = false
@@ -196,8 +186,74 @@ export const useUIStore = defineStore('ui', () => {
     isKeyboardHelpOpen.value = false
   }
   
+  // 打开评论模态框（互斥）
+  function openCommentsModal() {
+    closeAllModals()
+    isCommentsModalOpen.value = true
+  }
+  
+  function toggleCommentsModal() {
+    if (isCommentsModalOpen.value) {
+      isCommentsModalOpen.value = false
+    } else {
+      openCommentsModal()
+    }
+  }
+  
+  // 打开 VNDB 面板（互斥）
+  function openVndbPanel() {
+    closeAllModals()
+    isVndbPanelOpen.value = true
+  }
+  
+  function toggleVndbPanel() {
+    if (isVndbPanelOpen.value) {
+      isVndbPanelOpen.value = false
+    } else {
+      openVndbPanel()
+    }
+  }
+  
+  // 打开设置模态框（互斥）
+  function openSettingsModal() {
+    closeAllModals()
+    isSettingsModalOpen.value = true
+  }
+  
+  function toggleSettingsModal() {
+    if (isSettingsModalOpen.value) {
+      isSettingsModalOpen.value = false
+    } else {
+      openSettingsModal()
+    }
+  }
+  
+  // 打开历史记录模态框（互斥）
+  function openHistoryModal() {
+    closeAllModals()
+    isHistoryModalOpen.value = true
+  }
+  
   function toggleHistoryModal() {
-    isHistoryModalOpen.value = !isHistoryModalOpen.value
+    if (isHistoryModalOpen.value) {
+      isHistoryModalOpen.value = false
+    } else {
+      openHistoryModal()
+    }
+  }
+  
+  // 打开键盘帮助面板（互斥）
+  function openKeyboardHelp() {
+    closeAllModals()
+    isKeyboardHelpOpen.value = true
+  }
+  
+  function toggleKeyboardHelp() {
+    if (isKeyboardHelpOpen.value) {
+      isKeyboardHelpOpen.value = false
+    } else {
+      openKeyboardHelp()
+    }
   }
   
   // 方法 - 浮动按钮
@@ -451,10 +507,17 @@ export const useUIStore = defineStore('ui', () => {
     toggleDarkMode,
     setDarkMode,
     setCustomCSS,
+    // 模态框方法
+    openCommentsModal,
     toggleCommentsModal,
+    openVndbPanel,
     toggleVndbPanel,
+    openSettingsModal,
     toggleSettingsModal,
+    openHistoryModal,
     toggleHistoryModal,
+    openKeyboardHelp,
+    toggleKeyboardHelp,
     closeAllModals,
     setShowScrollToTop,
     togglePlatformNav,

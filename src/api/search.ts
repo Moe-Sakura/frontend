@@ -455,7 +455,7 @@ export async function fetchVndbData(gameName: string): Promise<VndbInfo | null> 
 
     // 获取封面图片 - 优先选择安全级别的图片
     let mainImageUrl: string | null = null
-    if (result.image && result.image.url) {
+    if (result.image?.url) {
       // 只使用 sexual <= 1 且 violence === 0 的图片
       if ((result.image.sexual === 0 || result.image.sexual === 1) && result.image.violence === 0) {
         mainImageUrl = result.image.url
@@ -650,7 +650,7 @@ export async function fetchVndbCharacters(vnId: string): Promise<VndbCharacter[]
         age?: number
       }) => {
         let imageUrl: string | undefined
-        if (c.image && c.image.url && c.image.sexual <= 1 && c.image.violence === 0) {
+        if (c.image?.url && c.image.sexual <= 1 && c.image.violence === 0) {
           imageUrl = c.image.url
         }
 
@@ -669,7 +669,7 @@ export async function fetchVndbCharacters(vnId: string): Promise<VndbCharacter[]
     // 使用代理替换 URL
     if (ENABLE_VNDB_IMAGE_PROXY && isProxyAvailable) {
       characters.forEach((char) => {
-        if (char.image && char.image.startsWith('https://t.vndb.org/')) {
+        if (char.image?.startsWith('https://t.vndb.org/')) {
           char.image = proxyUrl(char.image)
         }
       })
@@ -735,11 +735,10 @@ export type TranslateMode = 'description' | 'tags' | 'quotes'
 const DESCRIPTION_PROMPT = `你是一名专业的视觉小说（Galgame/AVG）本地化专家。请将游戏简介精准翻译为简体中文。
 
 【翻译规范】
-1. 格式净化：清除所有 HTML、Markdown、BBCode 等标记，仅保留纯文本
-2. 结构保留：保持原文段落划分，段落间用换行分隔
-3. 术语处理：使用视觉小说领域通用的中文术语
-4. 人名处理：优先使用中文圈广泛接受的译名，无通用译名时保留原名
-5. 内容控制：禁止添加剧透、解释性文字或主观评价
+1. 结构保留：保持原文段落划分，段落间用换行分隔
+2. 术语处理：使用视觉小说领域通用的中文术语
+3. 人名处理：优先使用中文圈广泛接受的译名，无通用译名时保留原名
+4. 内容控制：禁止添加剧透、解释性文字或主观评价
 
 【输出要求】
 仅输出翻译后的纯文本，无需任何说明`
@@ -811,7 +810,7 @@ const COMBINED_PROMPT = `你是一名专业的视觉小说（Galgame/AVG）本�
 export async function translateText(
   text: string, 
   mode: TranslateMode = 'description',
-  maxRetries: number = 2,
+  maxRetries = 2,
 ): Promise<string | null> {
   if (!text || text.trim().length === 0) {
     return null
@@ -913,7 +912,7 @@ export async function translateAllContent(
   description: string | null,
   tags: string[] | null,
   quotes: string[] | null,
-  maxRetries: number = 2,
+  maxRetries = 2,
 ): Promise<TranslateAllResult> {
   const result: TranslateAllResult = {
     description: null,
@@ -1032,12 +1031,12 @@ function replaceVndbUrls(vndbInfo: VndbInfo) {
   }
 
   // 替换封面图片 URL
-  if (vndbInfo.mainImageUrl && vndbInfo.mainImageUrl.startsWith('https://t.vndb.org/')) {
+  if (vndbInfo.mainImageUrl?.startsWith('https://t.vndb.org/')) {
     vndbInfo.mainImageUrl = proxyUrl(vndbInfo.mainImageUrl)
   }
 
   // 替换主截图 URL
-  if (vndbInfo.screenshotUrl && vndbInfo.screenshotUrl.startsWith('https://t.vndb.org/')) {
+  if (vndbInfo.screenshotUrl?.startsWith('https://t.vndb.org/')) {
     vndbInfo.screenshotUrl = proxyUrl(vndbInfo.screenshotUrl)
   }
 

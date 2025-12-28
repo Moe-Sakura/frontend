@@ -71,6 +71,7 @@ export {
   Heart,
   Star,
   Crown,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   Github,
   Quote,
   Reply,

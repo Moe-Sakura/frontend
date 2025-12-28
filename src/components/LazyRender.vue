@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, useAttrs } from 'vue'
+
+// 禁用自动继承属性，手动绑定到容器
+defineOptions({
+  inheritAttrs: false,
+})
+
+const attrs = useAttrs()
 
 const props = defineProps<{
   /** 距离可视区多少像素时开始渲染 */
@@ -51,7 +58,11 @@ onUnmounted(() => {
 <template>
   <div 
     ref="containerRef" 
-    :style="{ minHeight: !isVisible ? (minHeight || '60px') : undefined }"
+    v-bind="attrs"
+    :style="{ 
+      minHeight: !isVisible ? (minHeight || '60px') : undefined,
+      scrollMarginTop: '80px'
+    }"
   >
     <slot v-if="isVisible" />
     <!-- 占位符 -->

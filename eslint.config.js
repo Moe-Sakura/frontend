@@ -11,7 +11,6 @@ export default tseslint.config(
       '**/.pnpm-store/**',
       '**/public/**',
       '**/*.config.js',
-      '**/*.config.mjs',
       '**/*.config.ts',
       '**/.history/**', // 忽略编辑器历史文件
       '**/.vscode/**',

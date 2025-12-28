@@ -146,7 +146,7 @@ export const useStatsStore = defineStore('stats', () => {
   // 检查单个服务状态
   async function checkServiceStatus(serviceKey: string) {
     const service = serviceStatuses.value.get(serviceKey)
-    if (!service || !service.url) {return}
+    if (!service?.url) {return}
     
     // 设置为检测中
     serviceStatuses.value.set(serviceKey, {
@@ -196,14 +196,14 @@ export const useStatsStore = defineStore('stats', () => {
   // 开始定期检测
   function startStatusCheck(intervalMs = 30000) {
     // 立即检测一次
-    checkAllServices()
+    void checkAllServices()
     
     // 设置定期检测
     if (statusCheckInterval) {
       clearInterval(statusCheckInterval)
     }
     statusCheckInterval = window.setInterval(() => {
-      checkAllServices()
+      void checkAllServices()
     }, intervalMs)
   }
   

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <Teleport to="body">
     <!-- VNDB 信息面板 - 模态框 -->
@@ -10,7 +11,7 @@
       leave-to-class="opacity-0 scale-[0.98] translate-y-10"
     >
       <div
-        v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
+        v-show="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
         ref="modalRef"
         class="fixed z-50 flex flex-col vndb-page shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[900px] md:max-w-[calc(100%-3rem)] md:h-[800px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
       >
@@ -83,293 +84,325 @@
 
         <!-- 内容区域 -->
         <div class="flex-1 overflow-y-auto custom-scrollbar">
-          <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-            <!-- 封面和标题卡片 -->
-            <div class="vndb-card">
-              <!-- 封面图 -->
-              <div v-if="searchStore.vndbInfo.mainImageUrl" class="mb-4">
-                <button
-                  class="block w-full max-w-sm mx-auto"
-                  @click="openGallery(0)"
-                >
-                  <img
-                    :src="searchStore.vndbInfo.mainImageUrl"
-                    :alt="searchStore.vndbInfo.mainName"
-                    class="w-full h-auto rounded-2xl shadow-lg cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all"
-                    loading="lazy"
-                    @error="handleImageError"
-                  />
-                </button>
-              </div>
-
-              <!-- 标题 -->
-              <h2 class="text-2xl font-bold text-gray-800 dark:text-white text-center mb-2">
-                {{ searchStore.vndbInfo.mainName }}
-              </h2>
-
-              <!-- 原名 -->
-              <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 dark:text-slate-400 text-center mb-1">
-                {{ searchStore.vndbInfo.originalTitle }}
-              </p>
-              
-              <!-- 罗马音 -->
-              <p v-if="searchStore.vndbInfo.alttitle && searchStore.vndbInfo.alttitle !== searchStore.vndbInfo.originalTitle" class="text-xs text-gray-400 dark:text-slate-500 text-center mb-4 italic">
-                {{ searchStore.vndbInfo.alttitle }}
-              </p>
-              <div v-else class="mb-3" />
-
-              <!-- 别名标签 -->
-              <div v-if="searchStore.vndbInfo.names.length > 1" class="flex flex-wrap justify-center gap-2">
-                <span
-                  v-for="(name, index) in (expandedSections.names ? searchStore.vndbInfo.names : searchStore.vndbInfo.names.slice(0, 5))"
-                  :key="index"
-                  class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-[#ff1493] dark:text-[#ff69b4] text-xs rounded-full"
-                >
-                  {{ name }}
-                </span>
-                <button
-                  v-if="searchStore.vndbInfo.names.length > 5"
-                  class="px-3 py-1 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 text-xs rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
-                  @click="toggleSection('names')"
-                >
-                  {{ expandedSections.names ? '收起' : `+${searchStore.vndbInfo.names.length - 5}` }}
-                </button>
-              </div>
-            </div>
-
-            <!-- 信息卡片网格 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- 评分 -->
-              <div v-if="searchStore.vndbInfo.rating" class="vndb-card flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
-                  <Star :size="24" class="text-white" />
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400">VNDB 评分</p>
-                  <p class="text-xl font-bold text-gray-800 dark:text-white">
-                    {{ (searchStore.vndbInfo.rating / 10).toFixed(1) }}
-                    <span class="text-sm font-normal text-gray-500 dark:text-slate-400">/ 10</span>
-                  </p>
-                  <p class="text-xs text-gray-400 dark:text-slate-500">{{ searchStore.vndbInfo.votecount }} 票</p>
-                </div>
-              </div>
-
-              <!-- 游戏时长 -->
-              <div v-if="searchStore.vndbInfo.play_hours" class="vndb-card flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                  <Clock :size="24" class="text-white" />
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400">游戏时长</p>
-                  <p class="text-xl font-bold text-gray-800 dark:text-white">
-                    {{ searchStore.vndbInfo.play_hours }}
-                    <span class="text-sm font-normal text-gray-500 dark:text-slate-400">小时</span>
-                  </p>
-                  <p class="text-xs text-gray-400 dark:text-slate-500">{{ searchStore.vndbInfo.book_length }}</p>
-                </div>
-              </div>
-
-              <!-- 发行日期 -->
-              <div v-if="searchStore.vndbInfo.released" class="vndb-card flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <Calendar :size="24" class="text-white" />
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400">发行日期</p>
-                  <p class="text-lg font-bold text-gray-800 dark:text-white">
-                    {{ formatDate(searchStore.vndbInfo.released) }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- 开发商 -->
-              <div v-if="searchStore.vndbInfo.developers && searchStore.vndbInfo.developers.length > 0" class="vndb-card flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                  <Building :size="24" class="text-white" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-xs text-gray-500 dark:text-slate-400">开发商</p>
-                  <p 
-                    v-text-scroll 
-                    class="text-base font-bold text-gray-800 dark:text-white"
+          <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-5">
+            <!-- 顶部：封面和基本信息（横向排列） -->
+            <div class="vndb-card !p-4">
+              <div class="flex flex-col sm:flex-row gap-4">
+                <!-- 封面图 -->
+                <div v-if="searchStore.vndbInfo.mainImageUrl" class="sm:w-40 md:w-48 flex-shrink-0">
+                  <button
+                    class="block w-full"
+                    @click="openGallery(0)"
                   >
-                    {{ searchStore.vndbInfo.developers.map(d => d.name).join(', ') }}
-                  </p>
+                    <img
+                      :src="searchStore.vndbInfo.mainImageUrl"
+                      :alt="searchStore.vndbInfo.mainName"
+                      class="w-full h-auto rounded-xl shadow-lg cursor-pointer hover:opacity-90 hover:scale-[1.01] transition-all"
+                      loading="lazy"
+                      @error="handleImageError"
+                    />
+                  </button>
                 </div>
-              </div>
 
-              <!-- 开发状态 -->
-              <div v-if="searchStore.vndbInfo.devstatus !== undefined" class="vndb-card flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                  <Gamepad2 :size="24" class="text-white" />
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400">开发状态</p>
-                  <p class="text-base font-bold" :class="getDevStatusColor(searchStore.vndbInfo.devstatus)">
-                    {{ formatDevStatus(searchStore.vndbInfo.devstatus) }}
+                <!-- 标题和基本信息 -->
+                <div class="flex-1 min-w-0">
+                  <!-- 标题 -->
+                  <h2 class="text-xl font-bold text-gray-800 dark:text-white leading-tight mb-1">
+                    {{ searchStore.vndbInfo.mainName }}
+                  </h2>
+                  <p v-if="searchStore.vndbInfo.originalTitle" class="text-sm text-gray-500 dark:text-slate-400 mb-0.5">
+                    {{ searchStore.vndbInfo.originalTitle }}
                   </p>
-                </div>
-              </div>
+                  <p v-if="searchStore.vndbInfo.alttitle && searchStore.vndbInfo.alttitle !== searchStore.vndbInfo.originalTitle" class="text-xs text-gray-400 dark:text-slate-500 italic mb-3">
+                    {{ searchStore.vndbInfo.alttitle }}
+                  </p>
+                  
+                  <!-- 别名标签 -->
+                  <div v-if="searchStore.vndbInfo.names.length > 1" class="flex flex-wrap gap-1.5 mb-4">
+                    <span
+                      v-for="(name, index) in (expandedSections.names ? searchStore.vndbInfo.names : searchStore.vndbInfo.names.slice(0, 4))"
+                      :key="index"
+                      class="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/30 text-[#ff1493] dark:text-[#ff69b4] text-xs rounded-full"
+                    >
+                      {{ name }}
+                    </span>
+                    <button
+                      v-if="searchStore.vndbInfo.names.length > 4"
+                      class="px-2 py-0.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 text-xs rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+                      @click="toggleSection('names')"
+                    >
+                      {{ expandedSections.names ? '收起' : `+${searchStore.vndbInfo.names.length - 4}` }}
+                    </button>
+                  </div>
 
-              <!-- 原始语言 -->
-              <div v-if="searchStore.vndbInfo.olang" class="vndb-card flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
-                  <Globe :size="24" class="text-white" />
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400">原始语言</p>
-                  <p class="text-base font-bold text-gray-800 dark:text-white">
-                    {{ formatLanguage(searchStore.vndbInfo.olang) }}
-                  </p>
+                  <!-- 基本信息网格 -->
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <!-- 评分 -->
+                    <div v-if="searchStore.vndbInfo.rating" class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-sm">
+                        <Star :size="14" class="text-white" />
+                      </div>
+                      <div>
+                        <p class="text-[10px] text-gray-500 dark:text-slate-400">评分</p>
+                        <p class="text-sm font-bold text-gray-800 dark:text-white">
+                          {{ (searchStore.vndbInfo.rating / 10).toFixed(1) }}
+                          <span class="text-[10px] font-normal text-gray-400">({{ searchStore.vndbInfo.votecount }})</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- 游戏时长 -->
+                    <div v-if="searchStore.vndbInfo.play_hours" class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-sm">
+                        <Clock :size="14" class="text-white" />
+                      </div>
+                      <div>
+                        <p class="text-[10px] text-gray-500 dark:text-slate-400">时长</p>
+                        <p class="text-sm font-bold text-gray-800 dark:text-white">{{ searchStore.vndbInfo.play_hours }}h</p>
+                      </div>
+                    </div>
+
+                    <!-- 发行日期 -->
+                    <div v-if="searchStore.vndbInfo.released" class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-sm">
+                        <Calendar :size="14" class="text-white" />
+                      </div>
+                      <div>
+                        <p class="text-[10px] text-gray-500 dark:text-slate-400">发行</p>
+                        <p class="text-sm font-bold text-gray-800 dark:text-white">{{ formatDate(searchStore.vndbInfo.released) }}</p>
+                      </div>
+                    </div>
+
+                    <!-- 开发商 -->
+                    <div v-if="searchStore.vndbInfo.developers && searchStore.vndbInfo.developers.length > 0" class="flex items-center gap-2 col-span-2 sm:col-span-1">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-sm">
+                        <Building :size="14" class="text-white" />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-[10px] text-gray-500 dark:text-slate-400">开发商</p>
+                        <p v-text-scroll class="text-sm font-bold text-gray-800 dark:text-white">
+                          {{ searchStore.vndbInfo.developers.map(d => d.name).join(', ') }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- 开发状态 -->
+                    <div v-if="searchStore.vndbInfo.devstatus !== undefined" class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm">
+                        <Gamepad2 :size="14" class="text-white" />
+                      </div>
+                      <div>
+                        <p class="text-[10px] text-gray-500 dark:text-slate-400">状态</p>
+                        <p class="text-sm font-bold" :class="getDevStatusColor(searchStore.vndbInfo.devstatus)">
+                          {{ formatDevStatus(searchStore.vndbInfo.devstatus) }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- 原始语言 -->
+                    <div v-if="searchStore.vndbInfo.olang" class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center shadow-sm">
+                        <Globe :size="14" class="text-white" />
+                      </div>
+                      <div>
+                        <p class="text-[10px] text-gray-500 dark:text-slate-400">语言</p>
+                        <p class="text-sm font-bold text-gray-800 dark:text-white">{{ formatLanguage(searchStore.vndbInfo.olang) }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 标签 -->
+                  <div v-if="searchStore.vndbInfo.tags && searchStore.vndbInfo.tags.length > 0" class="mt-4 pt-3 border-t border-gray-200/50 dark:border-slate-700/50">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <Tag :size="14" class="text-violet-500" />
+                        <span class="text-xs font-bold text-gray-800 dark:text-white">标签</span>
+                        <Loader v-if="isTranslatingTags" :size="10" class="animate-spin text-violet-500" />
+                        <!-- AI 译文标签 -->
+                        <div 
+                          v-if="translatedTags.size > 0 && !showOriginalTags" 
+                          class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gradient-to-r from-violet-500 to-purple-500 text-white text-[9px] rounded-full"
+                        >
+                          <Bot :size="8" />
+                          <span>AI</span>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-1.5 text-[9px] text-gray-400 dark:text-slate-500">
+                        <span class="flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-violet-500" />内容</span>
+                        <span class="flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500" />技术</span>
+                        <span class="flex items-center gap-0.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500" />色情</span>
+                      </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                      <span
+                        v-for="(tag, index) in searchStore.vndbInfo.tags"
+                        :key="index"
+                        class="px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors cursor-default"
+                        :class="getTagCategoryClass(tag.category || '')"
+                        :title="`${tag.name}${translatedTags.get(tag.name) ? ' → ' + translatedTags.get(tag.name) : ''} | 相关性: ${Math.round((tag.rating || 0) * 10) / 10}`"
+                      >
+                        {{ getTagDisplayName(tag) }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- 支持语言 -->
-            <div v-if="searchStore.vndbInfo.languages && searchStore.vndbInfo.languages.length > 0" class="vndb-card">
-              <div class="flex items-center gap-2 mb-3">
-                <Languages :size="18" class="text-rose-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">支持语言</h3>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="(lang, index) in searchStore.vndbInfo.languages"
-                  :key="index"
-                  class="px-3 py-1.5 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-sm font-medium rounded-xl"
-                >
-                  {{ formatLanguage(lang) }}
-                </span>
-              </div>
-            </div>
-
-            <!-- 平台 -->
-            <div v-if="searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0" class="vndb-card">
-              <div class="flex items-center gap-2 mb-3">
-                <Monitor :size="18" class="text-green-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">支持平台</h3>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="(platform, index) in searchStore.vndbInfo.platforms"
-                  :key="index"
-                  class="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium rounded-xl"
-                >
-                  {{ formatPlatform(platform) }}
-                </span>
-              </div>
-            </div>
-
-            <!-- 标签 -->
-            <div v-if="searchStore.vndbInfo.tags && searchStore.vndbInfo.tags.length > 0" class="vndb-card">
+            <!-- 详细内容 -->
+            <!-- 简介（优先展示） -->
+            <div v-if="searchStore.vndbInfo.description" class="vndb-card !p-4">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
-                  <Tag :size="18" class="text-violet-500" />
-                  <h3 class="font-bold text-gray-800 dark:text-white">标签</h3>
-                  <span class="text-xs text-gray-400 dark:text-slate-500">(按相关性排序)</span>
+                  <AlignLeft :size="16" class="text-[#ff1493]" />
+                  <h3 class="text-sm font-bold text-gray-800 dark:text-white">简介</h3>
+                  <Loader v-if="isTranslating" :size="12" class="animate-spin text-[#ff1493]" />
                 </div>
-                <!-- 翻译中指示器 -->
-                <Loader v-if="isTranslatingTags" :size="14" class="animate-spin text-violet-500" />
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="(tag, index) in searchStore.vndbInfo.tags"
-                  :key="index"
-                  class="px-2.5 py-1 text-xs font-medium rounded-lg transition-colors cursor-default"
-                  :class="getTagCategoryClass(tag.category || '')"
-                  :title="`${tag.name}${translatedTags.get(tag.name) ? ' → ' + translatedTags.get(tag.name) : ''} | 相关性: ${Math.round((tag.rating || 0) * 10) / 10} | 分类: ${formatTagCategory(tag.category || '')}`"
+                <!-- AI 译文标签 - 右上角 -->
+                <div 
+                  v-if="translatedDescription && !showOriginal" 
+                  class="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-[#ff1493] to-[#d946ef] text-white text-[10px] rounded-full"
                 >
-                  {{ getTagDisplayName(tag) }}
-                </span>
+                  <Bot :size="10" />
+                  <span>AI 译文</span>
+                </div>
               </div>
-              <div class="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-gray-200/50 dark:border-slate-700/50">
-                <span class="text-xs text-gray-400 dark:text-slate-500">分类:</span>
-                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
-                  <span class="w-2 h-2 rounded-full bg-violet-500" />内容
-                </span>
-                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
-                  <span class="w-2 h-2 rounded-full bg-blue-500" />技术
-                </span>
-                <span class="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
-                  <span class="w-2 h-2 rounded-full bg-amber-500" />色情
-                </span>
+              <div 
+                class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed prose-description"
+                v-html="renderedDescription"
+              />
+            </div>
+
+            <!-- 语言和平台（合并为一行） -->
+            <div 
+              v-if="(searchStore.vndbInfo.languages && searchStore.vndbInfo.languages.length > 0) || (searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0)" 
+              class="vndb-card !p-4"
+            >
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- 支持语言 -->
+                <div v-if="searchStore.vndbInfo.languages && searchStore.vndbInfo.languages.length > 0">
+                  <div class="flex items-center gap-2 mb-2">
+                    <Languages :size="16" class="text-rose-500" />
+                    <h4 class="text-sm font-bold text-gray-800 dark:text-white">支持语言</h4>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span
+                      v-for="(lang, index) in searchStore.vndbInfo.languages"
+                      :key="index"
+                      class="px-2 py-1 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-xs font-medium rounded-lg"
+                    >
+                      {{ formatLanguage(lang) }}
+                    </span>
+                  </div>
+                </div>
+                <!-- 支持平台 -->
+                <div v-if="searchStore.vndbInfo.platforms && searchStore.vndbInfo.platforms.length > 0">
+                  <div class="flex items-center gap-2 mb-2">
+                    <Monitor :size="16" class="text-green-500" />
+                    <h4 class="text-sm font-bold text-gray-800 dark:text-white">支持平台</h4>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span
+                      v-for="(platform, index) in searchStore.vndbInfo.platforms"
+                      :key="index"
+                      class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-lg"
+                    >
+                      {{ formatPlatform(platform) }}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- 相关作品 -->
-            <div v-if="searchStore.vndbInfo.relations && searchStore.vndbInfo.relations.length > 0" class="vndb-card">
-              <div class="flex items-center gap-2 mb-3">
-                <GitBranch :size="18" class="text-amber-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">相关作品</h3>
-              </div>
-              <div class="space-y-2">
-                <a
-                  v-for="(relation, index) in (expandedSections.relations ? searchStore.vndbInfo.relations : searchStore.vndbInfo.relations.slice(0, 8))"
-                  :key="index"
-                  :href="`https://vndb.org/${relation.id}`"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="flex items-center gap-3 p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors group"
-                >
-                  <span class="px-2 py-0.5 text-xs font-medium rounded-md bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 flex-shrink-0">
-                    {{ formatRelation(relation.relation) }}
-                  </span>
-                  <span class="text-sm text-gray-700 dark:text-slate-300 truncate group-hover:underline flex-1">
-                    {{ relation.title }}
-                  </span>
-                  <ExternalLink :size="12" class="text-amber-400 dark:text-amber-600 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </a>
-              </div>
-              <button
-                v-if="searchStore.vndbInfo.relations.length > 8"
-                class="w-full mt-2 py-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
-                @click="toggleSection('relations')"
-              >
-                {{ expandedSections.relations ? '收起' : `显示全部 ${searchStore.vndbInfo.relations.length} 个相关作品` }}
-              </button>
-            </div>
+            <!-- 相关作品和外部链接 -->
+            <div 
+              v-if="(searchStore.vndbInfo.relations && searchStore.vndbInfo.relations.length > 0) || (searchStore.vndbInfo.extlinks && searchStore.vndbInfo.extlinks.length > 0)" 
+              class="vndb-card !p-4"
+            >
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- 相关作品 -->
+                <div v-if="searchStore.vndbInfo.relations && searchStore.vndbInfo.relations.length > 0">
+                  <div class="flex items-center gap-2 mb-2">
+                    <GitBranch :size="16" class="text-amber-500" />
+                    <h4 class="text-sm font-bold text-gray-800 dark:text-white">相关作品</h4>
+                    <span class="text-xs text-gray-400">({{ searchStore.vndbInfo.relations.length }})</span>
+                  </div>
+                  <div class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                    <a
+                      v-for="(relation, index) in (expandedSections.relations ? searchStore.vndbInfo.relations : searchStore.vndbInfo.relations.slice(0, 5))"
+                      :key="index"
+                      :href="`https://vndb.org/${relation.id}`"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="flex items-center gap-2 p-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors group"
+                    >
+                      <span class="px-1.5 py-0.5 text-[10px] font-medium rounded bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 flex-shrink-0">
+                        {{ formatRelation(relation.relation) }}
+                      </span>
+                      <span class="text-xs text-gray-700 dark:text-slate-300 truncate group-hover:underline flex-1">
+                        {{ relation.title }}
+                      </span>
+                    </a>
+                  </div>
+                  <button
+                    v-if="searchStore.vndbInfo.relations.length > 5"
+                    class="w-full mt-1.5 py-1 text-[10px] font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                    @click="toggleSection('relations')"
+                  >
+                    {{ expandedSections.relations ? '收起' : `+${searchStore.vndbInfo.relations.length - 5} 更多` }}
+                  </button>
+                </div>
 
-            <!-- 外部链接 -->
-            <div v-if="searchStore.vndbInfo.extlinks && searchStore.vndbInfo.extlinks.length > 0" class="vndb-card">
-              <div class="flex items-center gap-2 mb-3">
-                <Link2 :size="18" class="text-sky-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">外部链接</h3>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <a
-                  v-for="(link, index) in searchStore.vndbInfo.extlinks"
-                  :key="index"
-                  :href="link.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-xl bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors"
-                >
-                  <span>{{ link.label || link.name }}</span>
-                  <ExternalLink :size="12" />
-                </a>
+                <!-- 外部链接 -->
+                <div v-if="searchStore.vndbInfo.extlinks && searchStore.vndbInfo.extlinks.length > 0">
+                  <div class="flex items-center gap-2 mb-2">
+                    <Link2 :size="16" class="text-sky-500" />
+                    <h4 class="text-sm font-bold text-gray-800 dark:text-white">外部链接</h4>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <a
+                      v-for="(link, index) in searchStore.vndbInfo.extlinks"
+                      :key="index"
+                      :href="link.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors"
+                    >
+                      <span>{{ link.label || link.name }}</span>
+                      <ExternalLink :size="10" />
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- 角色 -->
-            <div v-if="characters.length > 0" class="vndb-card">
-              <div class="flex items-center gap-2 mb-3">
-                <Users :size="18" class="text-rose-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">角色</h3>
-                <span class="text-xs text-gray-400 dark:text-slate-500">({{ characters.length }})</span>
+            <div v-if="characters.length > 0" class="vndb-card !p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <Users :size="16" class="text-rose-500" />
+                  <h3 class="text-sm font-bold text-gray-800 dark:text-white">角色</h3>
+                  <span class="text-xs text-gray-400 dark:text-slate-500">({{ characters.length }})</span>
+                </div>
+                <button
+                  v-if="characters.length > 8"
+                  class="text-[10px] font-medium text-rose-600 dark:text-rose-400 hover:underline"
+                  @click="toggleSection('characters')"
+                >
+                  {{ expandedSections.characters ? '收起' : `全部` }}
+                </button>
               </div>
-              <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+              <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 <a
-                  v-for="(char, index) in (expandedSections.characters ? characters : characters.slice(0, 10))"
+                  v-for="(char, index) in (expandedSections.characters ? characters : characters.slice(0, 8))"
                   :key="index"
                   :href="`https://vndb.org/${char.id}`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="relative rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:scale-105 transition-all group"
+                  class="relative rounded-lg overflow-hidden shadow-sm hover:shadow-md hover:scale-105 transition-all group"
                 >
-                  <!-- 图片区域 -->
                   <div class="w-full relative">
-                    <!-- 占位 (padding-bottom: 133.33% = 3:4 比例) -->
                     <div class="w-full pb-[133.33%]" />
-                    <!-- 有图片时：骨架屏 + 图片 -->
                     <template v-if="char.image">
                       <div class="absolute inset-0 skeleton bg-rose-100 dark:bg-rose-900/30" />
                       <img 
@@ -380,29 +413,17 @@
                         @load="($event.target as HTMLElement).parentElement?.querySelector('.skeleton')?.classList.add('hidden')"
                       />
                     </template>
-                    <!-- 无图片时：占位符 -->
                     <div v-else class="absolute inset-0 flex items-center justify-center bg-rose-50 dark:bg-rose-900/30">
-                      <Users :size="24" class="text-rose-400 dark:text-rose-600" />
+                      <Users :size="16" class="text-rose-400 dark:text-rose-600" />
                     </div>
                   </div>
-                  <!-- 文字覆盖层 -->
-                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-2 pt-6">
-                    <p class="text-xs font-medium text-white text-center truncate group-hover:underline">
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 pt-4">
+                    <p class="text-[10px] font-medium text-white text-center truncate group-hover:underline">
                       {{ char.original || char.name }}
-                    </p>
-                    <p v-if="char.sex" class="text-[10px] text-white/70 text-center">
-                      {{ formatSex(char.sex) }}{{ char.age ? ` · ${char.age}岁` : '' }}
                     </p>
                   </div>
                 </a>
               </div>
-              <button
-                v-if="characters.length > 10"
-                class="w-full mt-2 py-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
-                @click="toggleSection('characters')"
-              >
-                {{ expandedSections.characters ? '收起' : `显示全部 ${characters.length} 个角色` }}
-              </button>
             </div>
             <div v-else-if="isLoadingCharacters" class="vndb-card">
               <div class="flex items-center gap-2">
@@ -412,131 +433,115 @@
             </div>
 
             <!-- 名言 -->
-            <div v-if="quotes.length > 0" class="vndb-card">
-              <div class="flex items-center justify-between mb-3">
+            <div v-if="quotes.length > 0" class="vndb-card !p-4">
+              <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
-                  <Quote :size="18" class="text-indigo-500" />
-                  <h3 class="font-bold text-gray-800 dark:text-white">名言</h3>
-                  <span class="text-xs text-gray-400 dark:text-slate-500">({{ quotes.length }})</span>
+                  <Quote :size="16" class="text-indigo-500" />
+                  <h3 class="text-sm font-bold text-gray-800 dark:text-white">名言</h3>
+                  <span class="text-xs text-gray-400">({{ quotes.length }})</span>
+                  <Loader v-if="isTranslatingQuotes" :size="12" class="animate-spin text-indigo-500" />
                 </div>
-                <!-- 翻译中指示器 -->
-                <Loader v-if="isTranslatingQuotes" :size="14" class="animate-spin text-indigo-500" />
+                <div class="flex items-center gap-2">
+                  <!-- AI 译文标签 - 右上角 -->
+                  <div 
+                    v-if="translatedQuotes.size > 0 && !showOriginalQuotes" 
+                    class="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-[10px] rounded-full"
+                  >
+                    <Bot :size="10" />
+                    <span>AI 译文</span>
+                  </div>
+                  <button
+                    v-if="quotes.length > 3"
+                    class="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                    @click="toggleSection('quotes')"
+                  >
+                    {{ expandedSections.quotes ? '收起' : `全部` }}
+                  </button>
+                </div>
               </div>
-              <div class="space-y-3">
+              <div class="space-y-2">
                 <div
-                  v-for="(q, index) in (expandedSections.quotes ? quotes : quotes.slice(0, 10))"
+                  v-for="(q, index) in (expandedSections.quotes ? quotes : quotes.slice(0, 3))"
                   :key="index"
-                  class="relative pl-4 border-l-2 border-indigo-300 dark:border-indigo-600"
+                  class="relative pl-3 border-l-2 border-indigo-300 dark:border-indigo-600 py-1"
                 >
-                  <p class="text-sm text-gray-700 dark:text-gray-300 italic leading-relaxed">
+                  <p class="text-xs text-gray-700 dark:text-gray-300 italic leading-relaxed">
                     "{{ getQuoteDisplayText(q.quote) }}"
                   </p>
-                  <p v-if="q.character" class="text-xs text-indigo-500 dark:text-indigo-400 mt-1 font-medium">
+                  <p v-if="q.character" class="text-[10px] text-indigo-500 dark:text-indigo-400 mt-0.5 font-medium">
                     — {{ q.character.original || q.character.name }}
                   </p>
                 </div>
               </div>
-              <button
-                v-if="quotes.length > 10"
-                class="w-full mt-2 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                @click="toggleSection('quotes')"
-              >
-                {{ expandedSections.quotes ? '收起' : `显示全部 ${quotes.length} 条名言` }}
-              </button>
             </div>
-            <div v-else-if="isLoadingQuotes" class="vndb-card">
+            <div v-else-if="isLoadingQuotes" class="vndb-card !p-4">
               <div class="flex items-center gap-2">
-                <Loader :size="18" class="animate-spin text-indigo-500" />
-                <span class="text-sm text-gray-500 dark:text-slate-400">加载名言中...</span>
+                <Loader :size="14" class="animate-spin text-indigo-500" />
+                <span class="text-xs text-gray-500 dark:text-slate-400">加载名言中...</span>
               </div>
             </div>
 
-            <!-- 简介 -->
-            <div v-if="searchStore.vndbInfo.description" class="vndb-card">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <AlignLeft :size="18" class="text-[#ff1493]" />
-                  <h3 class="font-bold text-gray-800 dark:text-white">简介</h3>
-                </div>
-                <!-- 翻译中指示器 -->
-                <Loader v-if="isTranslating" :size="14" class="animate-spin text-[#ff1493]" />
-              </div>
-
-              <!-- 显示内容 -->
-              <div class="text-sm text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-                <template v-if="showOriginal || !translatedDescription">
-                  {{ searchStore.vndbInfo.description }}
-                </template>
-                <template v-else>
-                  <div class="inline-flex items-center gap-1 px-2 py-0.5 mb-2 bg-gradient-to-r from-[#ff1493] to-[#d946ef] text-white text-xs rounded-full">
-                    <Bot :size="12" />
-                    <span>AI 译文</span>
-                  </div>
-                  <div>{{ translatedDescription }}</div>
-                </template>
-              </div>
-            </div>
-
-            <!-- PV 鉴赏 -->
-            <div v-if="pvVideoUrl" class="vndb-card">
-              <div class="flex items-center gap-2 mb-4">
-                <Play :size="18" class="text-rose-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">PV 鉴赏</h3>
-              </div>
-              <div class="relative rounded-xl overflow-hidden bg-black">
-                <video
-                  ref="pvVideoRef"
-                  :src="pvVideoUrl"
-                  controls
-                  playsinline
-                  preload="auto"
-                  class="w-full h-auto max-h-[400px] object-contain"
-                  @loadeddata="handleVideoLoaded"
-                >
-                  您的浏览器不支持视频播放
-                </video>
-              </div>
-              <p class="text-xs text-gray-500 dark:text-slate-400 mt-2 text-center">
-                视频来源：TouchGal
-              </p>
-            </div>
-
-            <!-- PV 加载中 -->
-            <div v-else-if="isPvLoading" class="vndb-card">
-              <div class="flex items-center gap-2 mb-4">
-                <Play :size="18" class="text-rose-500" />
-                <h3 class="font-bold text-gray-800 dark:text-white">PV 鉴赏</h3>
-              </div>
-              <div class="flex items-center justify-center py-8 text-gray-400">
-                <Loader :size="20" class="animate-spin mr-2" />
-                <span class="text-sm">正在获取视频...</span>
-              </div>
-            </div>
-
-            <!-- 游戏截图 -->
+            <!-- PV 视频和游戏截图 -->
             <div 
-              v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0" 
-              class="vndb-card"
+              v-if="pvVideoUrl || isPvLoading || (searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0)" 
+              class="vndb-card !p-4"
             >
-              <div class="flex items-center gap-2 mb-4">
-                <Image :size="18" class="text-[#d946ef]" />
-                <h3 class="font-bold text-gray-800 dark:text-white">游戏截图</h3>
+              <!-- PV 视频 -->
+              <div v-if="pvVideoUrl" class="mb-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <Play :size="16" class="text-rose-500" />
+                  <h4 class="text-sm font-bold text-gray-800 dark:text-white">PV</h4>
+                  <a 
+                    href="https://www.touchgal.us/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="text-[10px] text-gray-400 hover:text-rose-500 transition-colors"
+                  >TouchGal ↗</a>
+                </div>
+                <div class="relative rounded-lg overflow-hidden bg-black">
+                  <video
+                    ref="pvVideoRef"
+                    :src="pvVideoUrl"
+                    controls
+                    playsinline
+                    preload="metadata"
+                    class="w-full h-auto"
+                    @loadeddata="handleVideoLoaded"
+                  >
+                    您的浏览器不支持视频播放
+                  </video>
+                </div>
               </div>
-              <div class="grid grid-cols-2 gap-3">
-                <button
-                  v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
-                  :key="index"
-                  class="group block overflow-hidden rounded-xl hover:scale-[1.02] transition-transform bg-gray-100 dark:bg-slate-700"
-                  @click="openGallery(index + 1)"
-                >
-                  <img
-                    :src="screenshot"
-                    :alt="`${searchStore.vndbInfo.mainName} 截图 ${index + 1}`"
-                    class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                    @error="handleImageError"
-                  />
-                </button>
+              <div v-else-if="isPvLoading" class="mb-4">
+                <div class="flex items-center gap-2">
+                  <Loader :size="14" class="animate-spin text-rose-500" />
+                  <span class="text-xs text-gray-500">获取 PV 中...</span>
+                </div>
+              </div>
+
+              <!-- 游戏截图 -->
+              <div v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0">
+                <div class="flex items-center gap-2 mb-2">
+                  <Image :size="16" class="text-[#d946ef]" />
+                  <h4 class="text-sm font-bold text-gray-800 dark:text-white">截图</h4>
+                  <span class="text-xs text-gray-400">({{ searchStore.vndbInfo.screenshots.length }})</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <button
+                    v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
+                    :key="index"
+                    class="group block overflow-hidden rounded-lg hover:scale-[1.02] transition-transform bg-gray-100 dark:bg-slate-700"
+                    @click="openGallery(index + 1)"
+                  >
+                    <img
+                      :src="screenshot"
+                      :alt="`截图 ${index + 1}`"
+                      class="w-full h-auto cursor-pointer group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      @error="handleImageError"
+                    />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -551,7 +556,7 @@ import { ref, watch, computed } from 'vue'
 import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { translateAllContent, fetchVndbCharacters, fetchVndbQuotes, fetchGameVideoUrl } from '@/api/search'
-import { playClick, playSuccess, playError, playToggle, playTransitionUp, playTransitionDown } from '@/composables/useSound'
+import { playTap, playCelebration, playCaution, playToggleOn, playToggleOff, playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import { useImageViewer } from '@/composables/useImageViewer'
 import {
   BookOpen,
@@ -620,7 +625,7 @@ const hasAnyTranslation = computed(() =>
 // PV 视频状态
 const pvVideoUrl = ref<string | null>(null)
 const isPvLoading = ref(false)
-// eslint-disable-next-line no-undef
+ 
 const pvVideoRef = ref<HTMLVideoElement | null>(null)
 
 // 视频加载完成后暂停在第一帧
@@ -643,7 +648,7 @@ const expandedSections = ref({
 })
 
 function toggleSection(section: keyof typeof expandedSections.value) {
-  playClick()
+  playTap()
   expandedSections.value[section] = !expandedSections.value[section]
 }
 
@@ -699,11 +704,11 @@ watch(() => searchStore.vndbInfo, async (newInfo) => {
   
   // 如果有游戏 ID，加载角色和名言，然后自动翻译
   if (vnIdAtStart) {
-    loadCharactersAndQuotes(vnIdAtStart).then(() => {
+    void loadCharactersAndQuotes(vnIdAtStart).then(() => {
       // 检查是否仍是同一个游戏（防止切换游戏时数据错乱）
       if (currentVnId.value === vnIdAtStart) {
         // 自动触发 AI 翻译（静默模式，不播放音效）
-        handleTranslateAllSilent()
+        void handleTranslateAllSilent()
       }
     })
   }
@@ -752,7 +757,7 @@ async function translateAllInternal(silent = false) {
   }
   
   if (!silent) {
-    playClick()
+    playTap()
   }
   
   isTranslatingAllRef.value = true
@@ -797,7 +802,9 @@ async function translateAllInternal(silent = false) {
     if (result.tags && tagNames) {
       const newMap = new Map<string, string>()
       tagNames.forEach((original, index) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (result.tags![index]) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           newMap.set(original, result.tags![index])
         }
       })
@@ -811,7 +818,9 @@ async function translateAllInternal(silent = false) {
     if (result.quotes && quoteTexts) {
       const newMap = new Map<string, string>()
       quoteTexts.forEach((original, index) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (result.quotes![index]) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           newMap.set(original, result.quotes![index])
         }
       })
@@ -823,15 +832,15 @@ async function translateAllInternal(silent = false) {
     }
     
     if (!silent && hasSuccess) {
-      playSuccess()
+      playCelebration()
     } else if (!silent && !hasSuccess) {
       translateError.value = true
-      playError()
+      playCaution()
     }
   } catch {
     if (!silent) {
       translateError.value = true
-      playError()
+      playCaution()
     }
   } finally {
     isTranslatingAllRef.value = false
@@ -850,8 +859,13 @@ async function handleTranslateAllSilent() {
 
 // 切换所有翻译的显示状态
 function toggleAllTranslations() {
-  playToggle()
   const newState = !showOriginal.value
+  // 切换到原文时播放 off，切换到译文时播放 on
+  if (newState) {
+    playToggleOff()
+  } else {
+    playToggleOn()
+  }
   showOriginal.value = newState
   showOriginalTags.value = newState
   showOriginalQuotes.value = newState
@@ -898,6 +912,7 @@ function openGallery(startIndex: number) {
     searchStore.vndbInfo.screenshots.forEach((screenshot, index) => {
       images.push({
         src: screenshot,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         caption: `${searchStore.vndbInfo!.mainName} - 截图 ${index + 1}`,
       })
     })
@@ -908,8 +923,8 @@ function openGallery(startIndex: number) {
   }
 }
 
-// 格式化性别
-function formatSex(sex: string): string {
+// 格式化性别（保留备用）
+function _formatSex(sex: string): string {
   const sexMap: Record<string, string> = {
     'm': '男性',
     'f': '女性',
@@ -1001,6 +1016,51 @@ function formatLanguage(lang: string): string {
   return langMap[lang] || lang.toUpperCase()
 }
 
+// BBCode 渲染函数（VNDB 格式）
+function renderDescription(text: string): string {
+  if (!text) {
+    return ''
+  }
+  
+  const html = text
+    // 转义 HTML 特殊字符（防止 XSS）
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    // 链接 [url=链接]文字[/url]
+    .replace(/\[url=([^\]]+)\](.+?)\[\/url\]/gi, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#ff1493] hover:underline">$2</a>')
+    // 链接 [url]链接[/url]
+    .replace(/\[url\](.+?)\[\/url\]/gi, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#ff1493] hover:underline">$1</a>')
+    // 粗体 [b]文字[/b]
+    .replace(/\[b\](.+?)\[\/b\]/gi, '<strong>$1</strong>')
+    // 斜体 [i]文字[/i]
+    .replace(/\[i\](.+?)\[\/i\]/gi, '<em>$1</em>')
+    // 下划线 [u]文字[/u]
+    .replace(/\[u\](.+?)\[\/u\]/gi, '<u>$1</u>')
+    // 删除线 [s]文字[/s]
+    .replace(/\[s\](.+?)\[\/s\]/gi, '<del>$1</del>')
+    // 剧透 [spoiler]文字[/spoiler]
+    .replace(/\[spoiler\](.+?)\[\/spoiler\]/gi, '<span class="spoiler-text">$1</span>')
+    // 引用 [quote]文字[/quote]
+    .replace(/\[quote\](.+?)\[\/quote\]/gis, '<blockquote class="border-l-2 border-[#ff1493] pl-3 my-2 text-gray-600 dark:text-slate-400 italic">$1</blockquote>')
+    // 代码 [code]文字[/code]
+    .replace(/\[code\](.+?)\[\/code\]/gis, '<code class="bg-gray-100 dark:bg-slate-700 px-1 py-0.5 rounded text-sm">$1</code>')
+    // 原始文本 [raw]文字[/raw]
+    .replace(/\[raw\](.+?)\[\/raw\]/gis, '$1')
+    // 换行保持
+    .replace(/\n/g, '<br>')
+  
+  return html
+}
+
+// 计算渲染后的描述
+const renderedDescription = computed(() => {
+  const text = showOriginal.value || !translatedDescription.value 
+    ? searchStore.vndbInfo?.description 
+    : translatedDescription.value
+  return renderDescription(text || '')
+})
+
 // 格式化开发状态
 function formatDevStatus(status: number): string {
   const statusMap: Record<number, string> = {
@@ -1031,8 +1091,8 @@ function getTagCategoryClass(category: string): string {
   return categoryMap[category] || 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400'
 }
 
-// 格式化标签分类名称
-function formatTagCategory(category: string): string {
+// 格式化标签分类名称（保留备用）
+function _formatTagCategory(category: string): string {
   const categoryMap: Record<string, string> = {
     'cont': '内容',
     'tech': '技术',
@@ -1114,5 +1174,52 @@ function formatRelation(relation: string): string {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #c71585, #c026d3);
+}
+
+/* 描述文本 Markdown 样式 */
+.prose-description :deep(strong) {
+  font-weight: 600;
+  color: inherit;
+}
+
+.prose-description :deep(em) {
+  font-style: italic;
+}
+
+.prose-description :deep(a) {
+  color: #ff1493;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.prose-description :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.dark .prose-description :deep(a) {
+  color: #ff69b4;
+}
+
+/* 剧透文字 - 模糊效果，悬停显示 */
+.prose-description :deep(.spoiler-text) {
+  background: rgba(0, 0, 0, 0.8);
+  color: transparent;
+  border-radius: 2px;
+  padding: 0 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.prose-description :deep(.spoiler-text:hover) {
+  background: rgba(255, 20, 147, 0.1);
+  color: inherit;
+}
+
+.dark .prose-description :deep(.spoiler-text) {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.dark .prose-description :deep(.spoiler-text:hover) {
+  background: rgba(255, 105, 180, 0.2);
 }
 </style>

@@ -10,7 +10,7 @@
       leave-to-class="opacity-0 scale-[0.98] translate-y-10"
     >
       <div
-        v-if="isOpen"
+        v-show="isOpen"
         class="fixed z-[100] flex flex-col settings-page shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[800px] md:max-w-[calc(100%-3rem)] md:h-[700px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
       >
         <!-- 顶部导航栏 -->
@@ -460,7 +460,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { playTap, playCelebration, playToggle, playType } from '@/composables/useSound'
+import { playTap, playCelebration, playSelect, playType } from '@/composables/useSound'
 
 // Prism Editor
 import { PrismEditor } from 'vue-prism-editor'
@@ -541,7 +541,7 @@ const themeOptions = [
 ]
 
 function handleThemeChange(mode: ThemeMode) {
-  playToggle()
+  playSelect()
   uiStore.setThemeMode(mode)
 }
 
@@ -630,7 +630,7 @@ const localCustomApi = computed(() => {
 
 // 选择 API 选项
 function selectApiOption(option: string) {
-  playToggle()
+  playSelect()
   selectedApiOption.value = option
   if (option !== 'custom') {
     customApiInput.value = ''

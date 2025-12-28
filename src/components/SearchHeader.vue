@@ -465,7 +465,7 @@ import { useStatsStore } from '@/stores/stats'
 import { useCacheStore } from '@/stores/cache'
 import { useHistoryStore } from '@/stores/history'
 import { searchGameStream, fetchVndbData } from '@/api/search'
-import { playSwipe, playToggle, playCelebration, playCaution, playType } from '@/composables/useSound'
+import { playSwipe, playSelect, playCelebration, playCaution, playType } from '@/composables/useSound'
 import { useDebouncedClick } from '@/composables/useDebounce'
 import {
   Search,
@@ -733,7 +733,7 @@ function handleTyping() {
 // 搜索模式切换（带音效）
 function setSearchMode(mode: 'game' | 'patch') {
   if (searchMode.value !== mode) {
-    playToggle()
+    playSelect()
     searchMode.value = mode
   }
 }
@@ -844,7 +844,7 @@ function getErrorCodeInfo(error: string): ErrorCodeInfo {
   const errorLower = error.toLowerCase()
   
   // 尝试提取 HTTP 状态码
-  const statusMatch = error.match(/\b(4\d{2}|5\d{2})\b/)
+  const statusMatch = /\b(4\d{2}|5\d{2})\b/.exec(error)
   if (statusMatch) {
     const status = parseInt(statusMatch[1])
     const statusDescriptions: Record<number, string> = {

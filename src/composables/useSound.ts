@@ -122,27 +122,29 @@ const soundMap: Record<SoundType, keyof typeof Snd.SOUNDS> = {
   ringtone_loop: 'RINGTONE_LOOP',
 }
 
-// 播放音效
-async function playSound(type: SoundType): Promise<void> {
+// 播放音效（fire-and-forget，不返回 Promise）
+function playSound(type: SoundType): void {
   if (!soundEnabled.value) {
     return
   }
   
-  try {
-    const snd = await getSnd()
-    if (!snd) {
-      return
+  void (async () => {
+    try {
+      const snd = await getSnd()
+      if (!snd) {
+        return
+      }
+      
+      const soundKey = soundMap[type]
+      const sound = Snd.SOUNDS[soundKey]
+      
+      if (sound) {
+        snd.play(sound)
+      }
+    } catch {
+      // 静默处理错误
     }
-    
-    const soundKey = soundMap[type]
-    const sound = Snd.SOUNDS[soundKey]
-    
-    if (sound) {
-      snd.play(sound)
-    }
-  } catch {
-    // 静默处理错误
-  }
+  })()
 }
 
 // ========================================
@@ -192,10 +194,10 @@ const legacyMap: Record<LegacySoundType, SoundType> = {
   close: 'transition_down',
 }
 
-// 兼容旧 API 的播放方法
-async function playLegacySound(type: LegacySoundType): Promise<void> {
+// 兼容旧 API 的播放方法（fire-and-forget）
+function playLegacySound(type: LegacySoundType): void {
   const mappedType = legacyMap[type]
-  return playSound(mappedType)
+  playSound(mappedType)
 }
 
 // ========================================

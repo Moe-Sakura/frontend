@@ -158,10 +158,11 @@ function showUpdateToast(onUpdate: () => void) {
 }
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const reg = await navigator.serviceWorker.register('/sw.js')
-      console.log('[SW] Registered')
+  window.addEventListener('load', () => {
+    void (async () => {
+      try {
+        const reg = await navigator.serviceWorker.register('/sw.js')
+        console.info('[SW] Registered')
 
       // 新版本检测
       reg.addEventListener('updatefound', () => {
@@ -173,10 +174,10 @@ if ('serviceWorker' in navigator) {
         worker.addEventListener('statechange', () => {
           // 新 SW 安装完成且有旧 SW 控制页面 = 有更新
           if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[SW] Update available')
+            console.info('[SW] Update available')
             // 显示更新提示，5 秒后自动更新
             showUpdateToast(() => {
-              console.log('[SW] Activating update...')
+              console.info('[SW] Activating update...')
               worker.postMessage({ type: 'SKIP_WAITING' })
             })
           }
@@ -190,21 +191,22 @@ if ('serviceWorker' in navigator) {
           return
         }
         refreshing = true
-        console.log('[SW] New version activated, reloading...')
+        console.info('[SW] New version activated, reloading...')
         window.location.reload()
       })
 
       // 定期检查更新（5 分钟）
-      setInterval(() => reg.update().catch(() => {}), 5 * 60 * 1000)
+      setInterval(() => { void reg.update().catch(() => { /* 静默处理 */ }) }, 5 * 60 * 1000)
 
       // 页面可见时检查更新
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-          reg.update().catch(() => {})
+          void reg.update().catch(() => { /* 静默处理 */ })
         }
       })
     } catch {
       // 静默处理
     }
+    })()
   })
 }
