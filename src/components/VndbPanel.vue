@@ -11,7 +11,7 @@
       leave-to-class="opacity-0 scale-[0.98] translate-y-10"
     >
       <div
-        v-show="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
+        v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
         ref="modalRef"
         class="fixed z-50 flex flex-col vndb-page shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[900px] md:max-w-[calc(100%-3rem)] md:h-[800px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
       >
@@ -1022,15 +1022,29 @@ function renderDescription(text: string): string {
     return ''
   }
   
+  // 安全 URL 验证函数（只允许 http/https 协议，防止 javascript: XSS）
+  const isSafeUrl = (url: string): boolean => {
+    const trimmed = url.trim().toLowerCase()
+    return trimmed.startsWith('http://') || trimmed.startsWith('https://')
+  }
+  
   const html = text
     // 转义 HTML 特殊字符（防止 XSS）
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    // 链接 [url=链接]文字[/url]
-    .replace(/\[url=([^\]]+)\](.+?)\[\/url\]/gi, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#ff1493] hover:underline">$2</a>')
-    // 链接 [url]链接[/url]
-    .replace(/\[url\](.+?)\[\/url\]/gi, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-[#ff1493] hover:underline">$1</a>')
+    // 链接 [url=链接]文字[/url]（只允许安全协议）
+    .replace(/\[url=([^\]]+)\](.+?)\[\/url\]/gi, (_, url: string, text: string) => {
+      return isSafeUrl(url) 
+        ? `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#ff1493] hover:underline">${text}</a>`
+        : text // 不安全 URL 只显示文字
+    })
+    // 链接 [url]链接[/url]（只允许安全协议）
+    .replace(/\[url\](.+?)\[\/url\]/gi, (_, url: string) => {
+      return isSafeUrl(url)
+        ? `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#ff1493] hover:underline">${url}</a>`
+        : url // 不安全 URL 只显示原文
+    })
     // 粗体 [b]文字[/b]
     .replace(/\[b\](.+?)\[\/b\]/gi, '<strong>$1</strong>')
     // 斜体 [i]文字[/i]
