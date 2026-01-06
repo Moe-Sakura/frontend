@@ -51,8 +51,8 @@
     {
       "name": "TouchGal",
       "desc": "TouchGal 是一个一站式 Galgame 文化社区。提供Galgame 论坛、Galgame 下载等服务。承诺永久免费, 高质量。为Galgame 爱好者提供一片净土！",
-      "url": "https://www.touchgal.us/",
-      "logo": "https://www.touchgal.us/favicon.webp"
+      "url": "https://www.touchgal.top/",
+      "logo": "https://www.touchgal.top/favicon.webp"
     },
     {
       "name": "鲲 Galgame 论坛",
@@ -77,6 +77,12 @@
       "desc": "鸟白岛演绎厅提供最全的专辑音乐收录，在这里你可以看到ACGN相关的专辑信息及其文件下载，另有交流社区可以沟通和申请收录等，快来看看吧。",
       "url": "https://www.summerpockets.com/",
       "logo": "https://res.summerpockets.com/favicon.ico"
+    },
+    {
+      "name": "秒速5厘米--导航",
+      "desc": "二次元导航，资源收集，动漫资源，游戏资源，网盘资源，github",
+      "url": "https://dh.soliar.top/",
+      "logo": "https://dh.soliar.top/assets/images/favicon.png"
     }
   ]
 }

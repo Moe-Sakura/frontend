@@ -1,50 +1,42 @@
-// Service Worker - PWA 支持
-// 版本由构建工具注入，开发时使用时间戳
-const SW_VERSION = self.__SW_VERSION__ || Date.now().toString(36)
-const CACHE_NAME = `searchgal-${SW_VERSION}`
+// Service Worker - SearchGal PWA
+// 版本由构建工具注入
+const VERSION = self.__SW_VERSION__ || Date.now().toString(36)
+const CACHE = `searchgal-${VERSION}`
 
-// 可缓存的静态资源模式
-const CACHEABLE_EXTS = /\.(js|css|mjs|woff2?|ttf|otf|eot|png|jpg|jpeg|gif|webp|svg|ico|avif|mp3|wav|ogg|m4a|aac|flac|wasm)(\?.*)?$/i
-const CACHEABLE_PATHS = /\/(manifest\.json|favicon|apple-touch-icon|android-chrome)/i
-
-// 永不缓存
-const NO_CACHE = /\/(api|sw\.js|sockjs-node|__vite|hot-update)|\.map$/
-
-// 预缓存资源
-const PRECACHE = ['/', '/index.html', '/manifest.json']
+// 缓存规则
+const STATIC_EXT = /\.(js|css|mjs|woff2?|ttf|png|jpg|jpeg|gif|webp|svg|ico|avif|wasm)$/i
+const SKIP = /\/(api|sw\.js|__vite|hot-update)|\.map$/
 
 // ============================================
-// 生命周期事件
+// 生命周期
 // ============================================
 
 self.addEventListener('install', (e) => {
-  console.log(`[SW] Installing v${SW_VERSION}`)
-  e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((c) => c.addAll(PRECACHE).catch(() => {}))
-      .then(() => self.skipWaiting())
-  )
+  console.log(`[SW] Install v${VERSION}`)
+  e.waitUntil(self.skipWaiting())
 })
 
 self.addEventListener('activate', (e) => {
-  console.log(`[SW] Activating v${SW_VERSION}`)
+  console.log(`[SW] Activate v${VERSION}`)
   e.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
-        keys.filter((k) => k.startsWith('searchgal-') && k !== CACHE_NAME).map((k) => caches.delete(k))
+        keys.filter((k) => k.startsWith('searchgal-') && k !== CACHE)
+          .map((k) => caches.delete(k))
       ))
       .then(() => self.clients.claim())
   )
 })
 
 // ============================================
-// 消息处理
+// 消息
 // ============================================
 
 self.addEventListener('message', (e) => {
   const { type } = e.data || {}
+  
   if (type === 'GET_VERSION') {
-    e.ports[0]?.postMessage({ version: SW_VERSION })
+    e.ports[0]?.postMessage({ version: VERSION })
   } else if (type === 'SKIP_WAITING') {
     self.skipWaiting()
   } else if (type === 'CLEAR_CACHE') {
@@ -64,26 +56,26 @@ self.addEventListener('fetch', (e) => {
   const { request } = e
   const url = new URL(request.url)
 
-  // 只处理同源 GET 请求，跨域请求全部跳过（避免 CORS 问题）
+  // 跳过：非 GET、非 HTTP、跨域、特殊路径
   if (
     request.method !== 'GET' ||
     !url.protocol.startsWith('http') ||
     url.origin !== location.origin ||
-    NO_CACHE.test(url.href)
+    SKIP.test(url.href)
   ) return
 
-  const isDocument = request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('.html')
-  const isCacheable = CACHEABLE_EXTS.test(url.pathname) || CACHEABLE_PATHS.test(url.pathname)
+  const isDocument = request.destination === 'document'
+  const isStatic = STATIC_EXT.test(url.pathname)
 
   if (isDocument) {
-    // HTML：网络优先，离线返回提示页
-    e.respondWith(networkFirstWithOffline(request))
-  } else if (isCacheable) {
+    // HTML：网络优先，离线显示提示
+    e.respondWith(networkFirst(request, true))
+  } else if (isStatic) {
     // 静态资源：缓存优先
     e.respondWith(cacheFirst(request))
   } else {
     // 其他：网络优先
-    e.respondWith(networkFirst(request))
+    e.respondWith(networkFirst(request, false))
   }
 })
 
@@ -94,10 +86,11 @@ self.addEventListener('fetch', (e) => {
 async function cacheFirst(req) {
   const cached = await caches.match(req)
   if (cached) return cached
+  
   try {
     const res = await fetch(req)
     if (res.ok) {
-      const cache = await caches.open(CACHE_NAME)
+      const cache = await caches.open(CACHE)
       cache.put(req, res.clone())
     }
     return res
@@ -106,27 +99,20 @@ async function cacheFirst(req) {
   }
 }
 
-async function networkFirst(req) {
+async function networkFirst(req, showOffline) {
   try {
     const res = await fetch(req)
     if (res.ok) {
-      const cache = await caches.open(CACHE_NAME)
+      const cache = await caches.open(CACHE)
       cache.put(req, res.clone())
     }
     return res
   } catch {
-    return (await caches.match(req)) || new Response('', { status: 503 })
+    const cached = await caches.match(req)
+    if (cached) return cached
+    return showOffline ? offlinePage() : new Response('', { status: 503 })
   }
 }
-
-async function networkFirstWithOffline(req) {
-  try {
-    return await fetch(req)
-  } catch {
-    return offlinePage()
-  }
-}
-
 
 // ============================================
 // 离线页面
@@ -168,4 +154,4 @@ function offlinePage() {
   })
 }
 
-console.log(`[SW] Loaded v${SW_VERSION}`)
+console.log(`[SW] Ready v${VERSION}`)

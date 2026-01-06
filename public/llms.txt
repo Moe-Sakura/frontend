@@ -4,7 +4,7 @@
 
 ## 技术栈
 
-Vue 3.5 | TypeScript 5.9 | Vite 7 | Pinia 3 | Tailwind CSS 4.1 | motion-v | snd-lib
+Vue 3.5 | TypeScript 5.9 | Vite 7 | Pinia 3 | Tailwind CSS 4.1 | motion-v | Web Audio API
 
 ## 特性
 
@@ -29,7 +29,7 @@ Vue 3.5 | TypeScript 5.9 | Vite 7 | Pinia 3 | Tailwind CSS 4.1 | motion-v | snd-
 | `src/components/SearchResults.vue` | 搜索结果列表 |
 | `src/stores/search.ts` | 搜索状态管理 |
 | `src/api/search.ts` | SSE 搜索 API |
-| `src/composables/useSound.ts` | snd-lib 音效 |
+| `src/composables/useSound.ts` | Web Audio API 音效 |
 | `src/styles/glassmorphism.css` | 液态玻璃样式 |
 
 ## 文档

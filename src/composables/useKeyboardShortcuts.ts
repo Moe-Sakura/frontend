@@ -60,8 +60,7 @@ export function useKeyboardShortcuts() {
 
   // 聚焦搜索框
   function focusSearch() {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const searchInput = document.querySelector('input[type="search"], input[placeholder*="搜索"]')!
+    const searchInput = document.querySelector<HTMLInputElement>('input[type="search"], input[placeholder*="搜索"]')
     if (searchInput) {
       searchInput.focus()
       searchInput.select()
@@ -123,8 +122,7 @@ export function useKeyboardShortcuts() {
   // 切换站点导航
   function toggleNav() {
     // 模拟点击站点导航按钮
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const navBtn = document.querySelector('.nav-btn')!
+    const navBtn = document.querySelector<HTMLElement>('.nav-btn')
     if (navBtn) {
       navBtn.click()
     }
