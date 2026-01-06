@@ -3,109 +3,21 @@ import { ref, computed, watch } from 'vue'
 import { saveSearchState, loadSearchState } from '@/utils/persistence'
 import { useHistoryStore } from './history'
 import { useCacheStore } from './cache'
+import type { VndbInfo, PlatformData, PlatformResult } from '@/types/vndb'
 
-export interface VndbVoiceActor {
-  note: string | null
-  character: { id: string; name: string; original?: string }
-  staff: { id: string; name: string; original?: string }
-}
-
-export interface VndbTag {
-  id: string
-  name: string
-  rating?: number
-  spoiler?: number
-  category?: string
-}
-
-export interface VndbRelation {
-  id: string
-  title: string
-  relation: string
-  relation_official?: boolean
-}
-
-export interface VndbExtLink {
-  url: string
-  label: string
-  name: string
-}
-
-export interface VndbDeveloper {
-  id?: string
-  name: string
-  original?: string
-}
-
-export interface VndbCharacter {
-  id: string
-  name: string
-  original?: string
-  image?: string
-  sex?: string
-  description?: string
-  age?: number
-}
-
-export interface VndbQuote {
-  id: string
-  quote: string
-  character?: {
-    id: string
-    name: string
-    original?: string
-  }
-}
-
-export interface VndbInfo {
-  id?: string
-  names: string[]
-  aliases?: string[]
-  mainName: string
-  originalTitle: string
-  alttitle?: string
-  mainImageUrl: string | null
-  screenshotUrl: string | null
-  screenshots: string[]
-  description: string | null
-  translatedDescription: string | null
-  va: VndbVoiceActor[]
-  tags: VndbTag[]
-  relations: VndbRelation[]
-  extlinks: VndbExtLink[]
-  play_hours: number
-  length_minute: number
-  length_votes: number
-  length_color: string
-  book_length: string
-  rating?: number
-  average?: number
-  votecount?: number
-  released?: string
-  developers?: VndbDeveloper[]
-  platforms?: string[]
-  languages?: string[]
-  olang?: string
-  devstatus?: number
-  characters?: VndbCharacter[]
-  quotes?: VndbQuote[]
-}
-
-export interface SearchResult {
-  platform: string
-  title: string
-  url: string
-  tags?: string[]
-}
-
-export interface PlatformData {
-  name: string
-  color: 'lime' | 'white' | 'gold' | 'red'
-  url?: string
-  items: SearchResult[]
-  error: string
-  displayedCount: number // 当前显示的结果数量，默认 10
-}
+// 重新导出类型，保持向后兼容
+export type { 
+  VndbInfo, 
+  VndbVoiceActor, 
+  VndbTag, 
+  VndbRelation, 
+  VndbExtLink, 
+  VndbDeveloper, 
+  VndbCharacter, 
+  VndbQuote,
+  SearchResult,
+  PlatformData,
+} from '@/types/vndb'
 
 export const useSearchStore = defineStore('search', () => {
   // 状态
@@ -238,12 +150,13 @@ export const useSearchStore = defineStore('search', () => {
     searchProgress.value = { current, total }
   }
 
-  function setPlatformResult(name: string, data: PlatformData) {
-    // 确保有显示数量信息，默认显示 10 个
-    if (!data.displayedCount) {
-      data.displayedCount = 10
+  function setPlatformResult(name: string, data: PlatformResult) {
+    // 转换为 PlatformData，添加默认显示数量
+    const platformData: PlatformData = {
+      ...data,
+      displayedCount: 10,
     }
-    platformResults.value.set(name, data)
+    platformResults.value.set(name, platformData)
     
     // 保存搜索历史到 historyStore
     if (searchQuery.value && !isSearching.value) {

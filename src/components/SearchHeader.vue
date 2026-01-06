@@ -464,7 +464,7 @@ import { useSearchStore } from '@/stores/search'
 import { useStatsStore } from '@/stores/stats'
 import { useCacheStore } from '@/stores/cache'
 import { useHistoryStore } from '@/stores/history'
-import { searchGameStream, fetchVndbData } from '@/api/search'
+import { searchGameStream, fetchVndbData } from '@/api'
 import { playSwipe, playSelect, playCelebration, playCaution, playType } from '@/composables/useSound'
 import { useDebouncedClick } from '@/composables/useDebounce'
 import {

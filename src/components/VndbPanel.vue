@@ -116,7 +116,7 @@
                   <p v-if="searchStore.vndbInfo.alttitle && searchStore.vndbInfo.alttitle !== searchStore.vndbInfo.originalTitle" class="text-xs text-gray-400 dark:text-slate-500 italic mb-3">
                     {{ searchStore.vndbInfo.alttitle }}
                   </p>
-                  
+
                   <!-- 别名标签 -->
                   <div v-if="searchStore.vndbInfo.names.length > 1" class="flex flex-wrap gap-1.5 mb-4">
                     <span
@@ -492,7 +492,7 @@
                   <Play :size="16" class="text-rose-500" />
                   <h4 class="text-sm font-bold text-gray-800 dark:text-white">PV</h4>
                   <a 
-                    href="https://www.touchgal.us/" 
+                    href="https://www.touchgal.top/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     class="text-[10px] text-gray-400 hover:text-rose-500 transition-colors"
@@ -553,9 +553,10 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useSearchStore, type VndbCharacter, type VndbQuote } from '@/stores/search'
+import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
-import { translateAllContent, fetchVndbCharacters, fetchVndbQuotes, fetchGameVideoUrl } from '@/api/search'
+import { translateAllContent, fetchVndbCharacters, fetchVndbQuotes, fetchGameVideoUrl } from '@/api'
+import type { VndbCharacter, VndbQuote } from '@/api'
 import { playTap, playCelebration, playCaution, playToggleOn, playToggleOff, playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import { useImageViewer } from '@/composables/useImageViewer'
 import {

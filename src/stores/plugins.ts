@@ -19,19 +19,30 @@ export interface PersistOptions {
   deserialize?: (value: string) => StateTree
 }
 
-// 扩展 DefineStoreOptionsBase 类型
+// 扩展 Pinia 类型 - 使用 interface 合并
 declare module 'pinia' {
-  export interface DefineStoreOptionsBase<_S extends StateTree, _Store> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface DefineStoreOptionsBase<S, Store> {
     persist?: boolean | PersistOptions
+    undoRedo?: boolean
+    syncTabs?: boolean
   }
   
-  export interface PiniaCustomProperties {
+  interface PiniaCustomProperties {
     getPerformanceStats?: () => Record<string, {
       calls: number
       avgDuration: string
       totalDuration: string
     }>
     $persisted?: boolean
+    $undo?: () => boolean
+    $redo?: () => boolean
+    $canUndo?: () => boolean
+    $canRedo?: () => boolean
+    $snapshot?: (name: string) => void
+    $restore?: (name: string) => boolean
+    $listSnapshots?: () => string[]
+    $deleteSnapshot?: (name: string) => boolean
   }
 }
 

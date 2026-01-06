@@ -86,75 +86,9 @@ statsStore.incrementPageView()
 // Service Worker 注册与更新
 // ============================================
 
-// 显示更新提示 - 使用 UIStore 管理
-function showUpdateToast(onUpdate: () => void) {
-  // 通过 UIStore 显示更新通知
+// 显示更新提示 - 使用 UIStore 管理（由 UpdateToast 组件渲染）
+function showUpdateToast() {
   uiStore.setShowUpdateToast(true)
-  
-  // 也创建 DOM toast 作为备份（如果 Vue 组件未加载）
-  const toast = document.createElement('div')
-  toast.id = 'sw-update-toast'
-  toast.innerHTML = `
-    <div style="
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #ff1493, #d946ef);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(255, 20, 147, 0.3);
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-family: system-ui, -apple-system, sans-serif;
-      font-size: 14px;
-      animation: slideUp 0.3s ease-out;
-    ">
-      <span>🎉 发现新版本，<span id="sw-countdown">5</span> 秒后自动更新</span>
-      <button id="sw-update-now" style="
-        background: rgba(255,255,255,0.2);
-        border: none;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 500;
-      ">立即更新</button>
-    </div>
-    <style>
-      @keyframes slideUp {
-        from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-        to { opacity: 1; transform: translateX(-50%) translateY(0); }
-      }
-    </style>
-  `
-  document.body.appendChild(toast)
-
-  // 倒计时
-  let countdown = 5
-  const countdownEl = document.getElementById('sw-countdown')
-  const interval = setInterval(() => {
-    countdown--
-    if (countdownEl) {
-      countdownEl.textContent = String(countdown)
-    }
-    if (countdown <= 0) {
-      clearInterval(interval)
-      uiStore.setShowUpdateToast(false)
-      onUpdate()
-    }
-  }, 1000)
-
-  // 立即更新按钮
-  document.getElementById('sw-update-now')?.addEventListener('click', () => {
-    clearInterval(interval)
-    uiStore.setShowUpdateToast(false)
-    onUpdate()
-  })
 }
 
 if ('serviceWorker' in navigator) {
@@ -164,49 +98,46 @@ if ('serviceWorker' in navigator) {
         const reg = await navigator.serviceWorker.register('/sw.js')
         console.info('[SW] Registered')
 
-      // 新版本检测
-      reg.addEventListener('updatefound', () => {
-        const worker = reg.installing
-        if (!worker) {
-          return
-        }
+        // 新版本检测
+        reg.addEventListener('updatefound', () => {
+          const worker = reg.installing
+          if (!worker) {
+            return
+          }
 
-        worker.addEventListener('statechange', () => {
-          // 新 SW 安装完成且有旧 SW 控制页面 = 有更新
-          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.info('[SW] Update available')
-            // 显示更新提示，5 秒后自动更新
-            showUpdateToast(() => {
-              console.info('[SW] Activating update...')
-              worker.postMessage({ type: 'SKIP_WAITING' })
-            })
+          worker.addEventListener('statechange', () => {
+            // 新 SW 安装完成且有旧 SW 控制页面 = 有更新
+            if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.info('[SW] Update available')
+              // 显示更新提示（UpdateToast 组件处理倒计时和更新）
+              showUpdateToast()
+            }
+          })
+        })
+
+        // 新 SW 激活后刷新页面
+        let refreshing = false
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) {
+            return
+          }
+          refreshing = true
+          console.info('[SW] New version activated, reloading...')
+          window.location.reload()
+        })
+
+        // 定期检查更新（5 分钟）
+        setInterval(() => { void reg.update().catch(() => { /* 静默处理 */ }) }, 5 * 60 * 1000)
+
+        // 页面可见时检查更新
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            void reg.update().catch(() => { /* 静默处理 */ })
           }
         })
-      })
-
-      // 新 SW 激活后刷新页面
-      let refreshing = false
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) {
-          return
-        }
-        refreshing = true
-        console.info('[SW] New version activated, reloading...')
-        window.location.reload()
-      })
-
-      // 定期检查更新（5 分钟）
-      setInterval(() => { void reg.update().catch(() => { /* 静默处理 */ }) }, 5 * 60 * 1000)
-
-      // 页面可见时检查更新
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          void reg.update().catch(() => { /* 静默处理 */ })
-        }
-      })
-    } catch {
-      // 静默处理
-    }
+      } catch {
+        // 静默处理
+      }
     })()
   })
 }

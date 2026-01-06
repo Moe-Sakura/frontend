@@ -21,7 +21,7 @@ SearchGal 是一个 Galgame 聚合搜索前端，使用现代 Web 技术构建�
 | 样式 | Tailwind CSS | 4.1 |
 | 动画 | motion-v | 1.7 |
 | 图标 | lucide-vue-next | 0.561 |
-| 音效 | snd-lib | 1.2 |
+| 音效 | Web Audio API | - |
 | 评论 | Artalk | 2.9 |
 | 图片预览 | @fancyapps/ui | 6.1 |
 | 代码编辑 | vue-prism-editor + prismjs | - |
@@ -45,13 +45,12 @@ src/
 │   ├── UpdateToast.vue       # SW 更新提示
 │   └── LiquidGlass.vue       # 液态玻璃组件
 ├── composables/      # 组合式函数
-│   ├── useSound.ts           # snd-lib 音效封装
+│   ├── useSound.ts           # Web Audio API 音效
 │   ├── useKeyboardShortcuts.ts # 全局快捷键
 │   ├── usePerformance.ts     # 性能工具
 │   ├── useProgress.ts        # 进度条
 │   ├── useScrollLock.ts      # 滚动锁定
 │   ├── useDebounce.ts        # 防抖
-│   └── useClickEffect.ts     # 点击涟漪效果
 ├── stores/           # Pinia 状态管理
 │   ├── search.ts     # 搜索状态
 │   ├── ui.ts         # UI 状态 (模态框、暗色模式)

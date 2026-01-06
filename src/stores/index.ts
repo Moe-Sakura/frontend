@@ -7,7 +7,8 @@ export { useCacheStore } from './cache'
 export { useLazyLoadStore } from './lazyLoad'
 export { useStatsStore } from './stats'
 
-export type { VndbInfo, SearchResult, PlatformData } from './search'
+// 类型导出 - 从集中定义处导出
+export type { VndbInfo, SearchResult, PlatformData } from '@/types/vndb'
 export type { UserSettings } from './settings'
 export type { ServiceStatus, VisitorStats, AppStats } from './stats'
 

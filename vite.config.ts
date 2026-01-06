@@ -98,10 +98,6 @@ export default defineConfig({
             if (id.includes('/prismjs/') || id.includes('/vue-prism-editor/')) {
               return 'editor';
             }
-            // 音效库
-            if (id.includes('/snd-lib/')) {
-              return 'sound';
-            }
             // Fancybox
             if (id.includes('/@fancyapps/')) {
               return 'fancybox';
