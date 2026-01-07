@@ -11,6 +11,7 @@ import {
 } from './stores/plugins'
 import { useUIStore } from './stores/ui'
 import { useStatsStore } from './stores/stats'
+import { useSettingsStore, DEFAULT_API_CONFIG } from './stores/settings'
 
 // Noto Sans SC 字体（本地安装）
 import '@fontsource/noto-sans-sc/300.css'
@@ -26,10 +27,6 @@ import './styles/theme.css'
 
 // 苹果同款液态玻璃效果
 import './styles/glassmorphism.css'
-
-// 预加载随机图片 API
-const preloadImage = new Image()
-preloadImage.src = `https://api.illlights.com/v1/img?t=${Date.now()}`
 
 // 自定义进度条（使用 anime.js）
 import { createProgressFetch } from './composables/useProgress'
@@ -65,6 +62,12 @@ app.use(pinia)
 
 // 配置 fetch 进度条（拦截所有 fetch 请求）
 createProgressFetch()
+
+// 预加载随机图片 API（需在 Pinia 初始化后调用）
+const settingsStore = useSettingsStore()
+const preloadImage = new Image()
+const backgroundImageApiUrl = settingsStore.settings.backgroundImageApiUrl || DEFAULT_API_CONFIG.backgroundImageApiUrl
+preloadImage.src = `${backgroundImageApiUrl}?t=${Date.now()}`
 
 app.mount('#app')
 
