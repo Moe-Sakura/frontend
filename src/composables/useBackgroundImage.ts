@@ -20,7 +20,9 @@ export type KenBurnsType =
 const CONFIG = {
   MAX_CACHE_SIZE: 10000,      // 最大缓存 10000 张图片
   CLEANUP_BATCH_SIZE: 2000,   // 每次清理 2000 张
-  FETCH_INTERVAL: 5000,       // 5秒获取一次
+  FETCH_INTERVAL: 5000,       // 5秒获取一次（未达到缓存阈值时）
+  FETCH_INTERVAL_SLOW: 30000, // 30秒获取一次（图片缓存充足时）
+  CACHE_THRESHOLD: 30,        // 缓存阈值，达到后切换到慢速获取
   DISPLAY_INTERVAL: 10000,    // 10秒切换一次
   MAX_BLOB_URLS: 20,          // 最大同时保持的 Blob URL 数量
   PRELOAD_COUNT: 10,          // 预加载图片数量
@@ -162,6 +164,11 @@ export function useBackgroundImage() {
             // 限制缓存大小
             await cleanupCacheIfNeeded()
             
+            // 如果刚好达到阈值，重启获取定时器以切换到慢速模式
+            if (newCache.length === CONFIG.CACHE_THRESHOLD) {
+              startFetchInterval()
+            }
+            
             // 如果队列为空，重新洗牌
             if (shuffledQueue.value.length === 0) {
               reshuffleQueue()
@@ -298,9 +305,14 @@ export function useBackgroundImage() {
     
     void fetchAndCacheImage()
     
+    // 根据缓存数量决定获取间隔
+    const interval = imageCache.value.length >= CONFIG.CACHE_THRESHOLD 
+      ? CONFIG.FETCH_INTERVAL_SLOW 
+      : CONFIG.FETCH_INTERVAL
+    
     fetchInterval = window.setInterval(() => {
       void fetchAndCacheImage()
-    }, CONFIG.FETCH_INTERVAL)
+    }, interval)
   }
 
   // 启动图片显示定时器
