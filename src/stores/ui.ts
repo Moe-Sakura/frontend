@@ -79,9 +79,6 @@ export const useUIStore = defineStore('ui', () => {
   // 加载状态
   const isLoading = ref(false)
   const loadingMessage = ref('')
-
-  // SW 更新状态
-  const showUpdateToast = ref(false)
   
   // 滚动位置（用于恢复）
   const scrollPosition = ref(0)
@@ -466,11 +463,6 @@ export const useUIStore = defineStore('ui', () => {
     }, { passive: true })
   }
 
-  // 显示 SW 更新提示
-  function setShowUpdateToast(show: boolean) {
-    showUpdateToast.value = show
-  }
-  
   // 清除会话状态（用于完全重置）
   function clearSessionState() {
     sessionStorage.removeItem(SESSION_KEY)
@@ -493,7 +485,6 @@ export const useUIStore = defineStore('ui', () => {
     backgroundImageLoaded,
     isLoading,
     loadingMessage,
-    showUpdateToast,
     toasts,
     isKeyboardHelpOpen,
     scrollPosition,
@@ -526,7 +517,6 @@ export const useUIStore = defineStore('ui', () => {
     setBackgroundImage,
     setBackgroundImageLoaded,
     setLoading,
-    setShowUpdateToast,
     showToast,
     removeToast,
     clearToasts,

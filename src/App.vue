@@ -56,10 +56,7 @@
       <ImageViewer />
 
       <!-- SW 更新提示 -->
-      <UpdateToast
-        :is-visible="uiStore.showUpdateToast"
-        :on-update="handleSwUpdate"
-      />
+      <UpdateToast />
     </main>
   </div>
 </template>
@@ -119,14 +116,6 @@ const {
 // 切换设置面板（互斥）
 function openSettings() {
   uiStore.toggleSettingsModal()
-}
-
-// 处理 SW 更新
-function handleSwUpdate() {
-  // SW 更新逻辑由 main.ts 的 controllerchange 事件处理
-  // 这里只需要关闭提示并发送消息给 SW
-  uiStore.setShowUpdateToast(false)
-  navigator.serviceWorker.controller?.postMessage({ type: 'SKIP_WAITING' })
 }
 
 // 处理历史记录选择

@@ -4,13 +4,13 @@ import type { SearchHistory } from '@/utils/persistence'
 import { 
   loadSearchHistory, 
   saveSearchHistory as persistSearchHistory,
+  saveAllSearchHistory,
   clearSearchHistory as clearPersistedSearchHistory, 
 } from '@/utils/persistence'
 
 export const useHistoryStore = defineStore('history', () => {
   // 状态
   const searchHistory = ref<SearchHistory[]>([])
-  const maxHistoryItems = ref(50) // 最多保存 50 条历史
   
   // 计算属性
   const recentHistory = computed(() => 
@@ -57,11 +57,6 @@ export const useHistoryStore = defineStore('history', () => {
     // 添加到开头
     searchHistory.value.unshift(newItem)
     
-    // 限制数量
-    if (searchHistory.value.length > maxHistoryItems.value) {
-      searchHistory.value = searchHistory.value.slice(0, maxHistoryItems.value)
-    }
-    
     // 持久化
     persistSearchHistory(newItem)
   }
@@ -87,10 +82,8 @@ export const useHistoryStore = defineStore('history', () => {
   }
   
   function saveHistory() {
-    // 由于持久化工具只能添加单条，这里重新保存所有历史
-    searchHistory.value.forEach(item => {
-      persistSearchHistory(item)
-    })
+    // 覆盖保存整个历史列表
+    saveAllSearchHistory(searchHistory.value)
   }
   
   function getHistoryStats() {
@@ -128,7 +121,6 @@ export const useHistoryStore = defineStore('history', () => {
   return {
     // 状态
     searchHistory,
-    maxHistoryItems,
     
     // 计算属性
     recentHistory,

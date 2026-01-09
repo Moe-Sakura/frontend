@@ -61,6 +61,7 @@
             
               <!-- 输入框 -->
               <input
+                ref="searchInputRef"
                 v-model="searchQuery"
                 type="search"
                 :placeholder="searchMode === 'game' ? '搜索游戏...' : '搜索补丁...'"
@@ -502,6 +503,7 @@ const historyStore = useHistoryStore()
 const searchQuery = ref('')
 const customApi = ref('')
 const searchMode = ref<'game' | 'patch'>('game')
+const searchInputRef = ref<HTMLInputElement | null>(null)
 let cleanupURLListener: (() => void) | null = null
 let searchStartTime = 0
 
@@ -951,6 +953,11 @@ function searchWithParams(query: string, mode: 'game' | 'patch') {
     mode: mode,
     api: customApi.value,
   })
+  
+  // 自动对焦到输入框
+  setTimeout(() => {
+    searchInputRef.value?.focus()
+  }, 50)
 }
 
 defineExpose({

@@ -23,17 +23,19 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.1",
     "vite": "^7.3.0",
-    "vue-tsc": "^3.2.1"
+    "vite-plugin-pwa": "^1.2.0",
+    "vue-tsc": "^3.2.1",
+    "workbox-window": "^7.4.0"
   },
   "dependencies": {
     "@fontsource/noto-sans-sc": "^5.2.8",
+    "@tanstack/vue-virtual": "^3.13.13",
     "artalk": "^2.9.1",
     "lucide-vue-next": "^0.562.0",
     "pinia": "^3.0.4",
     "prismjs": "^1.30.0",
     "vue": "^3.5.26",
-    "vue-prism-editor": "2.0.0-alpha.2",
-    "@tanstack/vue-virtual": "^3.13.13"
+    "vue-prism-editor": "2.0.0-alpha.2"
   },
-  "packageManager": "pnpm@10.26.2"
+  "packageManager": "pnpm@10.27.0+sha512.72d699da16b1179c14ba9e64dc71c9a40988cbdc65c264cb0e489db7de917f20dcf4d64d8723625f2969ba52d4b7e2a1170682d9ac2a5dcaeaab732b7e16f04a"
 }

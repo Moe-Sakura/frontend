@@ -7,7 +7,6 @@ import type { PlatformData, VndbInfo } from '@/stores/search'
 
 const STORAGE_KEY = 'searchgal_state'
 const STORAGE_VERSION = '1.0'
-const MAX_HISTORY_SIZE = 10 // 最多保存 10 条搜索历史
 
 export interface SearchState {
   version: string
@@ -106,11 +105,6 @@ export function saveSearchHistory(history: SearchHistory): void {
     // 添加新搜索到开头
     historyList.unshift(history)
     
-    // 限制历史记录数量
-    if (historyList.length > MAX_HISTORY_SIZE) {
-      historyList = historyList.slice(0, MAX_HISTORY_SIZE)
-    }
-    
     localStorage.setItem(HISTORY_KEY, JSON.stringify(historyList))
   } catch (error) {
     // 静默处理
@@ -144,6 +138,18 @@ export function clearSearchHistory(): void {
   try {
     const HISTORY_KEY = 'searchgal_history'
     localStorage.removeItem(HISTORY_KEY)
+  } catch (error) {
+    // 静默处理
+  }
+}
+
+/**
+ * 覆盖保存整个搜索历史列表
+ */
+export function saveAllSearchHistory(historyList: SearchHistory[]): void {
+  try {
+    const HISTORY_KEY = 'searchgal_history'
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(historyList))
   } catch (error) {
     // 静默处理
   }
