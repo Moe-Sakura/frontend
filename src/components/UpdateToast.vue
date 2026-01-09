@@ -93,8 +93,10 @@ function startCountdown() {
   countdownTimer = window.setInterval(() => {
     countdown.value--
     if (countdown.value <= 0) {
-      clearInterval(countdownTimer!)
-      countdownTimer = null
+      if (countdownTimer) {
+        clearInterval(countdownTimer)
+        countdownTimer = null
+      }
       handleUpdate()
     }
   }, 1000)
