@@ -1,0 +1,31 @@
+{
+  "servers": [
+    {
+      "key": "cfapi",
+      "label": "Cloudflare",
+      "url": "https://cf.api.searchgal.homes"
+    },
+    {
+      "key": "api",
+      "label": "香港 雨云",
+      "url": "https://api.searchgal.homes"
+    },
+    {
+      "key": "gzapi",
+      "label": "广州 腾讯云",
+      "url": "https://gz.api.searchgal.homes"
+    },
+    {
+      "key": "jpapi",
+      "label": "东京 ClawCloud",
+      "url": "https://jp.api.searchgal.homes"
+    },
+    {
+      "key": "deapi",
+      "label": "法兰克福 ClawCloud",
+      "url": "https://de.api.searchgal.homes"
+    }
+  ],
+  "deployUrl": "https://github.com/Moe-Sakura/Wrangler-API",
+  "contributeUrl": "https://github.com/Moe-Sakura/frontend/edit/dev/src/data/api.json"
+}

@@ -5,8 +5,18 @@
 
 import { ref } from 'vue'
 
-// 音效是否启用
+// 音效是否启用（初始值，会被 settings store 覆盖）
 const soundEnabled = ref(true)
+
+// 初始化音效设置（从 settings store 同步）
+export function initSoundFromSettings(enabled: boolean): void {
+  soundEnabled.value = enabled
+}
+
+// 监听 settings 变化的函数（供外部调用）
+export function syncSoundWithSettings(enabled: boolean): void {
+  soundEnabled.value = enabled
+}
 
 // AudioContext 单例
 let audioContext: AudioContext | null = null

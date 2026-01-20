@@ -56,56 +56,37 @@
         <!-- 内容区域 -->
         <div class="flex-1 overflow-y-auto custom-scrollbar">
           <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-            <!-- 主题设置卡片 -->
-            <div
-              class="settings-card"
-            >
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                  <Palette :size="20" class="text-white" />
-                </div>
-                <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">外观主题</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">选择亮色、暗色或跟随系统</p>
-                </div>
-              </div>
-
-              <!-- 主题选项 -->
-              <div class="grid grid-cols-3 gap-3">
-                <button
-                  v-for="option in themeOptions"
-                  :key="option.value"
-                  type="button"
-                  :class="[
-                    'flex flex-col items-center gap-2 p-4 rounded-xl transition-all duration-200',
-                    uiStore.themeMode === option.value
-                      ? 'bg-[#ff1493]/10 border-2 border-[#ff1493] dark:border-[#ff69b4]'
-                      : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-pink-200 dark:hover:border-pink-900'
-                  ]"
-                  @click="handleThemeChange(option.value)"
-                >
-                  <!-- 图标 -->
-                  <div
-                    :class="[
-                      'w-10 h-10 rounded-xl flex items-center justify-center transition-colors',
-                      uiStore.themeMode === option.value
-                        ? 'bg-[#ff1493] text-white'
-                        : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
-                    ]"
-                  >
-                    <component :is="option.icon" :size="20" />
+            <!-- 音效设置卡片 -->
+            <div class="settings-card">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-lg shadow-pink-500/30">
+                    <Volume2 :size="20" class="text-white" />
                   </div>
-                  <!-- 标签 -->
+                  <div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white">音效</h2>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">界面交互音效</p>
+                  </div>
+                </div>
+                <!-- 开关 -->
+                <button
+                  type="button"
+                  role="switch"
+                  :aria-checked="localEnableSound"
+                  :class="[
+                    'relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                    localEnableSound
+                      ? 'bg-[#ff1493]'
+                      : 'bg-gray-300 dark:bg-slate-600'
+                  ]"
+                  @click="toggleSound"
+                >
                   <span
                     :class="[
-                      'text-sm font-medium',
-                      uiStore.themeMode === option.value
-                        ? 'text-[#ff1493] dark:text-[#ff69b4]'
-                        : 'text-gray-700 dark:text-slate-300'
+                      'pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out',
+                      localEnableSound ? 'translate-x-5' : 'translate-x-0'
                     ]"
-                  >
-                    {{ option.label }}
-                  </span>
+                  />
                 </button>
               </div>
             </div>
@@ -114,13 +95,40 @@
             <div
               class="settings-card"
             >
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                  <Server :size="20" class="text-white" />
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                    <Server :size="20" class="text-white" />
+                  </div>
+                  <div>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white">聚搜 API 后端</h2>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 URL 地址</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">聚搜 API 后端</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 URL 地址</p>
+                <!-- 部署后端 & 贡献 API 按钮 -->
+                <div class="flex items-center gap-2">
+                  <a
+                    :href="deployUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-95 transition-all"
+                    @click="playTap"
+                  >
+                    <Github :size="14" />
+                    <span class="hidden sm:inline">部署后端</span>
+                    <span class="sm:hidden">部署</span>
+                  </a>
+                  <a
+                    :href="contributeUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-95 transition-all"
+                    @click="playTap"
+                  >
+                    <Plus :size="14" />
+                    <span class="hidden sm:inline">贡献 API</span>
+                    <span class="sm:hidden">贡献</span>
+                  </a>
                 </div>
               </div>
 
@@ -191,7 +199,7 @@
                   v-if="selectedApiOption === 'custom'"
                   class="overflow-hidden"
                 >
-                  <div class="mt-4 space-y-3">
+                  <div class="mt-4">
                     <div class="relative">
                       <LinkIcon :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
@@ -201,18 +209,6 @@
                         class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-pink-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-[#ff1493] text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
                         @input="handleTyping"
                       />
-                    </div>
-                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
-                      <Github :size="14" />
-                      <span>部署后端:</span>
-                      <a
-                        href="https://github.com/Moe-Sakura/Wrangler-API"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-[#ff1493] dark:text-[#ff69b4] hover:underline"
-                      >
-                        Moe-Sakura/Wrangler-API
-                      </a>
                     </div>
                   </div>
                 </div>
@@ -467,7 +463,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { playTap, playCelebration, playSelect, playType } from '@/composables/useSound'
+import { playTap, playCelebration, playSelect, playType, playToggleOn, playToggleOff } from '@/composables/useSound'
 
 // Prism Editor
 import { PrismEditor } from 'vue-prism-editor'
@@ -529,28 +525,13 @@ import {
   Check,
   Github,
   X,
-  Palette,
-  Sun,
-  Moon,
-  Monitor,
+  Plus,
+  Volume2,
 } from 'lucide-vue-next'
-import { useUIStore, type ThemeMode } from '@/stores/ui'
 import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
+import apiData from '@/data/api.json'
 
-const uiStore = useUIStore()
 const settingsStore = useSettingsStore()
-
-// 主题选项
-const themeOptions = [
-  { value: 'light' as ThemeMode, label: '亮色', icon: Sun },
-  { value: 'system' as ThemeMode, label: '系统', icon: Monitor },
-  { value: 'dark' as ThemeMode, label: '暗色', icon: Moon },
-]
-
-function handleThemeChange(mode: ThemeMode) {
-  playSelect()
-  uiStore.setThemeMode(mode)
-}
 
 const props = defineProps<{
   isOpen: boolean
@@ -563,46 +544,33 @@ const emit = defineEmits<{
   save: [customApi: string, customCSS: string]
 }>()
 
-// API 服务器选项
+// API 服务器选项 - 从 JSON 读取
 const apiOptions = [
-  { value: 'cfapi', label: 'Cloudflare' },
-  { value: 'api', label: '香港 雨云' },
-  { value: 'gzapi', label: '广州 腾讯云' },
-  { value: 'usapi', label: '洛杉矶 CloudCone' },
-  { value: 'jpapi', label: '东京 ClawCloud' },
-  { value: 'deapi', label: '法兰克福 ClawCloud' },
+  ...apiData.servers.map(server => ({ value: server.key, label: server.label })),
   { value: 'custom', label: '自定义' },
 ]
 
-// API URL 映射
-const apiUrls: Record<string, string> = {
-  cfapi: 'https://cf.api.searchgal.homes',
-  api: 'https://api.searchgal.homes',
-  gzapi: 'https://gz.api.searchgal.homes',
-  usapi: 'https://us.api.searchgal.homes',
-  jpapi: 'https://jp.api.searchgal.homes',
-  deapi: 'https://de.api.searchgal.homes',
-}
+// API URL 映射 - 从 JSON 读取
+const apiUrls: Record<string, string> = Object.fromEntries(
+  apiData.servers.map(server => [server.key, server.url]),
+)
+
+// 部署后端 & 贡献 API 的 URL
+const deployUrl = apiData.deployUrl
+const contributeUrl = apiData.contributeUrl
 
 // 根据 URL 判断选中的选项
 function getOptionFromUrl(url: string): string {
-  if (!url || url === apiUrls.cfapi) {
-    return 'cfapi'
+  // 空 URL 或匹配第一个服务器（默认）
+  const defaultKey = apiData.servers[0]?.key || 'cfapi'
+  if (!url || url === apiUrls[defaultKey]) {
+    return defaultKey
   }
-  if (url === apiUrls.api) {
-    return 'api'
-  }
-  if (url === apiUrls.gzapi) {
-    return 'gzapi'
-  }
-  if (url === apiUrls.usapi) {
-    return 'usapi'
-  }
-  if (url === apiUrls.jpapi) {
-    return 'jpapi'
-  }
-  if (url === apiUrls.deapi) {
-    return 'deapi'
+  // 遍历查找匹配的服务器
+  for (const [key, serverUrl] of Object.entries(apiUrls)) {
+    if (url === serverUrl) {
+      return key
+    }
   }
   return 'custom'
 }
@@ -700,6 +668,26 @@ const localAiTranslateModel = ref(settingsStore.settings.aiTranslateModel)
 const localBackgroundImageApiUrl = ref(settingsStore.settings.backgroundImageApiUrl)
 const localVideoParseApiUrl = ref(settingsStore.settings.videoParseApiUrl)
 
+// 音效设置
+const localEnableSound = ref(settingsStore.settings.enableSound)
+
+// 切换音效
+function toggleSound() {
+  localEnableSound.value = !localEnableSound.value
+  // 播放对应的开关音效
+  if (localEnableSound.value) {
+    // 临时启用音效来播放开启音
+    settingsStore.updateSetting('enableSound', true)
+    playToggleOn()
+  } else {
+    playToggleOff()
+    // 延迟关闭，让关闭音效播放完
+    setTimeout(() => {
+      settingsStore.updateSetting('enableSound', false)
+    }, 150)
+  }
+}
+
 // 计算最终的 API 地址
 const localCustomApi = computed(() => {
   if (selectedApiOption.value === 'custom') {
@@ -750,6 +738,8 @@ watch(() => props.isOpen, (isOpen) => {
     localAiTranslateModel.value = settingsStore.settings.aiTranslateModel
     localBackgroundImageApiUrl.value = settingsStore.settings.backgroundImageApiUrl
     localVideoParseApiUrl.value = settingsStore.settings.videoParseApiUrl
+    // 同步音效设置
+    localEnableSound.value = settingsStore.settings.enableSound
   }
 }, { immediate: true })
 
