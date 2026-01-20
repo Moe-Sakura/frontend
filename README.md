@@ -127,7 +127,7 @@ frontend/
 - 多平台并行搜索，结果即时展示
 
 ### 2. 智能标签系统
-根据 [Cloudflare Workers API](https://github.com/Moe-Sakura/Wrangler-API) 规范，自动标注资源特性：
+根据 [Cloudflare Workers API](https://github.com/Moe-Sakura/SearchGal) 规范，自动标注资源特性：
 
 | 标签 | 含义 | 说明 |
 |------|------|------|
@@ -177,7 +177,7 @@ const apiUrl = 'https://cf.api.searchgal.homes'
 ### 本地开发 API
 如果使用本地 API 进行开发：
 ```bash
-# 在 Wrangler-API 项目中
+# 在 SearchGal 项目中
 npx wrangler dev --local
 ```
 
