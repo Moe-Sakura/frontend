@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
+import { defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import AnimatedBackground from '@/components/AnimatedBackground.vue'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
@@ -75,6 +75,7 @@ import {
 } from '@/utils/theme'
 import { scheduleIdleTask } from '@/composables/usePerformance'
 import { useBackgroundImage } from '@/composables/useBackgroundImage'
+import { initSoundFromSettings, syncSoundWithSettings } from '@/composables/useSound'
 
 // 关键组件 - 同步加载
 import StatsCorner from '@/components/StatsCorner.vue'
@@ -137,6 +138,9 @@ onMounted(async () => {
   // 初始化 UI Store（恢复持久化状态 + 会话状态）
   uiStore.init()
   
+  // 初始化音效设置
+  initSoundFromSettings(settingsStore.settings.enableSound)
+  
   // URL hash 优先级最高 - 覆盖会话状态
   const hash = window.location.hash
   if (hash.startsWith('#atk-comment-')) {
@@ -173,6 +177,14 @@ onMounted(async () => {
 onUnmounted(() => {
   destroyBackground()
 })
+
+// 监听音效设置变化
+watch(
+  () => settingsStore.settings.enableSound,
+  (enabled) => {
+    syncSoundWithSettings(enabled)
+  },
+)
 
 // 设置相关函数
 function saveSettings(customApi: string, newCustomCSS: string) {

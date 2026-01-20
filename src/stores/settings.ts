@@ -12,6 +12,7 @@ export interface UserSettings {
   showPlatformIcons: boolean
   compactMode: boolean
   enableNotifications: boolean
+  enableSound: boolean
   // API 高级配置
   vndbApiBaseUrl: string
   vndbImageProxyUrl: string
@@ -44,6 +45,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   showPlatformIcons: true,
   compactMode: false,
   enableNotifications: true,
+  enableSound: true,
   // API 高级配置
   vndbApiBaseUrl: DEFAULT_API_CONFIG.vndbApiBaseUrl,
   vndbImageProxyUrl: DEFAULT_API_CONFIG.vndbImageProxyUrl,
