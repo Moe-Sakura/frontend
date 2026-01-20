@@ -1,9 +1,19 @@
 {
   "servers": [
     {
+      "key": "vercelapi",
+      "label": "Vercel",
+      "url": "https://vercel.api.searchgal.homes"
+    },
+    {
       "key": "cfapi",
       "label": "Cloudflare",
       "url": "https://cf.api.searchgal.homes"
+    },
+    {
+      "key": "netlifyapi",
+      "label": "Netlify",
+      "url": "https://netlify.api.searchgal.homes"
     },
     {
       "key": "api",

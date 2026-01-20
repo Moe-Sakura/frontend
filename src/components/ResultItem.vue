@@ -13,12 +13,13 @@ defineProps<{
 
 const copied = ref(false)
 
-// 从URL中提取路径
-function extractPath(url: string): string {
+// 解码 URL 显示（包含完整网址）
+function decodeUrl(url: string): string {
   try {
-    const urlObj = new URL(url)
-    return urlObj.pathname + urlObj.search + urlObj.hash
+    // 解码 URL 编码的中文等字符
+    return decodeURIComponent(url)
   } catch {
+    // 解码失败则返回原始 URL
     return url
   }
 }
@@ -86,7 +87,7 @@ async function copyLink(url: string) {
     <div v-if="source.url" class="flex items-center gap-2 mt-2 ml-7 sm:ml-9">
       <LinkIcon :size="12" class="text-theme-primary/50 dark:text-theme-accent/50 shrink-0" />
       <span class="text-xs text-gray-500 dark:text-slate-400 break-all font-mono bg-gray-100/80 dark:bg-slate-800/80 px-2 py-1 rounded">
-        {{ extractPath(source.url) }}
+        {{ decodeUrl(source.url) }}
       </span>
     </div>
   </div>

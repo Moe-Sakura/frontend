@@ -559,12 +559,14 @@ const apiUrls: Record<string, string> = Object.fromEntries(
 const deployUrl = apiData.deployUrl
 const contributeUrl = apiData.contributeUrl
 
+// 默认 API 服务器 key（第一个）
+const defaultApiKey = apiData.servers[0]?.key || 'custom'
+
 // 根据 URL 判断选中的选项
 function getOptionFromUrl(url: string): string {
   // 空 URL 或匹配第一个服务器（默认）
-  const defaultKey = apiData.servers[0]?.key || 'cfapi'
-  if (!url || url === apiUrls[defaultKey]) {
-    return defaultKey
+  if (!url || url === apiUrls[defaultApiKey]) {
+    return defaultApiKey
   }
   // 遍历查找匹配的服务器
   for (const [key, serverUrl] of Object.entries(apiUrls)) {
@@ -693,7 +695,7 @@ const localCustomApi = computed(() => {
   if (selectedApiOption.value === 'custom') {
     return customApiInput.value
   }
-  if (selectedApiOption.value === 'cfapi') {
+  if (selectedApiOption.value === defaultApiKey) {
     return '' // 空字符串表示使用默认
   }
   return apiUrls[selectedApiOption.value] || ''
