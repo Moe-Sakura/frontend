@@ -58,7 +58,7 @@ export type {
 
 /**
  * 搜索游戏（流式处理）
- * 根据 Cloudflare Workers API 文档: https://github.com/Moe-Sakura/Wrangler-API
+ * 根据 Cloudflare Workers API 文档: https://github.com/Moe-Sakura/SearchGal
  *
  * API 端点:
  * - POST /gal - 搜索游戏资源

@@ -26,6 +26,6 @@
       "url": "https://de.api.searchgal.homes"
     }
   ],
-  "deployUrl": "https://github.com/Moe-Sakura/Wrangler-API",
+  "deployUrl": "https://github.com/Moe-Sakura/SearchGal",
   "contributeUrl": "https://github.com/Moe-Sakura/frontend/edit/dev/src/data/api.json"
 }
