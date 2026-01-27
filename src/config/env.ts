@@ -5,10 +5,10 @@
 
 // API 配置
 export const API_CONFIG = {
-  defaultApiUrl: import.meta.env.VITE_DEFAULT_API_URL || 'https://cf.api.searchgal.homes',
+  defaultApiUrl: import.meta.env.VITE_DEFAULT_API_URL || 'https://cf.api.searchgal.top',
   vndbApiUrl: import.meta.env.VITE_VNDB_API_URL || 'https://api.vndb.org/kana/vn',
-  translateApiUrl: import.meta.env.VITE_TRANSLATE_API_URL || 'https://cf.api.searchgal.homes/translate',
-  statusApiUrl: import.meta.env.VITE_STATUS_API_URL || 'https://status.searchgal.homes',
+  translateApiUrl: import.meta.env.VITE_TRANSLATE_API_URL || 'https://cf.api.searchgal.top/translate',
+  statusApiUrl: import.meta.env.VITE_STATUS_API_URL || 'https://status.searchgal.top',
   randomImageApi: import.meta.env.VITE_RANDOM_IMAGE_API || 'https://api.illlights.com/v1/img',
 } as const
 
@@ -17,7 +17,7 @@ export const APP_CONFIG = {
   name: import.meta.env.VITE_APP_NAME || 'SearchGal',
   title: import.meta.env.VITE_APP_TITLE || 'SearchGal - Galgame 聚合搜索',
   description: import.meta.env.VITE_APP_DESCRIPTION || 'Galgame 资源聚合搜索引擎',
-  url: import.meta.env.VITE_APP_URL || 'https://searchgal.homes',
+  url: import.meta.env.VITE_APP_URL || 'https://searchgal.top',
 } as const
 
 // 功能开关

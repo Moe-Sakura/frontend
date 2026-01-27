@@ -3,37 +3,52 @@
     {
       "key": "vercelapi",
       "label": "Vercel",
-      "url": "https://vercel.api.searchgal.homes"
+      "url": "https://vercel.api.searchgal.top"
     },
     {
       "key": "cfapi",
       "label": "Cloudflare",
-      "url": "https://cf.api.searchgal.homes"
+      "url": "https://cf.api.searchgal.top"
     },
     {
       "key": "netlifyapi",
       "label": "Netlify",
-      "url": "https://netlify.api.searchgal.homes"
+      "url": "https://netlify.api.searchgal.top"
     },
     {
       "key": "api",
       "label": "香港 雨云",
-      "url": "https://api.searchgal.homes"
+      "url": "https://api.searchgal.top"
     },
     {
       "key": "gzapi",
       "label": "广州 腾讯云",
-      "url": "https://gz.api.searchgal.homes"
+      "url": "https://gz.api.searchgal.top"
     },
     {
-      "key": "jpapi",
-      "label": "东京 ClawCloud",
-      "url": "https://jp.api.searchgal.homes"
+      "key": "us-westapi",
+      "label": "洛杉矶 ClawCloud",
+      "url": "https://us-west.api.searchgal.top"
+    },
+    {
+      "key": "us-eastapi",
+      "label": "弗吉尼亚州 ClawCloud",
+      "url": "https://us-east.api.searchgal.top"
+    },
+    {
+      "key": "sgapi",
+      "label": "新加坡 ClawCloud",
+      "url": "https://sg.api.searchgal.top"
     },
     {
       "key": "deapi",
       "label": "法兰克福 ClawCloud",
-      "url": "https://de.api.searchgal.homes"
+      "url": "https://de.api.searchgal.top"
+    },
+    {
+      "key": "jpapi",
+      "label": "东京 ClawCloud",
+      "url": "https://jp.api.searchgal.top"
     }
   ],
   "deployUrl": "https://github.com/Moe-Sakura/SearchGal",

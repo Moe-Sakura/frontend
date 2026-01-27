@@ -9,24 +9,24 @@
 
   <!-- 主页 -->
   <url>
-    <loc>https://searchgal.homes/</loc>
+    <loc>https://searchgal.top/</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://searchgal.homes/logo.svg</image:loc>
+      <image:loc>https://searchgal.top/logo.svg</image:loc>
       <image:title>SearchGal - Galgame 聚合搜索</image:title>
       <image:caption>Galgame 资源聚合搜索引擎，支持多站点搜索</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://searchgal.homes/og-image.png</image:loc>
+      <image:loc>https://searchgal.top/og-image.png</image:loc>
       <image:title>SearchGal 社交分享图</image:title>
     </image:image>
   </url>
 
   <!-- AI/LLM 信息页 -->
   <url>
-    <loc>https://searchgal.homes/llms.txt</loc>
+    <loc>https://searchgal.top/llms.txt</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -34,7 +34,7 @@
 
   <!-- PWA Manifest -->
   <url>
-    <loc>https://searchgal.homes/manifest.json</loc>
+    <loc>https://searchgal.top/manifest.json</loc>
     <lastmod>2025-12-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>

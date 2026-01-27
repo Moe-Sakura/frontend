@@ -117,20 +117,20 @@ export const config: AppConfig = {
   },
   
   api: {
-    baseUrl: getEnv('VITE_API_BASE_URL', 'https://cf.api.searchgal.homes'),
+    baseUrl: getEnv('VITE_API_BASE_URL', 'https://cf.api.searchgal.top'),
     timeout: getEnv('VITE_API_TIMEOUT', 30000),
-    translateUrl: getEnv('VITE_TRANSLATE_API_URL', 'https://translate.searchgal.homes'),
+    translateUrl: getEnv('VITE_TRANSLATE_API_URL', 'https://translate.searchgal.top'),
     vndbUrl: getEnv('VITE_VNDB_API_URL', 'https://api.vndb.org/kana/v1'),
   },
   
   services: {
-    statusUrl: getEnv('VITE_STATUS_URL', 'https://status.searchgal.homes'),
+    statusUrl: getEnv('VITE_STATUS_URL', 'https://status.searchgal.top'),
     artalkServer: getEnv('VITE_ARTALK_SERVER', 'https://artalk.saop.cc'),
     imageApiUrl: getEnv('VITE_IMAGE_API_URL', 'https://api.illlights.com/v1/img'),
   },
   
   site: {
-    url: getEnv('VITE_SITE_URL', 'https://searchgal.homes'),
+    url: getEnv('VITE_SITE_URL', 'https://searchgal.top'),
     name: getEnv('VITE_SITE_NAME', 'SearchGal'),
     githubUrl: getEnv('VITE_GITHUB_URL', 'https://github.com/Moe-Sakura/frontend'),
   },

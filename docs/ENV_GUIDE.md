@@ -37,16 +37,16 @@ pnpm dev
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `VITE_API_BASE_URL` | 搜索 API 地址 | https://cf.api.searchgal.homes |
+| `VITE_API_BASE_URL` | 搜索 API 地址 | https://cf.api.searchgal.top |
 | `VITE_API_TIMEOUT` | API 超时时间（毫秒） | 30000 |
-| `VITE_TRANSLATE_API_URL` | 翻译 API 地址 | https://translate.searchgal.homes |
+| `VITE_TRANSLATE_API_URL` | 翻译 API 地址 | https://translate.searchgal.top |
 | `VITE_VNDB_API_URL` | VNDB API 地址 | https://api.vndb.org/kana/v1 |
 
 ### 外部服务
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `VITE_STATUS_URL` | 状态检查 URL | https://status.searchgal.homes |
+| `VITE_STATUS_URL` | 状态检查 URL | https://status.searchgal.top |
 | `VITE_ARTALK_SERVER` | Artalk 评论服务器 | https://artalk.saop.cc |
 | `VITE_IMAGE_API_URL` | 随机图片 API | https://api.illlights.com/v1/img |
 
@@ -54,7 +54,7 @@ pnpm dev
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `VITE_SITE_URL` | 网站 URL | https://searchgal.homes |
+| `VITE_SITE_URL` | 网站 URL | https://searchgal.top |
 | `VITE_SITE_NAME` | 网站名称 | SearchGal |
 | `VITE_GITHUB_URL` | GitHub 仓库 | https://github.com/Moe-Sakura/frontend |
 

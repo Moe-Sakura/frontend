@@ -77,7 +77,7 @@
 ### 🔧 API 集成
 
 - **Cloudflare Workers API**
-  - 端点：`https://cf.api.searchgal.homes`
+  - 端点：`https://cf.api.searchgal.top`
   - POST `/gal` - 搜索游戏资源
   - POST `/patch` - 搜索补丁资源
   - SSE 流式响应

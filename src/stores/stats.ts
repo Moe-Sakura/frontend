@@ -46,7 +46,7 @@ export const useStatsStore = defineStore('stats', () => {
   
   // 服务状态
   const serviceStatuses = ref<Map<string, ServiceStatus>>(new Map([
-    ['api', { name: 'API 服务', status: 'unknown', lastChecked: 0, url: 'https://status.searchgal.homes' }],
+    ['api', { name: 'API 服务', status: 'unknown', lastChecked: 0, url: 'https://status.searchgal.top' }],
     ['vndb', { name: 'VNDB', status: 'unknown', lastChecked: 0, url: 'https://api.vndb.org' }],
   ]))
   
