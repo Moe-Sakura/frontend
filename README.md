@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8.svg)](https://tailwindcss.com/)
 
-🌐 **在线访问**: [searchgal.homes](https://searchgal.homes)
+🌐 **在线访问**: [searchgal.top](https://searchgal.top)
 
 ## ✨ 特性
 
@@ -169,7 +169,7 @@ frontend/
 默认使用 Cloudflare Workers API：
 ```typescript
 // src/api/search.ts
-const apiUrl = 'https://cf.api.searchgal.homes'
+const apiUrl = 'https://cf.api.searchgal.top'
 ```
 
 支持自定义 API 地址，在搜索页面输入框中填写即可。
@@ -220,7 +220,7 @@ pnpm run build
 本项目遵循 [llms.txt](https://llmstxt.org/) 规范，为 AI 助手和大语言模型提供了结构化的项目文档。
 
 - 📄 访问 `/llms.txt` 获取项目的 LLM 友好文档
-- 🔗 在线地址: [searchgal.homes/llms.txt](https://searchgal.homes/llms.txt)
+- 🔗 在线地址: [searchgal.top/llms.txt](https://searchgal.top/llms.txt)
 
 ## 🤝 贡献
 
@@ -278,7 +278,7 @@ vim .env
 ## 📮 联系方式
 
 - GitHub: [@Moe-Sakura](https://github.com/Moe-Sakura)
-- 项目主页: [searchgal.homes](https://searchgal.homes)
+- 项目主页: [searchgal.top](https://searchgal.top)
 
 ---
 

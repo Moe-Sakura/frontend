@@ -6,7 +6,7 @@
 
 **之前（硬编码）：**
 ```typescript
-const response = await fetch('https://cf.api.searchgal.homes/search')
+const response = await fetch('https://cf.api.searchgal.top/search')
 ```
 
 **之后（使用配置）：**

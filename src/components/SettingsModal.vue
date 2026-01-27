@@ -369,7 +369,7 @@
                   <input
                     v-model="localVndbImageProxyUrl"
                     type="url"
-                    placeholder="https://rp.searchgal.homes/"
+                    placeholder="https://rp.searchgal.top/"
                     class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
                     @input="handleTyping"
                   />
@@ -383,7 +383,7 @@
                   <input
                     v-model="localAiTranslateApiUrl"
                     type="url"
-                    placeholder="https://ai.searchgal.homes/v1/chat/completions"
+                    placeholder="https://ai.searchgal.top/v1/chat/completions"
                     class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
                     @input="handleTyping"
                   />
@@ -439,7 +439,7 @@
                   <input
                     v-model="localVideoParseApiUrl"
                     type="url"
-                    placeholder="https://vp.searchgal.homes/"
+                    placeholder="https://vp.searchgal.top/"
                     class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
                     @input="handleTyping"
                   />

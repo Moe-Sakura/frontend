@@ -2,7 +2,7 @@
   <!-- 左上角状态指示器 -->
   <div class="fixed top-4 left-4 z-40">
     <a
-      href="https://status.searchgal.homes"
+      href="https://status.searchgal.top"
       target="_blank"
       rel="noopener noreferrer"
       :class="[

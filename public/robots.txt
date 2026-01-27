@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://searchgal.homes/sitemap.xml
+Sitemap: https://searchgal.top/sitemap.xml

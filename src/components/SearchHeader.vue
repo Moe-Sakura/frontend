@@ -272,7 +272,7 @@
                 关闭提示
               </button>
               <a
-                href="https://status.searchgal.homes"
+                href="https://status.searchgal.top"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200/50 dark:border-red-800/30 transition-colors flex items-center gap-1.5"

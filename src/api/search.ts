@@ -84,7 +84,7 @@ export async function searchGameStream(
   },
 ) {
   try {
-    const apiUrl = searchParams.get('api') || 'https://cf.api.searchgal.homes'
+    const apiUrl = searchParams.get('api') || 'https://cf.api.searchgal.top'
     const gameName = searchParams.get('game')
     const searchMode = searchParams.get('mode') || 'game'
 
