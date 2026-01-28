@@ -454,6 +454,81 @@
                 </button>
               </div>
             </div>
+
+            <!-- 搜索历史管理卡片 -->
+            <div class="settings-card">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                  <History :size="20" class="text-white" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">搜索历史</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">
+                    共 {{ historyStore.historyCount }} 条记录
+                  </p>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <!-- 导出导入按钮 -->
+                <div class="flex gap-3">
+                  <button
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
+                    @click="exportHistory"
+                  >
+                    <Download :size="18" />
+                    <span>导出记录</span>
+                  </button>
+                  <button
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
+                    @click="triggerImport"
+                  >
+                    <Upload :size="18" />
+                    <span>导入记录</span>
+                  </button>
+                  <!-- 隐藏的文件输入框 -->
+                  <input
+                    ref="fileInputRef"
+                    type="file"
+                    accept=".json"
+                    class="hidden"
+                    @change="handleImportFile"
+                  />
+                </div>
+
+                <!-- 状态提示 -->
+                <Transition
+                  enter-active-class="transition-all duration-200 ease-out"
+                  enter-from-class="opacity-0 translate-y-1"
+                  enter-to-class="opacity-100 translate-y-0"
+                  leave-active-class="transition-all duration-150 ease-in"
+                  leave-from-class="opacity-100 translate-y-0"
+                  leave-to-class="opacity-0 translate-y-1"
+                >
+                  <div
+                    v-if="importStatus !== 'idle'"
+                    :class="[
+                      'flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
+                      importStatus === 'success'
+                        ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800/50'
+                        : 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50'
+                    ]"
+                  >
+                    <component
+                      :is="importStatus === 'success' ? CheckCircle2 : AlertCircle"
+                      :size="16"
+                    />
+                    <span>{{ importMessage }}</span>
+                  </div>
+                </Transition>
+
+                <!-- 说明 -->
+                <div class="flex items-start gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-xs text-gray-500 dark:text-slate-400">
+                  <FileJson :size="14" class="flex-shrink-0 mt-0.5 text-amber-500" />
+                  <p>导出为 JSON 格式，可用于备份或迁移到其他设备。导入时会自动去重。</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -527,11 +602,152 @@ import {
   X,
   Plus,
   Volume2,
+  Download,
+  Upload,
+  History,
+  FileJson,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-vue-next'
 import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
+import { useHistoryStore } from '@/stores/history'
+import type { SearchHistory } from '@/utils/persistence'
 import apiData from '@/data/api.json'
 
 const settingsStore = useSettingsStore()
+const historyStore = useHistoryStore()
+
+// 导入导出状态
+const importStatus = ref<'idle' | 'success' | 'error'>('idle')
+const importMessage = ref('')
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
+// 导出搜索历史为 JSON
+function exportHistory() {
+  playTap()
+  
+  const history = historyStore.searchHistory
+  if (history.length === 0) {
+    importStatus.value = 'error'
+    importMessage.value = '暂无搜索历史可导出'
+    setTimeout(() => {
+      importStatus.value = 'idle'
+    }, 3000)
+    return
+  }
+  
+  const exportData = {
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    source: 'SearchGal',
+    count: history.length,
+    history: history,
+  }
+  
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `searchgal-history-${new Date().toISOString().slice(0, 10)}.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+  
+  playCelebration()
+  importStatus.value = 'success'
+  importMessage.value = `已导出 ${history.length} 条搜索记录`
+  setTimeout(() => {
+    importStatus.value = 'idle'
+  }, 3000)
+}
+
+// 触发文件选择
+function triggerImport() {
+  playTap()
+  fileInputRef.value?.click()
+}
+
+// 处理导入文件
+function handleImportFile(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  
+  if (!file) {return}
+  
+  // 重置 input 以便可以选择相同文件
+  input.value = ''
+  
+  if (!file.name.endsWith('.json')) {
+    importStatus.value = 'error'
+    importMessage.value = '请选择 .json 格式的文件'
+    setTimeout(() => {
+      importStatus.value = 'idle'
+    }, 3000)
+    return
+  }
+  
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const content = e.target?.result as string
+      const data = JSON.parse(content)
+      
+      // 验证数据格式
+      if (!data.history || !Array.isArray(data.history)) {
+        throw new Error('无效的文件格式')
+      }
+      
+      // 验证每条记录
+      const validHistory: SearchHistory[] = []
+      for (const item of data.history) {
+        if (
+          typeof item.query === 'string' &&
+          (item.mode === 'game' || item.mode === 'patch') &&
+          typeof item.timestamp === 'number' &&
+          typeof item.resultCount === 'number'
+        ) {
+          validHistory.push({
+            query: item.query,
+            mode: item.mode,
+            timestamp: item.timestamp,
+            resultCount: item.resultCount,
+          })
+        }
+      }
+      
+      if (validHistory.length === 0) {
+        throw new Error('文件中没有有效的搜索记录')
+      }
+      
+      // 使用 store 的 importHistory 方法（自动去重、排序、保存）
+      const importedCount = historyStore.importHistory(validHistory)
+      
+      playCelebration()
+      importStatus.value = 'success'
+      importMessage.value = `成功导入 ${importedCount} 条新记录（共 ${validHistory.length} 条）`
+      setTimeout(() => {
+        importStatus.value = 'idle'
+      }, 3000)
+    } catch (error) {
+      importStatus.value = 'error'
+      importMessage.value = error instanceof Error ? error.message : '导入失败'
+      setTimeout(() => {
+        importStatus.value = 'idle'
+      }, 3000)
+    }
+  }
+  
+  reader.onerror = () => {
+    importStatus.value = 'error'
+    importMessage.value = '读取文件失败'
+    setTimeout(() => {
+      importStatus.value = 'idle'
+    }, 3000)
+  }
+  
+  reader.readAsText(file)
+}
 
 const props = defineProps<{
   isOpen: boolean
