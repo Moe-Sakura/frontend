@@ -118,6 +118,29 @@ export const useHistoryStore = defineStore('history', () => {
     )
   }
   
+  // 导入历史记录（合并去重）
+  function importHistory(items: SearchHistory[]): number {
+    let importedCount = 0
+    
+    for (const item of items) {
+      const exists = searchHistory.value.some(
+        h => h.query === item.query && h.mode === item.mode,
+      )
+      if (!exists) {
+        searchHistory.value.push(item)
+        importedCount++
+      }
+    }
+    
+    // 按时间排序（最新在前）
+    searchHistory.value.sort((a, b) => b.timestamp - a.timestamp)
+    
+    // 保存到 localStorage
+    saveHistory()
+    
+    return importedCount
+  }
+  
   return {
     // 状态
     searchHistory,
@@ -137,6 +160,7 @@ export const useHistoryStore = defineStore('history', () => {
     clearHistoryByMode,
     getHistoryStats,
     searchInHistory,
+    importHistory,
   }
 })
 

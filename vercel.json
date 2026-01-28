@@ -1,0 +1,26 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.searchgal.top"
+        }
+      ],
+      "destination": "https://searchgal.top/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "sg.saop.cc"
+        }
+      ],
+      "destination": "https://searchgal.top/:path*",
+      "permanent": true
+    }
+  ]
+}
