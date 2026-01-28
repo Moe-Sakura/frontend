@@ -27,12 +27,12 @@
     },
     {
       "key": "us-westapi",
-      "label": "洛杉矶 ClawCloud",
+      "label": "圣克拉拉 ClawCloud",
       "url": "https://us-west.api.searchgal.top"
     },
     {
       "key": "us-eastapi",
-      "label": "弗吉尼亚州 ClawCloud",
+      "label": "阿什本 ClawCloud",
       "url": "https://us-east.api.searchgal.top"
     },
     {

@@ -91,6 +91,81 @@
               </div>
             </div>
 
+            <!-- 搜索历史管理卡片 -->
+            <div class="settings-card">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                  <History :size="20" class="text-white" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">搜索历史</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">
+                    共 {{ historyStore.historyCount }} 条记录
+                  </p>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <!-- 导出导入按钮 -->
+                <div class="flex gap-3">
+                  <button
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
+                    @click="exportHistory"
+                  >
+                    <Download :size="18" />
+                    <span>导出记录</span>
+                  </button>
+                  <button
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
+                    @click="triggerImport"
+                  >
+                    <Upload :size="18" />
+                    <span>导入记录</span>
+                  </button>
+                  <!-- 隐藏的文件输入框 -->
+                  <input
+                    ref="fileInputRef"
+                    type="file"
+                    accept=".json"
+                    class="hidden"
+                    @change="handleImportFile"
+                  />
+                </div>
+
+                <!-- 状态提示 -->
+                <Transition
+                  enter-active-class="transition-all duration-200 ease-out"
+                  enter-from-class="opacity-0 translate-y-1"
+                  enter-to-class="opacity-100 translate-y-0"
+                  leave-active-class="transition-all duration-150 ease-in"
+                  leave-from-class="opacity-100 translate-y-0"
+                  leave-to-class="opacity-0 translate-y-1"
+                >
+                  <div
+                    v-if="importStatus !== 'idle'"
+                    :class="[
+                      'flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
+                      importStatus === 'success'
+                        ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800/50'
+                        : 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50'
+                    ]"
+                  >
+                    <component
+                      :is="importStatus === 'success' ? CheckCircle2 : AlertCircle"
+                      :size="16"
+                    />
+                    <span>{{ importMessage }}</span>
+                  </div>
+                </Transition>
+
+                <!-- 说明 -->
+                <div class="flex items-start gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-xs text-gray-500 dark:text-slate-400">
+                  <FileJson :size="14" class="flex-shrink-0 mt-0.5 text-amber-500" />
+                  <p>导出为 JSON 格式，可用于备份或迁移到其他设备。导入时会自动去重。</p>
+                </div>
+              </div>
+            </div>
+
             <!-- API 设置卡片 -->
             <div
               class="settings-card"
@@ -455,78 +530,38 @@
               </div>
             </div>
 
-            <!-- 搜索历史管理卡片 -->
+            <!-- 关于项目卡片 -->
             <div class="settings-card">
               <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                  <History :size="20" class="text-white" />
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                  <Info :size="20" class="text-white" />
                 </div>
                 <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">搜索历史</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">
-                    共 {{ historyStore.historyCount }} 条记录
-                  </p>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">关于项目</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">开源仓库与贡献</p>
                 </div>
               </div>
 
               <div class="space-y-3">
-                <!-- 导出导入按钮 -->
-                <div class="flex gap-3">
-                  <button
-                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
-                    @click="exportHistory"
-                  >
-                    <Download :size="18" />
-                    <span>导出记录</span>
-                  </button>
-                  <button
-                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
-                    @click="triggerImport"
-                  >
-                    <Upload :size="18" />
-                    <span>导入记录</span>
-                  </button>
-                  <!-- 隐藏的文件输入框 -->
-                  <input
-                    ref="fileInputRef"
-                    type="file"
-                    accept=".json"
-                    class="hidden"
-                    @change="handleImportFile"
-                  />
-                </div>
-
-                <!-- 状态提示 -->
-                <Transition
-                  enter-active-class="transition-all duration-200 ease-out"
-                  enter-from-class="opacity-0 translate-y-1"
-                  enter-to-class="opacity-100 translate-y-0"
-                  leave-active-class="transition-all duration-150 ease-in"
-                  leave-from-class="opacity-100 translate-y-0"
-                  leave-to-class="opacity-0 translate-y-1"
+                <!-- 仓库卡片列表 -->
+                <a
+                  v-for="repoUrl in repoData.repositories"
+                  :key="repoUrl"
+                  :href="repoUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                  @click="playTap"
                 >
-                  <div
-                    v-if="importStatus !== 'idle'"
-                    :class="[
-                      'flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
-                      importStatus === 'success'
-                        ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800/50'
-                        : 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50'
-                    ]"
-                  >
-                    <component
-                      :is="importStatus === 'success' ? CheckCircle2 : AlertCircle"
-                      :size="16"
-                    />
-                    <span>{{ importMessage }}</span>
-                  </div>
-                </Transition>
-
-                <!-- 说明 -->
-                <div class="flex items-start gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-xs text-gray-500 dark:text-slate-400">
-                  <FileJson :size="14" class="flex-shrink-0 mt-0.5 text-amber-500" />
-                  <p>导出为 JSON 格式，可用于备份或迁移到其他设备。导入时会自动去重。</p>
-                </div>
+                  <img
+                    v-if="githubHashTimestamp"
+                    :src="`https://opengraph.githubassets.com/${githubHashTimestamp}/${getRepoPath(repoUrl)}`"
+                    :alt="`${getRepoName(repoUrl)} repository`"
+                    class="w-full h-auto object-cover"
+                    loading="lazy"
+                  />
+                  <div v-else class="w-full aspect-[2/1] bg-slate-100 dark:bg-slate-800 animate-pulse" />
+                </a>
               </div>
             </div>
           </div>
@@ -613,9 +648,52 @@ import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
 import { useHistoryStore } from '@/stores/history'
 import type { SearchHistory } from '@/utils/persistence'
 import apiData from '@/data/api.json'
+import repoData from '@/data/repository-opengraph.json'
 
 const settingsStore = useSettingsStore()
 const historyStore = useHistoryStore()
+
+// GitHub 关于项目相关
+const githubHashTimestamp = ref('')
+
+// 生成 SHA-256 hash
+async function sha256(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message)
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// 获取当前日期的 YYMMDD 格式
+function getDateString(): string {
+  const now = new Date()
+  const yy = String(now.getFullYear()).slice(-2)
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const dd = String(now.getDate()).padStart(2, '0')
+  return `${yy}${mm}${dd}`
+}
+
+// 初始化 GitHub hash
+async function initGitHubHash() {
+  const dateStr = getDateString()
+  githubHashTimestamp.value = await sha256(dateStr)
+}
+
+// 从 GitHub URL 提取 owner/repo 路径
+function getRepoPath(url: string): string {
+  // https://github.com/Moe-Sakura/frontend -> Moe-Sakura/frontend
+  return url.replace('https://github.com/', '')
+}
+
+// 从 GitHub URL 提取仓库名
+function getRepoName(url: string): string {
+  // https://github.com/Moe-Sakura/frontend -> frontend
+  const parts = url.split('/')
+  return parts[parts.length - 1]
+}
+
+// 组件挂载时初始化
+void initGitHubHash()
 
 // 导入导出状态
 const importStatus = ref<'idle' | 'success' | 'error'>('idle')

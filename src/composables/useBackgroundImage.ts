@@ -1,11 +1,17 @@
 /**
  * 背景图片管理 composable
- * 负责从 API 获取图片、IndexedDB 缓存管理、洗牌队列、Ken Burns 动画等
+ * 简单的定时获取随机图片，失败时保持上一张
+ * 
+ * 自动参数：
+ * - name: 跟随 VNDB 获取到的作品名
+ * - maxbrightness: 暗色模式自动设为 0.5
+ * - view: 移动端自动使用 vertical 模式
  */
 
-import { ref, computed, shallowRef } from 'vue'
-import { imageDB } from '@/utils/imageDB'
+import { ref, computed } from 'vue'
 import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
+import { useSearchStore } from '@/stores/search'
+import { useUIStore } from '@/stores/ui'
 
 // Ken Burns 动画变体类型
 export type KenBurnsType = 
@@ -18,14 +24,8 @@ export type KenBurnsType =
 
 // 配置常量
 const CONFIG = {
-  MAX_CACHE_SIZE: 10000,      // 最大缓存 10000 张图片
-  CLEANUP_BATCH_SIZE: 2000,   // 每次清理 2000 张
-  FETCH_INTERVAL: 5000,       // 5秒获取一次（未达到缓存阈值时）
-  FETCH_INTERVAL_SLOW: 30000, // 30秒获取一次（图片缓存充足时）
-  CACHE_THRESHOLD: 30,        // 缓存阈值，达到后切换到慢速获取
-  DISPLAY_INTERVAL: 10000,    // 10秒切换一次
-  MAX_BLOB_URLS: 20,          // 最大同时保持的 Blob URL 数量
-  PRELOAD_COUNT: 10,          // 预加载图片数量
+  DISPLAY_INTERVAL: 30000, // 30秒切换一次
+  MOBILE_BREAKPOINT: 768,  // 移动端断点
 } as const
 
 // Ken Burns 效果列表
@@ -38,32 +38,27 @@ const KEN_BURNS_EFFECTS: KenBurnsType[] = [
   'kb-pan-down',
 ]
 
+// 检测是否为移动端
+function isMobile(): boolean {
+  return window.innerWidth < CONFIG.MOBILE_BREAKPOINT
+}
+
 export function useBackgroundImage() {
   const settingsStore = useSettingsStore()
+  const searchStore = useSearchStore()
+  const uiStore = useUIStore()
   
   // 状态
   const currentImageUrl = ref('')
-  const imageCache = shallowRef<string[]>([])
-  const imageCacheSet = shallowRef<Set<string>>(new Set())
-  const imageBlobUrls = shallowRef<Map<string, string>>(new Map())
-  const shuffledQueue = shallowRef<string[]>([])
   const currentBgKey = ref(0)
   const currentKenBurns = ref<KenBurnsType>('kb-zoom-in')
   
   // 定时器
-  let fetchInterval: number | null = null
   let displayInterval: number | null = null
 
   // 计算属性
   const hasBackgroundImage = computed(() => !!currentImageUrl.value)
-  
-  const backgroundImageUrl = computed(() => {
-    if (currentImageUrl.value) {
-      return imageBlobUrls.value.get(currentImageUrl.value) || currentImageUrl.value
-    }
-    return ''
-  })
-  
+  const backgroundImageUrl = computed(() => currentImageUrl.value)
   const kenBurnsClass = computed(() => currentKenBurns.value)
 
   // 随机选择 Ken Burns 效果
@@ -71,302 +66,123 @@ export function useBackgroundImage() {
     currentKenBurns.value = KEN_BURNS_EFFECTS[Math.floor(Math.random() * KEN_BURNS_EFFECTS.length)]
   }
 
-  // Fisher-Yates 洗牌算法
-  function shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-    return shuffled
+  // 参数级别配置
+  interface UrlOptions {
+    includeName?: boolean
+    includeBrightness?: boolean
+    includeView?: boolean
   }
 
-  // 重新洗牌队列
-  function reshuffleQueue() {
-    if (imageCache.value.length > 0) {
-      shuffledQueue.value = shuffleArray([...imageCache.value])
+  // 构建 API URL（自动参数）
+  function buildApiUrl(options: UrlOptions = {}): string {
+    const { includeName = true, includeBrightness = true, includeView = true } = options
+    const baseUrl = settingsStore.settings.backgroundImageApiUrl || DEFAULT_API_CONFIG.backgroundImageApiUrl
+    const params = new URLSearchParams()
+    
+    // 添加时间戳防止缓存
+    params.set('t', Date.now().toString())
+    
+    // 来源作品 - 跟随用户输入框内容
+    if (includeName) {
+      const searchQuery = searchStore.searchQuery?.trim()
+      if (searchQuery) {
+        params.set('name', searchQuery)
+      }
     }
+    
+    // 暗色模式 - 自动添加最大亮度 0.5
+    if (includeBrightness && uiStore.isDarkMode) {
+      params.set('maxbrightness', '0.5')
+    }
+    
+    // 移动端 - 使用 vertical 视图模式
+    if (includeView && isMobile()) {
+      params.set('view', 'vertical')
+    }
+    
+    return `${baseUrl}?${params.toString()}`
   }
 
-  // 从 IndexedDB 加载缓存
-  async function loadCacheFromDB(): Promise<boolean> {
-    try {
-      await imageDB.init()
-      const urls = await imageDB.getAllUrls()
-      
-      if (urls.length > 0) {
-        const uniqueUrls = [...new Set(urls)]
-        imageCache.value = uniqueUrls
-        imageCacheSet.value = new Set(uniqueUrls)
+  // 检查是否有来源作品参数
+  function hasNameParam(): boolean {
+    return !!searchStore.searchQuery?.trim()
+  }
+
+  // 加载图片
+  function loadImage(apiUrl: string, onSuccess: () => void, onError: () => void) {
+    const img = new Image()
+    img.onload = onSuccess
+    img.onerror = onError
+    img.src = apiUrl
+  }
+
+  // 更新背景图显示
+  function updateBackground(apiUrl: string) {
+    selectRandomKenBurns()
+    currentImageUrl.value = apiUrl
+    currentBgKey.value++
+  }
+
+  // 获取并显示下一张图片（三级重试）
+  function fetchNextImage() {
+    // 第一级：所有参数
+    const url1 = buildApiUrl({ includeName: true, includeBrightness: true, includeView: true })
+    
+    loadImage(url1, () => updateBackground(url1), () => {
+      // 第二级：只保留 name，去掉亮度和视图模式
+      if (hasNameParam()) {
+        const url2 = buildApiUrl({ includeName: true, includeBrightness: false, includeView: false })
         
-        // 预加载部分图片的 Blob URL
-        const preloadCount = Math.min(CONFIG.PRELOAD_COUNT, uniqueUrls.length)
-        const newBlobUrls = new Map(imageBlobUrls.value)
+        loadImage(url2, () => updateBackground(url2), () => {
+          // 第三级：去掉 name（只保留时间戳）
+          const url3 = buildApiUrl({ includeName: false, includeBrightness: false, includeView: false })
+          
+          loadImage(url3, () => updateBackground(url3), () => {
+            // 全部失败，保持当前图片不变
+          })
+        })
+      } else {
+        // 没有 name 参数，直接尝试基础 URL
+        const url3 = buildApiUrl({ includeName: false, includeBrightness: false, includeView: false })
         
-        for (let i = 0; i < preloadCount; i++) {
-          const url = uniqueUrls[i]
-          const blob = await imageDB.getImageByUrl(url)
-          if (blob) {
-            const blobUrl = URL.createObjectURL(blob)
-            newBlobUrls.set(url, blobUrl)
-          }
-        }
-        imageBlobUrls.value = newBlobUrls
-        
-        return true
-      }
-    } catch {
-      // 静默处理错误
-    }
-    return false
-  }
-
-  // 从 API 获取图片并添加到缓存
-  async function fetchAndCacheImage() {
-    try {
-      const timestamp = Date.now()
-      const baseUrl = settingsStore.settings.backgroundImageApiUrl || DEFAULT_API_CONFIG.backgroundImageApiUrl
-      const apiUrl = `${baseUrl}?t=${timestamp}`
-      
-      const response = await fetch(apiUrl)
-      if (!response.ok) {return}
-      
-      const finalUrl = response.url
-      
-      // 检查是否已存在
-      if (imageCacheSet.value.has(finalUrl)) {return}
-      
-      const existsInDB = await imageDB.hasUrl(finalUrl)
-      if (existsInDB) {return}
-      
-      const blob = await response.blob()
-      
-      // 验证是否为有效图片
-      const img = new Image()
-      const blobUrl = URL.createObjectURL(blob)
-      
-      img.onload = async () => {
-        if (!imageCacheSet.value.has(finalUrl)) {
-          try {
-            await imageDB.addImage(finalUrl, blob)
-            
-            // 更新缓存
-            const newCache = [...imageCache.value, finalUrl]
-            const newCacheSet = new Set(imageCacheSet.value)
-            newCacheSet.add(finalUrl)
-            const newBlobUrls = new Map(imageBlobUrls.value)
-            newBlobUrls.set(finalUrl, blobUrl)
-            
-            imageCache.value = newCache
-            imageCacheSet.value = newCacheSet
-            imageBlobUrls.value = newBlobUrls
-            
-            // 限制缓存大小
-            await cleanupCacheIfNeeded()
-            
-            // 如果刚好达到阈值，重启获取定时器以切换到慢速模式
-            if (newCache.length === CONFIG.CACHE_THRESHOLD) {
-              startFetchInterval()
-            }
-            
-            // 如果队列为空，重新洗牌
-            if (shuffledQueue.value.length === 0) {
-              reshuffleQueue()
-            }
-          } catch {
-            URL.revokeObjectURL(blobUrl)
-          }
-        } else {
-          URL.revokeObjectURL(blobUrl)
-        }
-      }
-      
-      img.onerror = () => {
-        URL.revokeObjectURL(blobUrl)
-      }
-      
-      img.src = blobUrl
-    } catch {
-      // 静默处理错误
-    }
-  }
-
-  // 清理缓存（如果超过最大大小）
-  async function cleanupCacheIfNeeded() {
-    const count = await imageDB.getCount()
-    if (count <= CONFIG.MAX_CACHE_SIZE) {return}
-    
-    const deletedCount = await imageDB.deleteOldestBatch(CONFIG.CLEANUP_BATCH_SIZE)
-    
-    // 同步更新内存缓存
-    const cleanedCache = imageCache.value.slice(deletedCount)
-    const cleanedSet = new Set(cleanedCache)
-    const cleanedBlobUrls = new Map<string, string>()
-    
-    // 清理被删除图片的 Blob URL
-    for (let i = 0; i < deletedCount; i++) {
-      const removed = imageCache.value[i]
-      if (removed) {
-        const oldBlobUrl = imageBlobUrls.value.get(removed)
-        if (oldBlobUrl) {
-          URL.revokeObjectURL(oldBlobUrl)
-        }
-      }
-    }
-    
-    // 保留剩余的 Blob URL
-    imageBlobUrls.value.forEach((url, key) => {
-      if (cleanedSet.has(key)) {
-        cleanedBlobUrls.set(key, url)
+        loadImage(url3, () => updateBackground(url3), () => {
+          // 失败，保持当前图片不变
+        })
       }
     })
-    
-    imageCache.value = cleanedCache
-    imageCacheSet.value = cleanedSet
-    imageBlobUrls.value = cleanedBlobUrls
   }
 
-  // 清理过多的 Blob URL 以释放内存
-  function cleanupBlobUrls(currentUrl: string) {
-    const blobUrls = imageBlobUrls.value
-    if (blobUrls.size <= CONFIG.MAX_BLOB_URLS) {return}
-    
-    const newBlobUrls = new Map<string, string>()
-    const currentBlobUrl = blobUrls.get(currentUrl)
-    if (currentBlobUrl) {
-      newBlobUrls.set(currentUrl, currentBlobUrl)
-    }
-    
-    const entries = Array.from(blobUrls.entries())
-    const toKeep = entries.slice(-CONFIG.MAX_BLOB_URLS + 1)
-    
-    for (const [url, blobUrl] of entries) {
-      if (url !== currentUrl && !toKeep.some(([u]) => u === url)) {
-        URL.revokeObjectURL(blobUrl)
-      } else if (url !== currentUrl) {
-        newBlobUrls.set(url, blobUrl)
-      }
-    }
-    
-    imageBlobUrls.value = newBlobUrls
-  }
-
-  // 显示下一张图片
-  async function displayNextImage() {
-    // 如果队列为空，重新洗牌
-    if (shuffledQueue.value.length === 0) {
-      if (imageCache.value.length === 0) {return}
-      reshuffleQueue()
-    }
-    
-    const queue = [...shuffledQueue.value]
-    const nextImageUrl = queue.shift()
-    shuffledQueue.value = queue
-    
-    if (!nextImageUrl) {return}
-    
-    try {
-      // 检查是否已有 Blob URL
-      let blobUrl = imageBlobUrls.value.get(nextImageUrl)
-      
-      // 如果没有，从 IndexedDB 加载
-      if (!blobUrl) {
-        const blob = await imageDB.getImageByUrl(nextImageUrl)
-        if (blob) {
-          blobUrl = URL.createObjectURL(blob)
-          const newBlobUrls = new Map(imageBlobUrls.value)
-          newBlobUrls.set(nextImageUrl, blobUrl)
-          imageBlobUrls.value = newBlobUrls
-        }
-      }
-      
-      // 预加载图片
-      const preloadImg = new Image()
-      preloadImg.onload = () => {
-        selectRandomKenBurns()
-        currentImageUrl.value = nextImageUrl
-        currentBgKey.value++
-        cleanupBlobUrls(nextImageUrl)
-      }
-      preloadImg.onerror = () => {
-        void displayNextImage()
-      }
-      preloadImg.src = blobUrl || nextImageUrl
-    } catch {
-      void displayNextImage()
-    }
-  }
-
-  // 启动图片获取定时器
-  function startFetchInterval() {
-    if (fetchInterval) {
-      clearInterval(fetchInterval)
-    }
-    
-    void fetchAndCacheImage()
-    
-    // 根据缓存数量决定获取间隔
-    const interval = imageCache.value.length >= CONFIG.CACHE_THRESHOLD 
-      ? CONFIG.FETCH_INTERVAL_SLOW 
-      : CONFIG.FETCH_INTERVAL
-    
-    fetchInterval = window.setInterval(() => {
-      void fetchAndCacheImage()
-    }, interval)
-  }
-
-  // 启动图片显示定时器
-  function startDisplayInterval() {
+  // 启动定时器
+  function startInterval() {
     if (displayInterval) {
       clearInterval(displayInterval)
     }
     
-    void displayNextImage()
+    // 立即获取第一张
+    fetchNextImage()
     
+    // 定时获取下一张
     displayInterval = window.setInterval(() => {
-      void displayNextImage()
+      fetchNextImage()
     }, CONFIG.DISPLAY_INTERVAL)
   }
 
-  // 停止所有定时器
-  function stopAllIntervals() {
-    if (fetchInterval) {
-      clearInterval(fetchInterval)
-      fetchInterval = null
-    }
+  // 停止定时器
+  function stopInterval() {
     if (displayInterval) {
       clearInterval(displayInterval)
       displayInterval = null
     }
   }
 
-  // 清理所有 Blob URL
-  function cleanupAllBlobUrls() {
-    imageBlobUrls.value.forEach(blobUrl => {
-      URL.revokeObjectURL(blobUrl)
-    })
-    imageBlobUrls.value = new Map()
-  }
-
   // 初始化
   async function init() {
-    await imageDB.init()
-    
-    const hasCachedImages = await loadCacheFromDB()
-    
-    if (hasCachedImages) {
-      reshuffleQueue()
-    }
-    
-    startFetchInterval()
-    startDisplayInterval()
+    startInterval()
   }
 
   // 销毁
   function destroy() {
-    stopAllIntervals()
-    cleanupAllBlobUrls()
-    imageDB.close()
+    stopInterval()
   }
 
   return {
@@ -384,4 +200,3 @@ export function useBackgroundImage() {
     destroy,
   }
 }
-
