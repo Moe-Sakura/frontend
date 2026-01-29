@@ -1,29 +1,29 @@
 {
   "servers": [
     {
-      "key": "vercelapi",
-      "label": "Vercel",
-      "url": "https://vercel.api.searchgal.top"
-    },
-    {
       "key": "cfapi",
       "label": "Cloudflare",
       "url": "https://cf.api.searchgal.top"
     },
     {
-      "key": "netlifyapi",
-      "label": "Netlify",
-      "url": "https://netlify.api.searchgal.top"
+      "key": "vercelapi",
+      "label": "Vercel",
+      "url": "https://vercel.api.searchgal.top"
     },
     {
-      "key": "api",
-      "label": "香港 雨云",
-      "url": "https://api.searchgal.top"
+      "key": "netlify2api",
+      "label": "Netlify 1",
+      "url": "https://netlify1.api.searchgal.top"
     },
     {
-      "key": "gzapi",
-      "label": "广州 腾讯云",
-      "url": "https://gz.api.searchgal.top"
+      "key": "netlify2api",
+      "label": "Netlify 2",
+      "url": "https://netlify2.api.searchgal.top"
+    },
+    {
+      "key": "netlify3api",
+      "label": "Netlify 3",
+      "url": "https://netlify3.api.searchgal.top"
     },
     {
       "key": "us-westapi",
