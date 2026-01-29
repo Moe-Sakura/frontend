@@ -1,52 +1,42 @@
 {
   "servers": [
     {
-      "key": "cfapi",
+      "key": "cloudflare",
       "label": "Cloudflare",
       "url": "https://cf.api.searchgal.top"
     },
     {
-      "key": "vercelapi",
+      "key": "vercel",
       "label": "Vercel",
       "url": "https://vercel.api.searchgal.top"
     },
     {
-      "key": "netlify1api",
-      "label": "Netlify 1",
-      "url": "https://netlify1.api.searchgal.top"
+      "key": "netlify",
+      "label": "Netlify",
+      "url": "https://netlify.api.searchgal.top"
     },
     {
-      "key": "netlify2api",
-      "label": "Netlify 2",
-      "url": "https://netlify2.api.searchgal.top"
-    },
-    {
-      "key": "netlify3api",
-      "label": "Netlify 3",
-      "url": "https://netlify3.api.searchgal.top"
-    },
-    {
-      "key": "us-westapi",
+      "key": "santaclara",
       "label": "圣克拉拉 ClawCloud",
       "url": "https://us-west.api.searchgal.top"
     },
     {
-      "key": "us-eastapi",
+      "key": "ashburn",
       "label": "阿什本 ClawCloud",
       "url": "https://us-east.api.searchgal.top"
     },
     {
-      "key": "sgapi",
+      "key": "singapore",
       "label": "新加坡 ClawCloud",
       "url": "https://sg.api.searchgal.top"
     },
     {
-      "key": "deapi",
+      "key": "frankfurt",
       "label": "法兰克福 ClawCloud",
       "url": "https://de.api.searchgal.top"
     },
     {
-      "key": "jpapi",
+      "key": "tokyo",
       "label": "东京 ClawCloud",
       "url": "https://jp.api.searchgal.top"
     }
