@@ -11,7 +11,7 @@
       "url": "https://vercel.api.searchgal.top"
     },
     {
-      "key": "netlify2api",
+      "key": "netlify1api",
       "label": "Netlify 1",
       "url": "https://netlify1.api.searchgal.top"
     },
