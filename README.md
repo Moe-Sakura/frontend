@@ -7,7 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38bdf8.svg)](https://tailwindcss.com/)
 
-🌐 **在线访问**: [searchgal.top](https://searchgal.top)
+🌐 **在线访问**: [searchgal.top](https://www.searchgal.top)
 
 ## ✨ 特性
 
@@ -220,7 +220,7 @@ pnpm run build
 本项目遵循 [llms.txt](https://llmstxt.org/) 规范，为 AI 助手和大语言模型提供了结构化的项目文档。
 
 - 📄 访问 `/llms.txt` 获取项目的 LLM 友好文档
-- 🔗 在线地址: [searchgal.top/llms.txt](https://searchgal.top/llms.txt)
+- 🔗 在线地址: [searchgal.top/llms.txt](https://www.searchgal.top/llms.txt)
 
 ## 🤝 贡献
 
@@ -278,7 +278,7 @@ vim .env
 ## 📮 联系方式
 
 - GitHub: [@Moe-Sakura](https://github.com/Moe-Sakura)
-- 项目主页: [searchgal.top](https://searchgal.top)
+- 项目主页: [searchgal.top](https://www.searchgal.top)
 
 ---
 

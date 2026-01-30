@@ -17,7 +17,7 @@ export const APP_CONFIG = {
   name: import.meta.env.VITE_APP_NAME || 'SearchGal',
   title: import.meta.env.VITE_APP_TITLE || 'SearchGal - Galgame 聚合搜索',
   description: import.meta.env.VITE_APP_DESCRIPTION || 'Galgame 资源聚合搜索引擎',
-  url: import.meta.env.VITE_APP_URL || 'https://searchgal.top',
+  url: import.meta.env.VITE_APP_URL || 'https://www.searchgal.top',
 } as const
 
 // 功能开关

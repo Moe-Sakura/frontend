@@ -146,7 +146,7 @@ function initArtalk() {
       try {
         artalkInstance = Artalk.init({
           el: '#Comments',
-          pageKey: 'https://searchgal.top',
+          pageKey: 'https://www.searchgal.top',
           pageTitle: 'Galgame 聚合搜索',
           server: 'https://artalk.saop.cc',
           site: 'Galgame 聚合搜索',

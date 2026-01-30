@@ -54,7 +54,7 @@ pnpm dev
 
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
-| `VITE_SITE_URL` | 网站 URL | https://searchgal.top |
+| `VITE_SITE_URL` | 网站 URL | https://www.searchgal.top |
 | `VITE_SITE_NAME` | 网站名称 | SearchGal |
 | `VITE_GITHUB_URL` | GitHub 仓库 | https://github.com/Moe-Sakura/frontend |
 
