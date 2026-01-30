@@ -130,7 +130,7 @@ export const config: AppConfig = {
   },
   
   site: {
-    url: getEnv('VITE_SITE_URL', 'https://searchgal.top'),
+    url: getEnv('VITE_SITE_URL', 'https://www.searchgal.top'),
     name: getEnv('VITE_SITE_NAME', 'SearchGal'),
     githubUrl: getEnv('VITE_GITHUB_URL', 'https://github.com/Moe-Sakura/frontend'),
   },

@@ -315,7 +315,7 @@
               </div>
               <div class="text-sm text-pink-800 dark:text-pink-200">
                 <p>
-                  本站已更换新域名 <a href="https://searchgal.top" class="font-bold text-[#ff1493] dark:text-[#ff69b4] hover:underline">searchgal.top</a>，请更新书签！
+                  本站已更换新域名 <a href="https://www.searchgal.top" class="font-bold text-[#ff1493] dark:text-[#ff69b4] hover:underline">searchgal.top</a>，请更新书签！
                 </p>
                 <p class="mt-1.5 text-pink-600 dark:text-pink-300">
                   💡 如需迁移搜索记录，可在<strong class="font-semibold">设置</strong>中导出历史后，到新站导入即可。
