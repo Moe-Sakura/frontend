@@ -28,7 +28,7 @@ export default defineConfig({
     tailwindcss(),
     // PWA 配置
     VitePWA({
-      registerType: 'prompt', // 提示用户更新
+      registerType: 'autoUpdate', // 收到新版本立即更新
       includeAssets: ['logo.svg', 'robots.txt'],
       manifest: {
         name: 'SearchGal - Galgame 聚合搜索',
