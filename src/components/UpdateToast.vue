@@ -13,48 +13,23 @@
     >
       <!-- 图标 -->
       <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-        <RefreshCw :size="18" :class="{ 'animate-spin': isUpdating }" />
+        <RefreshCw :size="18" class="animate-spin" />
       </div>
 
       <!-- 文字内容 -->
       <div class="flex-1 min-w-0">
         <p class="font-semibold text-sm">发现新版本</p>
-        <p class="text-xs text-white/80 truncate">
-          <template v-if="isUpdating">
-            正在更新...
-          </template>
-          <template v-else-if="countdown > 0">
-            {{ countdown }} 秒后自动更新...
-          </template>
-          <template v-else>
-            准备更新...
-          </template>
-        </p>
+        <p class="text-xs text-white/80 truncate">正在更新...</p>
       </div>
-
-      <!-- 立即更新按钮 -->
-      <button
-        v-if="!isUpdating && countdown > 0"
-        class="flex-shrink-0 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-xs font-medium transition-colors"
-        @click="handleUpdate"
-      >
-        立即更新
-      </button>
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
+import { watch } from 'vue'
 import { RefreshCw } from 'lucide-vue-next'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { playNotification } from '@/composables/useSound'
-
-const UPDATE_COUNTDOWN = 5 // 秒
-
-const countdown = ref(0)
-const isUpdating = ref(false)
-let countdownTimer: number | null = null
 
 const {
   needRefresh,
@@ -75,46 +50,12 @@ const {
   },
 })
 
-// 当有更新时启动倒计时
+// 当有更新时立即更新
 watch(needRefresh, (need) => {
   if (need) {
     playNotification()
-    startCountdown()
-  }
-})
-
-function startCountdown() {
-  countdown.value = UPDATE_COUNTDOWN
-  
-  if (countdownTimer) {
-    clearInterval(countdownTimer)
-  }
-  
-  countdownTimer = window.setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      if (countdownTimer) {
-        clearInterval(countdownTimer)
-        countdownTimer = null
-      }
-      handleUpdate()
-    }
-  }, 1000)
-}
-
-function handleUpdate() {
-  if (countdownTimer) {
-    clearInterval(countdownTimer)
-    countdownTimer = null
-  }
-  isUpdating.value = true
-  // 更新 SW 并刷新页面
-  void updateServiceWorker(true)
-}
-
-onUnmounted(() => {
-  if (countdownTimer) {
-    clearInterval(countdownTimer)
+    // 立即更新 SW 并刷新页面
+    void updateServiceWorker(true)
   }
 })
 </script>

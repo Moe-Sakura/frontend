@@ -27,12 +27,6 @@
     </a>
   </div>
 
-  <!-- 隐藏的 busuanzi 元素（让 busuanzi 脚本更新） -->
-  <div id="busuanzi_container_site_pv" style="display: none !important; visibility: hidden !important; position: absolute; left: -9999px;">
-    <span id="busuanzi_value_site_pv" />
-    <span id="busuanzi_value_site_uv" />
-  </div>
-
   <!-- 左下角统计（Vue 控制显示） -->
   <div
     class="fixed bottom-4 left-4 z-40 transition-all duration-300"
@@ -62,8 +56,6 @@ import { useStatsStore } from '@/stores/stats'
 
 const statsStore = useStatsStore()
 const showStats = ref(false)
-let checkInterval: number | null = null
-let observer: MutationObserver | null = null
 
 // 计算属性 - 从 statsStore 获取状态
 const apiService = computed(() => statsStore.serviceStatuses.get('api'))
@@ -100,46 +92,26 @@ const statusIconClass = computed(() => {
   return 'text-red-500'
 })
 
-// 检查不蒜子数据是否加载
-function checkBusuanziData() {
-  const pvElement = document.getElementById('busuanzi_value_site_pv')
-  const uvElement = document.getElementById('busuanzi_value_site_uv')
-  
-  if (pvElement && uvElement) {
-    const pvValue = parseInt(pvElement.textContent || '0', 10)
-    const uvValue = parseInt(uvElement.textContent || '0', 10)
+// 使用新的 busuanzi API 获取统计
+async function fetchBusuanziStats() {
+  try {
+    const res = await fetch('https://bsz.saop.cc/api', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'x-bsz-referer': window.location.href },
+    })
     
-    if (pvValue > 0 && uvValue > 0) {
-      // 更新 statsStore
-      statsStore.updateVisitorStats(pvValue, uvValue)
+    if (!res.ok) {return}
+    
+    const { success, data } = await res.json()
+    
+    if (success && data) {
+      statsStore.updateVisitorStats(data.site_pv, data.site_uv)
       showStats.value = true
-      
-      if (checkInterval !== null) {
-        clearInterval(checkInterval)
-        checkInterval = null
-      }
-      
-      if (observer) {
-        observer.disconnect()
-        observer = null
-      }
     }
+  } catch (error) {
+    console.warn('[Busuanzi] Failed to fetch stats:', error)
   }
-}
-
-// 使用 MutationObserver 监听不蒜子元素的变化
-function setupObserver() {
-  const pvElement = document.getElementById('busuanzi_value_site_pv')
-  const uvElement = document.getElementById('busuanzi_value_site_uv')
-  
-  if (!pvElement || !uvElement) {return}
-  
-  observer = new MutationObserver(() => {
-    checkBusuanziData()
-  })
-  
-  observer.observe(pvElement, { childList: true, characterData: true, subtree: true })
-  observer.observe(uvElement, { childList: true, characterData: true, subtree: true })
 }
 
 // 监听 visitorStats 变化，自动显示统计
@@ -153,39 +125,13 @@ onMounted(() => {
   // 使用 statsStore 进行状态检测
   statsStore.startStatusCheck(30000)
 
-  // 不蒜子统计
-  setupObserver()
-  checkBusuanziData()
-  
-  let attempts = 0
-  const maxAttempts = 40
-  
-  checkInterval = window.setInterval(() => {
-    attempts++
-    checkBusuanziData()
-    
-    if (showStats.value || attempts >= maxAttempts) {
-      if (checkInterval !== null) {
-        clearInterval(checkInterval)
-        checkInterval = null
-      }
-    }
-  }, 500)
+  // 获取不蒜子统计
+  void fetchBusuanziStats()
 })
 
 onUnmounted(() => {
   // 停止状态检测
   statsStore.stopStatusCheck()
-  
-  if (checkInterval !== null) {
-    clearInterval(checkInterval)
-    checkInterval = null
-  }
-  
-  if (observer) {
-    observer.disconnect()
-    observer = null
-  }
 })
 </script>
 
