@@ -92,21 +92,31 @@ const statusIconClass = computed(() => {
   return 'text-red-500'
 })
 
-// 使用新的 busuanzi API 获取统计
+// 不蒜子 API 配置
+// 文档: http://bsz.saop.cc/
+const BUSUANZI_API = 'https://bsz.saop.cc/api'
+
+// 获取统计数据（POST 方法会同时计数）
 async function fetchBusuanziStats() {
   try {
-    const res = await fetch('https://bsz.saop.cc/api', {
+    const res = await fetch(BUSUANZI_API, {
       method: 'POST',
-      credentials: 'include',
-      headers: { 'x-bsz-referer': window.location.href },
+      credentials: 'include', // 携带 Cookie（用于识别访客）
+      headers: {
+        'x-bsz-referer': window.location.href, // 必须：当前页面 URL
+      },
     })
     
-    if (!res.ok) {return}
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`)
+    }
     
-    const { success, data } = await res.json()
+    const json = await res.json()
     
-    if (success && data) {
-      statsStore.updateVisitorStats(data.site_pv, data.site_uv)
+    // 响应格式: { success: true, data: { site_pv, site_uv, page_pv } }
+    if (json.success && json.data) {
+      const { site_pv, site_uv } = json.data
+      statsStore.updateVisitorStats(site_pv, site_uv)
       showStats.value = true
     }
   } catch (error) {
