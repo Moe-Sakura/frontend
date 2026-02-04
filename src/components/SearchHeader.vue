@@ -313,14 +313,9 @@
               <div class="w-6 h-6 rounded-full bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Star :size="14" class="text-white" />
               </div>
-              <div class="text-sm text-pink-800 dark:text-pink-200">
-                <p>
-                  本站已更换新域名 <a href="https://www.searchgal.top" class="font-bold text-[#ff1493] dark:text-[#ff69b4] hover:underline">searchgal.top</a>，请更新书签！
-                </p>
-                <p class="mt-1.5 text-pink-600 dark:text-pink-300">
-                  💡 如需迁移搜索记录，可在<strong class="font-semibold">设置</strong>中导出历史后，到新站导入即可。
-                </p>
-              </div>
+              <p class="text-sm text-pink-800 dark:text-pink-200">
+                本站已更换新域名 <a href="https://www.searchgal.top" class="font-bold text-[#ff1493] dark:text-[#ff69b4] hover:underline">searchgal.top</a>，请更新书签！
+              </p>
             </div>
           </div>
 
