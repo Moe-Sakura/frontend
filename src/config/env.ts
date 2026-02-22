@@ -62,7 +62,7 @@ export const UI_CONFIG = {
 // 第三方服务配置
 export const THIRD_PARTY_CONFIG = {
   artalkServer: import.meta.env.VITE_ARTALK_SERVER || 'https://artalk.saop.cc',
-  artalkSite: import.meta.env.VITE_ARTALK_SITE || 'Galgame 聚合搜索',
+  artalkSite: import.meta.env.VITE_ARTALK_SITE || '旮旯聚搜',
   busuanziEnabled: import.meta.env.VITE_BUSUANZI_ENABLED === 'true',
 } as const
 
