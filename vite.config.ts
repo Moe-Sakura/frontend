@@ -20,11 +20,11 @@ export default defineConfig({
 
   plugins: [
     {
-      name: 'prismjs-global-fix',
+      name: 'prismjs-esm-fix',
       transform(code, id) {
         if (id.includes('prismjs/components/') && !id.includes('prism-core')) {
           return {
-            code: `var Prism = (typeof window !== 'undefined' ? window : globalThis).Prism;\n${code}`,
+            code: `import Prism from 'prismjs/components/prism-core';\n${code}`,
             map: null,
           }
         }
