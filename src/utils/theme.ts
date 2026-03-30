@@ -9,7 +9,7 @@ const CUSTOM_CSS_STORAGE_KEY = 'searchgal_custom_css'
  * 获取系统主题偏好
  */
 export function getSystemTheme(): 'light' | 'dark' {
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
     return 'dark'
   }
   return 'light'

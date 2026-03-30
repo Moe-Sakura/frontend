@@ -58,7 +58,7 @@ const DEFAULT_SETTINGS: UserSettings = {
 
 export const useSettingsStore = defineStore('settings', () => {
   // 状态
-  const settings = ref<UserSettings>({ ...DEFAULT_SETTINGS })
+  const settings = ref({ ...DEFAULT_SETTINGS })
   const isInitialized = ref(false)
   
   // 设置变更历史（用于撤销）

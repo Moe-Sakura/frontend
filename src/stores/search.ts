@@ -24,7 +24,7 @@ export const useSearchStore = defineStore('search', () => {
   const searchQuery = ref('')
   const searchMode = ref<'game' | 'patch'>('game')
   const customApi = ref('')
-  const platformResults = ref<Map<string, PlatformData>>(new Map())
+  const platformResults = ref(new Map())
   const vndbInfo = ref<VndbInfo | null>(null)
   const isSearching = ref(false)
   const searchProgress = ref({ current: 0, total: 0 })

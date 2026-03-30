@@ -1,16 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-interface LoadingImage {
-  src: string
-  startTime: number
-  status: 'loading' | 'loaded' | 'error'
-  loadTime?: number
-}
-
 export const useLazyLoadStore = defineStore('lazyLoad', () => {
   // 状态
-  const images = ref<Map<string, LoadingImage>>(new Map())
+  const images = ref(new Map())
   const sessionStats = ref({
     totalLoaded: 0,
     totalErrors: 0,

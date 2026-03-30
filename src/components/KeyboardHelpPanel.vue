@@ -16,7 +16,6 @@
       >
         <!-- 面板 -->
         <div
-          ref="panelRef"
           class="keyboard-help-panel glassmorphism-card rounded-3xl shadow-2xl shadow-black/20 w-full max-w-md overflow-hidden"
         >
           <!-- 标题栏 -->
@@ -161,7 +160,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { playTransitionDown } from '@/composables/useSound'
 import { 
@@ -172,7 +170,6 @@ import {
 } from 'lucide-vue-next'
 
 const uiStore = useUIStore()
-const panelRef = ref<HTMLElement | null>(null)
 
 function close() {
   playTransitionDown()

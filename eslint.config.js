@@ -178,6 +178,10 @@ export default tseslint.config(
         extraFileExtensions: ['.vue'],
       },
     },
+    rules: {
+      // <script setup> 中变量在 template 使用，ESLint 无法感知
+      'no-useless-assignment': 'off',
+    },
   },
 )
 

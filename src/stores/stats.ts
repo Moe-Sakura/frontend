@@ -51,14 +51,14 @@ export const useStatsStore = defineStore('stats', () => {
   ]))
   
   // 访客统计（不蒜子）
-  const visitorStats = ref<VisitorStats>({
+  const visitorStats = ref({
     pv: 0,
     uv: 0,
     lastUpdated: 0,
   })
   
   // 应用统计
-  const appStats = ref<AppStats>({
+  const appStats = ref({
     totalSearches: 0,
     gameSearches: 0,
     patchSearches: 0,

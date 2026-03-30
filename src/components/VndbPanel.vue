@@ -12,7 +12,6 @@
     >
       <div
         v-if="uiStore.isVndbPanelOpen && searchStore.vndbInfo"
-        ref="modalRef"
         class="fixed z-50 flex flex-col vndb-page shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[900px] md:max-w-[calc(100%-3rem)] md:h-[800px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
       >
         <!-- 顶部导航栏 -->
@@ -597,7 +596,7 @@ const translateError = ref(false)
 
 // 标签翻译状态
 const isTranslatingTags = ref(false)
-const translatedTags = ref<Map<string, string>>(new Map())
+const translatedTags = ref(new Map())
 const showOriginalTags = ref(false)
 const translateTagsError = ref(false)
 
@@ -608,7 +607,7 @@ const isLoadingCharacters = ref(false)
 const isLoadingQuotes = ref(false)
 
 // 名言翻译状态
-const translatedQuotes = ref<Map<string, string>>(new Map())
+const translatedQuotes = ref(new Map())
 const isTranslatingQuotes = ref(false)
 const translateQuotesError = ref(false)
 const showOriginalQuotes = ref(false)
@@ -653,7 +652,6 @@ function toggleSection(section: keyof typeof expandedSections.value) {
   expandedSections.value[section] = !expandedSections.value[section]
 }
 
-const modalRef = ref<HTMLElement | null>(null)
 
 // 计算 VNDB URL
 const vndbUrl = computed(() => {
@@ -924,17 +922,6 @@ function openGallery(startIndex: number) {
   }
 }
 
-// 格式化性别（保留备用）
-function _formatSex(sex: string): string {
-  const sexMap: Record<string, string> = {
-    'm': '男性',
-    'f': '女性',
-    'b': '双性',
-    'n': '无性',
-  }
-  return sexMap[sex] || sex
-}
-
 // 格式化日期
 function formatDate(dateString: string): string {
   if (!dateString) {return '未知'}
@@ -1104,16 +1091,6 @@ function getTagCategoryClass(category: string): string {
     'ero': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
   }
   return categoryMap[category] || 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400'
-}
-
-// 格式化标签分类名称（保留备用）
-function _formatTagCategory(category: string): string {
-  const categoryMap: Record<string, string> = {
-    'cont': '内容',
-    'tech': '技术',
-    'ero': '色情',
-  }
-  return categoryMap[category] || category
 }
 
 // 格式化关系类型

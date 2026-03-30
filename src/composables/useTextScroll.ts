@@ -129,10 +129,9 @@ export const vTextScroll = {
       // 获取当前实际文本内容（排除克隆的内容）
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const inner = el.querySelector('.text-scroll-inner')!
-      let currentContent = ''
+      let currentContent: string
       
       if (inner) {
-        // 获取不包含克隆的文本
         const clone = inner.querySelector('.text-scroll-clone')
         if (clone) {
           currentContent = inner.textContent?.replace(clone.textContent || '', '') || ''
@@ -140,11 +139,9 @@ export const vTextScroll = {
           currentContent = inner.textContent || ''
         }
       } else {
-        // 内容被 Vue 重新渲染，需要重新包装
         currentContent = el.textContent || ''
       }
       
-      // 如果内容变化或结构被破坏，重新初始化
       if (!inner || currentContent !== extEl._textScrollContent) {
         const newContent = el.textContent || ''
         extEl._textScrollContent = newContent

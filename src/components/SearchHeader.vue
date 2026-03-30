@@ -522,13 +522,7 @@ let searchStartTime = 0
 // 友情链接
 import friendsData from '@/data/friends.json'
 
-interface FriendLink {
-  name: string
-  desc: string
-  url: string
-  logo: string
-}
-const friendLinks = ref<FriendLink[]>(friendsData.friends || [])
+const friendLinks = ref(friendsData.friends || [])
 
 // 友链 logo 加载失败时显示占位符
 function handleFriendLogoError(e: Event) {
