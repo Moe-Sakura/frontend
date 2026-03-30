@@ -2,31 +2,16 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { VndbInfo } from './search'
 
-interface CachedVndbInfo {
-  query: string
-  data: VndbInfo
-  timestamp: number
-  expiresAt: number
-}
-
 interface SearchResultData {
   platforms: Map<string, unknown>
   vndbInfo?: unknown
 }
 
-interface CachedSearchResults {
-  query: string
-  mode: 'game' | 'patch'
-  data: SearchResultData
-  timestamp: number
-  expiresAt: number
-}
-
 export const useCacheStore = defineStore('cache', () => {
   // 状态
-  const vndbCache = ref<Map<string, CachedVndbInfo>>(new Map())
-  const searchResultsCache = ref<Map<string, CachedSearchResults>>(new Map())
-  const imageCache = ref<Map<string, string>>(new Map()) // URL -> base64
+  const vndbCache = ref(new Map())
+  const searchResultsCache = ref(new Map())
+  const imageCache = ref(new Map()) // URL -> base64
   
   // 配置
   const vndbCacheDuration = ref(30 * 60 * 1000) // 30 分钟

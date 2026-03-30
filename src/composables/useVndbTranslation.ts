@@ -17,13 +17,13 @@ export function useVndbTranslation() {
 
   // 标签翻译状态
   const isTranslatingTags = ref(false)
-  const translatedTags = ref<Map<string, string>>(new Map())
+  const translatedTags = ref(new Map())
   const showOriginalTags = ref(false)
   const translateTagsError = ref(false)
 
   // 名言翻译状态
   const isTranslatingQuotes = ref(false)
-  const translatedQuotes = ref<Map<string, string>>(new Map())
+  const translatedQuotes = ref(new Map())
   const showOriginalQuotes = ref(false)
   const translateQuotesError = ref(false)
 
