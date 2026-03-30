@@ -19,6 +19,17 @@ export default defineConfig({
   },
 
   plugins: [
+    {
+      name: 'prismjs-global-fix',
+      transform(code, id) {
+        if (id.includes('prismjs/components/') && !id.includes('prism-core')) {
+          return {
+            code: `var Prism = (typeof window !== 'undefined' ? window : globalThis).Prism;\n${code}`,
+            map: null,
+          }
+        }
+      },
+    },
     vue(),
     tailwindcss(),
     // PWA 配置
