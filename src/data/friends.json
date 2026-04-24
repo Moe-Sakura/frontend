@@ -95,6 +95,12 @@
       "desc": "本站拥有Galgame在线玩等功能,永久免费，不限速，自建储存，纯原创",
       "url": "https://danwo.top/",
       "logo": "https://danwo.top/favicon.ico"
+    },
+    {
+      "name": "Gal领域",
+      "desc": "Gal领域首页聚合最新 Galgame 资源更新、热门内容、站点公告、教程与专题文章，帮助你快速发现和筛选感兴趣的游戏信息。",
+      "url": "https://galgame.zone/",
+      "logo": "https://galgame.zone/icon/icon.png"
     }
   ]
 }
