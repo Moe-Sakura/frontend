@@ -1,6 +1,12 @@
 {
   "friends": [
     {
+      "name": "AI ACG",
+      "desc": "优质精品ACG资源站！",
+      "url": "https://www.aiacg.vip/r/ipigJ7MH",
+      "logo": "https://backup.r2.aiacg.vip/aiacg.vip/uploads/site-files/user-files/1/image/cd1f799f-9cd3-479a-836b-3740b7d44a84.webp"
+    },
+    {
       "name": "Jurangren",
       "desc": "本站后端大手子！",
       "url": "https://github.com/Jurangren",
@@ -97,10 +103,10 @@
       "logo": "https://danwo.top/favicon.ico"
     },
     {
-      "name": "Gal领域",
-      "desc": "Gal领域首页聚合最新 Galgame 资源更新、热门内容、站点公告、教程与专题文章，帮助你快速发现和筛选感兴趣的游戏信息。",
-      "url": "https://galgame.zone/",
-      "logo": "https://galgame.zone/icon/icon.png"
+      "name": "AI ACG",
+      "desc": "优质精品ACG资源站",
+      "url": "https://www.aiacg.vip/r/ipigJ7MH",
+      "logo": "https://backup.r2.aiacg.vip/aiacg.vip/uploads/site-files/user-files/1/image/cd1f799f-9cd3-479a-836b-3740b7d44a84.webp"
     }
   ]
 }
