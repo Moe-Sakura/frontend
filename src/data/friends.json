@@ -1,6 +1,12 @@
 {
   "friends": [
     {
+      "name": "AI ACG",
+      "desc": "优质精品ACG资源站！",
+      "url": "https://www.aiacg.vip/r/ipigJ7MH",
+      "logo": "https://backup.r2.aiacg.vip/aiacg.vip/uploads/site-files/user-files/1/image/cd1f799f-9cd3-479a-836b-3740b7d44a84.webp"
+    },
+    {
       "name": "Jurangren",
       "desc": "本站后端大手子！",
       "url": "https://github.com/Jurangren",
