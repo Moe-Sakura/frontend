@@ -86,7 +86,7 @@ function setValueByPath(obj: Record<string, unknown>, path: string, value: unkno
 function pickStatePaths(state: StateTree, paths: string[]): StateTree {
   const result: Record<string, unknown> = {}
   for (const path of paths) {
-    const value = getValueByPath(state as Record<string, unknown>, path)
+    const value = getValueByPath(state, path)
     if (value !== undefined) {
       setValueByPath(result, path, value)
     }
@@ -306,7 +306,8 @@ export function piniaUndoRedo(context: PiniaPluginContext) {
   ;(store as Store & { $undo?: () => boolean }).$undo = () => {
     if (currentIndex > 0) {
       currentIndex--
-      store.$patch(history[currentIndex])
+      const snapshot = history[currentIndex]
+      if (snapshot) {store.$patch(snapshot)}
       return true
     }
     return false
@@ -316,7 +317,8 @@ export function piniaUndoRedo(context: PiniaPluginContext) {
   ;(store as Store & { $redo?: () => boolean }).$redo = () => {
     if (currentIndex < history.length - 1) {
       currentIndex++
-      store.$patch(history[currentIndex])
+      const snapshot = history[currentIndex]
+      if (snapshot) {store.$patch(snapshot)}
       return true
     }
     return false

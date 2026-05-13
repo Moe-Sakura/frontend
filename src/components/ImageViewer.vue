@@ -81,11 +81,15 @@ function handleKeydown(e: KeyboardEvent) {
 let touchStartX = 0
 
 function handleTouchStart(e: TouchEvent) {
-  touchStartX = e.touches[0].clientX
+  const touch = e.touches[0]
+  if (!touch) {return}
+  touchStartX = touch.clientX
 }
 
 function handleTouchEnd(e: TouchEvent) {
-  const deltaX = e.changedTouches[0].clientX - touchStartX
+  const touch = e.changedTouches[0]
+  if (!touch) {return}
+  const deltaX = touch.clientX - touchStartX
   
   if (Math.abs(deltaX) > 80) {
     if (deltaX > 0) {

@@ -63,7 +63,8 @@ export function useBackgroundImage() {
 
   // 随机选择 Ken Burns 效果
   function selectRandomKenBurns() {
-    currentKenBurns.value = KEN_BURNS_EFFECTS[Math.floor(Math.random() * KEN_BURNS_EFFECTS.length)]
+    const picked = KEN_BURNS_EFFECTS[Math.floor(Math.random() * KEN_BURNS_EFFECTS.length)]
+    if (picked) {currentKenBurns.value = picked}
   }
 
   // 参数级别配置

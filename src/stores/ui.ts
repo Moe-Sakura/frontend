@@ -160,8 +160,8 @@ export const useUIStore = defineStore('ui', () => {
     // 切换主题模式：system -> light -> dark -> system
     const modes: ThemeMode[] = ['system', 'light', 'dark']
     const currentIndex = modes.indexOf(themeMode.value)
-    const nextIndex = (currentIndex + 1) % modes.length
-    setThemeMode(modes[nextIndex])
+    const nextMode = modes[(currentIndex + 1) % modes.length]
+    if (nextMode) {setThemeMode(nextMode)}
   }
   
   function setDarkMode(value: boolean) {

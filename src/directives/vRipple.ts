@@ -116,8 +116,8 @@ export const vRipple: Directive = {
 
     // 触摸设备支持
     el.addEventListener('touchstart', (event: TouchEvent) => {
-      if (event.touches.length === 1) {
-        const touch = event.touches[0]
+      const touch = event.touches[0]
+      if (event.touches.length === 1 && touch) {
         const mouseEvent = new MouseEvent('mousedown', {
           clientX: touch.clientX,
           clientY: touch.clientY,

@@ -74,6 +74,7 @@ import { watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import Artalk from 'artalk/dist/Artalk.mjs'
+import 'artalk/dist/Artalk.css'
 import { MessageCircle, ChevronLeft, X, Sparkles, Send } from 'lucide-vue-next'
 
 interface ArtalkInstance {

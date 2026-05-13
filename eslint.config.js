@@ -1,6 +1,7 @@
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import pluginVue from 'eslint-plugin-vue'
+import vueParser from 'vue-eslint-parser'
 
 export default tseslint.config(
   // 忽略的文件和目录
@@ -171,6 +172,7 @@ export default tseslint.config(
   {
     files: ['**/*.vue'],
     languageOptions: {
+      parser: vueParser,
       parserOptions: {
         parser: tseslint.parser,
         ecmaVersion: 'latest',
