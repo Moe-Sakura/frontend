@@ -491,7 +491,7 @@
                   <Play :size="16" class="text-rose-500" />
                   <h4 class="text-sm font-bold text-gray-800 dark:text-white">PV</h4>
                   <a 
-                    href="https://www.touchgal.top/" 
+                    href="https://www.touchgal.ink/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     class="text-[10px] text-gray-400 hover:text-rose-500 transition-colors"
