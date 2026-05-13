@@ -73,16 +73,31 @@ export type {
  * - {"progress": {...}, "result": {...}} - 平台结果
  * - {"done": true} - 完成标记
  */
+export interface SearchStreamOptions {
+  onTotal?: (total: number) => void
+  onProgress?: (current: number, total: number) => void
+  onPlatformResult?: (data: PlatformResult) => void
+  onComplete?: () => void
+  onError?: (error: string) => void
+  /** 外部取消信号，调用 .abort() 即可中止搜索 */
+  signal?: AbortSignal
+  /** 整体超时（毫秒），默认 60 000；传 0 关闭 */
+  timeoutMs?: number
+}
+
 export async function searchGameStream(
   searchParams: URLSearchParams,
-  callbacks: {
-    onTotal?: (total: number) => void
-    onProgress?: (current: number, total: number) => void
-    onPlatformResult?: (data: PlatformResult) => void
-    onComplete?: () => void
-    onError?: (error: string) => void
-  },
+  callbacks: SearchStreamOptions,
 ) {
+  // 合并外部 signal 与内部超时：任一触发都会取消
+  const internalCtrl = new AbortController()
+  const timeoutMs = callbacks.timeoutMs ?? 60_000
+  const timeoutId = timeoutMs > 0
+    ? setTimeout(() => { internalCtrl.abort(new DOMException('Timeout', 'TimeoutError')) }, timeoutMs)
+    : null
+  const externalAbortHandler = () => { internalCtrl.abort(callbacks.signal?.reason) }
+  callbacks.signal?.addEventListener('abort', externalAbortHandler, { once: true })
+
   try {
     const apiUrl = searchParams.get('api') || 'https://cf.api.searchgal.top'
     const gameName = searchParams.get('game')
@@ -102,20 +117,21 @@ export async function searchGameStream(
       body: formData,
       mode: 'cors',
       credentials: 'omit',
+      signal: internalCtrl.signal,
     }).catch((err) => {
       const errorName = err?.name || 'NetworkError'
       const errorMessage = err?.message || ''
-      
+
+      if (errorName === 'TimeoutError') {
+        throw new Error('[ERR_TIMEOUT] 请求超时，服务器响应过慢')
+      }
+      if (errorName === 'AbortError') {
+        throw new Error('[ERR_ABORTED] 请求已取消')
+      }
       if (errorMessage.includes('Failed to fetch') || errorName === 'TypeError') {
         throw new Error(`[ERR_NETWORK] 无法连接到服务器 (${apiUrl})`)
       }
-      if (errorMessage.includes('timeout') || errorName === 'TimeoutError') {
-        throw new Error('[ERR_TIMEOUT] 请求超时，服务器响应过慢')
-      }
-      if (errorMessage.includes('abort') || errorName === 'AbortError') {
-        throw new Error('[ERR_ABORTED] 请求已取消')
-      }
-      
+
       throw new Error(`[ERR_NETWORK] 网络连接失败: ${errorMessage || '未知错误'}`)
     })
 
@@ -201,12 +217,21 @@ export async function searchGameStream(
           } else if (data.done === true) {
             callbacks.onComplete?.()
           }
-        } catch {
-          // 忽略解析错误
+        } catch (err) {
+          // 单行 JSON 解析失败不影响整流，仅记录
+          console.warn('[SearchStream] 跳过无法解析的 SSE 行:', line, err)
         }
       }
     }
   } catch (error) {
-    callbacks.onError?.(error instanceof Error ? error.message : '搜索失败')
+    // 静默处理用户主动取消
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      callbacks.onError?.('[ERR_ABORTED] 请求已取消')
+    } else {
+      callbacks.onError?.(error instanceof Error ? error.message : '搜索失败')
+    }
+  } finally {
+    if (timeoutId !== null) {clearTimeout(timeoutId)}
+    callbacks.signal?.removeEventListener('abort', externalAbortHandler)
   }
 }

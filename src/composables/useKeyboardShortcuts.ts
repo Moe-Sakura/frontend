@@ -80,8 +80,8 @@ export function useKeyboardShortcuts() {
   // 跳转到指定平台
   function scrollToPlatform(index: number) {
     const platforms = getPlatformElements()
-    if (index >= 0 && index < platforms.length) {
-      const target = platforms[index]
+    const target = platforms[index]
+    if (target) {
       const yOffset = -80
       const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset
       window.scrollTo({ top: y, behavior: 'smooth' })
@@ -92,10 +92,11 @@ export function useKeyboardShortcuts() {
   function scrollToNextPlatform() {
     const platforms = getPlatformElements()
     if (platforms.length === 0) {return}
-    
+
     const scrollY = window.scrollY + 100
     for (let i = 0; i < platforms.length; i++) {
-      if (platforms[i].offsetTop > scrollY) {
+      const p = platforms[i]
+      if (p && p.offsetTop > scrollY) {
         scrollToPlatform(i)
         return
       }
@@ -107,10 +108,11 @@ export function useKeyboardShortcuts() {
   function scrollToPrevPlatform() {
     const platforms = getPlatformElements()
     if (platforms.length === 0) {return}
-    
+
     const scrollY = window.scrollY + 100
     for (let i = platforms.length - 1; i >= 0; i--) {
-      if (platforms[i].offsetTop < scrollY - 50) {
+      const p = platforms[i]
+      if (p && p.offsetTop < scrollY - 50) {
         scrollToPlatform(i)
         return
       }

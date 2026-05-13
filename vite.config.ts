@@ -75,10 +75,31 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // 预缓存所有构建产物
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // 预缓存核心构建产物（首屏必需，不包含字体——字体按 unicode-range 子集太多，改为运行时缓存）
+        globPatterns: ['**/*.{js,css,html,svg,ico}'],
+        // 单文件最大预缓存 3 MB，避免大依赖膨胀 precache
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // 排除按需加载的资源（评论、编辑器在用户触发时再缓存）
+        globIgnores: [
+          '**/artalk-*.{js,css}',
+          '**/editor-*.{js,css}',
+          '**/CommentsModal-*.{js,css}',
+          '**/SettingsModal-*.{js,css}',
+        ],
         // 运行时缓存策略
         runtimeCaching: [
+          {
+            // 本地字体子集 - 缓存优先（用户用到哪个子集才缓存哪个）
+            urlPattern: /\/fonts\/.*\.(woff2?|ttf|otf)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'local-fonts',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 年
+              },
+            },
+          },
           {
             // 字体文件 - 缓存优先
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
@@ -138,6 +159,14 @@ export default defineConfig({
     cssCodeSplit: true,
     sourcemap: false,
     chunkSizeWarningLimit: 600,
+    // 禁止字体 base64 内联：保留 fontsource 的 unicode-range 子集策略，
+    // 浏览器按需下载用到的子集而不是把全部字体 base64 进 CSS
+    assetsInlineLimit: (filePath) => {
+      if (/\.(woff2?|eot|ttf|otf)$/i.test(filePath)) {
+        return false
+      }
+      return undefined
+    },
     rolldownOptions: {
       output: {
         assetFileNames: (assetInfo) => {
@@ -171,9 +200,6 @@ export default defineConfig({
             }
             if (id.includes('/prismjs/') || id.includes('/vue-prism-editor/')) {
               return 'editor';
-            }
-            if (id.includes('/@fancyapps/')) {
-              return 'fancybox';
             }
             return 'vendor';
           }

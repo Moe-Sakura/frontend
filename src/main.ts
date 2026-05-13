@@ -13,10 +13,10 @@ import { useUIStore } from './stores/ui'
 import { useStatsStore } from './stores/stats'
 import { useSettingsStore, DEFAULT_API_CONFIG } from './stores/settings'
 
-// Noto Sans SC 字体（本地安装）
-import '@fontsource/noto-sans-sc/300.css'
+// Noto Sans SC 字体（本地安装，仅加载实际使用的字重）
 import '@fontsource/noto-sans-sc/400.css'
 import '@fontsource/noto-sans-sc/500.css'
+import '@fontsource/noto-sans-sc/600.css'
 import '@fontsource/noto-sans-sc/700.css'
 
 // 全局基础样式（Tailwind CSS @layer base）
@@ -30,9 +30,6 @@ import './styles/glassmorphism.css'
 
 // 自定义进度条（使用 anime.js）
 import { createProgressFetch } from './composables/useProgress'
-
-// Artalk 评论系统
-import 'artalk/dist/Artalk.css'
 
 // 点击涟漪指令
 import { vRipple } from './directives/vRipple'

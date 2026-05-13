@@ -410,125 +410,12 @@
             </div>
 
             <!-- 高级 API 设置卡片 -->
-            <div class="settings-card">
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                  <Terminal :size="20" class="text-white" />
-                </div>
-                <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">高级 API 设置</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">自定义 VNDB 和 AI 翻译 API</p>
-                </div>
-              </div>
+            <AdvancedApiSettings
+              v-model="localAdvancedApi"
+              @typing="handleTyping"
+              @reset="onAdvancedApiReset"
+            />
 
-              <div class="space-y-4">
-                <!-- VNDB API Base URL -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                    VNDB API 地址
-                  </label>
-                  <input
-                    v-model="localVndbApiBaseUrl"
-                    type="url"
-                    placeholder="https://api.vndb.org/kana"
-                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- VNDB Image Proxy URL -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                    VNDB 图片代理地址
-                  </label>
-                  <input
-                    v-model="localVndbImageProxyUrl"
-                    type="url"
-                    placeholder="https://rp.searchgal.top/"
-                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- AI Translate API URL -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                    AI 翻译 API 地址
-                  </label>
-                  <input
-                    v-model="localAiTranslateApiUrl"
-                    type="url"
-                    placeholder="https://ai.searchgal.top/v1/chat/completions"
-                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- AI Translate API Key -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                    AI 翻译 API Key
-                  </label>
-                  <input
-                    v-model="localAiTranslateApiKey"
-                    type="password"
-                    placeholder="sk-..."
-                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400 font-mono"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- AI Translate Model -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                    AI 翻译模型
-                  </label>
-                  <input
-                    v-model="localAiTranslateModel"
-                    type="text"
-                    placeholder="Qwen/Qwen2.5-32B-Instruct"
-                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- Background Image API URL -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                    背景图片 API 地址
-                  </label>
-                  <input
-                    v-model="localBackgroundImageApiUrl"
-                    type="url"
-                    placeholder="https://api.illlights.com/v1/img"
-                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- Video Parse API URL -->
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                    视频解析 API 地址
-                  </label>
-                  <input
-                    v-model="localVideoParseApiUrl"
-                    type="url"
-                    placeholder="https://vp.searchgal.top/"
-                    class="api-input w-full px-4 py-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-cyan-500 text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- 恢复默认按钮 -->
-                <button
-                  class="w-full px-4 py-2.5 rounded-xl text-cyan-600 dark:text-cyan-400 font-medium bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-[0.98] transition-all text-sm"
-                  @click="resetAdvancedApiSettings"
-                >
-                  恢复默认值
-                </button>
-              </div>
-            </div>
 
             <!-- 关于项目卡片 -->
             <div class="settings-card">
@@ -589,17 +476,18 @@ import 'prismjs/themes/prism-tomorrow.css'
 
 // CSS 语法高亮函数
 function highlightCSS(code: string): string {
-  return highlight(code, languages.css, 'css')
+  // languages.* 在对应 prism-* 组件 import 后必定存在
+  return languages.css ? highlight(code, languages.css, 'css') : code
 }
 
 // JS 语法高亮函数
 function highlightJS(code: string): string {
-  return highlight(code, languages.javascript, 'javascript')
+  return languages.javascript ? highlight(code, languages.javascript, 'javascript') : code
 }
 
 // HTML 语法高亮函数
 function highlightHTML(code: string): string {
-  return highlight(code, languages.markup, 'markup')
+  return languages.markup ? highlight(code, languages.markup, 'markup') : code
 }
 
 // 代码编辑器 Tab 类型
@@ -644,7 +532,8 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-vue-next'
-import { useSettingsStore, DEFAULT_API_CONFIG } from '@/stores/settings'
+import { useSettingsStore } from '@/stores/settings'
+import AdvancedApiSettings, { type AdvancedApiConfig } from '@/components/AdvancedApiSettings.vue'
 import { useHistoryStore } from '@/stores/history'
 import type { SearchHistory } from '@/utils/persistence'
 import apiData from '@/data/api.json'
@@ -689,7 +578,7 @@ function getRepoPath(url: string): string {
 function getRepoName(url: string): string {
   // https://github.com/Moe-Sakura/frontend -> frontend
   const parts = url.split('/')
-  return parts[parts.length - 1]
+  return parts[parts.length - 1] ?? ''
 }
 
 // 组件挂载时初始化
@@ -955,14 +844,16 @@ const localCustomCSS = ref(props.customCSS)
 const localCustomJS = ref(settingsStore.settings.customJS)
 const localCustomHTML = ref(settingsStore.settings.customHTML)
 
-// 高级 API 设置状态
-const localVndbApiBaseUrl = ref(settingsStore.settings.vndbApiBaseUrl)
-const localVndbImageProxyUrl = ref(settingsStore.settings.vndbImageProxyUrl)
-const localAiTranslateApiUrl = ref(settingsStore.settings.aiTranslateApiUrl)
-const localAiTranslateApiKey = ref(settingsStore.settings.aiTranslateApiKey)
-const localAiTranslateModel = ref(settingsStore.settings.aiTranslateModel)
-const localBackgroundImageApiUrl = ref(settingsStore.settings.backgroundImageApiUrl)
-const localVideoParseApiUrl = ref(settingsStore.settings.videoParseApiUrl)
+// 高级 API 设置状态（集中为一个对象，通过 v-model 传给 AdvancedApiSettings 子组件）
+const localAdvancedApi = ref<AdvancedApiConfig>({
+  vndbApiBaseUrl: settingsStore.settings.vndbApiBaseUrl,
+  vndbImageProxyUrl: settingsStore.settings.vndbImageProxyUrl,
+  aiTranslateApiUrl: settingsStore.settings.aiTranslateApiUrl,
+  aiTranslateApiKey: settingsStore.settings.aiTranslateApiKey,
+  aiTranslateModel: settingsStore.settings.aiTranslateModel,
+  backgroundImageApiUrl: settingsStore.settings.backgroundImageApiUrl,
+  videoParseApiUrl: settingsStore.settings.videoParseApiUrl,
+})
 
 // 音效设置
 const localEnableSound = ref(settingsStore.settings.enableSound)
@@ -1025,15 +916,17 @@ watch(() => props.isOpen, (isOpen) => {
     localCustomJS.value = settingsStore.settings.customJS
     localCustomHTML.value = settingsStore.settings.customHTML
     // 同步高级 API 设置
-    localVndbApiBaseUrl.value = settingsStore.settings.vndbApiBaseUrl
-    localVndbImageProxyUrl.value = settingsStore.settings.vndbImageProxyUrl
-    localAiTranslateApiUrl.value = settingsStore.settings.aiTranslateApiUrl
+    localAdvancedApi.value = {
+      vndbApiBaseUrl: settingsStore.settings.vndbApiBaseUrl,
+      vndbImageProxyUrl: settingsStore.settings.vndbImageProxyUrl,
+      aiTranslateApiUrl: settingsStore.settings.aiTranslateApiUrl,
+      aiTranslateApiKey: settingsStore.settings.aiTranslateApiKey,
+      aiTranslateModel: settingsStore.settings.aiTranslateModel,
+      backgroundImageApiUrl: settingsStore.settings.backgroundImageApiUrl,
+      videoParseApiUrl: settingsStore.settings.videoParseApiUrl,
+    }
     // 异步测量 API 延迟（不阻塞面板打开）
     setTimeout(measureAllApiLatencies, 100)
-    localAiTranslateApiKey.value = settingsStore.settings.aiTranslateApiKey
-    localAiTranslateModel.value = settingsStore.settings.aiTranslateModel
-    localBackgroundImageApiUrl.value = settingsStore.settings.backgroundImageApiUrl
-    localVideoParseApiUrl.value = settingsStore.settings.videoParseApiUrl
     // 同步音效设置
     localEnableSound.value = settingsStore.settings.enableSound
   }
@@ -1050,27 +943,16 @@ function save() {
   settingsStore.updateSettings({
     customJS: localCustomJS.value,
     customHTML: localCustomHTML.value,
-    vndbApiBaseUrl: localVndbApiBaseUrl.value,
-    vndbImageProxyUrl: localVndbImageProxyUrl.value,
-    aiTranslateApiUrl: localAiTranslateApiUrl.value,
-    aiTranslateApiKey: localAiTranslateApiKey.value,
-    aiTranslateModel: localAiTranslateModel.value,
-    backgroundImageApiUrl: localBackgroundImageApiUrl.value,
-    videoParseApiUrl: localVideoParseApiUrl.value,
+    ...localAdvancedApi.value,
   })
   emit('save', localCustomApi.value, localCustomCSS.value)
   emit('close')
 }
 
-function resetAdvancedApiSettings() {
+// 高级 API 设置的「恢复默认」由 AdvancedApiSettings 子组件处理，
+// 这里只负责播放音效
+function onAdvancedApiReset() {
   playTap()
-  localVndbApiBaseUrl.value = DEFAULT_API_CONFIG.vndbApiBaseUrl
-  localVndbImageProxyUrl.value = DEFAULT_API_CONFIG.vndbImageProxyUrl
-  localAiTranslateApiUrl.value = DEFAULT_API_CONFIG.aiTranslateApiUrl
-  localAiTranslateApiKey.value = DEFAULT_API_CONFIG.aiTranslateApiKey
-  localAiTranslateModel.value = DEFAULT_API_CONFIG.aiTranslateModel
-  localBackgroundImageApiUrl.value = DEFAULT_API_CONFIG.backgroundImageApiUrl
-  localVideoParseApiUrl.value = DEFAULT_API_CONFIG.videoParseApiUrl
 }
 </script>
 

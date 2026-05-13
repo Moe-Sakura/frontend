@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
+import { debounce } from '@/composables/useDebounce'
 
 export interface UserSettings {
   customApi: string
@@ -84,13 +85,25 @@ export const useSettingsStore = defineStore('settings', () => {
     historyIndex.value = 0
   }
   
-  // 保存设置到 localStorage
-  function saveSettings() {
+  // 立即把当前设置写入 localStorage（用于 unload 等需要同步落盘的场景）
+  function persistNow() {
     try {
       localStorage.setItem('userSettings', JSON.stringify(settings.value))
     } catch (error) {
-      console.error('Failed to save settings:', error)
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.warn('[settings] localStorage 已满，无法保存设置')
+      } else {
+        console.error('Failed to save settings:', error)
+      }
     }
+  }
+
+  // 防抖保存：避免 input 拖拽等高频变更对 localStorage 造成压力
+  const saveSettings = debounce(persistNow, 300)
+
+  // 页面卸载前强制落盘，避免丢失最后一次未持久化的更改
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', persistNow)
   }
   
   // 记录设置变更历史
@@ -146,19 +159,25 @@ export const useSettingsStore = defineStore('settings', () => {
   function undoSettings(): boolean {
     if (historyIndex.value > 0) {
       historyIndex.value--
-      settings.value = { ...settingsHistory.value[historyIndex.value] }
-      saveSettings()
+      const snapshot = settingsHistory.value[historyIndex.value]
+      if (snapshot) {
+        settings.value = { ...snapshot }
+        saveSettings()
+      }
       return true
     }
     return false
   }
-  
+
   // 重做设置变更
   function redoSettings(): boolean {
     if (historyIndex.value < settingsHistory.value.length - 1) {
       historyIndex.value++
-      settings.value = { ...settingsHistory.value[historyIndex.value] }
-      saveSettings()
+      const snapshot = settingsHistory.value[historyIndex.value]
+      if (snapshot) {
+        settings.value = { ...snapshot }
+        saveSettings()
+      }
       return true
     }
     return false
