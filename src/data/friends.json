@@ -1,6 +1,12 @@
 {
   "friends": [
     {
+      "name": "很太导航",
+      "desc": "精选海内外ACG动漫、游戏、漫画网址导航！聚合动画、漫画、Gal游戏、图片、社区、磁力BT、工具等绅士必备资源中心，探索专属次元异世界。",
+      "url": "https://www.hentaidh.net/",
+      "logo": "https://www.hentaidh.net/android-chrome-192x192.png"
+    },
+    {
       "name": "Jurangren",
       "desc": "本站后端大手子！",
       "url": "https://github.com/Jurangren",
