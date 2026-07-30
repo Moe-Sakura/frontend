@@ -406,7 +406,7 @@ import {
   ShieldCheck,
   BookOpen,
   Star,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import { getSearchParamsFromURL, updateURLParams, onURLParamsChange } from '@/utils/urlParams'
 
 const searchStore = useSearchStore()

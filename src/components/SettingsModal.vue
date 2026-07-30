@@ -189,7 +189,7 @@
                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-95 transition-all"
                     @click="playTap"
                   >
-                    <Github :size="14" />
+                    <GithubIcon :size="14" />
                     <span class="hidden sm:inline">部署后端</span>
                     <span class="sm:hidden">部署</span>
                   </a>
@@ -521,7 +521,6 @@ import {
   Code,
   FileCode,
   Check,
-  Github,
   X,
   Plus,
   Volume2,
@@ -531,9 +530,10 @@ import {
   FileJson,
   AlertCircle,
   CheckCircle2,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 import { useSettingsStore } from '@/stores/settings'
 import AdvancedApiSettings, { type AdvancedApiConfig } from '@/components/AdvancedApiSettings.vue'
+import GithubIcon from '@/components/GithubIcon.vue'
 import { useHistoryStore } from '@/stores/history'
 import type { SearchHistory } from '@/utils/persistence'
 import apiData from '@/data/api.json'

@@ -5,7 +5,7 @@
  */
 
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { ChevronLeft, ChevronRight, X } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, X } from '@lucide/vue'
 import { useImageViewer } from '@/composables/useImageViewer'
 import { playSwipe, playTransitionUp, playTransitionDown } from '@/composables/useSound'
 

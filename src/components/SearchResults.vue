@@ -154,7 +154,7 @@ import {
   Magnet,
   Wand2,
   Tag as TagIcon,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 const searchStore = useSearchStore()
 

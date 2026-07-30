@@ -387,66 +387,12 @@ function playSound(type: SoundType): void {
 }
 
 // ========================================
-// 兼容旧 API 的音效类型（映射到新类型）
-// ========================================
-export type LegacySoundType = 
-  | 'click'
-  | 'success'  
-  | 'error'
-  | 'pop'
-  | 'whoosh'
-  | 'toggle'
-  | 'hover'
-  | 'complete'
-  | 'warning'
-  | 'typing'
-  | 'coin'
-  | 'levelup'
-  | 'bubble'
-  | 'sweep'
-  | 'ding'
-  | 'chime'
-  | 'bounce'
-  | 'unlock'
-  | 'close'
-
-// 旧 API 映射
-const legacyMap: Record<LegacySoundType, SoundType> = {
-  click: 'tap',
-  success: 'celebration',
-  error: 'caution',
-  pop: 'button',
-  whoosh: 'swipe',
-  toggle: 'toggle_on',
-  hover: 'tap',
-  complete: 'celebration',
-  warning: 'caution',
-  typing: 'type',
-  coin: 'celebration',
-  levelup: 'celebration',
-  bubble: 'button',
-  sweep: 'swipe',
-  ding: 'notification',
-  chime: 'notification',
-  bounce: 'transition_up',
-  unlock: 'celebration',
-  close: 'transition_down',
-}
-
-// 兼容旧 API 的播放方法
-function playLegacySound(type: LegacySoundType): void {
-  const mappedType = legacyMap[type]
-  playSound(mappedType)
-}
-
-// ========================================
 // 导出 composable
 // ========================================
 export function useSound() {
   return {
     soundEnabled,
     playSound,
-    playLegacySound,
     toggleSound: () => {
       soundEnabled.value = !soundEnabled.value
     },
@@ -475,25 +421,3 @@ export const playTransitionDown = () => playSound('transition_down')
 export const playProgressLoop = () => playSound('progress_loop')
 export const playRingtoneLoop = () => playSound('ringtone_loop')
 
-// ========================================
-// 兼容旧 API 的便捷方法
-// ========================================
-export const playClick = () => playLegacySound('click')
-export const playSuccess = () => playLegacySound('success')
-export const playError = () => playLegacySound('error')
-export const playPop = () => playLegacySound('pop')
-export const playWhoosh = () => playLegacySound('whoosh')
-export const playToggle = () => playLegacySound('toggle')
-export const playHover = () => playLegacySound('hover')
-export const playComplete = () => playLegacySound('complete')
-export const playWarning = () => playLegacySound('warning')
-export const playTyping = () => playLegacySound('typing')
-export const playCoin = () => playLegacySound('coin')
-export const playLevelup = () => playLegacySound('levelup')
-export const playBubble = () => playLegacySound('bubble')
-export const playSweep = () => playLegacySound('sweep')
-export const playDing = () => playLegacySound('ding')
-export const playChime = () => playLegacySound('chime')
-export const playBounce = () => playLegacySound('bounce')
-export const playUnlock = () => playLegacySound('unlock')
-export const playClose = () => playLegacySound('close')

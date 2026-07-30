@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { Eye, Users, Activity, Wifi, WifiOff } from 'lucide-vue-next'
+import { Eye, Users, Activity, Wifi, WifiOff } from '@lucide/vue'
 import { useStatsStore } from '@/stores/stats'
 
 const statsStore = useStatsStore()

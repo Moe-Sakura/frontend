@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link as LinkIcon, ExternalLink, FileText, Copy, Check } from 'lucide-vue-next'
+import { Link as LinkIcon, ExternalLink, FileText, Copy, Check } from '@lucide/vue'
 import { ref } from 'vue'
 import { playTap, playNotification } from '@/composables/useSound'
 

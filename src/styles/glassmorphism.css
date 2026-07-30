@@ -36,7 +36,6 @@
   /* 兼容旧变量名 */
   --glass-pink: var(--color-primary);
   --glass-pink-light: var(--color-primary-light);
-  --glass-pink-pale: var(--color-primary-pale);
   
   /* ========== 透明度变量 ========== */
   /* 基础透明度 - 亮色模式 */
@@ -118,28 +117,8 @@
   --border-thick: 2px;
   
   /* ========== 组合变量 ========== */
-  /* 亮色模式背景 - 半透明 */
-  --glass-bg-light: rgba(var(--color-bg-light), var(--opacity-card));
-  --glass-bg-light-hover: rgba(var(--color-bg-light), var(--opacity-button-hover));
   --glass-border-light: rgba(var(--color-primary), var(--opacity-border));
-  --glass-border-light-hover: rgba(var(--color-primary), var(--opacity-border-hover));
-  
-  /* 暗色模式背景 - 半透明 */
-  --glass-bg-dark: rgba(var(--color-bg-dark), var(--opacity-card-dark));
-  --glass-bg-dark-hover: rgba(var(--color-bg-dark), var(--opacity-button-dark-hover));
   --glass-border-dark: rgba(var(--color-primary-light), var(--opacity-border-dark));
-  --glass-border-dark-hover: rgba(var(--color-primary-light), var(--opacity-border-dark-hover));
-}
-
-/* ========== 基础半透明效果 ========== */
-.glass {
-  background: var(--glass-bg-light);
-  border: 1px solid var(--glass-border-light);
-}
-
-.dark .glass {
-  background: var(--glass-bg-dark);
-  border-color: var(--glass-border-dark);
 }
 
 /* ========== 搜索输入框效果 ========== */
@@ -211,212 +190,6 @@
   transform: scale(1.01);
 }
 
-/* ========== 搜索按钮效果 ========== */
-.glassmorphism-button {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(var(--glass-pink-pale), 0.75) 100%
-  );
-  border: 1.5px solid rgba(var(--glass-pink), 0.25);
-  box-shadow: 0 4px 12px rgba(var(--glass-pink), 0.12);
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
-}
-
-.glassmorphism-button:hover:not(:disabled) {
-  border-color: rgba(var(--glass-pink), 0.4);
-  box-shadow: 0 6px 18px rgba(var(--glass-pink), 0.2);
-  transform: translateY(-1px) scale(1.02);
-}
-
-.glassmorphism-button:active:not(:disabled) {
-  transform: scale(0.98);
-  box-shadow: 0 2px 8px rgba(var(--glass-pink), 0.1);
-}
-
-.glassmorphism-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.dark .glassmorphism-button {
-  background: linear-gradient(
-    135deg,
-    rgba(30, 41, 59, 0.8) 0%,
-    rgba(51, 65, 85, 0.75) 100%
-  );
-  border-color: rgba(var(--glass-pink-light), 0.3);
-  box-shadow: 0 4px 12px rgba(var(--glass-pink-light), 0.15);
-}
-
-.dark .glassmorphism-button:hover:not(:disabled) {
-  border-color: rgba(var(--glass-pink-light), 0.45);
-  box-shadow: 0 6px 18px rgba(var(--glass-pink-light), 0.25);
-}
-
-/* ========== 内嵌搜索按钮 ========== */
-.glassmorphism-search-button {
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(var(--glass-pink), 0.2);
-  box-shadow: 0 2px 6px rgba(var(--glass-pink), 0.08);
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
-}
-
-.glassmorphism-search-button:hover:not(:disabled) {
-  border-color: rgba(var(--glass-pink), 0.35);
-  box-shadow: 0 4px 10px rgba(var(--glass-pink), 0.14);
-  transform: translateY(-1px) scale(1.02);
-}
-
-.glassmorphism-search-button:active:not(:disabled) {
-  transform: scale(0.96);
-}
-
-.glassmorphism-search-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.dark .glassmorphism-search-button {
-  background: rgba(30, 41, 59, 0.75);
-  border-color: rgba(var(--glass-pink-light), 0.25);
-  box-shadow: 0 2px 6px rgba(var(--glass-pink-light), 0.1);
-}
-
-.dark .glassmorphism-search-button:hover:not(:disabled) {
-  border-color: rgba(var(--glass-pink-light), 0.4);
-  box-shadow: 0 4px 10px rgba(var(--glass-pink-light), 0.18);
-}
-
-/* ========== 模式切换器效果 ========== */
-.glassmorphism-mode-switch {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 248, 252, 0.75) 100%
-  );
-  border: 2px solid rgba(var(--glass-pink), 0.15);
-  box-shadow: 0 4px 12px rgba(var(--glass-pink), 0.1);
-  transition: all 0.3s ease-out;
-}
-
-.glassmorphism-mode-switch:hover {
-  border-color: rgba(var(--glass-pink), 0.25);
-  box-shadow: 0 6px 18px rgba(var(--glass-pink), 0.14);
-}
-
-.dark .glassmorphism-mode-switch {
-  background: linear-gradient(
-    135deg,
-    rgba(30, 41, 59, 0.8) 0%,
-    rgba(45, 55, 75, 0.75) 100%
-  );
-  border: 2px solid rgba(var(--glass-pink-light), 0.2);
-  box-shadow: 0 4px 12px rgba(var(--glass-pink-light), 0.12);
-}
-
-.dark .glassmorphism-mode-switch:hover {
-  border-color: rgba(var(--glass-pink-light), 0.3);
-  box-shadow: 0 6px 18px rgba(var(--glass-pink-light), 0.18);
-}
-
-/* ========== 模态框效果 ========== */
-.glassmorphism-modal {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 250, 252, 0.82) 100%
-  );
-  border: 1.5px solid var(--glass-border-light);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  border-radius: 24px;
-  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-}
-
-.glassmorphism-modal:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
-}
-
-.dark .glassmorphism-modal {
-  background: linear-gradient(
-    145deg,
-    rgba(30, 41, 59, 0.88) 0%,
-    rgba(40, 51, 69, 0.85) 100%
-  );
-  border-color: var(--glass-border-dark);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-.dark .glassmorphism-modal:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-}
-
-/* ========== 面板效果 ========== */
-.glassmorphism-panel {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 252, 254, 0.82) 100%
-  );
-  border: 1.5px solid var(--glass-border-light);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-  border-radius: 20px;
-  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-}
-
-.glassmorphism-panel:hover {
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-
-.dark .glassmorphism-panel {
-  background: linear-gradient(
-    145deg,
-    rgba(30, 41, 59, 0.88) 0%,
-    rgba(40, 51, 69, 0.85) 100%
-  );
-  border-color: var(--glass-border-dark);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-}
-
-.dark .glassmorphism-panel:hover {
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
-  transform: translateY(-2px);
-}
-
-/* ========== 工具栏按钮效果 ========== */
-.glassmorphism-toolbar-button {
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid var(--glass-border-light);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  border-radius: 12px;
-  transition: transform 0.2s ease-out, background 0.2s ease-out, box-shadow 0.2s ease-out;
-}
-
-.glassmorphism-toolbar-button:hover {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: var(--glass-border-light-hover);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
-
-.glassmorphism-toolbar-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
-
-.dark .glassmorphism-toolbar-button {
-  background: rgba(30, 41, 59, 0.75);
-  border-color: var(--glass-border-dark);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.dark .glassmorphism-toolbar-button:hover {
-  background: rgba(40, 51, 69, 0.85);
-  border-color: var(--glass-border-dark-hover);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-}
-
 /* ========== 卡片效果 ========== */
 .glassmorphism-card {
   background: rgba(255, 255, 255, 0.8);
@@ -442,42 +215,6 @@
   transform: translateY(-2px);
 }
 
-/* ========== 悬浮按钮效果 ========== */
-.glassmorphism-fab {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid var(--glass-border-light);
-  box-shadow: 0 4px 14px rgba(var(--glass-pink), 0.12);
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-}
-
-.glassmorphism-fab:hover {
-  box-shadow: 0 6px 20px rgba(var(--glass-pink), 0.18);
-  transform: translateY(-2px) scale(1.05);
-}
-
-.glassmorphism-fab:active {
-  transform: scale(0.95);
-}
-
-.dark .glassmorphism-fab {
-  background: rgba(30, 41, 59, 0.8);
-  border-color: var(--glass-border-dark);
-  box-shadow: 0 4px 14px rgba(var(--glass-pink-light), 0.18);
-}
-
-.dark .glassmorphism-fab:hover {
-  box-shadow: 0 6px 20px rgba(var(--glass-pink-light), 0.28);
-}
-
-/* ========== 遮罩层效果 ========== */
-.glassmorphism-overlay {
-  background: rgba(0, 0, 0, 0.35);
-}
-
-.dark .glassmorphism-overlay {
-  background: rgba(0, 0, 0, 0.5);
-}
-
 /* ========== 导航栏效果 ========== */
 .glassmorphism-navbar {
   background: rgba(255, 255, 255, 0.8);
@@ -492,39 +229,20 @@
 }
 
 /* ========== 性能优化工具类 ========== */
-/* GPU 加速 */
-.glass-gpu {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
 /* 性能提示：will-change 自动管理 */
-.glassmorphism-card:hover,
-.glassmorphism-panel:hover,
-.glassmorphism-modal:hover,
-.glassmorphism-fab:hover,
-.glassmorphism-button:hover {
+.glassmorphism-card:hover {
   will-change: transform;
 }
 
 /* 触摸设备优化 */
 @media (hover: none) {
-  .glassmorphism-card,
-  .glassmorphism-panel,
-  .glassmorphism-modal,
-  .glassmorphism-fab,
-  .glassmorphism-button {
+  .glassmorphism-card {
     will-change: auto;
   }
 }
 
 /* 渲染隔离 */
-.glass,
 .glassmorphism-input,
-.glassmorphism-button,
-.glassmorphism-modal,
-.glassmorphism-panel,
-.glassmorphism-card,
-.glassmorphism-fab {
+.glassmorphism-card {
   isolation: isolate;
 }

@@ -149,7 +149,7 @@ import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { playTap, playButton, playTransitionUp, playTransitionDown, playSwipe } from '@/composables/useSound'
 import { throttle } from '@/composables/useDebounce'
-import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare, History, Star, Circle, DollarSign, XCircle } from 'lucide-vue-next'
+import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare, History, Star, Circle, DollarSign, XCircle } from '@lucide/vue'
 import type { FunctionalComponent } from 'vue'
 
 const searchStore = useSearchStore()
