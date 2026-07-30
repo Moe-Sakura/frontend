@@ -76,7 +76,13 @@ export default defineConfig({
       },
       workbox: {
         // 预缓存核心构建产物（首屏必需，不包含字体——字体按 unicode-range 子集太多，改为运行时缓存）
-        globPatterns: ['**/*.{js,css,html,svg,ico}'],
+        //
+        // 注意：这里刻意不含 html。index.html 若进预缓存会被 cache-first 永久命中，
+        // 返回的是上一个版本的 HTML，而它引用的懒加载 chunk（见下方 globIgnores）
+        // 并未预缓存、发版后已从服务器消失，请求会被 SPA 回退成 text/html，
+        // 浏览器拒绝将其作为 ES module 执行 —— 表现为评论区等面板永久空白，
+        // 必须手动清理 SW 才能恢复。HTML 改由下方 NetworkFirst 规则处理。
+        globPatterns: ['**/*.{js,css,svg,ico}'],
         // 单文件最大预缓存 3 MB，避免大依赖膨胀 precache
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         // 排除按需加载的资源（评论、编辑器在用户触发时再缓存）
@@ -88,6 +94,19 @@ export default defineConfig({
         ],
         // 运行时缓存策略
         runtimeCaching: [
+          {
+            // HTML 导航 - 网络优先，保证 HTML 与其引用的 chunk 始终同属一次发版；
+            // 断网时回退到上次缓存的 HTML，离线能力不受影响
+            urlPattern: ({ request }: { request: Request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'html-shell',
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 4,
+              },
+            },
+          },
           {
             // 本地字体子集 - 缓存优先（用户用到哪个子集才缓存哪个）
             urlPattern: /\/fonts\/.*\.(woff2?|ttf|otf)$/i,
