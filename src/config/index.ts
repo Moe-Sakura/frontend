@@ -23,6 +23,7 @@ interface AppConfig {
   services: {
     statusUrl: string
     artalkServer: string
+    artalkSite: string
     imageApiUrl: string
   }
   
@@ -126,6 +127,7 @@ export const config: AppConfig = {
   services: {
     statusUrl: getEnv('VITE_STATUS_URL', 'https://status.searchgal.top'),
     artalkServer: getEnv('VITE_ARTALK_SERVER', 'https://artalk.saop.cc'),
+    artalkSite: getEnv('VITE_ARTALK_SITE', '旮旯聚搜'),
     imageApiUrl: getEnv('VITE_IMAGE_API_URL', 'https://api.illlights.com/v1/img'),
   },
   

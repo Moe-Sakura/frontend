@@ -37,6 +37,31 @@ import { vRipple } from './directives/vRipple'
 // 文本滚动指令
 import { vTextScroll } from './composables/useTextScroll'
 
+// ============================================
+// 陈旧 chunk 自愈
+// ============================================
+// 用户停留期间若发生了新的发版，页面里旧的 chunk 文件名已从服务器移除，
+// 此时懒加载（评论区、设置面板等）请求会被 SPA 回退成 text/html，
+// 浏览器拒绝将其作为 ES module 执行。Vite 会为这类失败派发 vite:preloadError，
+// 这里捕获后重载一次以取回最新 HTML。用 sessionStorage 打标防止重载死循环。
+// 用「上次重载时间」而非布尔标记做防护：重载后页面会重新执行本文件，
+// 布尔标记若在 load 时清掉就挡不住循环——若 chunk 依然缺失会无限重载。
+// 时间窗内不再重载，超过窗口（下一次发版）则重新具备自愈能力。
+const RELOAD_AT_KEY = 'sg:chunk-reload-at'
+const RELOAD_COOLDOWN = 10_000
+
+window.addEventListener('vite:preloadError', (event) => {
+  const last = Number(sessionStorage.getItem(RELOAD_AT_KEY) ?? 0)
+  if (Date.now() - last < RELOAD_COOLDOWN) {
+    // 刚重载过仍失败，说明不是版本错配，放行让错误正常抛出便于排查
+    console.error('[chunk] 重载后仍无法加载资源，放弃自愈：', event)
+    return
+  }
+  sessionStorage.setItem(RELOAD_AT_KEY, String(Date.now()))
+  event.preventDefault()
+  window.location.reload()
+})
+
 const app = createApp(App)
 
 // 注册全局指令

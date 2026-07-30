@@ -76,6 +76,7 @@ import { playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import Artalk from 'artalk/dist/Artalk.mjs'
 import 'artalk/dist/Artalk.css'
 import { MessageCircle, ChevronLeft, X, Sparkles, Send } from '@lucide/vue'
+import { config } from '@/config'
 
 interface ArtalkInstance {
   destroy(): void
@@ -136,28 +137,33 @@ function initArtalk() {
     try {
       artalkInstance.destroy()
       artalkInstance = null
-    } catch {
-      // 静默处理错误
+    } catch (error) {
+      console.warn('[Artalk] 销毁旧实例失败：', error)
+      artalkInstance = null
     }
   }
 
   void nextTick(() => {
     const commentsEl = document.getElementById('Comments')
-    if (commentsEl) {
-      try {
-        artalkInstance = Artalk.init({
-          el: '#Comments',
-          pageKey: '/',
-          server: 'https://artalk.saop.cc',
-          site: '旮旯聚搜',
-          darkMode: 'auto',
-        })
-        
-        // 尝试滚动到指定评论
-        scrollToComment()
-      } catch {
-        // 静默处理错误
-      }
+    if (!commentsEl) {
+      console.error('[Artalk] 未找到挂载点 #Comments，评论区无法初始化')
+      return
+    }
+
+    try {
+      artalkInstance = Artalk.init({
+        el: '#Comments',
+        pageKey: '/',
+        server: config.services.artalkServer,
+        site: config.services.artalkSite,
+        darkMode: 'auto',
+      })
+
+      // 尝试滚动到指定评论
+      scrollToComment()
+    } catch (error) {
+      // 不再静默：初始化失败时评论区会是空白，必须留下可诊断的线索
+      console.error('[Artalk] 初始化失败：', error)
     }
   })
 }
