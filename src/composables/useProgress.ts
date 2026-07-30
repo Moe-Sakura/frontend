@@ -279,13 +279,13 @@ export function incProgress(amount?: number) {
  * 创建带进度条的 fetch 包装器
  */
 export function createProgressFetch() {
-  const originalFetch = window.fetch
+  // 绑定 window，避免脱离宿主对象调用时的 Illegal invocation
+  const originalFetch = window.fetch.bind(window)
 
-  window.fetch = async function (...args) {
+  window.fetch = async (...args) => {
     startProgress()
     try {
-      const response = await originalFetch.apply(this, args)
-      return response
+      return await originalFetch(...args)
     } finally {
       doneProgress()
     }

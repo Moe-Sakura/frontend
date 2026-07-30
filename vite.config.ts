@@ -186,14 +186,15 @@ export default defineConfig({
         chunkFileNames: 'js/[name]-[hash].js',
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
+            // 必须先于 vue-core 判断：@lucide/vue 的路径同样包含 "/vue/"
+            if (id.includes('/@lucide/vue/')) {
+              return 'ui-libs';
+            }
             if (id.includes('/vue/') || id.includes('/@vue/')) {
               return 'vue-core';
             }
             if (id.includes('/pinia/')) {
               return 'pinia';
-            }
-            if (id.includes('/lucide-vue-next/')) {
-              return 'ui-libs';
             }
             if (id.includes('/artalk/')) {
               return 'artalk';
@@ -213,7 +214,7 @@ export default defineConfig({
     include: [
       'vue',
       'pinia',
-      'lucide-vue-next',
+      '@lucide/vue',
     ],
     exclude: ['artalk'],
   },

@@ -30,7 +30,7 @@
       aria-label="访问 GitHub 仓库"
       class="toolbar-button github-button"
     >
-      <Github :size="20" />
+      <GithubIcon :size="20" />
     </a>
 
     <!-- 键盘快捷键按钮 -->
@@ -58,7 +58,8 @@ import { ref, computed } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { generateShareURL } from '@/utils/urlParams'
-import { Check, Download, Share2, Github, Keyboard, Settings } from 'lucide-vue-next'
+import { Check, Download, Share2, Keyboard, Settings } from '@lucide/vue'
+import GithubIcon from '@/components/GithubIcon.vue'
 import { playTap, playCelebration, playNotification, playSwipe } from '@/composables/useSound'
 
 const searchStore = useSearchStore()

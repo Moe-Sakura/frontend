@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { watch } from 'vue'
-import { RefreshCw } from 'lucide-vue-next'
+import { RefreshCw } from '@lucide/vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { playNotification } from '@/composables/useSound'
 

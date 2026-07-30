@@ -582,7 +582,7 @@ import {
   Users,
   Quote,
   Play,
-} from 'lucide-vue-next'
+} from '@lucide/vue'
 
 // 图片预览
 const imageViewer = useImageViewer()

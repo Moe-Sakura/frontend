@@ -91,7 +91,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AlertCircle, Clock, RefreshCw, Server, Wifi, WifiOff, X } from 'lucide-vue-next'
+import { AlertCircle, Clock, RefreshCw, Server, Wifi, WifiOff, X } from '@lucide/vue'
 
 interface ErrorCodeInfo {
   code: string

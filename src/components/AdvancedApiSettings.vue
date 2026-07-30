@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { Terminal } from 'lucide-vue-next'
+import { Terminal } from '@lucide/vue'
 import { DEFAULT_API_CONFIG } from '@/stores/settings'
 
 export interface AdvancedApiConfig {

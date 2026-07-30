@@ -145,7 +145,7 @@ import { useUIStore } from '@/stores/ui'
 import { useHistoryStore } from '@/stores/history'
 import type { SearchHistory } from '@/utils/persistence'
 import { playSelect, playTap, playCaution, playTransitionUp, playTransitionDown } from '@/composables/useSound'
-import { History, Trash2, X, Gamepad2, Wrench, Hash, Clock, Search } from 'lucide-vue-next'
+import { History, Trash2, X, Gamepad2, Wrench, Hash, Clock, Search } from '@lucide/vue'
 
 const uiStore = useUIStore()
 const historyStore = useHistoryStore()
