@@ -8,40 +8,39 @@
  *
  * 项目用的是 Tailwind v4，配置走 CSS 而不是 JS —— 没有 tailwind.config.js，
  * 也不需要 @config。
+ *
+ * ⚠️ shadcn-vue CLI（init / add）会用 postcss 原地重写本文件。每次跑完 CLI
+ * 都要 review 这里的 diff，它会重新塞回下面几处被刻意移除/改动的内容。
  */
 
 @import "tailwindcss";
+
+/* shadcn 组件的进出场动画（animate-in / data-[state=open]:* 等）依赖它 */
+@import "tw-animate-css";
 
 /*
  * dark 变体绑定到 .dark 类（由 index.html 的首屏内联脚本和 stores/ui.ts
  * 打在 <html> 上）。
  *
  * 用 :where() 而非 :is()：前者特异性为 0，且能同时匹配 .dark 元素本身与其
- * 后代。全项目有近 400 处 dark: 工具类依赖这个语义，改成 :is(.dark *) 会
- * 抬高特异性并让直接打在 <html> 上的 dark: 类失效。
+ * 后代。全项目有近 400 处 dark: 工具类依赖这个语义，改成 shadcn 文档里的
+ * `&:is(.dark *)` 会抬高特异性、并让直接打在 <html> 上的 dark: 类失效。
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * 把主题色接进 Tailwind，供 text-theme-primary / bg-theme-accent/10 等类使用。
- * 走 CSS 变量而不是写死颜色，预设主题色（utils/themeColor.ts 写在 <html> 上的
- * 内联样式）才能实时生效。
- *
- * `inline` 是承重的：它让 Tailwind 把值直接内联进工具类，从而正确解析 var()。
- * 去掉 inline 会让 Tailwind 反过来把 --color-theme-* 发射进 :root，与
- * theme.css 里的 RGB 三元组约定互相踩踏。不要「简化」掉它。
- */
-/*
  * 圆角刻度 —— 项目自己的一套，比 Tailwind 默认大一档（卡片 16px、面板 20px）。
  *
  * 这组变量原本写在 glassmorphism.css 的无 layer :root 里，等于"意外"覆盖了
- * Tailwind 的同名 theme 键：rounded-lg 实际渲染成 1rem 而不是默认的 0.5rem。
- * 搬到 @theme 之后渲染结果完全不变，但这份占用从意外变成显式声明——后续
- * shadcn-vue 引入它自己的 --radius 体系时，冲突有唯一一处可以调和。
+ * Tailwind 的同名 theme 键。搬到 @theme 后渲染完全不变，占用也从意外变显式。
  *
- * 注意这里必须用不带 inline 的 @theme：工具类（.rounded-lg{border-radius:
- * var(--radius-lg)}）和 CSS 里的 var(--radius-lg) 直读都要拿到值，
- * 所以变量需要真正发射进 :root。
+ * shadcn 默认会往下面的 @theme inline 里写一套 --radius-sm/md/lg/xl，
+ * 由 `--radius: 0.625rem` 用 calc() 推导。那会把 rounded-lg 从 1rem 压到
+ * 0.625rem，影响全项目 124 处圆角。这里刻意保留项目自己的刻度，并把
+ * --radius 设成 1rem，让少数直读 var(--radius) 的 shadcn 组件也对齐玻璃卡片。
+ *
+ * 必须用不带 inline 的 @theme：工具类（.rounded-lg{border-radius:
+ * var(--radius-lg)}）和 CSS 里的 var(--radius-lg) 直读都要拿到值。
  */
 @theme {
   --radius-xs: 0.375rem;   /* 6px  - 小按钮 */
@@ -53,7 +52,22 @@
   --radius-3xl: 2rem;      /* 32px - 大圆角 */
 }
 
+/*
+ * 两套颜色体系并存，靠 `inline` 才不打架：
+ *
+ * 1. 项目自己的 --color-primary / --color-accent 是 RGB 三元组
+ *    （theme.css 的无 layer :root，且 utils/themeColor.ts 会把它们写成
+ *    <html> 的内联样式做主题色切换），供 rgb()/rgba() 双用途。
+ * 2. shadcn 的 --primary / --accent 等是完整 oklch() 颜色。
+ *
+ * `inline` 让 Tailwind 把值直接内联进工具类，而**不**把 --color-* 发射进
+ * :root。少了 inline，Tailwind 就会发射 `--color-primary: var(--primary)`，
+ * 与项目的三元组互相覆盖：shadcn 工具类拿到非法颜色被丢弃，项目的
+ * rgb(var(--color-primary)) 拿到 oklch 字符串也失效，两边同时炸。
+ * 这个关键字是承重的，不要「简化」。
+ */
 @theme inline {
+  /* 项目主题色 → text-theme-primary / bg-theme-accent/10 等 */
   --color-theme-primary: rgb(var(--color-primary));
   --color-theme-primary-light: rgb(var(--color-primary-light));
   --color-theme-primary-lighter: rgb(var(--color-primary-lighter));
@@ -63,4 +77,102 @@
   --color-theme-accent: rgb(var(--color-accent));
   --color-theme-accent-light: rgb(var(--color-accent-light));
   --color-theme-accent-dark: rgb(var(--color-accent-dark));
+
+  /* shadcn 语义色 → bg-background / text-muted-foreground / border-border 等 */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
+
+/*
+ * shadcn 语义 token。目前仍是 CLI 生成的中性色 —— 尚未接到项目的艳粉体系，
+ * 因为暂时还没有任何 shadcn 组件在用它们（全项目 bg-primary / text-foreground
+ * 之类的工具类零使用），所以现在是惰性的、不影响任何现有渲染。
+ *
+ * 待办：加入第一个 shadcn 组件时，把 --primary / --accent / --ring / --border
+ * 映射到项目的粉色与玻璃描边。
+ */
+:root {
+  --radius: 1rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+/*
+ * ⚠️ 这里刻意**没有** shadcn 默认的 @layer base 重置。CLI 每次都会写回来，
+ * review diff 时请再删掉。它长这样：
+ *
+ *   @layer base {
+ *     * { @apply border-border outline-ring/50; }
+ *     body { @apply bg-background text-foreground; }
+ *   }
+ *
+ * 两条都有害：
+ *
+ * body { bg-background }
+ *   base.css 里 `body { background: transparent }` 是承重的 —— App.vue 把
+ *   #background-container 放在 z-[-2] 渲染全屏 Ken Burns 背景图，靠 body
+ *   透明才能透出来。两条规则同层同特异性，纯靠导入顺序决胜负，而且只会在
+ *   **亮色模式**下坏（.dark body 特异性更高，照样透明），是个很难复现的 bug。
+ *
+ * * { border-border }
+ *   给每个元素刷上 border-color: var(--border)。项目现有的裸 border/border-t
+ *   工具类目前继承 currentColor，会集体变成中性灰。
+ *
+ * 但注意：shadcn 的 card / button **确实**用裸 border 加全局色。等真正引入
+ * 第一个 shadcn 组件时，要么把这条规则限定到 ui 组件作用域，要么把 --border
+ * 调成项目的玻璃描边色（rgba(var(--color-primary), 0.15)）再放开。
+ * 现在还没有任何 shadcn 组件，所以先不引入这个全局副作用。
+ */
