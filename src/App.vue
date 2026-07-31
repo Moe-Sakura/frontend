@@ -204,30 +204,7 @@ function saveSettings(customApi: string, newCustomCSS: string) {
 </script>
 
 <style>
-@import "tailwindcss";
-
-/* Tailwind v4: 配置 dark 变体使用 .dark 类 */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/*
- * 把主题色接进 Tailwind，供 text-theme-primary / bg-theme-accent/10 等类使用。
- * 走 CSS 变量而不是写死颜色，预设主题色才能实时生效。
- * `inline` 让 Tailwind 把值直接内联进工具类，从而正确解析 var()。
- *
- * 注：项目用的是 Tailwind v4，根目录的 tailwind.config.js 未经 @config 引入，
- * 并不会被读取；theme-* 这组颜色以此处为准。
- */
-@theme inline {
-  --color-theme-primary: rgb(var(--color-primary));
-  --color-theme-primary-light: rgb(var(--color-primary-light));
-  --color-theme-primary-lighter: rgb(var(--color-primary-lighter));
-  --color-theme-primary-pale: rgb(var(--color-primary-pale));
-  --color-theme-primary-dark: rgb(var(--color-primary-dark));
-  --color-theme-primary-darker: rgb(var(--color-primary-darker));
-  --color-theme-accent: rgb(var(--color-accent));
-  --color-theme-accent-light: rgb(var(--color-accent-light));
-  --color-theme-accent-dark: rgb(var(--color-accent-dark));
-}
+/* Tailwind 入口、dark 变体与主题色 @theme 见 src/styles/tailwind.css */
 
 /* Ken Burns 动画效果 - 使用 CSS 动画实现更流畅的背景切换 */
 .ken-burns {

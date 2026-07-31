@@ -1,3 +1,7 @@
+// Tailwind 入口 —— 必须排在所有样式（含 App.vue 的 <style>）之前，
+// 否则 base.css 的 @layer base 不会并入 Tailwind 的 base 层。详见该文件注释。
+import './styles/tailwind.css'
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'

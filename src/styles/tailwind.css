@@ -1,0 +1,66 @@
+/*
+ * Tailwind CSS v4 入口
+ *
+ * 这个文件必须是 main.ts 里的第一个样式导入：Tailwind 的 `@layer` 声明语句
+ * 需要排在所有样式之前，base.css 的 `@layer base { ... }` 才会并入 Tailwind
+ * 的 base 层，而不是另起一层跑到 utilities 后面去。顺序错了不会报错，只会
+ * 让层级悄悄颠倒。
+ *
+ * 项目用的是 Tailwind v4，配置走 CSS 而不是 JS —— 没有 tailwind.config.js，
+ * 也不需要 @config。
+ */
+
+@import "tailwindcss";
+
+/*
+ * dark 变体绑定到 .dark 类（由 index.html 的首屏内联脚本和 stores/ui.ts
+ * 打在 <html> 上）。
+ *
+ * 用 :where() 而非 :is()：前者特异性为 0，且能同时匹配 .dark 元素本身与其
+ * 后代。全项目有近 400 处 dark: 工具类依赖这个语义，改成 :is(.dark *) 会
+ * 抬高特异性并让直接打在 <html> 上的 dark: 类失效。
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * 把主题色接进 Tailwind，供 text-theme-primary / bg-theme-accent/10 等类使用。
+ * 走 CSS 变量而不是写死颜色，预设主题色（utils/themeColor.ts 写在 <html> 上的
+ * 内联样式）才能实时生效。
+ *
+ * `inline` 是承重的：它让 Tailwind 把值直接内联进工具类，从而正确解析 var()。
+ * 去掉 inline 会让 Tailwind 反过来把 --color-theme-* 发射进 :root，与
+ * theme.css 里的 RGB 三元组约定互相踩踏。不要「简化」掉它。
+ */
+/*
+ * 圆角刻度 —— 项目自己的一套，比 Tailwind 默认大一档（卡片 16px、面板 20px）。
+ *
+ * 这组变量原本写在 glassmorphism.css 的无 layer :root 里，等于"意外"覆盖了
+ * Tailwind 的同名 theme 键：rounded-lg 实际渲染成 1rem 而不是默认的 0.5rem。
+ * 搬到 @theme 之后渲染结果完全不变，但这份占用从意外变成显式声明——后续
+ * shadcn-vue 引入它自己的 --radius 体系时，冲突有唯一一处可以调和。
+ *
+ * 注意这里必须用不带 inline 的 @theme：工具类（.rounded-lg{border-radius:
+ * var(--radius-lg)}）和 CSS 里的 var(--radius-lg) 直读都要拿到值，
+ * 所以变量需要真正发射进 :root。
+ */
+@theme {
+  --radius-xs: 0.375rem;   /* 6px  - 小按钮 */
+  --radius-sm: 0.5rem;     /* 8px  - 小元素 */
+  --radius-md: 0.75rem;    /* 12px - 按钮/输入框 */
+  --radius-lg: 1rem;       /* 16px - 卡片 */
+  --radius-xl: 1.25rem;    /* 20px - 面板 */
+  --radius-2xl: 1.5rem;    /* 24px - 模态框 */
+  --radius-3xl: 2rem;      /* 32px - 大圆角 */
+}
+
+@theme inline {
+  --color-theme-primary: rgb(var(--color-primary));
+  --color-theme-primary-light: rgb(var(--color-primary-light));
+  --color-theme-primary-lighter: rgb(var(--color-primary-lighter));
+  --color-theme-primary-pale: rgb(var(--color-primary-pale));
+  --color-theme-primary-dark: rgb(var(--color-primary-dark));
+  --color-theme-primary-darker: rgb(var(--color-primary-darker));
+  --color-theme-accent: rgb(var(--color-accent));
+  --color-theme-accent-light: rgb(var(--color-accent-light));
+  --color-theme-accent-dark: rgb(var(--color-accent-dark));
+}
