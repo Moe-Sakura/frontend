@@ -54,7 +54,7 @@ function createElements() {
       }
       
       #progress-bar .progress-bar {
-        background: linear-gradient(90deg, rgb(var(--color-primary)), rgb(var(--color-accent)), rgb(var(--color-primary-light)), rgb(var(--color-primary)));
+        background: linear-gradient(90deg, rgb(var(--brand-primary)), rgb(var(--brand-accent)), rgb(var(--brand-primary-light)), rgb(var(--brand-primary)));
         background-size: 300% 100%;
         animation: progress-gradient 2s linear infinite;
         height: 3px;
@@ -94,8 +94,8 @@ function createElements() {
         height: 20px;
         box-sizing: border-box;
         border: 2px solid transparent;
-        border-top-color: rgb(var(--color-primary));
-        border-left-color: rgb(var(--color-accent));
+        border-top-color: rgb(var(--brand-primary));
+        border-left-color: rgb(var(--brand-accent));
         border-radius: 50%;
         animation: progress-spin 0.6s linear infinite;
       }
@@ -111,8 +111,8 @@ function createElements() {
       }
       
       .dark #progress-bar .spinner-icon {
-        border-top-color: rgb(var(--color-primary-light));
-        border-left-color: rgb(var(--color-accent-light));
+        border-top-color: rgb(var(--brand-primary-light));
+        border-left-color: rgb(var(--brand-accent-light));
       }
       
       /* 移动端 */

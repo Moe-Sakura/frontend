@@ -3,8 +3,8 @@
  *
  * 变量约定 —— 重要：
  * 所有 `--color-*` 均为 **RGB 三元组**（如 `255, 20, 147`），而不是十六进制。
- * 这样同一个变量既能取实色 `rgb(var(--color-primary))`，
- * 也能直接叠加透明度 `rgba(var(--color-primary), 0.15)`。
+ * 这样同一个变量既能取实色 `rgb(var(--brand-primary))`，
+ * 也能直接叠加透明度 `rgba(var(--brand-primary), 0.15)`。
  * 组件中已大量使用后者，切勿改回 hex，否则整条声明会因语法非法被丢弃。
  *
  * 这里的值是「默认预设」。用户在调色盘中选择其它预设时，
@@ -14,22 +14,22 @@
 
 :root {
   /* ========== 主色调 ========== */
-  --color-primary: 255, 20, 147;        /* #ff1493 DeepPink - 主色 */
-  --color-primary-light: 255, 105, 180; /* #ff69b4 HotPink - 浅色 */
-  --color-primary-lighter: 255, 179, 217; /* #ffb3d9 更浅 */
-  --color-primary-pale: 255, 228, 242;  /* #ffe4f2 极浅 */
-  --color-primary-dark: 199, 21, 133;   /* #c71585 深色 */
-  --color-primary-darker: 139, 10, 80;  /* #8b0a50 更深 */
+  --brand-primary: 255, 20, 147;        /* #ff1493 DeepPink - 主色 */
+  --brand-primary-light: 255, 105, 180; /* #ff69b4 HotPink - 浅色 */
+  --brand-primary-lighter: 255, 179, 217; /* #ffb3d9 更浅 */
+  --brand-primary-pale: 255, 228, 242;  /* #ffe4f2 极浅 */
+  --brand-primary-dark: 199, 21, 133;   /* #c71585 深色 */
+  --brand-primary-darker: 139, 10, 80;  /* #8b0a50 更深 */
 
   /* ========== 辅助色 ========== */
-  --color-accent: 217, 70, 239;         /* #d946ef 紫色辅助色 */
-  --color-accent-light: 232, 121, 249;  /* #e879f9 */
-  --color-accent-dark: 192, 38, 211;    /* #c026d3 */
+  --brand-accent: 217, 70, 239;         /* #d946ef 紫色辅助色 */
+  --brand-accent-light: 232, 121, 249;  /* #e879f9 */
+  --brand-accent-dark: 192, 38, 211;    /* #c026d3 */
 
   /* ========== 渐变色（跟随主色/辅助色自动变化） ========== */
-  --gradient-primary: linear-gradient(135deg, rgb(var(--color-primary)) 0%, rgb(var(--color-accent)) 100%);
-  --gradient-primary-hover: linear-gradient(135deg, rgb(var(--color-primary-light)) 0%, rgb(var(--color-accent-light)) 100%);
-  --gradient-primary-reverse: linear-gradient(135deg, rgb(var(--color-accent)) 0%, rgb(var(--color-primary)) 100%);
+  --gradient-primary: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-accent)) 100%);
+  --gradient-primary-hover: linear-gradient(135deg, rgb(var(--brand-primary-light)) 0%, rgb(var(--brand-accent-light)) 100%);
+  --gradient-primary-reverse: linear-gradient(135deg, rgb(var(--brand-accent)) 0%, rgb(var(--brand-primary)) 100%);
 
   /* ========== 背景色 ========== */
   --bg-primary: 255, 245, 250;          /* #fff5fa 主色浅色调背景 */
@@ -42,18 +42,18 @@
   --text-tertiary: 156, 163, 175;       /* #9ca3af 第三级文本 */
 
   /* ========== 主色辉光 ========== */
-  --shadow-glow: 0 0 20px rgba(var(--color-primary), 0.4);
+  --shadow-glow: 0 0 20px rgba(var(--brand-primary), 0.4);
 
   /* ========== 玻璃态效果 ========== */
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.8);
-  --glass-shadow: 0 8px 32px rgba(var(--color-primary), 0.08);
+  --glass-shadow: 0 8px 32px rgba(var(--brand-primary), 0.08);
 }
 
 /*
  * 暗色模式
- * 注意：这里**不**重映射 --color-primary。组件的 `.dark` 规则本就直接引用
- * --color-primary-light / --color-primary-lighter，若在此再平移一次会导致双重变浅。
+ * 注意：这里**不**重映射 --brand-primary。组件的 `.dark` 规则本就直接引用
+ * --brand-primary-light / --brand-primary-lighter，若在此再平移一次会导致双重变浅。
  */
 .dark {
   /* ========== 背景色 ========== */
@@ -67,12 +67,12 @@
   --text-tertiary: 100, 116, 139;       /* #64748b */
 
   /* ========== 主色辉光（暗色下用浅主色，更亮） ========== */
-  --shadow-glow: 0 0 25px rgba(var(--color-primary-light), 0.5);
+  --shadow-glow: 0 0 25px rgba(var(--brand-primary-light), 0.5);
 
   /* ========== 玻璃态效果 ========== */
   --glass-bg: rgba(30, 41, 59, 0.8);
-  --glass-border: rgba(var(--color-primary-light), 0.2);
-  --glass-shadow: 0 8px 32px rgba(var(--color-primary-light), 0.15);
+  --glass-border: rgba(var(--brand-primary-light), 0.2);
+  --glass-shadow: 0 8px 32px rgba(var(--brand-primary-light), 0.15);
 }
 
 /* ========== Tailwind CSS 主题颜色扩展 ========== */

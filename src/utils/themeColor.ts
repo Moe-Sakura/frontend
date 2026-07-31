@@ -117,15 +117,15 @@ export function buildThemeVars(preset: ThemePreset): Record<string, string> {
   const accentHsl = rgbToHsl(accentRgb)
 
   return {
-    '--color-primary': toTriplet(primaryRgb),
-    '--color-primary-light': toTriplet(shiftLightness(primaryHsl, SHADE_STEPS.light)),
-    '--color-primary-lighter': toTriplet(shiftLightness(primaryHsl, SHADE_STEPS.lighter)),
-    '--color-primary-pale': toTriplet(hslToRgb({ ...primaryHsl, l: PALE_LIGHTNESS })),
-    '--color-primary-dark': toTriplet(shiftLightness(primaryHsl, SHADE_STEPS.dark)),
-    '--color-primary-darker': toTriplet(shiftLightness(primaryHsl, SHADE_STEPS.darker)),
-    '--color-accent': toTriplet(accentRgb),
-    '--color-accent-light': toTriplet(shiftLightness(accentHsl, SHADE_STEPS.light)),
-    '--color-accent-dark': toTriplet(shiftLightness(accentHsl, SHADE_STEPS.dark)),
+    '--brand-primary': toTriplet(primaryRgb),
+    '--brand-primary-light': toTriplet(shiftLightness(primaryHsl, SHADE_STEPS.light)),
+    '--brand-primary-lighter': toTriplet(shiftLightness(primaryHsl, SHADE_STEPS.lighter)),
+    '--brand-primary-pale': toTriplet(hslToRgb({ ...primaryHsl, l: PALE_LIGHTNESS })),
+    '--brand-primary-dark': toTriplet(shiftLightness(primaryHsl, SHADE_STEPS.dark)),
+    '--brand-primary-darker': toTriplet(shiftLightness(primaryHsl, SHADE_STEPS.darker)),
+    '--brand-accent': toTriplet(accentRgb),
+    '--brand-accent-light': toTriplet(shiftLightness(accentHsl, SHADE_STEPS.light)),
+    '--brand-accent-dark': toTriplet(shiftLightness(accentHsl, SHADE_STEPS.dark)),
   }
 }
 

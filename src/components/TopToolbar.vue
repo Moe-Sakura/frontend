@@ -277,10 +277,10 @@ async function saveBackgroundImage() {
   
   /* 半透明效果 */
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12));
   
-  color: rgb(var(--color-primary-dark, 199, 21, 133));
+  color: rgb(var(--brand-primary-dark, 199, 21, 133));
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -309,15 +309,15 @@ async function saveBackgroundImage() {
 /* 暗色主题 */
 .dark .toolbar-button {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  color: rgb(var(--color-primary-light, 255, 179, 217));
+  color: rgb(var(--brand-primary-light, 255, 179, 217));
 }
 
 .toolbar-button:hover {
   transform: translate3d(0, -3px, 0) scale(1.08);
   box-shadow:
-    0 16px 40px rgba(var(--color-primary, 255, 20, 147), 0.3),
+    0 16px 40px rgba(var(--brand-primary, 255, 20, 147), 0.3),
     0 8px 20px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border-color: rgba(255, 255, 255, 0.5);
@@ -325,7 +325,7 @@ async function saveBackgroundImage() {
 
 .dark .toolbar-button:hover {
   box-shadow:
-    0 16px 40px rgba(var(--color-primary-light, 255, 105, 180), 0.35),
+    0 16px 40px rgba(var(--brand-primary-light, 255, 105, 180), 0.35),
     0 8px 20px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.2);
@@ -342,12 +342,12 @@ async function saveBackgroundImage() {
 
 /* 保存成功状态 - 主题色渐变 */
 .save-success {
-  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-primary-dark))) !important;
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark))) !important;
   color: white !important;
-  border-color: rgba(var(--color-primary), 0.5) !important;
+  border-color: rgba(var(--brand-primary), 0.5) !important;
   box-shadow: 
-    0 8px 20px rgba(var(--color-primary), 0.4),
-    0 0 30px rgba(var(--color-primary), 0.3) !important;
+    0 8px 20px rgba(var(--brand-primary), 0.4),
+    0 0 30px rgba(var(--brand-primary), 0.3) !important;
 }
 
 .save-success i {
@@ -356,12 +356,12 @@ async function saveBackgroundImage() {
 
 /* 分享已复制状态 - 主题色渐变 */
 .share-copied {
-  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-primary-dark))) !important;
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark))) !important;
   color: white !important;
-  border-color: rgba(var(--color-primary), 0.5) !important;
+  border-color: rgba(var(--brand-primary), 0.5) !important;
   box-shadow: 
-    0 8px 20px rgba(var(--color-primary), 0.4),
-    0 0 30px rgba(var(--color-primary), 0.3) !important;
+    0 8px 20px rgba(var(--brand-primary), 0.4),
+    0 0 30px rgba(var(--brand-primary), 0.3) !important;
 }
 
 .share-copied i {

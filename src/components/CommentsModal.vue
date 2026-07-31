@@ -218,7 +218,7 @@ onUnmounted(() => {
 .comments-modal {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-xl, 0 12px 32px rgba(0, 0, 0, 0.15));
 }
 
@@ -232,7 +232,7 @@ onUnmounted(() => {
 /* 评论面板 - 暗色模式 */
 .dark .comments-modal {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
@@ -291,8 +291,8 @@ onUnmounted(() => {
 
 @keyframes comment-highlight {
   0%, 50% {
-    background-color: rgba(var(--color-primary), 0.2);
-    box-shadow: 0 0 0 4px rgba(var(--color-primary), 0.3);
+    background-color: rgba(var(--brand-primary), 0.2);
+    box-shadow: 0 0 0 4px rgba(var(--brand-primary), 0.3);
     border-radius: 8px;
   }
   100% {

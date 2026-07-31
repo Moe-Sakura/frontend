@@ -149,31 +149,31 @@ function resetMethod() {
 
 .filter-chip-idle {
   background: rgba(var(--color-bg-light, 255, 255, 255), 0.6);
-  border-color: rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border-color: rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   color: rgb(var(--text-secondary, 107, 114, 128));
 }
 
 .filter-chip-idle:hover {
-  background: rgba(var(--color-primary, 255, 20, 147), 0.08);
-  border-color: rgba(var(--color-primary, 255, 20, 147), var(--opacity-border-hover, 0.25));
-  color: rgb(var(--color-primary-dark, 199, 21, 133));
+  background: rgba(var(--brand-primary, 255, 20, 147), 0.08);
+  border-color: rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border-hover, 0.25));
+  color: rgb(var(--brand-primary-dark, 199, 21, 133));
 }
 
 .filter-chip-selected {
-  background: rgb(var(--color-primary, 255, 20, 147));
-  border-color: rgb(var(--color-primary, 255, 20, 147));
+  background: rgb(var(--brand-primary, 255, 20, 147));
+  border-color: rgb(var(--brand-primary, 255, 20, 147));
   color: #fff;
-  box-shadow: 0 2px 8px rgba(var(--color-primary, 255, 20, 147), 0.3);
+  box-shadow: 0 2px 8px rgba(var(--brand-primary, 255, 20, 147), 0.3);
 }
 
 .dark .filter-chip-idle {
   background: rgba(var(--color-bg-dark, 30, 41, 59), 0.6);
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   color: rgb(var(--text-secondary, 148, 163, 184));
 }
 
 .dark .filter-chip-idle:hover {
-  background: rgba(var(--color-primary-light, 255, 105, 180), 0.12);
-  color: rgb(var(--color-primary-light, 255, 105, 180));
+  background: rgba(var(--brand-primary-light, 255, 105, 180), 0.12);
+  color: rgb(var(--brand-primary-light, 255, 105, 180));
 }
 </style>

@@ -215,7 +215,7 @@ function close() {
   background: linear-gradient(135deg, #ff1493, #d946ef);
   border-radius: 0.5rem;
   box-shadow: 
-    0 2px 6px rgba(var(--color-primary), 0.3),
+    0 2px 6px rgba(var(--brand-primary), 0.3),
     0 1px 0 rgba(255, 255, 255, 0.2) inset;
 }
 
@@ -229,11 +229,11 @@ function close() {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(var(--color-primary), 0.3);
+  background: rgba(var(--brand-primary), 0.3);
   border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--color-primary), 0.5);
+  background: rgba(var(--brand-primary), 0.5);
 }
 </style>

@@ -6,9 +6,9 @@
       <h1
         class="header-title text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-6 sm:mb-8 animate-fade-in-down
                  text-white
-                 drop-shadow-[0_2px_8px_rgba(var(--color-primary),0.6)]
-                 dark:drop-shadow-[0_2px_12px_rgba(var(--color-primary-light),0.8)]"
-        style="text-shadow: 0 0 30px rgba(var(--color-primary), 0.4), 0 0 60px rgba(var(--color-primary-light), 0.2);"
+                 drop-shadow-[0_2px_8px_rgba(var(--brand-primary),0.6)]
+                 dark:drop-shadow-[0_2px_12px_rgba(var(--brand-primary-light),0.8)]"
+        style="text-shadow: 0 0 30px rgba(var(--brand-primary), 0.4), 0 0 60px rgba(var(--brand-primary-light), 0.2);"
       >
         <span class="whitespace-nowrap">Galgame 聚合搜索</span>
       </h1>
@@ -899,16 +899,16 @@ defineExpose({
 /* 搜索中状态 - 输入框整体效果 */
 .search-input-wrapper.is-searching .search-box {
   box-shadow: 
-    0 0 0 2px rgba(var(--color-primary), 0.4),
-    0 0 25px rgba(var(--color-primary), 0.2),
-    0 0 50px rgba(var(--color-primary), 0.1);
+    0 0 0 2px rgba(var(--brand-primary), 0.4),
+    0 0 25px rgba(var(--brand-primary), 0.2),
+    0 0 50px rgba(var(--brand-primary), 0.1);
 }
 
 .dark .search-input-wrapper.is-searching .search-box {
   box-shadow: 
-    0 0 0 2px rgba(var(--color-primary-light), 0.5),
-    0 0 25px rgba(var(--color-primary-light), 0.25),
-    0 0 50px rgba(var(--color-primary-light), 0.15);
+    0 0 0 2px rgba(var(--brand-primary-light), 0.5),
+    0 0 25px rgba(var(--brand-primary-light), 0.25),
+    0 0 50px rgba(var(--brand-primary-light), 0.15);
 }
 
 /* 搜索中输入框透明背景 */
@@ -960,9 +960,9 @@ defineExpose({
   background: linear-gradient(
     135deg,
     transparent 0%,
-    rgba(var(--color-primary), 0.4) 25%,
-    rgba(var(--color-accent), 0.4) 50%,
-    rgba(var(--color-primary-light), 0.4) 75%,
+    rgba(var(--brand-primary), 0.4) 25%,
+    rgba(var(--brand-accent), 0.4) 50%,
+    rgba(var(--brand-primary-light), 0.4) 75%,
     transparent 100%
   );
   -webkit-mask: 
@@ -998,13 +998,13 @@ defineExpose({
 /* 模式切换器 - 半透明效果 */
 .liquid-mode-switch {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
 }
 
 .dark .liquid-mode-switch {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
@@ -1018,7 +1018,7 @@ defineExpose({
   position: absolute;
   inset: 0;
   border-radius: 0.75rem;
-  background: linear-gradient(135deg, rgba(var(--color-primary), 0.1), rgba(var(--color-accent), 0.05));
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.1), rgba(var(--brand-accent), 0.05));
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;

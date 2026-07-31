@@ -314,7 +314,7 @@ onUnmounted(() => {
   /* 半透明效果 */
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   
   /* 性能优化 */
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
@@ -323,7 +323,7 @@ onUnmounted(() => {
 
 .dark .fab-button {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -349,7 +349,7 @@ onUnmounted(() => {
 .fab-button:hover {
   transform: translate3d(0, -4px, 0) scale(1.08);
   box-shadow: 
-    0 16px 48px rgba(var(--color-primary), 0.35),
+    0 16px 48px rgba(var(--brand-primary), 0.35),
     0 8px 24px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border-color: rgba(255, 255, 255, 0.5);
@@ -357,7 +357,7 @@ onUnmounted(() => {
 
 .dark .fab-button:hover {
   box-shadow: 
-    0 16px 48px rgba(var(--color-primary-light), 0.4),
+    0 16px 48px rgba(var(--brand-primary-light), 0.4),
     0 8px 24px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.25);
@@ -374,14 +374,14 @@ onUnmounted(() => {
 }
 
 .comments-btn {
-  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-primary-dark)));
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark)));
   color: white;
 }
 
 .comments-btn.comments-open {
   background: linear-gradient(135deg, rgb(255, 105, 180), rgb(199, 21, 133));
   color: white;
-  border-color: rgba(var(--color-primary-light), 0.5);
+  border-color: rgba(var(--brand-primary-light), 0.5);
 }
 
 .history-btn {
@@ -396,7 +396,7 @@ onUnmounted(() => {
 }
 
 .vndb-btn {
-  background: linear-gradient(135deg, rgb(var(--color-accent)), rgb(var(--color-accent-dark)));
+  background: linear-gradient(135deg, rgb(var(--brand-accent)), rgb(var(--brand-accent-dark)));
   color: white;
 }
 
@@ -414,7 +414,7 @@ onUnmounted(() => {
 .nav-btn.nav-open {
   background: linear-gradient(135deg, rgb(255, 105, 180), rgb(232, 121, 249));
   color: white;
-  border-color: rgba(var(--color-primary-light), 0.5);
+  border-color: rgba(var(--brand-primary-light), 0.5);
 }
 
 .fab-button i {
@@ -435,12 +435,12 @@ onUnmounted(() => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(var(--color-primary), 0.5), rgba(var(--color-accent), 0.5));
+  background: linear-gradient(180deg, rgba(var(--brand-primary), 0.5), rgba(var(--brand-accent), 0.5));
   border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(var(--color-primary), 0.7), rgba(var(--color-accent), 0.7));
+  background: linear-gradient(180deg, rgba(var(--brand-primary), 0.7), rgba(var(--brand-accent), 0.7));
 }
 
 /* ============================================
@@ -451,7 +451,7 @@ onUnmounted(() => {
 .nav-panel {
   /* 不设置 position，使用模板中的 fixed */
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));
   overflow: hidden;
 }
@@ -459,19 +459,19 @@ onUnmounted(() => {
 /* 站点导航面板 - 暗色模式 */
 .dark .nav-panel {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* 标题栏 */
 .nav-header {
-  background: linear-gradient(135deg, rgba(var(--color-primary), 0.08), rgba(var(--color-accent), 0.05));
-  border-bottom: 1px solid rgba(var(--color-primary), 0.15);
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.08), rgba(var(--brand-accent), 0.05));
+  border-bottom: 1px solid rgba(var(--brand-primary), 0.15);
 }
 
 .dark .nav-header {
-  background: linear-gradient(135deg, rgba(var(--color-primary), 0.12), rgba(var(--color-accent), 0.08));
-  border-bottom: 1px solid rgba(var(--color-primary-light), 0.15);
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.12), rgba(var(--brand-accent), 0.08));
+  border-bottom: 1px solid rgba(var(--brand-primary-light), 0.15);
 }
 
 /* 导航项 - GPU 加速动画 */
@@ -484,7 +484,7 @@ onUnmounted(() => {
 }
 
 .nav-item:hover {
-  background: linear-gradient(135deg, rgba(var(--color-primary), 0.08), rgba(var(--color-accent), 0.05));
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.08), rgba(var(--brand-accent), 0.05));
   transform: translate3d(4px, 0, 0);
 }
 
@@ -493,7 +493,7 @@ onUnmounted(() => {
 }
 
 .dark .nav-item:hover {
-  background: linear-gradient(135deg, rgba(var(--color-primary), 0.15), rgba(var(--color-accent), 0.1));
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.15), rgba(var(--brand-accent), 0.1));
 }
 
 @keyframes navItemSlideIn {
@@ -518,14 +518,14 @@ onUnmounted(() => {
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-accent)));
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-accent)));
   border-radius: 0.5rem;
-  box-shadow: 0 2px 6px rgba(var(--color-primary), 0.3);
+  box-shadow: 0 2px 6px rgba(var(--brand-primary), 0.3);
 }
 
 .dark .count-badge {
-  background: linear-gradient(135deg, rgb(var(--color-primary-light)), rgb(var(--color-accent-light)));
-  box-shadow: 0 2px 8px rgba(var(--color-primary-light), 0.4);
+  background: linear-gradient(135deg, rgb(var(--brand-primary-light)), rgb(var(--brand-accent-light)));
+  box-shadow: 0 2px 8px rgba(var(--brand-primary-light), 0.4);
 }
 
 /* 底部栏 */

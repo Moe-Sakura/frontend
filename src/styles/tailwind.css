@@ -53,30 +53,33 @@
 }
 
 /*
- * 两套颜色体系并存，靠 `inline` 才不打架：
+ * 两套颜色体系并存，值的格式完全不同：
  *
- * 1. 项目自己的 --color-primary / --color-accent 是 RGB 三元组
- *    （theme.css 的无 layer :root，且 utils/themeColor.ts 会把它们写成
- *    <html> 的内联样式做主题色切换），供 rgb()/rgba() 双用途。
- * 2. shadcn 的 --primary / --accent 等是完整 oklch() 颜色。
+ * 1. 项目品牌色 --brand-primary / --brand-accent 及其深浅档，是 RGB 三元组
+ *    （"255, 20, 147"，定义在 theme.css 的无 layer :root，且
+ *    utils/themeColor.ts 会把它们写成 <html> 的内联样式做主题色切换）。
+ *    存三元组是为了 rgb() 与 rgba() 双用途。
+ * 2. shadcn 语义色 --primary / --accent 等，是完整的 oklch() 颜色。
  *
- * `inline` 让 Tailwind 把值直接内联进工具类，而**不**把 --color-* 发射进
- * :root。少了 inline，Tailwind 就会发射 `--color-primary: var(--primary)`，
- * 与项目的三元组互相覆盖：shadcn 工具类拿到非法颜色被丢弃，项目的
- * rgb(var(--color-primary)) 拿到 oklch 字符串也失效，两边同时炸。
- * 这个关键字是承重的，不要「简化」。
+ * 这两套原本都叫 --color-primary / --color-accent，是同名不同格式的直接冲突：
+ * shadcn 的 bg-primary 会编译成 background-color:var(--color-primary)，
+ * 解析到三元组就是非法颜色、整条声明被丢弃（按钮没有背景）。品牌色已统一
+ * 改名为 --brand-*（160 处），冲突从根上消除，两套可以安全共存。
+ *
+ * 下面用 `inline` 仍然是必要的：它让 Tailwind 把值内联进工具类而不发射
+ * --color-* 进 :root，从而正确解析嵌套的 var()。不要「简化」掉它。
  */
 @theme inline {
   /* 项目主题色 → text-theme-primary / bg-theme-accent/10 等 */
-  --color-theme-primary: rgb(var(--color-primary));
-  --color-theme-primary-light: rgb(var(--color-primary-light));
-  --color-theme-primary-lighter: rgb(var(--color-primary-lighter));
-  --color-theme-primary-pale: rgb(var(--color-primary-pale));
-  --color-theme-primary-dark: rgb(var(--color-primary-dark));
-  --color-theme-primary-darker: rgb(var(--color-primary-darker));
-  --color-theme-accent: rgb(var(--color-accent));
-  --color-theme-accent-light: rgb(var(--color-accent-light));
-  --color-theme-accent-dark: rgb(var(--color-accent-dark));
+  --color-theme-primary: rgb(var(--brand-primary));
+  --color-theme-primary-light: rgb(var(--brand-primary-light));
+  --color-theme-primary-lighter: rgb(var(--brand-primary-lighter));
+  --color-theme-primary-pale: rgb(var(--brand-primary-pale));
+  --color-theme-primary-dark: rgb(var(--brand-primary-dark));
+  --color-theme-primary-darker: rgb(var(--brand-primary-darker));
+  --color-theme-accent: rgb(var(--brand-accent));
+  --color-theme-accent-light: rgb(var(--brand-accent-light));
+  --color-theme-accent-dark: rgb(var(--brand-accent-dark));
 
   /* shadcn 语义色 → bg-background / text-muted-foreground / border-border 等 */
   --color-background: var(--background);
@@ -171,8 +174,9 @@
  *   给每个元素刷上 border-color: var(--border)。项目现有的裸 border/border-t
  *   工具类目前继承 currentColor，会集体变成中性灰。
  *
- * 但注意：shadcn 的 card / button **确实**用裸 border 加全局色。等真正引入
- * 第一个 shadcn 组件时，要么把这条规则限定到 ui 组件作用域，要么把 --border
- * 调成项目的玻璃描边色（rgba(var(--color-primary), 0.15)）再放开。
+ * 但注意：shadcn 的 card / button **确实**用裸 border 加全局色（已核对
+ * registry 源码）。等真正引入第一个 shadcn 组件时，要么把这条规则限定到 ui
+ * 组件作用域，要么把 --border 调成项目的玻璃描边色
+ * （rgba(var(--brand-primary), 0.15)）再放开。
  * 现在还没有任何 shadcn 组件，所以先不引入这个全局副作用。
  */

@@ -262,14 +262,14 @@ function getRecommendText(color: string) {
   contain-intrinsic-size: auto 400px;
   
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-card, 0.8)) !important;
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15)) !important;
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15)) !important;
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.1)) !important;
 }
 
 /* 暗色模式 */
 .dark .result-card {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-dark, 0.8)) !important;
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2)) !important;
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2)) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
 }
 

@@ -11,7 +11,7 @@
 
 :root {
   /* ========== 主题色 ========== */
-  /* --color-primary / -light / -lighter / -pale / -dark / -darker 及辅助色
+  /* --brand-primary / -light / -lighter / -pale / -dark / -darker 及辅助色
      统一定义在 styles/theme.css（本文件在其之后加载，重复定义会覆盖它并
      导致预设主题色失效）。切换主题色请改 config/themePresets.ts。 */
 
@@ -33,8 +33,8 @@
   --color-info: 59, 130, 246;           /* 信息 #3b82f6 */
   
   /* 兼容旧变量名 */
-  --glass-pink: var(--color-primary);
-  --glass-pink-light: var(--color-primary-light);
+  --glass-pink: var(--brand-primary);
+  --glass-pink-light: var(--brand-primary-light);
   
   /* ========== 透明度变量 ========== */
   /* 基础透明度 - 亮色模式 */
@@ -82,9 +82,9 @@
   --shadow-2xl: 0 16px 48px rgba(0, 0, 0, 0.18);
   
   /* 主题色阴影 */
-  --shadow-primary-sm: 0 2px 8px rgba(var(--color-primary), 0.1);
-  --shadow-primary-md: 0 4px 16px rgba(var(--color-primary), 0.12);
-  --shadow-primary-lg: 0 8px 24px rgba(var(--color-primary), 0.15);
+  --shadow-primary-sm: 0 2px 8px rgba(var(--brand-primary), 0.1);
+  --shadow-primary-md: 0 4px 16px rgba(var(--brand-primary), 0.12);
+  --shadow-primary-lg: 0 8px 24px rgba(var(--brand-primary), 0.15);
   
   /* ========== 过渡时间 ========== */
   --transition-fast: 0.15s;
@@ -111,8 +111,8 @@
   --border-thick: 2px;
   
   /* ========== 组合变量 ========== */
-  --glass-border-light: rgba(var(--color-primary), var(--opacity-border));
-  --glass-border-dark: rgba(var(--color-primary-light), var(--opacity-border-dark));
+  --glass-border-light: rgba(var(--brand-primary), var(--opacity-border));
+  --glass-border-dark: rgba(var(--brand-primary-light), var(--opacity-border-dark));
 }
 
 /* ========== 搜索输入框效果 ========== */

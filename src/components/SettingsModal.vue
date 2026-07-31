@@ -1045,7 +1045,7 @@ function onAdvancedApiReset() {
 .settings-page {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-xl, 0 12px 32px rgba(0, 0, 0, 0.15));
 }
 
@@ -1059,7 +1059,7 @@ function onAdvancedApiReset() {
 /* 设置面板 - 暗色模式 */
 .dark .settings-page {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
@@ -1068,7 +1068,7 @@ function onAdvancedApiReset() {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-card-inner, 0.75));
   border-radius: var(--radius-xl, 1.25rem);
   padding: var(--spacing-lg, 1.25rem);
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
 }
 
@@ -1100,24 +1100,24 @@ function onAdvancedApiReset() {
 .swatch-active {
   box-shadow:
     0 0 0 2px rgba(var(--color-bg-light, 255, 255, 255), 0.95),
-    0 0 0 4px rgb(var(--color-primary, 255, 20, 147)),
+    0 0 0 4px rgb(var(--brand-primary, 255, 20, 147)),
     0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .dark .swatch-active {
   box-shadow:
     0 0 0 2px rgba(var(--color-bg-dark, 30, 41, 59), 0.95),
-    0 0 0 4px rgb(var(--color-primary-light, 255, 105, 180)),
+    0 0 0 4px rgb(var(--brand-primary-light, 255, 105, 180)),
     0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 /* ========== 外观：明暗模式分段控件 ========== */
 .mode-row {
-  background: rgba(var(--color-primary, 255, 20, 147), 0.07);
+  background: rgba(var(--brand-primary, 255, 20, 147), 0.07);
 }
 
 .dark .mode-row {
-  background: rgba(var(--color-primary-light, 255, 105, 180), 0.1);
+  background: rgba(var(--brand-primary-light, 255, 105, 180), 0.1);
 }
 
 .mode-btn {
@@ -1131,8 +1131,8 @@ function onAdvancedApiReset() {
 }
 
 .mode-btn-idle:hover {
-  background: rgba(var(--color-primary, 255, 20, 147), 0.1);
-  color: rgb(var(--color-primary-dark, 199, 21, 133));
+  background: rgba(var(--brand-primary, 255, 20, 147), 0.1);
+  color: rgb(var(--brand-primary-dark, 199, 21, 133));
 }
 
 .dark .mode-btn-idle {
@@ -1140,19 +1140,19 @@ function onAdvancedApiReset() {
 }
 
 .dark .mode-btn-idle:hover {
-  color: rgb(var(--color-primary-light, 255, 105, 180));
+  color: rgb(var(--brand-primary-light, 255, 105, 180));
 }
 
 .mode-btn-active {
-  background: rgb(var(--color-primary, 255, 20, 147));
+  background: rgb(var(--brand-primary, 255, 20, 147));
   color: #fff;
-  box-shadow: 0 2px 8px rgba(var(--color-primary, 255, 20, 147), 0.35);
+  box-shadow: 0 2px 8px rgba(var(--brand-primary, 255, 20, 147), 0.35);
 }
 
 /* 设置卡片 - 暗色模式 */
 .dark .settings-card {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-inner-dark, 0.75));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
@@ -1166,12 +1166,12 @@ function onAdvancedApiReset() {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgb(var(--color-primary)), rgb(var(--color-accent)));
+  background: linear-gradient(180deg, rgb(var(--brand-primary)), rgb(var(--brand-accent)));
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgb(var(--color-primary-dark)), rgb(var(--color-accent-dark)));
+  background: linear-gradient(180deg, rgb(var(--brand-primary-dark)), rgb(var(--brand-accent-dark)));
 }
 
 /* 输入框选中样式 */
@@ -1183,7 +1183,7 @@ function onAdvancedApiReset() {
 
 .api-input::selection,
 .css-input::selection {
-  background-color: rgba(var(--color-primary), 0.3);
+  background-color: rgba(var(--brand-primary), 0.3);
 }
 
 /* IDE 风格代码编辑器 */

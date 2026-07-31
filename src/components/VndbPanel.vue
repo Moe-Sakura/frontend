@@ -1116,7 +1116,7 @@ function formatRelation(relation: string): string {
 .vndb-page {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-xl, 0 12px 32px rgba(0, 0, 0, 0.15));
 }
 
@@ -1130,7 +1130,7 @@ function formatRelation(relation: string): string {
 /* VNDB 面板 - 暗色模式 */
 .dark .vndb-page {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
@@ -1139,14 +1139,14 @@ function formatRelation(relation: string): string {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-card-inner, 0.75));
   border-radius: var(--radius-xl, 1.25rem);
   padding: var(--spacing-lg, 1.25rem);
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
 }
 
 /* VNDB 卡片 - 暗色模式 */
 .dark .vndb-card {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-inner-dark, 0.75));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
@@ -1203,7 +1203,7 @@ function formatRelation(relation: string): string {
 }
 
 .prose-description :deep(.spoiler-text:hover) {
-  background: rgba(var(--color-primary), 0.1);
+  background: rgba(var(--brand-primary), 0.1);
   color: inherit;
 }
 
@@ -1212,6 +1212,6 @@ function formatRelation(relation: string): string {
 }
 
 .dark .prose-description :deep(.spoiler-text:hover) {
-  background: rgba(var(--color-primary-light), 0.2);
+  background: rgba(var(--brand-primary-light), 0.2);
 }
 </style>
