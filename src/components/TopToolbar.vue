@@ -60,7 +60,13 @@ import { useUIStore } from '@/stores/ui'
 import { generateShareURL } from '@/utils/urlParams'
 import { Check, Download, Share2, Keyboard, Settings } from '@lucide/vue'
 import GithubIcon from '@/components/GithubIcon.vue'
-import { playTap, playCelebration, playNotification, playSwipe } from '@/composables/useSound'
+import {
+  playTap,
+  playCelebration,
+  playNotification,
+  playSwipe,
+  playCaution,
+} from '@/composables/useSound'
 
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
@@ -136,79 +142,127 @@ function openSettings() {
   emit('openSettings')
 }
 
+/** 文件系统不允许出现在文件名中的字符 */
+const INVALID_FILENAME_CHARS = /[\\/:*?"<>|]/g
+
+/** 图源常把尺寸等信息 URL 编码进文件名，解码失败时原样返回 */
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'image/avif': 'avif',
+  'image/bmp': 'bmp',
+  'image/svg+xml': 'svg',
+}
+
+/**
+ * 由图片地址与 MIME 推导文件名
+ * @param sourceUrl 应传重定向后的最终地址：随机图 API 的入口（/v1/img?t=…）里没有文件名
+ */
+function buildImageFilename(sourceUrl: string, mimeType: string): string {
+  let filename = 'searchgal-background'
+  let extension = 'jpg'
+
+  try {
+    const rawName = new URL(sourceUrl).pathname.split('/').pop() ?? ''
+    // 图源常把尺寸等信息编码进文件名（如 xxx_%5B79%201%5D.avif），先还原再清洗
+    const lastPart = safeDecode(rawName)
+
+    if (lastPart.includes('.')) {
+      const nameParts = lastPart.split('.')
+      extension = nameParts.pop() || extension
+      filename = nameParts.join('.')
+    } else if (lastPart) {
+      filename = lastPart
+    }
+  } catch {
+    // 地址不合法时用默认文件名
+  }
+
+  if (mimeType) {
+    extension = MIME_TO_EXT[mimeType] || extension
+  }
+
+  // 去掉文件名里不能用的字符，并把连续空白压成单个下划线
+  filename = filename
+    .replace(INVALID_FILENAME_CHARS, '')
+    .replace(/\s+/g, '_')
+    .replace(/^[._]+|[._]+$/g, '')
+
+  if (!filename) {
+    filename = 'searchgal-background'
+  }
+
+  // 部分随机图 API 的文件名很长，截断避免超出文件系统限制
+  if (filename.length > 50) {
+    filename = filename.slice(0, 50)
+  }
+
+  return `${filename}.${extension}`
+}
+
+function triggerDownload(href: string, filename: string) {
+  const link = document.createElement('a')
+  link.href = href
+  link.download = filename
+  link.style.display = 'none'
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+function flashSaveTip() {
+  showSaveTip.value = true
+  setTimeout(() => {
+    showSaveTip.value = false
+  }, 2000)
+}
+
 // 保存背景图（使用源格式和文件名）
 async function saveBackgroundImage() {
   if (!props.currentBackgroundUrl) {return}
   playSwipe()
-  
+
   try {
     const response = await fetch(props.currentBackgroundUrl)
+    if (!response.ok) {throw new Error(`HTTP ${response.status}`)}
+
     const blob = await response.blob()
-    
-    // 从 URL 中提取文件名和扩展名
-    let filename = 'searchgal-background'
-    let extension = 'jpg'
-    
-    try {
-      const url = new URL(props.currentBackgroundUrl)
-      const pathname = url.pathname
-      const parts = pathname.split('/')
-      const lastPart = parts[parts.length - 1]
-      
-      if (lastPart?.includes('.')) {
-        // 有文件名和扩展名
-        const nameParts = lastPart.split('.')
-        extension = nameParts.pop() || 'jpg'
-        filename = nameParts.join('.')
-      } else if (lastPart) {
-        // 只有文件名，没有扩展名
-        filename = lastPart
-      }
-      
-      // 根据 MIME 类型确定扩展名
-      if (blob.type) {
-        const mimeToExt: Record<string, string> = {
-          'image/jpeg': 'jpg',
-          'image/jpg': 'jpg',
-          'image/png': 'png',
-          'image/gif': 'gif',
-          'image/webp': 'webp',
-          'image/bmp': 'bmp',
-          'image/svg+xml': 'svg',
-        }
-        extension = mimeToExt[blob.type] || extension
-      }
-    } catch (e) {
-      // URL 解析失败，使用默认值
-    }
-    
-    // 如果文件名太长，截断
-    if (filename.length > 50) {
-      filename = filename.substring(0, 50)
-    }
-    
-    // 创建下载链接
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${filename}.${extension}`
-    link.style.display = 'none'
-    
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    
-    setTimeout(() => {
-      URL.revokeObjectURL(url)
-    }, 100)
-    
+    const objectUrl = URL.createObjectURL(blob)
+
+    // response.url 是跟随重定向后的真实图片地址，文件名取它才有意义
+    triggerDownload(objectUrl, buildImageFilename(response.url || props.currentBackgroundUrl, blob.type))
+    setTimeout(() => { URL.revokeObjectURL(objectUrl) }, 100)
+
     playCelebration()
-    showSaveTip.value = true
-    setTimeout(() => {
-      showSaveTip.value = false
-    }, 2000)
+    flashSaveTip()
   } catch (error) {
-    // 静默处理
+    /*
+     * 自定义随机图 API 大多不返回 Access-Control-Allow-Origin，fetch 会被浏览器拦截
+     * （背景图本身是 CSS background-image，不受 CORS 限制，所以只有下载会失败）。
+     * 跨域时 <a download> 会被忽略，只能退回到新标签页打开原图让用户自行保存。
+     */
+    console.warn('[TopToolbar] 背景图下载失败（多为图源未开放 CORS），回退到新标签页打开：', error)
+
+    const opened = window.open(props.currentBackgroundUrl, '_blank', 'noopener,noreferrer')
+    if (opened) {
+      playNotification()
+      flashSaveTip()
+    } else {
+      // 弹窗被拦截，什么都做不了，至少给个失败反馈
+      playCaution()
+    }
   }
 }
 </script>
@@ -226,7 +280,7 @@ async function saveBackgroundImage() {
   border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12));
   
-  color: rgb(199, 21, 133);
+  color: rgb(var(--color-primary-dark, 199, 21, 133));
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -262,16 +316,16 @@ async function saveBackgroundImage() {
 
 .toolbar-button:hover {
   transform: translate3d(0, -3px, 0) scale(1.08);
-  box-shadow: 
-    0 16px 40px rgba(255, 20, 147, 0.3),
+  box-shadow:
+    0 16px 40px rgba(var(--color-primary, 255, 20, 147), 0.3),
     0 8px 20px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border-color: rgba(255, 255, 255, 0.5);
 }
 
 .dark .toolbar-button:hover {
-  box-shadow: 
-    0 16px 40px rgba(255, 105, 180, 0.35),
+  box-shadow:
+    0 16px 40px rgba(var(--color-primary-light, 255, 105, 180), 0.35),
     0 8px 20px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.2);
@@ -286,28 +340,28 @@ async function saveBackgroundImage() {
   text-decoration: none;
 }
 
-/* 保存成功状态 - 艳粉渐变 */
+/* 保存成功状态 - 主题色渐变 */
 .save-success {
-  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119)) !important;
+  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-primary-dark))) !important;
   color: white !important;
-  border-color: rgba(236, 72, 153, 0.5) !important;
+  border-color: rgba(var(--color-primary), 0.5) !important;
   box-shadow: 
-    0 8px 20px rgba(236, 72, 153, 0.4),
-    0 0 30px rgba(236, 72, 153, 0.3) !important;
+    0 8px 20px rgba(var(--color-primary), 0.4),
+    0 0 30px rgba(var(--color-primary), 0.3) !important;
 }
 
 .save-success i {
   color: white !important;
 }
 
-/* 分享已复制状态 - 艳粉渐变 */
+/* 分享已复制状态 - 主题色渐变 */
 .share-copied {
-  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119)) !important;
+  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-primary-dark))) !important;
   color: white !important;
-  border-color: rgba(236, 72, 153, 0.5) !important;
+  border-color: rgba(var(--color-primary), 0.5) !important;
   box-shadow: 
-    0 8px 20px rgba(236, 72, 153, 0.4),
-    0 0 30px rgba(236, 72, 153, 0.3) !important;
+    0 8px 20px rgba(var(--color-primary), 0.4),
+    0 0 30px rgba(var(--color-primary), 0.3) !important;
 }
 
 .share-copied i {

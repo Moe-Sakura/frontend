@@ -20,7 +20,7 @@
           <!-- 返回按钮 - 移动端 -->
           <button
             v-ripple
-            class="flex items-center gap-1 px-3 py-2 -ml-2 rounded-xl text-[#ff1493] dark:text-[#ff69b4] font-medium transition-all hover:bg-pink-50 dark:hover:bg-pink-900/20 md:hidden"
+            class="flex items-center gap-1 px-3 py-2 -ml-2 rounded-xl text-theme-primary dark:text-theme-primary-light font-medium transition-all hover:bg-theme-primary/5 dark:hover:bg-theme-primary-darker/20 md:hidden"
             @click="closeModal"
           >
             <ChevronLeft :size="20" />
@@ -29,7 +29,7 @@
 
           <!-- 标题 -->
           <div class="flex items-center gap-2 md:ml-0">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-lg shadow-pink-500/30 relative">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30 relative">
               <MessageCircle :size="16" class="text-white" />
               <Send :size="8" class="text-white/80 absolute -bottom-0.5 -right-0.5" />
             </div>
@@ -291,8 +291,8 @@ onUnmounted(() => {
 
 @keyframes comment-highlight {
   0%, 50% {
-    background-color: rgba(255, 20, 147, 0.2);
-    box-shadow: 0 0 0 4px rgba(255, 20, 147, 0.3);
+    background-color: rgba(var(--color-primary), 0.2);
+    box-shadow: 0 0 0 4px rgba(var(--color-primary), 0.3);
     border-radius: 8px;
   }
   100% {

@@ -24,7 +24,7 @@ export const useSearchStore = defineStore('search', () => {
   const searchQuery = ref('')
   const searchMode = ref<'game' | 'patch'>('game')
   const customApi = ref('')
-  const platformResults = ref(new Map())
+  const platformResults = ref(new Map<string, PlatformData>())
   const vndbInfo = ref<VndbInfo | null>(null)
   const isSearching = ref(false)
   const searchProgress = ref({ current: 0, total: 0 })
@@ -32,7 +32,11 @@ export const useSearchStore = defineStore('search', () => {
   const isFirstSearch = ref(true)
   const lastSearchTime = ref(0)
   const isStateRestored = ref(false)
-  
+
+  // 结果筛选：空字符串表示「全部」
+  const channelFilter = ref('')
+  const methodFilter = ref('')
+
   // 获取其他 stores
   const historyStore = useHistoryStore()
   const cacheStore = useCacheStore()
@@ -93,16 +97,72 @@ export const useSearchStore = defineStore('search', () => {
     const COOLDOWN_MS = 30 * 1000
     return isSearching.value || (now - lastSearchTime.value < COOLDOWN_MS)
   })
-  const totalResults = computed(() => 
+  const totalResults = computed(() =>
     Array.from(platformResults.value.values())
       .reduce((sum, platform) => sum + platform.items.length, 0),
   )
+
+  /**
+   * 站点所含的全部标签
+   * 后端把标签挂在每个条目上，但同站点的条目标签一致，所以取并集即站点标签。
+   */
+  function getPlatformTags(platform: PlatformData): string[] {
+    const tags = new Set<string>()
+    for (const item of platform.items) {
+      item.tags?.forEach(tag => tags.add(tag))
+    }
+    return Array.from(tags)
+  }
+
+  /** 当前结果中真实出现过的标签，用于只渲染有意义的筛选项 */
+  const availableTags = computed(() => {
+    const tags = new Set<string>()
+    for (const platform of platformResults.value.values()) {
+      getPlatformTags(platform).forEach(tag => tags.add(tag))
+    }
+    return tags
+  })
+
+  /** 应用筛选后的站点结果；未选任何筛选时原样返回，避免无谓的 Map 拷贝 */
+  const filteredPlatformResults = computed(() => {
+    if (!channelFilter.value && !methodFilter.value) {
+      return platformResults.value
+    }
+
+    const filtered = new Map<string, PlatformData>()
+    for (const [name, platform] of platformResults.value.entries()) {
+      const tags = getPlatformTags(platform)
+      if (channelFilter.value && !tags.includes(channelFilter.value)) {continue}
+      if (methodFilter.value && !tags.includes(methodFilter.value)) {continue}
+      filtered.set(name, platform)
+    }
+    return filtered
+  })
+
+  const isFiltering = computed(() => !!channelFilter.value || !!methodFilter.value)
+
+  const filteredPlatformCount = computed(() => filteredPlatformResults.value.size)
 
   // 方法
   function clearResults() {
     platformResults.value.clear()
     vndbInfo.value = null
     errorMessage.value = ''
+    resetFilters()
+  }
+
+  /** 设置筛选；传入当前已选值则取消该项（再次点击同一 chip = 取消） */
+  function setChannelFilter(tag: string) {
+    channelFilter.value = channelFilter.value === tag ? '' : tag
+  }
+
+  function setMethodFilter(tag: string) {
+    methodFilter.value = methodFilter.value === tag ? '' : tag
+  }
+
+  function resetFilters() {
+    channelFilter.value = ''
+    methodFilter.value = ''
   }
 
   function setSearchQuery(query: string) {
@@ -192,13 +252,22 @@ export const useSearchStore = defineStore('search', () => {
     isFirstSearch,
     lastSearchTime,
     isStateRestored,
+    channelFilter,
+    methodFilter,
     // 计算属性
     hasResults,
     isVndbMode,
     searchDisabled,
     totalResults,
+    availableTags,
+    filteredPlatformResults,
+    isFiltering,
+    filteredPlatformCount,
     // 方法
     clearResults,
+    setChannelFilter,
+    setMethodFilter,
+    resetFilters,
     setSearchQuery,
     setSearchMode,
     setCustomApi,

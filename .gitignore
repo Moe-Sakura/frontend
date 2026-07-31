@@ -31,3 +31,6 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# Claude Code 本地配置与临时 worktree
+.claude/

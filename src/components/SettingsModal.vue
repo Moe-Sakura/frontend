@@ -19,7 +19,7 @@
         >
           <!-- 返回按钮 - 仅移动端 -->
           <button
-            class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors active:scale-95 md:hidden"
+            class="flex items-center gap-1 text-theme-primary dark:text-theme-primary-light font-medium transition-colors active:scale-95 md:hidden"
             @click="close"
           >
             <ChevronLeft :size="24" />
@@ -28,7 +28,7 @@
 
           <!-- 标题 -->
           <div class="flex items-center gap-2 md:ml-0">
-            <SettingsIcon :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
+            <SettingsIcon :size="20" class="text-theme-primary dark:text-theme-primary-light" />
             <h1 class="text-lg font-bold text-gray-800 dark:text-white">设置</h1>
           </div>
 
@@ -36,7 +36,7 @@
           <div class="flex items-center gap-2">
             <!-- 保存按钮 -->
             <button
-              class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-[#ff1493] hover:bg-[#e0117f] active:scale-95 transition-all shadow-lg shadow-pink-500/25"
+              class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-theme-primary hover:bg-[#e0117f] active:scale-95 transition-all shadow-lg shadow-theme-primary/25"
               @click="save"
             >
               保存
@@ -56,11 +56,66 @@
         <!-- 内容区域 -->
         <div class="flex-1 overflow-y-auto custom-scrollbar">
           <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+            <!-- 外观设置卡片 -->
+            <div class="settings-card">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30">
+                  <Palette :size="20" class="text-white" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">外观</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">主题色与明暗模式</p>
+                </div>
+              </div>
+
+              <!-- 预设主题色 -->
+              <div class="mt-5">
+                <p class="mb-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300">
+                  主题色
+                </p>
+                <div class="flex flex-wrap items-center gap-3">
+                  <button
+                    v-for="preset in THEME_PRESETS"
+                    :key="preset.key"
+                    type="button"
+                    class="swatch"
+                    :class="{ 'swatch-active': uiStore.themeColor === preset.key }"
+                    :style="{ background: preset.primary }"
+                    :title="preset.label"
+                    :aria-label="`主题色：${preset.label}`"
+                    :aria-pressed="uiStore.themeColor === preset.key"
+                    @click="selectThemeColor(preset.key)"
+                  />
+                </div>
+              </div>
+
+              <!-- 明暗模式 -->
+              <div class="mt-5">
+                <p class="mb-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300">
+                  明暗模式
+                </p>
+                <div class="mode-row flex items-center gap-1 rounded-xl p-1">
+                  <button
+                    v-for="mode in THEME_MODES"
+                    :key="mode.value"
+                    type="button"
+                    class="mode-btn flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-semibold"
+                    :class="uiStore.themeMode === mode.value ? 'mode-btn-active' : 'mode-btn-idle'"
+                    :aria-pressed="uiStore.themeMode === mode.value"
+                    @click="selectThemeMode(mode.value)"
+                  >
+                    <component :is="mode.icon" :size="16" />
+                    <span>{{ mode.label }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <!-- 音效设置卡片 -->
             <div class="settings-card">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-lg shadow-pink-500/30">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30">
                     <Volume2 :size="20" class="text-white" />
                   </div>
                   <div>
@@ -76,7 +131,7 @@
                   :class="[
                     'relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                     localEnableSound
-                      ? 'bg-[#ff1493]'
+                      ? 'bg-theme-primary'
                       : 'bg-gray-300 dark:bg-slate-600'
                   ]"
                   @click="toggleSound"
@@ -216,8 +271,8 @@
                   :class="[
                     'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
                     selectedApiOption === option.value
-                      ? 'bg-gradient-to-r from-[#ff1493]/10 to-[#d946ef]/10 border-2 border-[#ff1493] dark:border-[#ff69b4]'
-                      : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-pink-200 dark:hover:border-pink-900'
+                      ? 'bg-gradient-to-r from-theme-primary/10 to-theme-accent/10 border-2 border-theme-primary dark:border-theme-primary-light'
+                      : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-theme-primary/25 dark:hover:border-theme-primary-darker'
                   ]"
                   @click="selectApiOption(option.value)"
                 >
@@ -226,7 +281,7 @@
                       :class="[
                         'w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors',
                         selectedApiOption === option.value
-                          ? 'border-[#ff1493] bg-[#ff1493]'
+                          ? 'border-theme-primary bg-theme-primary'
                           : 'border-gray-300 dark:border-slate-600'
                       ]"
                     >
@@ -236,7 +291,7 @@
                       :class="[
                         'font-medium text-sm sm:text-base',
                         selectedApiOption === option.value
-                          ? 'text-[#ff1493] dark:text-[#ff69b4]'
+                          ? 'text-theme-primary dark:text-theme-primary-light'
                           : 'text-gray-700 dark:text-slate-300'
                       ]"
                     >
@@ -281,7 +336,7 @@
                         v-model="customApiInput"
                         type="url"
                         placeholder="https://api.example.com"
-                        class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-pink-500/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-[#ff1493] text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                        class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-theme-primary/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-theme-primary text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
                         @input="handleTyping"
                       />
                     </div>
@@ -322,9 +377,9 @@
                   ]"
                   @click="switchCodeTab('css')"
                 >
-                  <Paintbrush :size="14" :class="activeCodeTab === 'css' ? 'text-[#ff1493]' : 'text-gray-500 group-hover:text-[#ff1493]'" />
+                  <Paintbrush :size="14" :class="activeCodeTab === 'css' ? 'text-theme-primary' : 'text-gray-500 group-hover:text-theme-primary'" />
                   <span>style.css</span>
-                  <div v-if="activeCodeTab === 'css'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff1493]" />
+                  <div v-if="activeCodeTab === 'css'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-theme-primary" />
                 </button>
                 <button
                   :class="[
@@ -530,8 +585,15 @@ import {
   FileJson,
   AlertCircle,
   CheckCircle2,
+  Palette,
+  Sun,
+  Moon,
+  Monitor,
 } from '@lucide/vue'
 import { useSettingsStore } from '@/stores/settings'
+import { useUIStore } from '@/stores/ui'
+import type { ThemeMode } from '@/stores/ui'
+import { THEME_PRESETS } from '@/config/themePresets'
 import AdvancedApiSettings, { type AdvancedApiConfig } from '@/components/AdvancedApiSettings.vue'
 import GithubIcon from '@/components/GithubIcon.vue'
 import { useHistoryStore } from '@/stores/history'
@@ -541,6 +603,28 @@ import repoData from '@/data/repository-opengraph.json'
 
 const settingsStore = useSettingsStore()
 const historyStore = useHistoryStore()
+const uiStore = useUIStore()
+
+// ========== 外观 ==========
+
+const THEME_MODES: { value: ThemeMode; label: string; icon: typeof Monitor }[] = [
+  { value: 'system', label: '跟随系统', icon: Monitor },
+  { value: 'light', label: '明亮', icon: Sun },
+  { value: 'dark', label: '黑夜', icon: Moon },
+]
+
+// 主题色/明暗模式即选即生效并自行持久化，无需等「保存」
+function selectThemeColor(key: string) {
+  if (uiStore.themeColor === key) {return}
+  playSelect()
+  uiStore.setThemeColor(key)
+}
+
+function selectThemeMode(mode: ThemeMode) {
+  if (uiStore.themeMode === mode) {return}
+  playTap()
+  uiStore.setThemeMode(mode)
+}
 
 // GitHub 关于项目相关
 const githubHashTimestamp = ref('')
@@ -988,6 +1072,83 @@ function onAdvancedApiReset() {
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.08));
 }
 
+/* ========== 外观：主题色色块 ========== */
+.swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s var(--ease-out-back, cubic-bezier(0.34, 1.56, 0.64, 1)),
+              box-shadow 0.2s ease-out;
+}
+
+.dark .swatch {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.swatch:hover {
+  transform: scale(1.15);
+}
+
+.swatch:active {
+  transform: scale(0.95);
+}
+
+/* 选中态用外描边圈出，不改动色块本身的颜色 */
+.swatch-active {
+  box-shadow:
+    0 0 0 2px rgba(var(--color-bg-light, 255, 255, 255), 0.95),
+    0 0 0 4px rgb(var(--color-primary, 255, 20, 147)),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dark .swatch-active {
+  box-shadow:
+    0 0 0 2px rgba(var(--color-bg-dark, 30, 41, 59), 0.95),
+    0 0 0 4px rgb(var(--color-primary-light, 255, 105, 180)),
+    0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* ========== 外观：明暗模式分段控件 ========== */
+.mode-row {
+  background: rgba(var(--color-primary, 255, 20, 147), 0.07);
+}
+
+.dark .mode-row {
+  background: rgba(var(--color-primary-light, 255, 105, 180), 0.1);
+}
+
+.mode-btn {
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease-out, color 0.2s ease-out;
+}
+
+.mode-btn-idle {
+  color: rgb(var(--text-secondary, 107, 114, 128));
+}
+
+.mode-btn-idle:hover {
+  background: rgba(var(--color-primary, 255, 20, 147), 0.1);
+  color: rgb(var(--color-primary-dark, 199, 21, 133));
+}
+
+.dark .mode-btn-idle {
+  color: rgb(var(--text-secondary, 148, 163, 184));
+}
+
+.dark .mode-btn-idle:hover {
+  color: rgb(var(--color-primary-light, 255, 105, 180));
+}
+
+.mode-btn-active {
+  background: rgb(var(--color-primary, 255, 20, 147));
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(var(--color-primary, 255, 20, 147), 0.35);
+}
+
 /* 设置卡片 - 暗色模式 */
 .dark .settings-card {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-inner-dark, 0.75));
@@ -1005,12 +1166,12 @@ function onAdvancedApiReset() {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ff1493, #d946ef);
+  background: linear-gradient(180deg, rgb(var(--color-primary)), rgb(var(--color-accent)));
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c71585, #c026d3);
+  background: linear-gradient(180deg, rgb(var(--color-primary-dark)), rgb(var(--color-accent-dark)));
 }
 
 /* 输入框选中样式 */
@@ -1022,7 +1183,7 @@ function onAdvancedApiReset() {
 
 .api-input::selection,
 .css-input::selection {
-  background-color: rgba(255, 20, 147, 0.3);
+  background-color: rgba(var(--color-primary), 0.3);
 }
 
 /* IDE 风格代码编辑器 */

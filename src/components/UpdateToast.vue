@@ -9,7 +9,7 @@
   >
     <div
       v-if="needRefresh"
-      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-3 rounded-2xl bg-gradient-to-r from-[#ff1493] to-[#d946ef] text-white shadow-xl shadow-pink-500/30 flex items-center gap-3 max-w-[90vw] sm:max-w-md"
+      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-3 rounded-2xl bg-gradient-to-r from-theme-primary to-theme-accent text-white shadow-xl shadow-theme-primary/30 flex items-center gap-3 max-w-[90vw] sm:max-w-md"
     >
       <!-- 图标 -->
       <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">

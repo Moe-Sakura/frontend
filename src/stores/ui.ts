@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
+import { DEFAULT_THEME_PRESET } from '@/config/themePresets'
+import { applyThemeColor } from '@/utils/themeColor'
 
 // 主题模式类型
 export type ThemeMode = 'system' | 'light' | 'dark'
@@ -9,6 +11,8 @@ export interface PersistedUIState {
   // 主题
   themeMode: ThemeMode
   isDarkMode: boolean
+  /** 预设主题色 key，见 config/themePresets.ts */
+  themeColor: string
   customCSS: string
   
   // 模态框状态
@@ -36,6 +40,7 @@ const SESSION_KEY = 'ui-session-state'
 const DEFAULT_PERSISTED_STATE: PersistedUIState = {
   themeMode: 'system',
   isDarkMode: false,
+  themeColor: DEFAULT_THEME_PRESET,
   customCSS: '',
   isCommentsModalOpen: false,
   isVndbPanelOpen: false,
@@ -55,6 +60,7 @@ export const useUIStore = defineStore('ui', () => {
   // 主题相关
   const themeMode = ref<ThemeMode>('system')
   const isDarkMode = ref(false)
+  const themeColor = ref<string>(DEFAULT_THEME_PRESET)
   const customCSS = ref('')
   let systemThemeCleanup: (() => void) | null = null
   
@@ -166,6 +172,15 @@ export const useUIStore = defineStore('ui', () => {
   
   function setDarkMode(value: boolean) {
     setThemeMode(value ? 'dark' : 'light')
+  }
+
+  /**
+   * 设置预设主题色
+   * @param key config/themePresets.ts 中的预设 key
+   */
+  function setThemeColor(key: string) {
+    themeColor.value = key
+    applyThemeColor(key)
   }
   
   function setCustomCSS(css: string) {
@@ -335,6 +350,7 @@ export const useUIStore = defineStore('ui', () => {
         }
         
         themeMode.value = savedThemeMode ?? DEFAULT_PERSISTED_STATE.themeMode
+        themeColor.value = parsed.themeColor ?? DEFAULT_PERSISTED_STATE.themeColor
         customCSS.value = parsed.customCSS ?? DEFAULT_PERSISTED_STATE.customCSS
         showSearchHistory.value = parsed.showSearchHistory ?? DEFAULT_PERSISTED_STATE.showSearchHistory
       }
@@ -371,6 +387,7 @@ export const useUIStore = defineStore('ui', () => {
     try {
       const state: Partial<PersistedUIState> = {
         themeMode: themeMode.value,
+        themeColor: themeColor.value,
         customCSS: customCSS.value,
         showSearchHistory: showSearchHistory.value,
         lastVisitTime: Date.now(),
@@ -401,7 +418,7 @@ export const useUIStore = defineStore('ui', () => {
 
   // 监听需要持久化的状态变化（localStorage - 长期偏好）
   watch(
-    [themeMode, customCSS, showSearchHistory],
+    [themeMode, themeColor, customCSS, showSearchHistory],
     () => {
       if (isInitialized.value) {
         savePersistedState()
@@ -436,7 +453,10 @@ export const useUIStore = defineStore('ui', () => {
 
     // 应用主题模式
     setThemeMode(themeMode.value)
-    
+
+    // 应用预设主题色
+    applyThemeColor(themeColor.value)
+
     isInitialized.value = true
     
     // 恢复滚动位置
@@ -473,6 +493,7 @@ export const useUIStore = defineStore('ui', () => {
     isInitialized,
     themeMode,
     isDarkMode,
+    themeColor,
     customCSS,
     isCommentsModalOpen,
     isVndbPanelOpen,
@@ -497,6 +518,7 @@ export const useUIStore = defineStore('ui', () => {
     setThemeMode,
     toggleDarkMode,
     setDarkMode,
+    setThemeColor,
     setCustomCSS,
     // 模态框方法
     openCommentsModal,

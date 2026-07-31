@@ -21,7 +21,7 @@
           <!-- 标题栏 -->
           <div class="flex items-center justify-between px-5 py-4 border-b border-white/10 dark:border-slate-700/50">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-lg shadow-pink-500/30">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30">
                 <Keyboard :size="20" class="text-white" />
               </div>
               <div>
@@ -69,7 +69,7 @@
                 </div>
                 <div class="shortcut-row">
                   <span class="flex items-center gap-2">
-                    <MessageSquare :size="14" class="text-pink-400" />
+                    <MessageSquare :size="14" class="text-theme-primary-light" />
                     打开/关闭评论
                   </span>
                   <kbd>C</kbd>
@@ -215,7 +215,7 @@ function close() {
   background: linear-gradient(135deg, #ff1493, #d946ef);
   border-radius: 0.5rem;
   box-shadow: 
-    0 2px 6px rgba(255, 20, 147, 0.3),
+    0 2px 6px rgba(var(--color-primary), 0.3),
     0 1px 0 rgba(255, 255, 255, 0.2) inset;
 }
 
@@ -229,11 +229,11 @@ function close() {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 20, 147, 0.3);
+  background: rgba(var(--color-primary), 0.3);
   border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 20, 147, 0.5);
+  background: rgba(var(--color-primary), 0.5);
 }
 </style>

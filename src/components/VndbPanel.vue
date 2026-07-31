@@ -20,7 +20,7 @@
         >
           <!-- 返回按钮 - 移动端 -->
           <button
-            class="flex items-center gap-1 text-[#ff1493] dark:text-[#ff69b4] font-medium transition-colors hover:opacity-80 md:hidden"
+            class="flex items-center gap-1 text-theme-primary dark:text-theme-primary-light font-medium transition-colors hover:opacity-80 md:hidden"
             @click="closePanel"
           >
             <ChevronLeft :size="24" />
@@ -29,7 +29,7 @@
 
           <!-- 标题 -->
           <div class="flex items-center gap-2 md:ml-0">
-            <BookOpen :size="20" class="text-[#ff1493] dark:text-[#ff69b4]" />
+            <BookOpen :size="20" class="text-theme-primary dark:text-theme-primary-light" />
             <h1 class="text-lg font-bold text-gray-800 dark:text-white">作品介绍</h1>
           </div>
 
@@ -64,7 +64,7 @@
               :href="vndbUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-white bg-[#ff1493] hover:bg-[#e6007f]"
+              class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-white bg-theme-primary hover:bg-[#e6007f]"
             >
               <ExternalLink :size="14" />
               <span class="hidden sm:inline">VNDB</span>
@@ -121,7 +121,7 @@
                     <span
                       v-for="(name, index) in (expandedSections.names ? searchStore.vndbInfo.names : searchStore.vndbInfo.names.slice(0, 4))"
                       :key="index"
-                      class="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/30 text-[#ff1493] dark:text-[#ff69b4] text-xs rounded-full"
+                      class="px-2 py-0.5 bg-theme-primary/10 dark:bg-theme-primary-darker/30 text-theme-primary dark:text-theme-primary-light text-xs rounded-full"
                     >
                       {{ name }}
                     </span>
@@ -253,14 +253,14 @@
             <div v-if="searchStore.vndbInfo.description" class="vndb-card !p-4">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
-                  <AlignLeft :size="16" class="text-[#ff1493]" />
+                  <AlignLeft :size="16" class="text-theme-primary" />
                   <h3 class="text-sm font-bold text-gray-800 dark:text-white">简介</h3>
-                  <Loader v-if="isTranslating" :size="12" class="animate-spin text-[#ff1493]" />
+                  <Loader v-if="isTranslating" :size="12" class="animate-spin text-theme-primary" />
                 </div>
                 <!-- AI 译文标签 - 右上角 -->
                 <div 
                   v-if="translatedDescription && !showOriginal" 
-                  class="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-[#ff1493] to-[#d946ef] text-white text-[10px] rounded-full"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-theme-primary to-theme-accent text-white text-[10px] rounded-full"
                 >
                   <Bot :size="10" />
                   <span>AI 译文</span>
@@ -521,7 +521,7 @@
               <!-- 游戏截图 -->
               <div v-if="searchStore.vndbInfo.screenshots && searchStore.vndbInfo.screenshots.length > 0">
                 <div class="flex items-center gap-2 mb-2">
-                  <Image :size="16" class="text-[#d946ef]" />
+                  <Image :size="16" class="text-theme-accent" />
                   <h4 class="text-sm font-bold text-gray-800 dark:text-white">截图</h4>
                   <span class="text-xs text-gray-400">({{ searchStore.vndbInfo.screenshots.length }})</span>
                 </div>
@@ -1024,13 +1024,13 @@ function renderDescription(text: string): string {
     // 链接 [url=链接]文字[/url]（只允许安全协议）
     .replace(/\[url=([^\]]+)\](.+?)\[\/url\]/gi, (_, url: string, text: string) => {
       return isSafeUrl(url) 
-        ? `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#ff1493] hover:underline">${text}</a>`
+        ? `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-theme-primary hover:underline">${text}</a>`
         : text // 不安全 URL 只显示文字
     })
     // 链接 [url]链接[/url]（只允许安全协议）
     .replace(/\[url\](.+?)\[\/url\]/gi, (_, url: string) => {
       return isSafeUrl(url)
-        ? `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-[#ff1493] hover:underline">${url}</a>`
+        ? `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-theme-primary hover:underline">${url}</a>`
         : url // 不安全 URL 只显示原文
     })
     // 粗体 [b]文字[/b]
@@ -1044,7 +1044,7 @@ function renderDescription(text: string): string {
     // 剧透 [spoiler]文字[/spoiler]
     .replace(/\[spoiler\](.+?)\[\/spoiler\]/gi, '<span class="spoiler-text">$1</span>')
     // 引用 [quote]文字[/quote]
-    .replace(/\[quote\](.+?)\[\/quote\]/gis, '<blockquote class="border-l-2 border-[#ff1493] pl-3 my-2 text-gray-600 dark:text-slate-400 italic">$1</blockquote>')
+    .replace(/\[quote\](.+?)\[\/quote\]/gis, '<blockquote class="border-l-2 border-theme-primary pl-3 my-2 text-gray-600 dark:text-slate-400 italic">$1</blockquote>')
     // 代码 [code]文字[/code]
     .replace(/\[code\](.+?)\[\/code\]/gis, '<code class="bg-gray-100 dark:bg-slate-700 px-1 py-0.5 rounded text-sm">$1</code>')
     // 原始文本 [raw]文字[/raw]
@@ -1203,7 +1203,7 @@ function formatRelation(relation: string): string {
 }
 
 .prose-description :deep(.spoiler-text:hover) {
-  background: rgba(255, 20, 147, 0.1);
+  background: rgba(var(--color-primary), 0.1);
   color: inherit;
 }
 
@@ -1212,6 +1212,6 @@ function formatRelation(relation: string): string {
 }
 
 .dark .prose-description :deep(.spoiler-text:hover) {
-  background: rgba(255, 105, 180, 0.2);
+  background: rgba(var(--color-primary-light), 0.2);
 }
 </style>

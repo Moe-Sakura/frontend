@@ -41,6 +41,7 @@ src/
 ├── components/       # Vue 组件
 │   ├── SearchHeader.vue      # 搜索框 + 模式切换
 │   ├── SearchResults.vue     # 搜索结果列表
+│   ├── ResultFilterPanel.vue # 结果筛选栏 (渠道 / 获取方式)
 │   ├── ResultItem.vue        # 单条搜索结果
 │   ├── SearchErrorCard.vue   # 搜索错误卡片
 │   ├── VndbPanel.vue         # VNDB 游戏信息面板
@@ -84,7 +85,8 @@ src/
 │   └── theme.css     # 主题变量
 ├── utils/            # 工具函数
 │   ├── persistence.ts # LocalStorage 持久化
-│   ├── theme.ts      # 主题管理
+│   ├── theme.ts      # 明暗主题 + 自定义 CSS/JS/HTML
+│   ├── themeColor.ts # 预设主题色 → CSS 变量
 │   └── urlParams.ts  # URL 参数处理
 ├── directives/       # 自定义指令
 │   └── vRipple.ts    # Material Design 涟漪点击效果
@@ -98,7 +100,9 @@ src/
 │   └── repository-opengraph.json
 ├── config/           # 配置
 │   ├── index.ts      # 统一配置入口
-│   └── env.ts        # 环境变量
+│   ├── env.ts        # 环境变量
+│   ├── themePresets.ts # 预设主题色列表
+│   └── resultTags.ts   # 结果标签 (渠道/方式) 文案·图标·配色
 ├── App.vue           # 根组件
 └── main.ts           # 入口文件
 ```
@@ -211,6 +215,33 @@ playSelect()
 > 早期还定义过 `glass`、`glass-gpu`、`glassmorphism-button/modal/panel/fab/
 > overlay/toolbar-button/search-button/mode-switch` 等 10 个类，因长期无引用已删除。
 > 新增玻璃拟态元素时，优先复用上面三个类或直接用 Tailwind 组合。
+
+### 主题色
+
+主题色变量集中定义在 `src/styles/theme.css`，**全部是 RGB 三元组**
+（`255, 20, 147`）而不是十六进制：
+
+```css
+color: rgb(var(--color-primary));              /* 实色 */
+border-color: rgba(var(--color-primary), .15); /* 带透明度 */
+```
+
+写成 `#ff1493` 会让 `rgba()` 语法非法、整条声明被丢弃，务必保持三元组。
+Tailwind 侧在 `App.vue` 的 `@theme inline` 里接了同一批变量，因此
+`text-theme-primary`、`bg-theme-accent/10`、`shadow-theme-primary/30`
+这类工具类同样会跟随主题色变化。可用色阶：
+
+`theme-primary` / `-light` / `-lighter` / `-pale` / `-dark` / `-darker`、
+`theme-accent` / `-light` / `-dark`。
+
+新增主题色请改 `src/config/themePresets.ts`（只需给主色与辅助色，其余色阶由
+`utils/themeColor.ts` 按 HSL 明度推导），切换入口在设置面板的「外观」卡片。
+
+> 注意：根目录 `tailwind.config.js` 是 Tailwind v3 时代的遗留文件，v4 未经
+> `@config` 引入，**不会生效**；颜色以 `App.vue` 的 `@theme inline` 为准。
+
+组件里写死颜色前先想想：这个颜色应该跟随主题色吗？跟随就用变量；
+像结果标签（自建盘=粉、直接下载=绿）那种彼此需要区分的语义色才写死。
 
 ### 动画
 
@@ -355,7 +386,9 @@ A: 使用 `!important` 或增加选择器特异性，检查 CSS 加载顺序
 | 环境变量 / 配置 | `src/config/env.ts`, `src/config/index.ts`, `.env.example` |
 | 搜索源列表 | `src/data/api.json` |
 | 液态玻璃 | `src/styles/glassmorphism.css` |
-| 主题色 | `src/styles/theme.css` |
+| 主题色变量 | `src/styles/theme.css`, `src/App.vue` 的 `@theme inline` |
+| 预设主题色 | `src/config/themePresets.ts`, `src/utils/themeColor.ts` |
+| 结果标签 / 筛选 | `src/config/resultTags.ts`, `src/components/ResultFilterPanel.vue` |
 | 全局样式 | `src/styles/base.css` |
 | 自定义指令 | `src/directives/vRipple.ts` |
 | Vite 配置 / 分包 | `vite.config.ts` |

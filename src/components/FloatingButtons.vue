@@ -81,7 +81,7 @@
         <!-- 标题栏 -->
         <div class="nav-header flex items-center justify-between px-4 py-3 rounded-t-2xl">
           <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-md shadow-pink-500/30">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-md shadow-theme-primary/30">
               <Grid3x3 :size="16" class="text-white" />
             </div>
             <div>
@@ -94,7 +94,7 @@
               {{ searchStore.platformResults.size }} 站点
             </span>
             <button
-              class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-[#ff1493] hover:bg-pink-50 dark:hover:bg-pink-900/30 transition-colors"
+              class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-theme-primary hover:bg-theme-primary/5 dark:hover:bg-theme-primary-darker/30 transition-colors"
               @click="togglePlatformNav(true)"
             >
               <X :size="16" />
@@ -349,7 +349,7 @@ onUnmounted(() => {
 .fab-button:hover {
   transform: translate3d(0, -4px, 0) scale(1.08);
   box-shadow: 
-    0 16px 48px rgba(255, 20, 147, 0.35),
+    0 16px 48px rgba(var(--color-primary), 0.35),
     0 8px 24px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border-color: rgba(255, 255, 255, 0.5);
@@ -357,7 +357,7 @@ onUnmounted(() => {
 
 .dark .fab-button:hover {
   box-shadow: 
-    0 16px 48px rgba(255, 105, 180, 0.4),
+    0 16px 48px rgba(var(--color-primary-light), 0.4),
     0 8px 24px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.25);
@@ -374,14 +374,14 @@ onUnmounted(() => {
 }
 
 .comments-btn {
-  background: linear-gradient(135deg, #ff1493, #c71585);
+  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-primary-dark)));
   color: white;
 }
 
 .comments-btn.comments-open {
   background: linear-gradient(135deg, rgb(255, 105, 180), rgb(199, 21, 133));
   color: white;
-  border-color: rgba(255, 105, 180, 0.5);
+  border-color: rgba(var(--color-primary-light), 0.5);
 }
 
 .history-btn {
@@ -396,7 +396,7 @@ onUnmounted(() => {
 }
 
 .vndb-btn {
-  background: linear-gradient(135deg, #d946ef, #c026d3);
+  background: linear-gradient(135deg, rgb(var(--color-accent)), rgb(var(--color-accent-dark)));
   color: white;
 }
 
@@ -414,7 +414,7 @@ onUnmounted(() => {
 .nav-btn.nav-open {
   background: linear-gradient(135deg, rgb(255, 105, 180), rgb(232, 121, 249));
   color: white;
-  border-color: rgba(255, 105, 180, 0.5);
+  border-color: rgba(var(--color-primary-light), 0.5);
 }
 
 .fab-button i {
@@ -435,12 +435,12 @@ onUnmounted(() => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(255, 20, 147, 0.5), rgba(217, 70, 239, 0.5));
+  background: linear-gradient(180deg, rgba(var(--color-primary), 0.5), rgba(var(--color-accent), 0.5));
   border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(255, 20, 147, 0.7), rgba(217, 70, 239, 0.7));
+  background: linear-gradient(180deg, rgba(var(--color-primary), 0.7), rgba(var(--color-accent), 0.7));
 }
 
 /* ============================================
@@ -465,13 +465,13 @@ onUnmounted(() => {
 
 /* 标题栏 */
 .nav-header {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.08), rgba(217, 70, 239, 0.05));
-  border-bottom: 1px solid rgba(255, 20, 147, 0.15);
+  background: linear-gradient(135deg, rgba(var(--color-primary), 0.08), rgba(var(--color-accent), 0.05));
+  border-bottom: 1px solid rgba(var(--color-primary), 0.15);
 }
 
 .dark .nav-header {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.12), rgba(217, 70, 239, 0.08));
-  border-bottom: 1px solid rgba(255, 105, 180, 0.15);
+  background: linear-gradient(135deg, rgba(var(--color-primary), 0.12), rgba(var(--color-accent), 0.08));
+  border-bottom: 1px solid rgba(var(--color-primary-light), 0.15);
 }
 
 /* 导航项 - GPU 加速动画 */
@@ -484,7 +484,7 @@ onUnmounted(() => {
 }
 
 .nav-item:hover {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.08), rgba(217, 70, 239, 0.05));
+  background: linear-gradient(135deg, rgba(var(--color-primary), 0.08), rgba(var(--color-accent), 0.05));
   transform: translate3d(4px, 0, 0);
 }
 
@@ -493,7 +493,7 @@ onUnmounted(() => {
 }
 
 .dark .nav-item:hover {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.15), rgba(217, 70, 239, 0.1));
+  background: linear-gradient(135deg, rgba(var(--color-primary), 0.15), rgba(var(--color-accent), 0.1));
 }
 
 @keyframes navItemSlideIn {
@@ -518,14 +518,14 @@ onUnmounted(() => {
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, #ff1493, #d946ef);
+  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-accent)));
   border-radius: 0.5rem;
-  box-shadow: 0 2px 6px rgba(255, 20, 147, 0.3);
+  box-shadow: 0 2px 6px rgba(var(--color-primary), 0.3);
 }
 
 .dark .count-badge {
-  background: linear-gradient(135deg, #ff69b4, #e879f9);
-  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4);
+  background: linear-gradient(135deg, rgb(var(--color-primary-light)), rgb(var(--color-accent-light)));
+  box-shadow: 0 2px 8px rgba(var(--color-primary-light), 0.4);
 }
 
 /* 底部栏 */

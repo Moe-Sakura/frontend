@@ -1,10 +1,13 @@
 <template>
   <div v-if="searchStore.hasResults" class="w-full sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 animate-fade-in">
     <div id="results" class="sm:max-w-5xl sm:mx-auto space-y-4 sm:space-y-6">
+      <!-- 渠道 / 方式 筛选栏 -->
+      <ResultFilterPanel />
+
       <!-- 使用 v-memo 优化平台卡片渲染 + LazyRender 懒渲染 -->
       <!-- data-platform 放在 LazyRender 容器上，确保即使内容未渲染也能被站点导航找到 -->
       <LazyRender
-        v-for="[platformName, platformData] in searchStore.platformResults"
+        v-for="[platformName, platformData] in searchStore.filteredPlatformResults"
         :key="platformName"
         v-memo="[platformName, platformData.name, platformData.color, platformData.items.length, platformData.displayedCount, platformData.error, platformData.url]"
         :once="true"
@@ -58,11 +61,11 @@
               <!-- 站点的所有标签（去重） -->
               <template v-for="tag in getUniqueTags(platformData)" :key="tag">
                 <span
-                  :class="getTagClass(tag)"
+                  :class="getResultTagChipClass(tag)"
                   class="px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 border"
                 >
-                  <component :is="getTagIconComponent(tag)" :size="12" />
-                  <span>{{ getTagLabel(tag) }}</span>
+                  <component :is="getResultTagIcon(tag)" :size="12" />
+                  <span>{{ getResultTagLabel(tag) }}</span>
                 </span>
               </template>
             
@@ -96,8 +99,8 @@
             <div v-if="platformData.items.length > platformData.displayedCount" class="load-more mt-6 flex justify-center">
               <button
                 class="px-6 py-3 rounded-xl
-                     bg-pink-500 hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-500
-                     text-white font-bold shadow-lg shadow-pink-500/30 dark:shadow-pink-600/30
+                     bg-theme-primary hover:bg-theme-primary-dark dark:bg-theme-primary-dark dark:hover:bg-theme-primary
+                     text-white font-bold shadow-lg shadow-theme-primary/30 dark:shadow-theme-primary-dark/30
                      hover:scale-105 active:scale-95
                      transition-all duration-200
                      flex items-center gap-2"
@@ -132,6 +135,12 @@ import type { PlatformData } from '@/stores/search'
 import { playTap } from '@/composables/useSound'
 import LazyRender from '@/components/LazyRender.vue'
 import ResultItem from '@/components/ResultItem.vue'
+import ResultFilterPanel from '@/components/ResultFilterPanel.vue'
+import {
+  getResultTagChipClass,
+  getResultTagIcon,
+  getResultTagLabel,
+} from '@/config/resultTags'
 import {
   ExternalLink,
   AlertTriangle,
@@ -143,17 +152,6 @@ import {
   Circle,
   DollarSign,
   XCircle,
-  User,
-  Coins,
-  MessageCircle,
-  Reply,
-  Server,
-  Rocket,
-  Turtle,
-  Layers,
-  Magnet,
-  Wand2,
-  Tag as TagIcon,
 } from '@lucide/vue'
 
 const searchStore = useSearchStore()
@@ -245,24 +243,6 @@ function getPlatformIconComponent(color: string): typeof Star       {
   return icons[color] || Circle
 }
 
-// 获取标签图标组件
-function getTagIconComponent(tag: string): typeof CheckCircle                       {
-  const icons: Record<string, typeof CheckCircle                      > = {
-    'NoReq': CheckCircle,
-    'Login': User,
-    'LoginPay': Coins,
-    'LoginRep': MessageCircle,
-    'Rep': Reply,
-    'SuDrive': Server,
-    'NoSplDrive': Rocket,
-    'SplDrive': Turtle,
-    'MixDrive': Layers,
-    'BTmag': Magnet,
-    'magic': Wand2,
-  }
-  return icons[tag] || TagIcon
-}
-
 function getRecommendText(color: string) {
   const texts: Record<string, string> = {
     lime: '推荐',
@@ -272,42 +252,6 @@ function getRecommendText(color: string) {
   return texts[color] || ''
 }
 
-// 标签样式映射（根据 Cloudflare Workers API 文档）- 优化配色
-function getTagClass(tag: string) {
-  const classes: Record<string, string> = {
-    'NoReq': 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-400 dark:border-green-600',
-    'Login': 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-400 dark:border-blue-600',
-    'LoginPay': 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 border-yellow-400 dark:border-yellow-600',
-    'LoginRep': 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-400 dark:border-purple-600',
-    'Rep': 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-400 dark:border-indigo-600',
-    'SuDrive': 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 border-pink-400 dark:border-pink-600',
-    'NoSplDrive': 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-400 dark:border-emerald-600',
-    'SplDrive': 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 border-orange-400 dark:border-orange-600',
-    'MixDrive': 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 border-cyan-400 dark:border-cyan-600',
-    'BTmag': 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-400 dark:border-violet-600',
-    'magic': 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-400 dark:border-red-600',
-  }
-  return classes[tag] || 'bg-gray-100 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 border-gray-400 dark:border-gray-600'
-}
-
-// 标签图标映射
-// 标签文本映射
-function getTagLabel(tag: string) {
-  const labels: Record<string, string> = {
-    'NoReq': '直接下载',
-    'Login': '需登录',
-    'LoginPay': '需积分',
-    'LoginRep': '登录+留言',
-    'Rep': '需留言',
-    'SuDrive': '自建盘',
-    'NoSplDrive': '不限速',
-    'SplDrive': '限速盘',
-    'MixDrive': '混合盘',
-    'BTmag': 'BT/磁力',
-    'magic': '需魔法',
-  }
-  return labels[tag] || tag
-}
 </script>
 
 <style scoped>

@@ -1,89 +1,78 @@
 /**
- * 艳粉主题配色方案
- * Deep Pink Color Scheme
+ * 主题配色方案（默认：艳粉 Deep Pink）
+ *
+ * 变量约定 —— 重要：
+ * 所有 `--color-*` 均为 **RGB 三元组**（如 `255, 20, 147`），而不是十六进制。
+ * 这样同一个变量既能取实色 `rgb(var(--color-primary))`，
+ * 也能直接叠加透明度 `rgba(var(--color-primary), 0.15)`。
+ * 组件中已大量使用后者，切勿改回 hex，否则整条声明会因语法非法被丢弃。
+ *
+ * 这里的值是「默认预设」。用户在调色盘中选择其它预设时，
+ * `src/utils/themeColor.ts` 会把同名变量以行内样式写到 <html> 上覆盖之。
+ * 新增预设请改 `src/config/themePresets.ts`，不要在此硬编码。
  */
 
 :root {
-  /* ========== 主色调 - 艳粉色系 ========== */
-  --color-primary: #ff1493;           /* DeepPink - 主要色 */
-  --color-primary-light: #ff69b4;     /* HotPink - 浅色 */
-  --color-primary-lighter: #ffb3d9;   /* 更浅的粉色 */
-  --color-primary-dark: #c71585;      /* MediumVioletRed - 深色 */
-  --color-primary-darker: #8b0a50;    /* 更深的粉色 */
-  
-  /* ========== 渐变色 ========== */
-  --gradient-primary: linear-gradient(135deg, #ff1493 0%, #d946ef 100%);
-  --gradient-primary-hover: linear-gradient(135deg, #ff69b4 0%, #e879f9 100%);
-  --gradient-primary-reverse: linear-gradient(135deg, #d946ef 0%, #ff1493 100%);
-  
+  /* ========== 主色调 ========== */
+  --color-primary: 255, 20, 147;        /* #ff1493 DeepPink - 主色 */
+  --color-primary-light: 255, 105, 180; /* #ff69b4 HotPink - 浅色 */
+  --color-primary-lighter: 255, 179, 217; /* #ffb3d9 更浅 */
+  --color-primary-pale: 255, 228, 242;  /* #ffe4f2 极浅 */
+  --color-primary-dark: 199, 21, 133;   /* #c71585 深色 */
+  --color-primary-darker: 139, 10, 80;  /* #8b0a50 更深 */
+
   /* ========== 辅助色 ========== */
-  --color-accent: #d946ef;            /* 紫色辅助色 */
-  --color-accent-light: #e879f9;
-  --color-accent-dark: #c026d3;
-  
+  --color-accent: 217, 70, 239;         /* #d946ef 紫色辅助色 */
+  --color-accent-light: 232, 121, 249;  /* #e879f9 */
+  --color-accent-dark: 192, 38, 211;    /* #c026d3 */
+
+  /* ========== 渐变色（跟随主色/辅助色自动变化） ========== */
+  --gradient-primary: linear-gradient(135deg, rgb(var(--color-primary)) 0%, rgb(var(--color-accent)) 100%);
+  --gradient-primary-hover: linear-gradient(135deg, rgb(var(--color-primary-light)) 0%, rgb(var(--color-accent-light)) 100%);
+  --gradient-primary-reverse: linear-gradient(135deg, rgb(var(--color-accent)) 0%, rgb(var(--color-primary)) 100%);
+
   /* ========== 背景色 ========== */
-  --bg-primary: #fff5fa;              /* 浅粉色背景 */
-  --bg-secondary: #ffe4f2;            /* 粉色背景 */
-  --bg-tertiary: #ffb3d9;             /* 更深的粉色背景 */
-  
+  --bg-primary: 255, 245, 250;          /* #fff5fa 主色浅色调背景 */
+  --bg-secondary: 255, 228, 242;        /* #ffe4f2 */
+  --bg-tertiary: 255, 179, 217;         /* #ffb3d9 */
+
   /* ========== 文本色 ========== */
-  --text-primary: #1d1b1e;            /* 主要文本 */
-  --text-secondary: #6b7280;          /* 次要文本 */
-  --text-tertiary: #9ca3af;           /* 第三级文本 */
-  
-  /* ========== 阴影 ========== */
-  --shadow-sm: 0 1px 2px rgba(255, 20, 147, 0.1);
-  --shadow-md: 0 4px 6px rgba(255, 20, 147, 0.15);
-  --shadow-lg: 0 10px 15px rgba(255, 20, 147, 0.2);
-  --shadow-xl: 0 20px 25px rgba(255, 20, 147, 0.25);
-  --shadow-glow: 0 0 20px rgba(255, 20, 147, 0.4);
-  
+  --text-primary: 29, 27, 30;           /* #1d1b1e 主要文本 */
+  --text-secondary: 107, 114, 128;      /* #6b7280 次要文本 */
+  --text-tertiary: 156, 163, 175;       /* #9ca3af 第三级文本 */
+
+  /* ========== 主色辉光 ========== */
+  --shadow-glow: 0 0 20px rgba(var(--color-primary), 0.4);
+
   /* ========== 玻璃态效果 ========== */
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.8);
-  --glass-shadow: 0 8px 32px rgba(255, 20, 147, 0.08);
+  --glass-shadow: 0 8px 32px rgba(var(--color-primary), 0.08);
 }
 
-/* 暗色模式 */
+/*
+ * 暗色模式
+ * 注意：这里**不**重映射 --color-primary。组件的 `.dark` 规则本就直接引用
+ * --color-primary-light / --color-primary-lighter，若在此再平移一次会导致双重变浅。
+ */
 .dark {
-  /* ========== 主色调 ========== */
-  --color-primary: #ff69b4;
-  --color-primary-light: #ffb3d9;
-  --color-primary-lighter: #ffc9e6;
-  --color-primary-dark: #ff1493;
-  --color-primary-darker: #c71585;
-  
-  /* ========== 渐变色 ========== */
-  --gradient-primary: linear-gradient(135deg, #ff69b4 0%, #e879f9 100%);
-  --gradient-primary-hover: linear-gradient(135deg, #ffb3d9 0%, #f0abfc 100%);
-  --gradient-primary-reverse: linear-gradient(135deg, #e879f9 0%, #ff69b4 100%);
-  
-  /* ========== 辅助色 ========== */
-  --color-accent: #e879f9;
-  --color-accent-light: #f0abfc;
-  --color-accent-dark: #d946ef;
-  
   /* ========== 背景色 ========== */
-  --bg-primary: #0f172a;              /* 深色背景 */
-  --bg-secondary: #1e293b;            /* 次要背景 */
-  --bg-tertiary: #334155;             /* 第三级背景 */
-  
+  --bg-primary: 15, 23, 42;             /* #0f172a 深色背景 */
+  --bg-secondary: 30, 41, 59;           /* #1e293b 次要背景 */
+  --bg-tertiary: 51, 65, 85;            /* #334155 第三级背景 */
+
   /* ========== 文本色 ========== */
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #64748b;
-  
-  /* ========== 阴影 ========== */
-  --shadow-sm: 0 1px 2px rgba(255, 105, 180, 0.15);
-  --shadow-md: 0 4px 6px rgba(255, 105, 180, 0.2);
-  --shadow-lg: 0 10px 15px rgba(255, 105, 180, 0.25);
-  --shadow-xl: 0 20px 25px rgba(255, 105, 180, 0.3);
-  --shadow-glow: 0 0 25px rgba(255, 105, 180, 0.5);
-  
+  --text-primary: 226, 232, 240;        /* #e2e8f0 */
+  --text-secondary: 148, 163, 184;      /* #94a3b8 */
+  --text-tertiary: 100, 116, 139;       /* #64748b */
+
+  /* ========== 主色辉光（暗色下用浅主色，更亮） ========== */
+  --shadow-glow: 0 0 25px rgba(var(--color-primary-light), 0.5);
+
   /* ========== 玻璃态效果 ========== */
   --glass-bg: rgba(30, 41, 59, 0.8);
-  --glass-border: rgba(255, 105, 180, 0.2);
-  --glass-shadow: 0 8px 32px rgba(255, 105, 180, 0.15);
+  --glass-border: rgba(var(--color-primary-light), 0.2);
+  --glass-shadow: 0 8px 32px rgba(var(--color-primary-light), 0.15);
 }
 
 /* ========== Tailwind CSS 主题颜色扩展 ========== */

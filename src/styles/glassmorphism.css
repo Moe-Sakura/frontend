@@ -11,11 +11,10 @@
 
 :root {
   /* ========== 主题色 ========== */
-  /* 主色调 - 艳粉 (可修改此处切换主题色) */
-  --color-primary: 255, 20, 147;        /* 主色 #ff1493 */
-  --color-primary-light: 255, 105, 180; /* 浅主色 #ff69b4 */
-  --color-primary-pale: 255, 228, 242;  /* 极浅主色 #ffe4f2 */
-  
+  /* --color-primary / -light / -lighter / -pale / -dark / -darker 及辅助色
+     统一定义在 styles/theme.css（本文件在其之后加载，重复定义会覆盖它并
+     导致预设主题色失效）。切换主题色请改 config/themePresets.ts。 */
+
   /* 背景色 */
   --color-bg-light: 255, 255, 255;      /* 亮色背景 #ffffff */
   --color-bg-dark: 30, 41, 59;          /* 暗色背景 #1e293b */

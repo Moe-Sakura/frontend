@@ -6,9 +6,9 @@
       <h1
         class="header-title text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-6 sm:mb-8 animate-fade-in-down
                  text-white
-                 drop-shadow-[0_2px_8px_rgba(255,20,147,0.6)]
-                 dark:drop-shadow-[0_2px_12px_rgba(255,105,180,0.8)]"
-        style="text-shadow: 0 0 30px rgba(255, 20, 147, 0.4), 0 0 60px rgba(255, 105, 180, 0.2);"
+                 drop-shadow-[0_2px_8px_rgba(var(--color-primary),0.6)]
+                 dark:drop-shadow-[0_2px_12px_rgba(var(--color-primary-light),0.8)]"
+        style="text-shadow: 0 0 30px rgba(var(--color-primary), 0.4), 0 0 60px rgba(var(--color-primary-light), 0.2);"
       >
         <span class="whitespace-nowrap">Galgame 聚合搜索</span>
       </h1>
@@ -27,7 +27,7 @@
             <!-- 外层发光效果 -->
             <div 
               class="absolute -inset-0.5 rounded-[1.25rem] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100
-                     bg-gradient-to-r from-[#ff1493]/30 via-[#d946ef]/20 to-[#ff69b4]/30
+                     bg-gradient-to-r from-theme-primary/30 via-theme-accent/20 to-theme-primary-light/30
                      blur-lg transition-opacity duration-500"
               :class="{ 'opacity-100': searchStore.isSearching }"
             />
@@ -38,8 +38,8 @@
               <div 
                 v-if="searchStore.isSearching"
                 class="search-progress-fill absolute inset-0 z-0 pointer-events-none
-                       bg-gradient-to-r from-[#ff1493]/20 via-[#d946ef]/15 to-[#ff69b4]/20
-                       dark:from-[#ff1493]/25 dark:via-[#d946ef]/20 dark:to-[#ff69b4]/25"
+                       bg-gradient-to-r from-theme-primary/20 via-theme-accent/15 to-theme-primary-light/20
+                       dark:from-theme-primary/25 dark:via-theme-accent/20 dark:to-theme-primary-light/25"
                 :style="{ 
                   clipPath: `inset(0 ${100 - (searchStore.searchProgress.total > 0 ? (searchStore.searchProgress.current / searchStore.searchProgress.total) * 100 : 0)}% 0 0)`
                 }"
@@ -52,8 +52,8 @@
                   :size="22"
                   :class="[
                     searchStore.isSearching 
-                      ? 'text-[#ff1493] dark:text-[#ff69b4] animate-spin' 
-                      : 'text-[#ff1493]/50 dark:text-[#ff69b4]/60 group-hover:text-[#ff1493]/70 dark:group-hover:text-[#ff69b4]/80 group-focus-within:text-[#ff1493] dark:group-focus-within:text-[#ff69b4] group-focus-within:scale-110',
+                      ? 'text-theme-primary dark:text-theme-primary-light animate-spin' 
+                      : 'text-theme-primary/50 dark:text-theme-primary-light/60 group-hover:text-theme-primary/70 dark:group-hover:text-theme-primary-light/80 group-focus-within:text-theme-primary dark:group-focus-within:text-theme-primary-light group-focus-within:scale-110',
                     'transition-all duration-300'
                   ]"
                 />
@@ -87,8 +87,8 @@
                   v-if="searchQuery && !searchStore.isSearching"
                   type="button"
                   class="w-6 h-6 flex items-center justify-center rounded-full
-                         text-gray-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4]
-                         hover:bg-[#ff1493]/10 dark:hover:bg-[#ff69b4]/15
+                         text-gray-400 hover:text-theme-primary dark:hover:text-theme-primary-light
+                         hover:bg-theme-primary/10 dark:hover:bg-theme-primary-light/15
                          transition-all duration-200"
                   @click="clearSearch"
                 >
@@ -98,7 +98,7 @@
                 <!-- 搜索时显示进度 -->
                 <span 
                   v-if="searchStore.isSearching"
-                  class="text-sm font-bold text-[#ff1493] dark:text-[#ff69b4] tabular-nums"
+                  class="text-sm font-bold text-theme-primary dark:text-theme-primary-light tabular-nums"
                 >
                   {{ searchStore.searchProgress.current }}/{{ searchStore.searchProgress.total }}
                 </span>
@@ -111,9 +111,9 @@
                          bg-gray-100/80 dark:bg-slate-700/60
                          text-gray-500 dark:text-slate-400
                          border border-gray-200/50 dark:border-slate-600/50
-                         group-focus-within:bg-[#ff1493]/10 group-focus-within:text-[#ff1493]
-                         dark:group-focus-within:bg-[#ff69b4]/15 dark:group-focus-within:text-[#ff69b4]
-                         group-focus-within:border-[#ff1493]/30 dark:group-focus-within:border-[#ff69b4]/30
+                         group-focus-within:bg-theme-primary/10 group-focus-within:text-theme-primary
+                         dark:group-focus-within:bg-theme-primary-light/15 dark:group-focus-within:text-theme-primary-light
+                         group-focus-within:border-theme-primary/30 dark:group-focus-within:border-theme-primary-light/30
                          transition-all duration-200"
                 >
                   <CornerDownLeft :size="14" />
@@ -134,8 +134,8 @@
               <!-- 滑动背景指示器 -->
               <div
                 class="mode-indicator absolute top-1.5 bottom-1.5 rounded-xl 
-                       bg-gradient-to-r from-[#ff1493] to-[#d946ef]
-                       shadow-lg shadow-[#ff1493]/40
+                       bg-gradient-to-r from-theme-primary to-theme-accent
+                       shadow-lg shadow-theme-primary/40
                        transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                 :style="{
                   left: searchMode === 'game' ? '6px' : 'calc(50% + 0px)',
@@ -151,7 +151,7 @@
                        flex items-center gap-2.5 text-sm whitespace-nowrap"
                 :class="searchMode === 'game' 
                   ? 'text-white' 
-                  : 'text-gray-600 dark:text-slate-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4]'"
+                  : 'text-gray-600 dark:text-slate-400 hover:text-theme-primary dark:hover:text-theme-primary-light'"
                 @click="setSearchMode('game')"
               >
                 <Gamepad2 
@@ -169,7 +169,7 @@
                        flex items-center gap-2.5 text-sm whitespace-nowrap"
                 :class="searchMode === 'patch' 
                   ? 'text-white' 
-                  : 'text-gray-600 dark:text-slate-400 hover:text-[#ff1493] dark:hover:text-[#ff69b4]'"
+                  : 'text-gray-600 dark:text-slate-400 hover:text-theme-primary dark:hover:text-theme-primary-light'"
                 @click="setSearchMode('patch')"
               >
                 <Wrench 
@@ -205,10 +205,10 @@
       >
         <h2
           class="text-xl sm:text-2xl font-bold 
-                 bg-gradient-to-r from-[#ff1493] to-[#d946ef] bg-clip-text text-transparent
+                 bg-gradient-to-r from-theme-primary to-theme-accent bg-clip-text text-transparent
                  mb-5 sm:mb-6 flex items-center gap-2"
         >
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-lg shadow-pink-500/30">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30">
             <Info :size="18" class="text-white" />
           </div>
           使用须知
@@ -216,13 +216,13 @@
         
         <div class="space-y-4">
           <!-- 域名更换提示 -->
-          <div class="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 border border-pink-200/50 dark:border-pink-800/30">
+          <div class="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-theme-primary/5 to-rose-50 dark:from-theme-primary-darker/30 dark:to-rose-950/30 border border-theme-primary/20 dark:border-theme-primary-darker/30">
             <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Star :size="14" class="text-white" />
               </div>
-              <p class="text-sm text-pink-800 dark:text-pink-200">
-                本站已更换新域名 <a href="https://www.searchgal.top" class="font-bold text-[#ff1493] dark:text-[#ff69b4] hover:underline">searchgal.top</a>，请更新书签！
+              <p class="text-sm text-theme-primary-darker dark:text-theme-primary-lighter">
+                本站已更换新域名 <a href="https://www.searchgal.top" class="font-bold text-theme-primary dark:text-theme-primary-light hover:underline">searchgal.top</a>，请更新书签！
               </p>
             </div>
           </div>
@@ -242,9 +242,9 @@
           <!-- 使用说明列表 -->
           <div class="grid gap-3 text-sm text-gray-600 dark:text-slate-400">
             <div class="flex items-start gap-2.5">
-              <Heart :size="16" class="text-pink-500 flex-shrink-0 mt-0.5" />
+              <Heart :size="16" class="text-theme-primary flex-shrink-0 mt-0.5" />
               <p>
-                本程序纯属<strong class="text-[#ff1493] dark:text-[#ff69b4]">用爱发电</strong>，仅供绅士们交流学习使用，务必请大家<strong class="text-[#ff1493] dark:text-[#ff69b4]">支持正版 Galgame</strong>！让爱与梦想延续！
+                本程序纯属<strong class="text-theme-primary dark:text-theme-primary-light">用爱发电</strong>，仅供绅士们交流学习使用，务必请大家<strong class="text-theme-primary dark:text-theme-primary-light">支持正版 Galgame</strong>！让爱与梦想延续！
               </p>
             </div>
             
@@ -294,12 +294,12 @@
           </div>
 
           <!-- 支持我们 -->
-          <div class="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-950/30 dark:to-purple-950/30 border border-pink-200/50 dark:border-pink-800/30">
+          <div class="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-theme-primary/5 to-purple-50 dark:from-theme-primary-darker/30 dark:to-purple-950/30 border border-theme-primary/20 dark:border-theme-primary-darker/30">
             <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div class="w-6 h-6 rounded-full bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Star :size="14" class="text-white" />
               </div>
-              <p class="text-sm text-pink-800 dark:text-pink-200">
+              <p class="text-sm text-theme-primary-darker dark:text-theme-primary-lighter">
                 如觉得本站好用，请移步
                 <a href="https://github.com/Moe-Sakura" target="_blank" class="font-semibold hover:underline">GitHub</a>
                 给本项目点个免费的 <strong class="font-semibold">Star</strong> 吧！你的支持就是咱最大的动力 💕
@@ -334,8 +334,8 @@
             target="_blank"
             rel="noopener noreferrer"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
-                   text-white bg-gradient-to-r from-[#ff1493] to-[#d946ef]
-                   shadow-md shadow-pink-500/20 hover:shadow-lg hover:shadow-pink-500/30
+                   text-white bg-gradient-to-r from-theme-primary to-theme-accent
+                   shadow-md shadow-theme-primary/20 hover:shadow-lg hover:shadow-theme-primary/30
                    transition-all"
           >
             <GitPullRequestArrow :size="14" />
@@ -352,8 +352,8 @@
             class="friend-card group flex items-center gap-3 p-3 rounded-xl
                    bg-white/50 dark:bg-slate-800/50
                    border border-gray-200/50 dark:border-slate-700/50
-                   hover:border-[#ff1493]/30 dark:hover:border-[#ff69b4]/30
-                   hover:shadow-lg hover:shadow-pink-500/10
+                   hover:border-theme-primary/30 dark:hover:border-theme-primary-light/30
+                   hover:shadow-lg hover:shadow-theme-primary/10
                    transition-all duration-300"
           >
             <img
@@ -365,7 +365,7 @@
               @error="handleFriendLogoError"
             />
             <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-gray-800 dark:text-white text-sm group-hover:text-[#ff1493] dark:group-hover:text-[#ff69b4] transition-colors truncate">
+              <h3 class="font-bold text-gray-800 dark:text-white text-sm group-hover:text-theme-primary dark:group-hover:text-theme-primary-light transition-colors truncate">
                 {{ friend.name }}
               </h3>
               <p class="text-xs text-gray-500 dark:text-slate-400 truncate">
@@ -899,16 +899,16 @@ defineExpose({
 /* 搜索中状态 - 输入框整体效果 */
 .search-input-wrapper.is-searching .search-box {
   box-shadow: 
-    0 0 0 2px rgba(255, 20, 147, 0.4),
-    0 0 25px rgba(255, 20, 147, 0.2),
-    0 0 50px rgba(255, 20, 147, 0.1);
+    0 0 0 2px rgba(var(--color-primary), 0.4),
+    0 0 25px rgba(var(--color-primary), 0.2),
+    0 0 50px rgba(var(--color-primary), 0.1);
 }
 
 .dark .search-input-wrapper.is-searching .search-box {
   box-shadow: 
-    0 0 0 2px rgba(255, 105, 180, 0.5),
-    0 0 25px rgba(255, 105, 180, 0.25),
-    0 0 50px rgba(255, 105, 180, 0.15);
+    0 0 0 2px rgba(var(--color-primary-light), 0.5),
+    0 0 25px rgba(var(--color-primary-light), 0.25),
+    0 0 50px rgba(var(--color-primary-light), 0.15);
 }
 
 /* 搜索中输入框透明背景 */
@@ -960,9 +960,9 @@ defineExpose({
   background: linear-gradient(
     135deg,
     transparent 0%,
-    rgba(255, 20, 147, 0.4) 25%,
-    rgba(217, 70, 239, 0.4) 50%,
-    rgba(255, 105, 180, 0.4) 75%,
+    rgba(var(--color-primary), 0.4) 25%,
+    rgba(var(--color-accent), 0.4) 50%,
+    rgba(var(--color-primary-light), 0.4) 75%,
     transparent 100%
   );
   -webkit-mask: 
@@ -1018,7 +1018,7 @@ defineExpose({
   position: absolute;
   inset: 0;
   border-radius: 0.75rem;
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.1), rgba(217, 70, 239, 0.05));
+  background: linear-gradient(135deg, rgba(var(--color-primary), 0.1), rgba(var(--color-accent), 0.05));
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;
