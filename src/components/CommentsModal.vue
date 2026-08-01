@@ -1,82 +1,90 @@
 <template>
-  <Teleport to="body">
-    <!-- 评论面板 - 模态框 -->
-    <Transition
-      enter-active-class="duration-300 ease-out"
-      enter-from-class="opacity-0 scale-[0.98] translate-y-10"
-      enter-to-class="opacity-100 scale-100 translate-y-0"
-      leave-active-class="duration-200 ease-in"
-      leave-from-class="opacity-100 scale-100 translate-y-0"
-      leave-to-class="opacity-0 scale-[0.98] translate-y-10"
+  <Dialog v-model:open="open">
+    <DialogContent
+      :show-close-button="false"
+      class="comments-modal inset-0 flex translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 p-0 shadow-2xl shadow-black/20
+             max-w-none sm:max-w-none
+             md:inset-6 md:m-auto md:h-[760px] md:max-h-[calc(100%_-_3rem)] md:w-[900px] md:max-w-[calc(100%_-_3rem)] md:rounded-3xl"
     >
-      <div
-        v-show="uiStore.isCommentsModalOpen"
-        class="comments-modal fixed z-[100] flex flex-col shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[900px] md:max-w-[calc(100%-3rem)] md:h-[760px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
+      <!-- 顶部导航栏 -->
+      <DialogHeader
+        class="comments-header flex-row flex-shrink-0 items-center justify-between space-y-0 border-b border-white/10 px-3 py-2.5 select-none sm:px-5 sm:py-4 md:rounded-t-3xl dark:border-slate-700/50"
       >
-        <!-- 顶部导航栏 -->
-        <div 
-          class="comments-header flex-shrink-0 flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-4 border-b border-white/10 dark:border-slate-700/50 select-none md:rounded-t-3xl"
+        <!-- 返回按钮 - 移动端 -->
+        <button
+          v-ripple
+          class="-ml-2 flex items-center gap-1 rounded-xl px-3 py-2 font-medium text-theme-primary transition-all hover:bg-theme-primary/5 md:hidden dark:text-theme-primary-light dark:hover:bg-theme-primary-darker/20"
+          @click="open = false"
         >
-          <!-- 返回按钮 - 移动端 -->
-          <button
-            v-ripple
-            class="flex items-center gap-1 px-3 py-2 -ml-2 rounded-xl text-theme-primary dark:text-theme-primary-light font-medium transition-all hover:bg-theme-primary/5 dark:hover:bg-theme-primary-darker/20 md:hidden"
-            @click="closeModal"
+          <ChevronLeft :size="20" />
+          <span class="text-sm sm:text-base">返回</span>
+        </button>
+
+        <!-- 标题 -->
+        <div class="flex items-center gap-2 md:ml-0">
+          <div
+            class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-theme-primary to-theme-accent shadow-lg shadow-theme-primary/30"
           >
-            <ChevronLeft :size="20" />
-            <span class="text-sm sm:text-base">返回</span>
+            <MessageCircle :size="16" class="text-white" />
+            <Send :size="8" class="absolute -right-0.5 -bottom-0.5 text-white/80" />
+          </div>
+          <div class="text-left">
+            <DialogTitle
+              class="flex items-center gap-1.5 text-base font-bold text-gray-800 sm:text-lg dark:text-white"
+            >
+              评论区
+              <Sparkles :size="14" class="text-amber-400" />
+            </DialogTitle>
+            <DialogDescription class="hidden text-xs text-gray-500 md:block dark:text-slate-400">
+              欢迎留下你的想法 💬
+            </DialogDescription>
+            <DialogDescription class="sr-only md:hidden">
+              站点评论区
+            </DialogDescription>
+          </div>
+        </div>
+
+        <!-- 右侧按钮组 -->
+        <div class="flex items-center gap-2">
+          <!-- 关闭按钮 - 仅桌面端 -->
+          <button
+            class="hidden h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-all hover:bg-red-50 hover:text-red-500 md:flex dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+            title="关闭"
+            @click="open = false"
+          >
+            <X :size="16" />
           </button>
 
-          <!-- 标题 -->
-          <div class="flex items-center gap-2 md:ml-0">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30 relative">
-              <MessageCircle :size="16" class="text-white" />
-              <Send :size="8" class="text-white/80 absolute -bottom-0.5 -right-0.5" />
-            </div>
-            <div>
-              <h1 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white flex items-center gap-1.5">
-                评论区
-                <Sparkles :size="14" class="text-amber-400" />
-              </h1>
-              <p class="text-xs text-gray-500 dark:text-slate-400 hidden md:block">欢迎留下你的想法 💬</p>
-            </div>
-          </div>
-
-          <!-- 右侧按钮组 -->
-          <div class="flex items-center gap-2">
-            <!-- 关闭按钮 - 仅桌面端 -->
-            <button
-              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-              title="关闭"
-              @click="closeModal"
-            >
-              <X :size="16" />
-            </button>
-          
-            <!-- 移动端占位 -->
-            <div class="w-8 md:hidden" />
-          </div>
+          <!-- 移动端占位 -->
+          <div class="w-8 md:hidden" />
         </div>
+      </DialogHeader>
 
-        <!-- 内容区域 -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar">
-          <div class="px-2 sm:px-5 py-3 sm:py-5">
-            <div id="Comments" class="comments-container" />
-          </div>
+      <!-- 内容区域 -->
+      <div class="custom-scrollbar flex-1 overflow-y-auto">
+        <div class="px-2 py-3 sm:px-5 sm:py-5">
+          <div id="Comments" class="comments-container" />
         </div>
       </div>
-    </Transition>
-  </Teleport>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { playTransitionUp, playTransitionDown } from '@/composables/useSound'
 import Artalk from 'artalk/dist/Artalk.mjs'
 import 'artalk/dist/Artalk.css'
 import { MessageCircle, ChevronLeft, X, Sparkles, Send } from '@lucide/vue'
 import { config } from '@/config'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface ArtalkInstance {
   destroy(): void
@@ -84,21 +92,33 @@ interface ArtalkInstance {
 
 const uiStore = useUIStore()
 let artalkInstance: ArtalkInstance | null = null
-let isClosing = false
+
+/**
+ * 音效挂在 setter 上：Reka 处理 Esc 与点击遮罩时只会把 open 置为 false，
+ * 不会调用组件里的函数。原先的 isClosing 去抖也不需要了 —— 那是为了防住
+ * 手写关闭路径的重复触发，Reka 的状态机自己保证幂等。
+ */
+const open = computed({
+  get: () => uiStore.isCommentsModalOpen,
+  set: (value: boolean) => {
+    if (value) { playTransitionUp() } else { playTransitionDown() }
+    uiStore.isCommentsModalOpen = value
+  },
+})
 
 // 检查并滚动到指定评论
 function scrollToComment() {
   const hash = window.location.hash
   if (!hash.startsWith('#atk-comment-')) {return}
-  
+
   // 等待 Artalk 渲染完成后滚动
   const maxAttempts = 20
   let attempts = 0
-  
+
   const tryScroll = () => {
     attempts++
     const targetEl = document.querySelector(hash)
-    
+
     if (targetEl) {
       // 滚动到评论
       targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -112,22 +132,9 @@ function scrollToComment() {
       setTimeout(tryScroll, 200)
     }
   }
-  
+
   // 延迟一点开始尝试，等待 Artalk 初始化
   setTimeout(tryScroll, 500)
-}
-
-function closeModal() {
-  if (isClosing) {return}
-  isClosing = true
-  
-  playTransitionDown()
-  // 关闭模态框
-  uiStore.isCommentsModalOpen = false
-  
-  setTimeout(() => {
-    isClosing = false
-  }, 300)
 }
 
 // 初始化 Artalk
@@ -168,40 +175,25 @@ function initArtalk() {
   })
 }
 
-// 键盘事件
-function handleKeydown(e: globalThis.KeyboardEvent) {
-  if (!uiStore.isCommentsModalOpen) {return}
-  
-  if (e.key === 'Escape') {
-    e.preventDefault()
-    closeModal()
-  }
-}
-
-// 监听模态框打开状态
+/**
+ * Dialog 关闭时会卸载内容，#Comments 挂载点随之消失，所以每次打开都要重建
+ * Artalk 实例 —— 这与迁移前的行为一致（原先虽然用 v-show 保留了 DOM，
+ * initArtalk 里也是先 destroy 再 init）。延时是等 Reka 把内容挂进 portal。
+ */
 watch(() => uiStore.isCommentsModalOpen, (isOpen: boolean) => {
   if (isOpen) {
-    playTransitionUp()
-    // 延迟初始化，确保 DOM 已渲染
-    setTimeout(() => {
-      initArtalk()
-    }, 100)
+    setTimeout(initArtalk, 100)
   }
 })
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
-  // 如果挂载时模态框就是打开的，初始化 Artalk
+  // 面板状态会被持久化，刷新后可能一上来就是打开的
   if (uiStore.isCommentsModalOpen) {
-    setTimeout(() => {
-      initArtalk()
-    }, 200)
+    setTimeout(initArtalk, 200)
   }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
-  // 销毁 Artalk 实例
   if (artalkInstance) {
     try {
       artalkInstance.destroy()
@@ -276,12 +268,13 @@ onUnmounted(() => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ff1493, #d946ef);
+  /* 跟随主题色预设，原先写死 #ff1493 → #d946ef */
+  background: linear-gradient(180deg, rgb(var(--brand-primary)), rgb(var(--brand-accent)));
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c71585, #c026d3);
+  background: linear-gradient(180deg, rgb(var(--brand-primary-dark)), rgb(var(--brand-accent-dark)));
 }
 
 /* 评论高亮动画 */
