@@ -103,54 +103,75 @@
 }
 
 /*
- * shadcn 语义 token。目前仍是 CLI 生成的中性色 —— 尚未接到项目的艳粉体系，
- * 因为暂时还没有任何 shadcn 组件在用它们（全项目 bg-primary / text-foreground
- * 之类的工具类零使用），所以现在是惰性的、不影响任何现有渲染。
+ * shadcn 语义 token → 项目的玻璃 + 品牌色体系。
  *
- * 待办：加入第一个 shadcn 组件时，把 --primary / --accent / --ring / --border
- * 映射到项目的粉色与玻璃描边。
+ * CLI 生成的是一套中性灰 oklch 常量，这里整体重写成 var() 引用，指向
+ * theme.css / glassmorphism.css 的既有 token。这样做的关键收益：因为
+ * utils/themeColor.ts 会在运行时把 --brand-* 写成 <html> 的内联样式，
+ * shadcn 组件会自动跟随用户选的主题色预设（艳粉/晴蓝/青绿……），
+ * 不需要为组件单独做一套主题切换。
+ *
+ * 暗色值放在下面的 .dark 里；--foreground / --muted-foreground 直接引用
+ * --text-primary / --text-secondary，而这两个已由 theme.css 的 .dark 重映射，
+ * 所以会自动跟随明暗，无需在这里重复声明。
+ *
+ * 半透明是有意的：面板要透出 Ken Burns 背景图，与 glassmorphism-card
+ * 的观感保持一致。
  */
 :root {
+  /* 玻璃卡片圆角 16px，与 .glassmorphism-card 对齐 */
   --radius: 1rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+
+  /* 面 —— 对应 glassmorphism 的各级不透明度 */
+  --background: rgba(255, 255, 255, 0.85);   /* --opacity-panel */
+  --card: rgba(255, 255, 255, 0.8);          /* --opacity-card，= .glassmorphism-card */
+  --popover: rgba(255, 255, 255, 0.94);      /* 浮层压在背景图上，需要更实一些 */
+
+  /* 字 */
+  --foreground: rgb(var(--text-primary));
+  --card-foreground: rgb(var(--text-primary));
+  --popover-foreground: rgb(var(--text-primary));
+  --muted-foreground: rgb(var(--text-secondary));
+
+  /* 品牌色：实心按钮、选中态 */
+  --primary: rgb(var(--brand-primary));
+  --primary-foreground: #fff;
+
+  /* 弱强调：次级按钮、菜单项 hover */
+  --secondary: rgba(var(--brand-primary), 0.08);
+  --secondary-foreground: rgb(var(--brand-primary-darker));
+  --muted: rgba(var(--brand-primary), 0.06);
+  --accent: rgba(var(--brand-primary), 0.1);
+  --accent-foreground: rgb(var(--brand-primary-darker));
+
+  --destructive: rgb(var(--color-error));
+
+  /* 描边与焦点环 —— 与 --glass-border-light 同源 */
+  --border: rgba(var(--brand-primary), var(--opacity-border));
+  --input: rgba(var(--brand-primary), var(--opacity-border));
+  --ring: rgb(var(--brand-primary));
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: rgba(30, 41, 59, 0.88);      /* --opacity-panel-dark */
+  --card: rgba(30, 41, 59, 0.8);             /* = .dark .glassmorphism-card */
+  --popover: rgba(30, 41, 59, 0.94);
+
+  /* --text-primary / --text-secondary 已由 theme.css 的 .dark 重映射，
+     上面 :root 的引用会自动跟随，这里无需重复。 */
+
+  --primary: rgb(var(--brand-primary));
+  --primary-foreground: #fff;
+
+  --secondary: rgba(var(--brand-primary-light), 0.12);
+  --secondary-foreground: rgb(var(--brand-primary-lighter));
+  --muted: rgba(var(--brand-primary-light), 0.08);
+  --accent: rgba(var(--brand-primary-light), 0.14);
+  --accent-foreground: rgb(var(--brand-primary-lighter));
+
+  --border: rgba(var(--brand-primary-light), var(--opacity-border-dark));
+  --input: rgba(var(--brand-primary-light), var(--opacity-border-dark));
+  --ring: rgb(var(--brand-primary-light));
 }
 
 /*
@@ -174,9 +195,8 @@
  *   给每个元素刷上 border-color: var(--border)。项目现有的裸 border/border-t
  *   工具类目前继承 currentColor，会集体变成中性灰。
  *
- * 但注意：shadcn 的 card / button **确实**用裸 border 加全局色（已核对
- * registry 源码）。等真正引入第一个 shadcn 组件时，要么把这条规则限定到 ui
- * 组件作用域，要么把 --border 调成项目的玻璃描边色
- * （rgba(var(--brand-primary), 0.15)）再放开。
- * 现在还没有任何 shadcn 组件，所以先不引入这个全局副作用。
+ * 采用的替代方案：14 个生成组件里用到裸 border 的地方，已逐个补上显式的
+ * `border-border`（见 components/ui/）。效果等价，但作用域只在 shadcn 组件
+ * 内部，不波及项目现有的任何元素。代价是每次 `shadcn-vue add` 拉入新组件后
+ * 要重新补一次 —— scripts/patch-ui-borders.mjs 可以自动做这件事。
  */
