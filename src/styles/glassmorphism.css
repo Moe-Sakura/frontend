@@ -189,7 +189,8 @@
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--glass-border-light);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
+  /* 跟随圆角设置（原先写死 16px，切档时这里不动会与卡片其余部分对不齐） */
+  border-radius: var(--radius-lg);
   transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 

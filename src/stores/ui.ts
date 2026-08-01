@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { DEFAULT_THEME_PRESET } from '@/config/themePresets'
 import { applyThemeColor } from '@/utils/themeColor'
+import { applyRadius, clampRadiusPercent, DEFAULT_RADIUS_PERCENT } from '@/utils/radius'
 
 // 主题模式类型
 export type ThemeMode = 'system' | 'light' | 'dark'
@@ -13,6 +14,8 @@ export interface PersistedUIState {
   isDarkMode: boolean
   /** 预设主题色 key，见 config/themePresets.ts */
   themeColor: string
+  /** 圆角百分比 0–100，见 utils/radius.ts */
+  radius: number
   customCSS: string
   
   // 模态框状态
@@ -41,6 +44,7 @@ const DEFAULT_PERSISTED_STATE: PersistedUIState = {
   themeMode: 'system',
   isDarkMode: false,
   themeColor: DEFAULT_THEME_PRESET,
+  radius: DEFAULT_RADIUS_PERCENT,
   customCSS: '',
   isCommentsModalOpen: false,
   isVndbPanelOpen: false,
@@ -61,6 +65,7 @@ export const useUIStore = defineStore('ui', () => {
   const themeMode = ref<ThemeMode>('system')
   const isDarkMode = ref(false)
   const themeColor = ref<string>(DEFAULT_THEME_PRESET)
+  const radius = ref<number>(DEFAULT_RADIUS_PERCENT)
   const customCSS = ref('')
   let systemThemeCleanup: (() => void) | null = null
   
@@ -181,6 +186,16 @@ export const useUIStore = defineStore('ui', () => {
   function setThemeColor(key: string) {
     themeColor.value = key
     applyThemeColor(key)
+  }
+
+  /**
+   * 设置圆角
+   * @param percent 0–100，越界会被夹回区间
+   */
+  function setRadius(percent: number) {
+    const value = clampRadiusPercent(percent)
+    radius.value = value
+    applyRadius(value)
   }
   
   function setCustomCSS(css: string) {
@@ -351,6 +366,7 @@ export const useUIStore = defineStore('ui', () => {
         
         themeMode.value = savedThemeMode ?? DEFAULT_PERSISTED_STATE.themeMode
         themeColor.value = parsed.themeColor ?? DEFAULT_PERSISTED_STATE.themeColor
+        radius.value = clampRadiusPercent(parsed.radius ?? DEFAULT_PERSISTED_STATE.radius)
         customCSS.value = parsed.customCSS ?? DEFAULT_PERSISTED_STATE.customCSS
         showSearchHistory.value = parsed.showSearchHistory ?? DEFAULT_PERSISTED_STATE.showSearchHistory
       }
@@ -388,6 +404,7 @@ export const useUIStore = defineStore('ui', () => {
       const state: Partial<PersistedUIState> = {
         themeMode: themeMode.value,
         themeColor: themeColor.value,
+        radius: radius.value,
         customCSS: customCSS.value,
         showSearchHistory: showSearchHistory.value,
         lastVisitTime: Date.now(),
@@ -418,7 +435,7 @@ export const useUIStore = defineStore('ui', () => {
 
   // 监听需要持久化的状态变化（localStorage - 长期偏好）
   watch(
-    [themeMode, themeColor, customCSS, showSearchHistory],
+    [themeMode, themeColor, radius, customCSS, showSearchHistory],
     () => {
       if (isInitialized.value) {
         savePersistedState()
@@ -456,6 +473,7 @@ export const useUIStore = defineStore('ui', () => {
 
     // 应用预设主题色
     applyThemeColor(themeColor.value)
+    applyRadius(radius.value)
 
     isInitialized.value = true
     
@@ -494,6 +512,7 @@ export const useUIStore = defineStore('ui', () => {
     themeMode,
     isDarkMode,
     themeColor,
+    radius,
     customCSS,
     isCommentsModalOpen,
     isVndbPanelOpen,
@@ -519,6 +538,7 @@ export const useUIStore = defineStore('ui', () => {
     toggleDarkMode,
     setDarkMode,
     setThemeColor,
+    setRadius,
     setCustomCSS,
     // 模态框方法
     openCommentsModal,

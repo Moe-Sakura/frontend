@@ -62,7 +62,7 @@
               </div>
               <div>
                 <h2 class="text-lg font-bold text-gray-800 dark:text-white">外观</h2>
-                <p class="text-sm text-gray-500 dark:text-slate-400">主题色与明暗模式</p>
+                <p class="text-sm text-gray-500 dark:text-slate-400">主题色、明暗模式与圆角</p>
               </div>
             </div>
 
@@ -84,7 +84,30 @@
                   :aria-pressed="uiStore.themeColor === preset.key"
                   @click="selectThemeColor(preset.key)"
                 />
+
+                <!--
+                  取色器：原生 <input type="color"> 铺满整个色块，
+                  这样点色块任意位置都能唤起系统调色板，不必再套一层触发按钮。
+                -->
+                <label
+                  class="swatch swatch-custom"
+                  :class="{ 'swatch-active': isCustomThemeColor }"
+                  :style="{ background: isCustomThemeColor ? uiStore.themeColor : undefined }"
+                  :title="isCustomThemeColor ? `自定义 ${uiStore.themeColor}` : '自定义颜色'"
+                >
+                  <Pipette v-if="!isCustomThemeColor" :size="15" />
+                  <input
+                    type="color"
+                    class="sr-only"
+                    :value="customColorValue"
+                    aria-label="自定义主题色"
+                    @input="onPickColor"
+                  />
+                </label>
               </div>
+              <p v-if="isCustomThemeColor" class="mt-2 font-mono text-xs text-gray-400 dark:text-slate-500">
+                {{ uiStore.themeColor }} · 辅助色 {{ derivedAccent }}
+              </p>
             </div>
 
             <!-- 明暗模式 -->
@@ -105,6 +128,35 @@
                   <component :is="mode.icon" :size="16" />
                   <span>{{ mode.label }}</span>
                 </button>
+              </div>
+            </div>
+
+            <!-- 圆角 -->
+            <div class="mt-5">
+              <div class="mb-2.5 flex items-baseline justify-between">
+                <p class="text-sm font-semibold text-gray-700 dark:text-slate-300">
+                  圆角
+                </p>
+                <p class="font-mono text-xs text-gray-400 dark:text-slate-500">
+                  {{ uiStore.radius }}% · 卡片 {{ radiusCardPx }}px
+                </p>
+              </div>
+              <div class="flex items-center gap-3">
+                <!-- 左右两端各放一个方块，拖动时它们跟着变，是最直观的刻度示意 -->
+                <span class="radius-swatch shrink-0" style="border-radius: 0" />
+                <input
+                  v-model.number="radiusPercent"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  class="radius-range flex-1"
+                  aria-label="圆角大小"
+                />
+                <span
+                  class="radius-swatch shrink-0"
+                  :style="{ borderRadius: `${radiusCardPx * 0.5}px` }"
+                />
               </div>
             </div>
           </div>
@@ -485,6 +537,7 @@ import {
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { percentToRem } from '@/utils/radius'
 
 // Prism Editor
 import { PrismEditor } from 'vue-prism-editor'
@@ -573,6 +626,7 @@ function handleTyping() {
 import {
   Settings as SettingsIcon,
   ChevronLeft,
+  Pipette,
   Paintbrush,
   Info,
   Server,
@@ -598,7 +652,7 @@ import {
 import { useSettingsStore } from '@/stores/settings'
 import { useUIStore } from '@/stores/ui'
 import type { ThemeMode } from '@/stores/ui'
-import { THEME_PRESETS } from '@/config/themePresets'
+import { THEME_PRESETS, getThemePreset, isCustomColor, deriveAccent } from '@/config/themePresets'
 import AdvancedApiSettings, { type AdvancedApiConfig } from '@/components/AdvancedApiSettings.vue'
 import GithubIcon from '@/components/GithubIcon.vue'
 import { useHistoryStore } from '@/stores/history'
@@ -623,6 +677,37 @@ function selectThemeColor(key: string) {
   if (uiStore.themeColor === key) {return}
   playSelect()
   uiStore.setThemeColor(key)
+}
+
+/* ---------- 圆角：连续百分比 ---------- */
+
+/** 拖动即生效；不发音效，滑动过程中会触发几十次 */
+const radiusPercent = computed({
+  get: () => uiStore.radius,
+  set: (value: number) => uiStore.setRadius(value),
+})
+
+/** 卡片实际圆角，px，用于滑块两端的示意方块与读数 */
+const radiusCardPx = computed(() => Math.round(percentToRem(uiStore.radius) * 16))
+
+/* ---------- 主题色：取色器 ---------- */
+
+const isCustomThemeColor = computed(() => isCustomColor(uiStore.themeColor))
+
+/** 打开系统调色板时的初始值：已是自定义就用它，否则用当前预设的主色 */
+const customColorValue = computed(() => {
+  if (isCustomThemeColor.value) { return uiStore.themeColor }
+  return getThemePreset(uiStore.themeColor).primary
+})
+
+const derivedAccent = computed(() =>
+  isCustomThemeColor.value ? deriveAccent(uiStore.themeColor) : '',
+)
+
+/** 取色器是拖动式的，同样不发音效 */
+function onPickColor(event: Event) {
+  const value = (event.target as HTMLInputElement).value
+  if (value) { uiStore.setThemeColor(value.toLowerCase()) }
 }
 
 function selectThemeMode(mode: ThemeMode) {
@@ -1133,6 +1218,52 @@ function onAdvancedApiReset() {
 
 .dark .mode-row {
   background: rgba(var(--brand-primary-light, 255, 105, 180), 0.1);
+}
+
+/* 滑块两端的示意方块：左端恒为直角，右端跟随当前取值 */
+.radius-swatch {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(var(--brand-primary, 255, 20, 147), 0.55);
+  transition: border-radius 0.12s ease-out;
+}
+
+/* 取色器色块：未选中时显示滴管图标，选中后整块变成所选颜色 */
+.swatch-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgb(var(--text-secondary, 107, 114, 128));
+  background:
+    conic-gradient(from 0deg,
+      #ff1493, #f8b125, #88bf1b, #019ae8, #4f54da, #d946ef, #ff1493);
+}
+
+.radius-range {
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(var(--brand-primary, 255, 20, 147), 0.2);
+  cursor: pointer;
+}
+
+.radius-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgb(var(--brand-primary, 255, 20, 147));
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.radius-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgb(var(--brand-primary, 255, 20, 147));
+  border: 2px solid #fff;
 }
 
 .mode-btn {

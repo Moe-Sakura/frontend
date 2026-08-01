@@ -923,7 +923,8 @@ defineExpose({
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 1rem;
+  /* 与 .glassmorphism-input 的圆角保持一致，否则伪元素会露出直角 */
+  border-radius: var(--radius-2xl);
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.95) 0%,
@@ -955,7 +956,8 @@ defineExpose({
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 1rem;
+  /* 与 .glassmorphism-input 的圆角保持一致，否则伪元素会露出直角 */
+  border-radius: var(--radius-2xl);
   padding: 2px;
   background: linear-gradient(
     135deg,

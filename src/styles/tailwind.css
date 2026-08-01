@@ -29,27 +29,31 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * 圆角刻度 —— 项目自己的一套，比 Tailwind 默认大一档（卡片 16px、面板 20px）。
+ * 圆角刻度 —— 项目自己的一套，且用户可在设置面板里切档（直角/小/适中/圆润）。
  *
  * 这组变量原本写在 glassmorphism.css 的无 layer :root 里，等于"意外"覆盖了
- * Tailwind 的同名 theme 键。搬到 @theme 后渲染完全不变，占用也从意外变显式。
+ * Tailwind 的同名 theme 键；搬到 @theme 后这份占用从意外变成了显式声明。
  *
  * shadcn 默认会往下面的 @theme inline 里写一套 --radius-sm/md/lg/xl，
- * 由 `--radius: 0.625rem` 用 calc() 推导。那会把 rounded-lg 从 1rem 压到
- * 0.625rem，影响全项目 124 处圆角。这里刻意保留项目自己的刻度，并把
- * --radius 设成 1rem，让少数直读 var(--radius) 的 shadcn 组件也对齐玻璃卡片。
+ * 由 `--radius: 0.625rem` 用 calc() 推导 —— 那会覆盖掉项目自己的刻度，
+ * 所以刻意不采用。
+ *
+ * 这里的值是「适中」预设（config/radiusPresets.ts）的展开结果，只是首屏的
+ * 起点：utils/radius.ts 会在 store 初始化时把用户选的档位写成 <html> 的
+ * 内联样式盖过它。两边保持一致才不会在启动瞬间闪一下圆角。
+ * 各档位相对 --radius-lg 是固定倍率，改比例请去 utils/radius.ts。
  *
  * 必须用不带 inline 的 @theme：工具类（.rounded-lg{border-radius:
  * var(--radius-lg)}）和 CSS 里的 var(--radius-lg) 直读都要拿到值。
  */
 @theme {
-  --radius-xs: 0.375rem;   /* 6px  - 小按钮 */
-  --radius-sm: 0.5rem;     /* 8px  - 小元素 */
-  --radius-md: 0.75rem;    /* 12px - 按钮/输入框 */
-  --radius-lg: 1rem;       /* 16px - 卡片 */
-  --radius-xl: 1.25rem;    /* 20px - 面板 */
-  --radius-2xl: 1.5rem;    /* 24px - 模态框 */
-  --radius-3xl: 2rem;      /* 32px - 大圆角 */
+  --radius-xs: 0.2813rem;  /* 4.5px - 小按钮 */
+  --radius-sm: 0.375rem;   /* 6px   - 小元素 */
+  --radius-md: 0.5625rem;  /* 9px   - 按钮/输入框 */
+  --radius-lg: 0.75rem;    /* 12px  - 卡片 */
+  --radius-xl: 0.9375rem;  /* 15px  - 面板 */
+  --radius-2xl: 1.125rem;  /* 18px  - 模态框 */
+  --radius-3xl: 1.5rem;    /* 24px  - 大圆角 */
 }
 
 /*
@@ -119,8 +123,9 @@
  * 的观感保持一致。
  */
 :root {
-  /* 玻璃卡片圆角 16px，与 .glassmorphism-card 对齐 */
-  --radius: 1rem;
+  /* shadcn 组件读的圆角，等同卡片圆角（--radius-lg）。
+     同样只是首屏起点，运行时由 utils/radius.ts 覆盖。 */
+  --radius: 0.75rem;
 
   /* 面 —— 对应 glassmorphism 的各级不透明度 */
   --background: rgba(255, 255, 255, 0.85);   /* --opacity-panel */
