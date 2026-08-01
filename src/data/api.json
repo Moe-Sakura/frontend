@@ -14,32 +14,14 @@
       "key": "netlify",
       "label": "Netlify",
       "url": "https://netlify.api.searchgal.top"
-    },
-    {
-      "key": "santaclara",
-      "label": "圣克拉拉 ClawCloud",
-      "url": "https://us-west.api.searchgal.top"
-    },
-    {
-      "key": "ashburn",
-      "label": "阿什本 ClawCloud",
-      "url": "https://us-east.api.searchgal.top"
-    },
-    {
-      "key": "singapore",
-      "label": "新加坡 ClawCloud",
-      "url": "https://sg.api.searchgal.top"
-    },
-    {
-      "key": "frankfurt",
-      "label": "法兰克福 ClawCloud",
-      "url": "https://de.api.searchgal.top"
-    },
-    {
-      "key": "tokyo",
-      "label": "东京 ClawCloud",
-      "url": "https://jp.api.searchgal.top"
     }
+  ],
+  "retiredServers": [
+    "https://us-west.api.searchgal.top",
+    "https://us-east.api.searchgal.top",
+    "https://sg.api.searchgal.top",
+    "https://de.api.searchgal.top",
+    "https://jp.api.searchgal.top"
   ],
   "deployUrl": "https://github.com/Moe-Sakura/SearchGal",
   "contributeUrl": "https://github.com/Moe-Sakura/frontend/edit/dev/src/data/api.json"

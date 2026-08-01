@@ -85,6 +85,7 @@ src/
 │   └── theme.css     # 主题变量
 ├── utils/            # 工具函数
 │   ├── persistence.ts # LocalStorage 持久化
+│   ├── apiServers.ts # 下线分流地址的迁移 (旧链接/旧缓存回落默认节点)
 │   ├── theme.ts      # 明暗主题 + 自定义 CSS/JS/HTML
 │   ├── themeColor.ts # 预设主题色 → CSS 变量
 │   └── urlParams.ts  # URL 参数处理

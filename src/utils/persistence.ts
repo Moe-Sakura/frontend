@@ -4,6 +4,7 @@
  */
 
 import type { PlatformData, VndbInfo } from '@/stores/search'
+import { migrateApiUrl } from './apiServers'
 
 const STORAGE_KEY = 'searchgal_state'
 const STORAGE_VERSION = '1.0'
@@ -68,7 +69,13 @@ export function loadSearchState(): SearchState | null {
       localStorage.removeItem(STORAGE_KEY)
       return null
     }
-    
+
+    // 分流下线后，清掉残留的旧地址，回落到默认节点
+    state.customApi = migrateApiUrl(state.customApi)
+    if (state.inputApi) {
+      state.inputApi = migrateApiUrl(state.inputApi)
+    }
+
     return state
   } catch (error) {
     // 解析失败，清除无效数据

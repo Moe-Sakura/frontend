@@ -3,6 +3,8 @@
  * 用于实现搜索参数与地址栏的双向绑定
  */
 
+import { isRetiredApiUrl } from './apiServers'
+
 export interface SearchParams {
   s?: string        // 搜索关键字
   mode?: 'game' | 'patch'  // 搜索模式
@@ -29,10 +31,13 @@ export function getSearchParamsFromURL(): SearchParams {
     result.mode = mode
   }
   
-  // 自定义 API
+  // 自定义 API：旧分享链接里可能带着已下线的分流，忽略即可回落到默认节点
   const api = params.get('api')
   if (api) {
-    result.api = decodeURIComponent(api)
+    const decoded = decodeURIComponent(api)
+    if (!isRetiredApiUrl(decoded)) {
+      result.api = decoded
+    }
   }
   
   return result
