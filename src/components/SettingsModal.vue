@@ -1,521 +1,490 @@
 <template>
-  <Teleport to="body">
-    <!-- 设置面板 - 模态框 -->
-    <Transition
-      enter-active-class="duration-300 ease-out"
-      enter-from-class="opacity-0 scale-[0.98] translate-y-10"
-      enter-to-class="opacity-100 scale-100 translate-y-0"
-      leave-active-class="duration-200 ease-in"
-      leave-from-class="opacity-100 scale-100 translate-y-0"
-      leave-to-class="opacity-0 scale-[0.98] translate-y-10"
+  <Dialog v-model:open="open">
+    <DialogContent
+      :show-close-button="false"
+      class="settings-page inset-0 flex translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 p-0 shadow-2xl shadow-black/20
+             max-w-none sm:max-w-none
+             md:inset-6 md:m-auto md:h-[700px] md:max-h-[calc(100%_-_3rem)] md:w-[800px] md:max-w-[calc(100%_-_3rem)] md:rounded-3xl"
     >
-      <div
-        v-show="isOpen"
-        class="fixed z-[100] flex flex-col settings-page shadow-2xl shadow-black/20 inset-0 md:inset-6 md:m-auto md:w-[800px] md:max-w-[calc(100%-3rem)] md:h-[700px] md:max-h-[calc(100%-3rem)] md:rounded-3xl"
+      <!-- 顶部导航栏 -->
+      <DialogHeader
+        class="glassmorphism-navbar flex-row flex-shrink-0 items-center justify-between space-y-0 border-b border-white/10 px-4 py-3 select-none sm:px-6 sm:py-4 md:rounded-t-3xl dark:border-slate-700/50"
       >
-        <!-- 顶部导航栏 -->
-        <div
-          class="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 dark:border-slate-700/50 glassmorphism-navbar select-none md:rounded-t-3xl"
+        <!-- 返回按钮 - 仅移动端 -->
+        <button
+          class="flex items-center gap-1 font-medium text-theme-primary transition-colors active:scale-95 md:hidden dark:text-theme-primary-light"
+          @click="open = false"
         >
-          <!-- 返回按钮 - 仅移动端 -->
-          <button
-            class="flex items-center gap-1 text-theme-primary dark:text-theme-primary-light font-medium transition-colors active:scale-95 md:hidden"
-            @click="close"
-          >
-            <ChevronLeft :size="24" />
-            <span class="text-base">返回</span>
-          </button>
+          <ChevronLeft :size="24" />
+          <span class="text-base">返回</span>
+        </button>
 
-          <!-- 标题 -->
-          <div class="flex items-center gap-2 md:ml-0">
-            <SettingsIcon :size="20" class="text-theme-primary dark:text-theme-primary-light" />
-            <h1 class="text-lg font-bold text-gray-800 dark:text-white">设置</h1>
-          </div>
-
-          <!-- 右侧按钮组 -->
-          <div class="flex items-center gap-2">
-            <!-- 保存按钮 -->
-            <button
-              class="px-4 py-1.5 rounded-full text-white text-sm font-semibold bg-theme-primary hover:bg-[#e0117f] active:scale-95 transition-all shadow-lg shadow-theme-primary/25"
-              @click="save"
-            >
-              保存
-            </button>
-          
-            <!-- 关闭按钮 - 仅桌面端 -->
-            <button
-              class="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-              title="关闭"
-              @click="close"
-            >
-              <X :size="16" />
-            </button>
-          </div>
+        <!-- 标题 -->
+        <div class="flex items-center gap-2 md:ml-0">
+          <SettingsIcon :size="20" class="text-theme-primary dark:text-theme-primary-light" />
+          <DialogTitle class="text-lg font-bold text-gray-800 dark:text-white">
+            设置
+          </DialogTitle>
+          <DialogDescription class="sr-only">
+            站点设置面板：外观、音效、搜索历史、自定义代码与高级 API
+          </DialogDescription>
         </div>
 
-        <!-- 内容区域 -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar">
-          <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-            <!-- 外观设置卡片 -->
-            <div class="settings-card">
+        <!-- 右侧按钮组 -->
+        <div class="flex items-center gap-2">
+          <!-- 保存按钮 -->
+          <button
+            class="rounded-full bg-theme-primary px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-theme-primary/25 transition-all hover:bg-theme-primary-dark active:scale-95"
+            @click="save"
+          >
+            保存
+          </button>
+
+          <!-- 关闭按钮 - 仅桌面端 -->
+          <button
+            class="hidden h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-all hover:bg-red-50 hover:text-red-500 md:flex dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+            title="关闭"
+            @click="open = false"
+          >
+            <X :size="16" />
+          </button>
+        </div>
+      </DialogHeader>
+
+      <!-- 内容区域 -->
+      <div class="custom-scrollbar flex-1 overflow-y-auto">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+          <!-- 外观设置卡片 -->
+          <div class="settings-card">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30">
+                <Palette :size="20" class="text-white" />
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">外观</h2>
+                <p class="text-sm text-gray-500 dark:text-slate-400">主题色与明暗模式</p>
+              </div>
+            </div>
+
+            <!-- 预设主题色 -->
+            <div class="mt-5">
+              <p class="mb-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300">
+                主题色
+              </p>
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  v-for="preset in THEME_PRESETS"
+                  :key="preset.key"
+                  type="button"
+                  class="swatch"
+                  :class="{ 'swatch-active': uiStore.themeColor === preset.key }"
+                  :style="{ background: preset.primary }"
+                  :title="preset.label"
+                  :aria-label="`主题色：${preset.label}`"
+                  :aria-pressed="uiStore.themeColor === preset.key"
+                  @click="selectThemeColor(preset.key)"
+                />
+              </div>
+            </div>
+
+            <!-- 明暗模式 -->
+            <div class="mt-5">
+              <p class="mb-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300">
+                明暗模式
+              </p>
+              <div class="mode-row flex items-center gap-1 rounded-xl p-1">
+                <button
+                  v-for="mode in THEME_MODES"
+                  :key="mode.value"
+                  type="button"
+                  class="mode-btn flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-semibold"
+                  :class="uiStore.themeMode === mode.value ? 'mode-btn-active' : 'mode-btn-idle'"
+                  :aria-pressed="uiStore.themeMode === mode.value"
+                  @click="selectThemeMode(mode.value)"
+                >
+                  <component :is="mode.icon" :size="16" />
+                  <span>{{ mode.label }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 音效设置卡片 -->
+          <div class="settings-card">
+            <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30">
-                  <Palette :size="20" class="text-white" />
+                  <Volume2 :size="20" class="text-white" />
                 </div>
                 <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">外观</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">主题色与明暗模式</p>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">音效</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">界面交互音效</p>
                 </div>
               </div>
+              <!-- 开关 -->
+              <Switch
+                :model-value="localEnableSound"
+                aria-label="界面交互音效"
+                class="h-7 w-12 data-[state=checked]:bg-theme-primary data-[state=unchecked]:bg-gray-300 dark:data-[state=unchecked]:bg-slate-600 [&>span]:size-6 [&>span]:data-[state=checked]:translate-x-5"
+                @update:model-value="toggleSound"
+              />
+            </div>
+          </div>
 
-              <!-- 预设主题色 -->
-              <div class="mt-5">
-                <p class="mb-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300">
-                  主题色
+          <!-- 搜索历史管理卡片 -->
+          <div class="settings-card">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <History :size="20" class="text-white" />
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">搜索历史</h2>
+                <p class="text-sm text-gray-500 dark:text-slate-400">
+                  共 {{ historyStore.historyCount }} 条记录
                 </p>
-                <div class="flex flex-wrap items-center gap-3">
-                  <button
-                    v-for="preset in THEME_PRESETS"
-                    :key="preset.key"
-                    type="button"
-                    class="swatch"
-                    :class="{ 'swatch-active': uiStore.themeColor === preset.key }"
-                    :style="{ background: preset.primary }"
-                    :title="preset.label"
-                    :aria-label="`主题色：${preset.label}`"
-                    :aria-pressed="uiStore.themeColor === preset.key"
-                    @click="selectThemeColor(preset.key)"
-                  />
-                </div>
-              </div>
-
-              <!-- 明暗模式 -->
-              <div class="mt-5">
-                <p class="mb-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300">
-                  明暗模式
-                </p>
-                <div class="mode-row flex items-center gap-1 rounded-xl p-1">
-                  <button
-                    v-for="mode in THEME_MODES"
-                    :key="mode.value"
-                    type="button"
-                    class="mode-btn flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-semibold"
-                    :class="uiStore.themeMode === mode.value ? 'mode-btn-active' : 'mode-btn-idle'"
-                    :aria-pressed="uiStore.themeMode === mode.value"
-                    @click="selectThemeMode(mode.value)"
-                  >
-                    <component :is="mode.icon" :size="16" />
-                    <span>{{ mode.label }}</span>
-                  </button>
-                </div>
               </div>
             </div>
 
-            <!-- 音效设置卡片 -->
-            <div class="settings-card">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-lg shadow-theme-primary/30">
-                    <Volume2 :size="20" class="text-white" />
-                  </div>
-                  <div>
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white">音效</h2>
-                    <p class="text-sm text-gray-500 dark:text-slate-400">界面交互音效</p>
-                  </div>
-                </div>
-                <!-- 开关 -->
+            <div class="space-y-3">
+              <!-- 导出导入按钮 -->
+              <div class="flex gap-3">
                 <button
-                  type="button"
-                  role="switch"
-                  :aria-checked="localEnableSound"
-                  :class="[
-                    'relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
-                    localEnableSound
-                      ? 'bg-theme-primary'
-                      : 'bg-gray-300 dark:bg-slate-600'
-                  ]"
-                  @click="toggleSound"
+                  class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
+                  @click="exportHistory"
                 >
-                  <span
-                    :class="[
-                      'pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out',
-                      localEnableSound ? 'translate-x-5' : 'translate-x-0'
-                    ]"
-                  />
+                  <Download :size="18" />
+                  <span>导出记录</span>
                 </button>
-              </div>
-            </div>
-
-            <!-- 搜索历史管理卡片 -->
-            <div class="settings-card">
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                  <History :size="20" class="text-white" />
-                </div>
-                <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">搜索历史</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">
-                    共 {{ historyStore.historyCount }} 条记录
-                  </p>
-                </div>
-              </div>
-
-              <div class="space-y-3">
-                <!-- 导出导入按钮 -->
-                <div class="flex gap-3">
-                  <button
-                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
-                    @click="exportHistory"
-                  >
-                    <Download :size="18" />
-                    <span>导出记录</span>
-                  </button>
-                  <button
-                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
-                    @click="triggerImport"
-                  >
-                    <Upload :size="18" />
-                    <span>导入记录</span>
-                  </button>
-                  <!-- 隐藏的文件输入框 -->
-                  <input
-                    ref="fileInputRef"
-                    type="file"
-                    accept=".json"
-                    class="hidden"
-                    @change="handleImportFile"
-                  />
-                </div>
-
-                <!-- 状态提示 -->
-                <Transition
-                  enter-active-class="transition-all duration-200 ease-out"
-                  enter-from-class="opacity-0 translate-y-1"
-                  enter-to-class="opacity-100 translate-y-0"
-                  leave-active-class="transition-all duration-150 ease-in"
-                  leave-from-class="opacity-100 translate-y-0"
-                  leave-to-class="opacity-0 translate-y-1"
-                >
-                  <div
-                    v-if="importStatus !== 'idle'"
-                    :class="[
-                      'flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
-                      importStatus === 'success'
-                        ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800/50'
-                        : 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50'
-                    ]"
-                  >
-                    <component
-                      :is="importStatus === 'success' ? CheckCircle2 : AlertCircle"
-                      :size="16"
-                    />
-                    <span>{{ importMessage }}</span>
-                  </div>
-                </Transition>
-
-                <!-- 说明 -->
-                <div class="flex items-start gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-xs text-gray-500 dark:text-slate-400">
-                  <FileJson :size="14" class="flex-shrink-0 mt-0.5 text-amber-500" />
-                  <p>导出为 JSON 格式，可用于备份或迁移到其他设备。导入时会自动去重。</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- API 设置卡片 -->
-            <div
-              class="settings-card"
-            >
-              <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                    <Server :size="20" class="text-white" />
-                  </div>
-                  <div>
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white">聚搜 API 后端</h2>
-                    <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 URL 地址</p>
-                  </div>
-                </div>
-                <!-- 部署后端 & 贡献 API 按钮 -->
-                <div class="flex items-center gap-2">
-                  <a
-                    :href="deployUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-95 transition-all"
-                    @click="playTap"
-                  >
-                    <GithubIcon :size="14" />
-                    <span class="hidden sm:inline">部署后端</span>
-                    <span class="sm:hidden">部署</span>
-                  </a>
-                  <a
-                    :href="contributeUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-95 transition-all"
-                    @click="playTap"
-                  >
-                    <Plus :size="14" />
-                    <span class="hidden sm:inline">贡献 API</span>
-                    <span class="sm:hidden">贡献</span>
-                  </a>
-                </div>
-              </div>
-
-              <!-- API 选项列表 -->
-              <div class="space-y-2">
                 <button
-                  v-for="option in apiOptions"
-                  :key="option.value"
-                  type="button"
-                  :class="[
-                    'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
-                    selectedApiOption === option.value
-                      ? 'bg-gradient-to-r from-theme-primary/10 to-theme-accent/10 border-2 border-theme-primary dark:border-theme-primary-light'
-                      : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-theme-primary/25 dark:hover:border-theme-primary-darker'
-                  ]"
-                  @click="selectApiOption(option.value)"
+                  class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
+                  @click="triggerImport"
                 >
-                  <div class="flex items-center gap-3">
-                    <div
-                      :class="[
-                        'w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors',
-                        selectedApiOption === option.value
-                          ? 'border-theme-primary bg-theme-primary'
-                          : 'border-gray-300 dark:border-slate-600'
-                      ]"
-                    >
-                      <Check v-if="selectedApiOption === option.value" :size="12" class="text-white" />
-                    </div>
-                    <span
-                      :class="[
-                        'font-medium text-sm sm:text-base',
-                        selectedApiOption === option.value
-                          ? 'text-theme-primary dark:text-theme-primary-light'
-                          : 'text-gray-700 dark:text-slate-300'
-                      ]"
-                    >
-                      {{ option.label }}
-                    </span>
-                    <!-- 延迟显示 -->
-                    <span 
-                      v-if="option.value !== 'custom'"
-                      :class="['text-xs font-mono tabular-nums', getLatencyClass(option.value)]"
-                    >
-                      {{ getLatencyText(option.value) }}
-                    </span>
-                  </div>
-                  <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧靠右 -->
-                  <span 
-                    v-if="option.value !== 'custom'" 
-                    v-text-scroll
-                    class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-auto sm:text-right truncate max-w-[50%]"
-                  >
-                    {{ getApiUrl(option.value) }}
-                  </span>
+                  <Upload :size="18" />
+                  <span>导入记录</span>
                 </button>
+                <!-- 隐藏的文件输入框 -->
+                <input
+                  ref="fileInputRef"
+                  type="file"
+                  accept=".json"
+                  class="hidden"
+                  @change="handleImportFile"
+                />
               </div>
 
-              <!-- 自定义 API 输入 -->
+              <!-- 状态提示 -->
               <Transition
                 enter-active-class="transition-all duration-200 ease-out"
-                enter-from-class="opacity-0 max-h-0"
-                enter-to-class="opacity-100 max-h-40"
-                leave-active-class="transition-all duration-200 ease-in"
-                leave-from-class="opacity-100 max-h-40"
-                leave-to-class="opacity-0 max-h-0"
+                enter-from-class="opacity-0 translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition-all duration-150 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-1"
               >
                 <div
-                  v-if="selectedApiOption === 'custom'"
-                  class="overflow-hidden"
+                  v-if="importStatus !== 'idle'"
+                  :class="[
+                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
+                    importStatus === 'success'
+                      ? 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800/50'
+                      : 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50'
+                  ]"
                 >
-                  <div class="mt-4">
-                    <div class="relative">
-                      <LinkIcon :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input
-                        v-model="customApiInput"
-                        type="url"
-                        placeholder="https://api.example.com"
-                        class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-theme-primary/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-theme-primary text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
-                        @input="handleTyping"
-                      />
-                    </div>
-                  </div>
+                  <component
+                    :is="importStatus === 'success' ? CheckCircle2 : AlertCircle"
+                    :size="16"
+                  />
+                  <span>{{ importMessage }}</span>
                 </div>
               </Transition>
-            </div>
 
-            <!-- 自定义代码卡片 - IDE 风格 -->
-            <div class="settings-card !p-0 overflow-hidden">
-              <!-- IDE 风格顶部栏 -->
-              <div class="flex items-center justify-between px-4 py-3 bg-[#252526] border-b border-[#3c3c3c]">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                    <Code :size="16" class="text-white" />
-                  </div>
-                  <div>
-                    <h2 class="text-sm font-semibold text-white">自定义代码</h2>
-                    <p class="text-xs text-gray-400">CSS · JavaScript · HTML</p>
-                  </div>
-                </div>
-                <!-- 窗口控制按钮装饰 -->
-                <div class="flex items-center gap-1.5">
-                  <div class="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                  <div class="w-3 h-3 rounded-full bg-[#febc2e]" />
-                  <div class="w-3 h-3 rounded-full bg-[#28c840]" />
-                </div>
-              </div>
-
-              <!-- IDE 风格 Tab 栏 -->
-              <div class="flex bg-[#2d2d2d] border-b border-[#3c3c3c]">
-                <button
-                  :class="[
-                    'group relative flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all border-r border-[#3c3c3c]',
-                    activeCodeTab === 'css'
-                      ? 'bg-[#1e1e1e] text-white'
-                      : 'text-gray-400 hover:text-gray-200 hover:bg-[#383838]'
-                  ]"
-                  @click="switchCodeTab('css')"
-                >
-                  <Paintbrush :size="14" :class="activeCodeTab === 'css' ? 'text-theme-primary' : 'text-gray-500 group-hover:text-theme-primary'" />
-                  <span>style.css</span>
-                  <div v-if="activeCodeTab === 'css'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-theme-primary" />
-                </button>
-                <button
-                  :class="[
-                    'group relative flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all border-r border-[#3c3c3c]',
-                    activeCodeTab === 'js'
-                      ? 'bg-[#1e1e1e] text-white'
-                      : 'text-gray-400 hover:text-gray-200 hover:bg-[#383838]'
-                  ]"
-                  @click="switchCodeTab('js')"
-                >
-                  <Terminal :size="14" :class="activeCodeTab === 'js' ? 'text-amber-400' : 'text-gray-500 group-hover:text-amber-400'" />
-                  <span>script.js</span>
-                  <div v-if="activeCodeTab === 'js'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400" />
-                </button>
-                <button
-                  :class="[
-                    'group relative flex items-center gap-2 px-4 py-2 text-xs font-medium transition-all',
-                    activeCodeTab === 'html'
-                      ? 'bg-[#1e1e1e] text-white'
-                      : 'text-gray-400 hover:text-gray-200 hover:bg-[#383838]'
-                  ]"
-                  @click="switchCodeTab('html')"
-                >
-                  <FileCode :size="14" :class="activeCodeTab === 'html' ? 'text-cyan-400' : 'text-gray-500 group-hover:text-cyan-400'" />
-                  <span>custom.html</span>
-                  <div v-if="activeCodeTab === 'html'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400" />
-                </button>
-              </div>
-
-              <!-- 编辑器区域 -->
-              <div class="relative">
-                <!-- CSS 编辑器 -->
-                <div v-show="activeCodeTab === 'css'">
-                  <PrismEditor
-                    v-model="localCustomCSS"
-                    :highlight="highlightCSS"
-                    :line-numbers="true"
-                    class="code-editor"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- JS 编辑器 -->
-                <div v-show="activeCodeTab === 'js'">
-                  <PrismEditor
-                    v-model="localCustomJS"
-                    :highlight="highlightJS"
-                    :line-numbers="true"
-                    class="code-editor"
-                    @input="handleTyping"
-                  />
-                </div>
-
-                <!-- HTML 编辑器 -->
-                <div v-show="activeCodeTab === 'html'">
-                  <PrismEditor
-                    v-model="localCustomHTML"
-                    :highlight="highlightHTML"
-                    :line-numbers="true"
-                    class="code-editor"
-                    @input="handleTyping"
-                  />
-                </div>
-              </div>
-
-              <!-- 底部状态栏 -->
-              <div class="flex items-center justify-between px-4 py-1.5 bg-[#007acc] text-white text-xs">
-                <div class="flex items-center gap-4">
-                  <span class="flex items-center gap-1">
-                    <Info :size="12" />
-                    <span v-if="activeCodeTab === 'css'">CSS 样式会覆盖现有样式</span>
-                    <span v-else-if="activeCodeTab === 'js'">脚本在页面加载时执行</span>
-                    <span v-else>HTML 添加到 body 末尾</span>
-                  </span>
-                </div>
-                <div class="flex items-center gap-3 text-white/80">
-                  <span>UTF-8</span>
-                  <span v-if="activeCodeTab === 'css'">CSS</span>
-                  <span v-else-if="activeCodeTab === 'js'">JavaScript</span>
-                  <span v-else>HTML</span>
-                </div>
+              <!-- 说明 -->
+              <div class="flex items-start gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-xs text-gray-500 dark:text-slate-400">
+                <FileJson :size="14" class="flex-shrink-0 mt-0.5 text-amber-500" />
+                <p>导出为 JSON 格式，可用于备份或迁移到其他设备。导入时会自动去重。</p>
               </div>
             </div>
+          </div>
 
-            <!-- 高级 API 设置卡片 -->
-            <AdvancedApiSettings
-              v-model="localAdvancedApi"
-              @typing="handleTyping"
-              @reset="onAdvancedApiReset"
-            />
-
-
-            <!-- 关于项目卡片 -->
-            <div class="settings-card">
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                  <Info :size="20" class="text-white" />
+          <!-- API 设置卡片 -->
+          <div
+            class="settings-card"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                  <Server :size="20" class="text-white" />
                 </div>
                 <div>
-                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">关于项目</h2>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">开源仓库与贡献</p>
+                  <h2 class="text-lg font-bold text-gray-800 dark:text-white">聚搜 API 后端</h2>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">选择或自定义 URL 地址</p>
                 </div>
               </div>
-
-              <div class="space-y-3">
-                <!-- 仓库卡片列表 -->
+              <!-- 部署后端 & 贡献 API 按钮 -->
+              <div class="flex items-center gap-2">
                 <a
-                  v-for="repoUrl in repoData.repositories"
-                  :key="repoUrl"
-                  :href="repoUrl"
+                  :href="deployUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="block rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-95 transition-all"
                   @click="playTap"
                 >
-                  <img
-                    v-if="githubHashTimestamp"
-                    :src="`https://opengraph.githubassets.com/${githubHashTimestamp}/${getRepoPath(repoUrl)}`"
-                    :alt="`${getRepoName(repoUrl)} repository`"
-                    class="w-full h-auto object-cover"
-                    loading="lazy"
-                  />
-                  <div v-else class="w-full aspect-[2/1] bg-slate-100 dark:bg-slate-800 animate-pulse" />
+                  <GithubIcon :size="14" />
+                  <span class="hidden sm:inline">部署后端</span>
+                  <span class="sm:hidden">部署</span>
+                </a>
+                <a
+                  :href="contributeUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/50 hover:bg-cyan-100 dark:hover:bg-cyan-950/60 active:scale-95 transition-all"
+                  @click="playTap"
+                >
+                  <Plus :size="14" />
+                  <span class="hidden sm:inline">贡献 API</span>
+                  <span class="sm:hidden">贡献</span>
                 </a>
               </div>
+            </div>
+
+            <!-- API 选项列表 -->
+            <div class="space-y-2">
+              <button
+                v-for="option in apiOptions"
+                :key="option.value"
+                type="button"
+                :class="[
+                  'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
+                  selectedApiOption === option.value
+                    ? 'bg-gradient-to-r from-theme-primary/10 to-theme-accent/10 border-2 border-theme-primary dark:border-theme-primary-light'
+                    : 'bg-slate-50 dark:bg-slate-800/60 border-2 border-transparent hover:border-theme-primary/25 dark:hover:border-theme-primary-darker'
+                ]"
+                @click="selectApiOption(option.value)"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    :class="[
+                      'w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors',
+                      selectedApiOption === option.value
+                        ? 'border-theme-primary bg-theme-primary'
+                        : 'border-gray-300 dark:border-slate-600'
+                    ]"
+                  >
+                    <Check v-if="selectedApiOption === option.value" :size="12" class="text-white" />
+                  </div>
+                  <span
+                    :class="[
+                      'font-medium text-sm sm:text-base',
+                      selectedApiOption === option.value
+                        ? 'text-theme-primary dark:text-theme-primary-light'
+                        : 'text-gray-700 dark:text-slate-300'
+                    ]"
+                  >
+                    {{ option.label }}
+                  </span>
+                  <!-- 延迟显示 -->
+                  <span 
+                    v-if="option.value !== 'custom'"
+                    :class="['text-xs font-mono tabular-nums', getLatencyClass(option.value)]"
+                  >
+                    {{ getLatencyText(option.value) }}
+                  </span>
+                </div>
+                <!-- 移动端：URL 显示在第二行；桌面端：显示在右侧靠右 -->
+                <span 
+                  v-if="option.value !== 'custom'" 
+                  v-text-scroll
+                  class="text-xs text-gray-400 dark:text-slate-500 font-mono mt-1.5 sm:mt-0 ml-8 sm:ml-auto sm:text-right truncate max-w-[50%]"
+                >
+                  {{ getApiUrl(option.value) }}
+                </span>
+              </button>
+            </div>
+
+            <!-- 自定义 API 输入 -->
+            <Transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 max-h-0"
+              enter-to-class="opacity-100 max-h-40"
+              leave-active-class="transition-all duration-200 ease-in"
+              leave-from-class="opacity-100 max-h-40"
+              leave-to-class="opacity-0 max-h-0"
+            >
+              <div
+                v-if="selectedApiOption === 'custom'"
+                class="overflow-hidden"
+              >
+                <div class="mt-4">
+                  <div class="relative">
+                    <LinkIcon :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      v-model="customApiInput"
+                      type="url"
+                      placeholder="https://api.example.com"
+                      class="api-input w-full pl-12 pr-4 py-4 text-base rounded-xl bg-slate-50 dark:bg-slate-800/80 shadow-inner focus:shadow-lg focus:shadow-theme-primary/10 transition-all duration-200 outline-none border-2 border-transparent focus:border-theme-primary text-gray-800 dark:text-slate-100 placeholder:text-gray-400"
+                      @input="handleTyping"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Transition>
+          </div>
+
+          <!-- 自定义代码卡片 - IDE 风格 -->
+          <div class="settings-card !p-0 overflow-hidden">
+            <!-- IDE 风格顶部栏 -->
+            <div class="flex items-center justify-between px-4 py-3 bg-[#252526] border-b border-[#3c3c3c]">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <Code :size="16" class="text-white" />
+                </div>
+                <div>
+                  <h2 class="text-sm font-semibold text-white">自定义代码</h2>
+                  <p class="text-xs text-gray-400">CSS · JavaScript · HTML</p>
+                </div>
+              </div>
+              <!-- 窗口控制按钮装饰 -->
+              <div class="flex items-center gap-1.5">
+                <div class="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                <div class="w-3 h-3 rounded-full bg-[#febc2e]" />
+                <div class="w-3 h-3 rounded-full bg-[#28c840]" />
+              </div>
+            </div>
+
+            <!-- IDE 风格 Tab 栏 -->
+            <Tabs v-model="activeCodeTab" @update:model-value="playTap()">
+              <!-- 标签栏（仿编辑器） -->
+              <TabsList class="h-auto w-full justify-start rounded-none border-b border-[#3c3c3c] bg-[#2d2d2d] p-0">
+                <TabsTrigger
+                  v-for="tab in CODE_TABS"
+                  :key="tab.key"
+                  :value="tab.key"
+                  class="group relative gap-2 rounded-none border-0 border-r border-[#3c3c3c] px-4 py-2 text-xs font-medium text-gray-400 transition-all last:border-r-0 hover:bg-[#383838] hover:text-gray-200 data-[state=active]:bg-[#1e1e1e] data-[state=active]:text-white data-[state=active]:shadow-none"
+                >
+                  <component
+                    :is="tab.icon"
+                    :size="14"
+                    class="text-gray-500"
+                    :class="[tab.groupHoverAccent, activeCodeTab === tab.key && tab.accent]"
+                  />
+                  <span>{{ tab.file }}</span>
+                  <div
+                    v-if="activeCodeTab === tab.key"
+                    class="absolute right-0 bottom-0 left-0 h-0.5"
+                    :class="tab.bar"
+                  />
+                </TabsTrigger>
+              </TabsList>
+
+              <!--
+                  force-mount：三个 PrismEditor 实例保持挂载，切换标签不重建。
+                  重建会丢掉光标位置与撤销栈，也白白付出高亮的开销。
+                -->
+              <TabsContent value="css" force-mount class="relative mt-0 data-[state=inactive]:hidden">
+                <PrismEditor
+                  v-model="localCustomCSS"
+                  :highlight="highlightCSS"
+                  :line-numbers="true"
+                  class="code-editor"
+                  @input="handleTyping"
+                />
+              </TabsContent>
+              <TabsContent value="js" force-mount class="relative mt-0 data-[state=inactive]:hidden">
+                <PrismEditor
+                  v-model="localCustomJS"
+                  :highlight="highlightJS"
+                  :line-numbers="true"
+                  class="code-editor"
+                  @input="handleTyping"
+                />
+              </TabsContent>
+              <TabsContent value="html" force-mount class="relative mt-0 data-[state=inactive]:hidden">
+                <PrismEditor
+                  v-model="localCustomHTML"
+                  :highlight="highlightHTML"
+                  :line-numbers="true"
+                  class="code-editor"
+                  @input="handleTyping"
+                />
+              </TabsContent>
+            </Tabs>
+
+            <!-- 底部状态栏 -->
+            <div class="flex items-center justify-between bg-[#007acc] px-4 py-1.5 text-xs text-white">
+              <div class="flex items-center gap-4">
+                <span class="flex items-center gap-1">
+                  <Info :size="12" />
+                  <span>{{ currentCodeTab.hint }}</span>
+                </span>
+              </div>
+              <div class="flex items-center gap-3 text-white/80">
+                <span>UTF-8</span>
+                <span>{{ currentCodeTab.lang }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 高级 API 设置卡片 -->
+          <AdvancedApiSettings
+            v-model="localAdvancedApi"
+            @typing="handleTyping"
+            @reset="onAdvancedApiReset"
+          />
+
+
+          <!-- 关于项目卡片 -->
+          <div class="settings-card">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                <Info :size="20" class="text-white" />
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">关于项目</h2>
+                <p class="text-sm text-gray-500 dark:text-slate-400">开源仓库与贡献</p>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <!-- 仓库卡片列表 -->
+              <a
+                v-for="repoUrl in repoData.repositories"
+                :key="repoUrl"
+                :href="repoUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                @click="playTap"
+              >
+                <img
+                  v-if="githubHashTimestamp"
+                  :src="`https://opengraph.githubassets.com/${githubHashTimestamp}/${getRepoPath(repoUrl)}`"
+                  :alt="`${getRepoName(repoUrl)} repository`"
+                  class="w-full h-auto object-cover"
+                  loading="lazy"
+                />
+                <div v-else class="w-full aspect-[2/1] bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              </a>
             </div>
           </div>
         </div>
       </div>
-    </Transition>
-  </Teleport>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
+import type { Component } from 'vue'
 import { ref, watch, computed } from 'vue'
 import { playTap, playCelebration, playSelect, playType, playToggleOn, playToggleOff } from '@/composables/useSound'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Prism Editor
 import { PrismEditor } from 'vue-prism-editor'
@@ -545,14 +514,50 @@ function highlightHTML(code: string): string {
   return languages.markup ? highlight(code, languages.markup, 'markup') : code
 }
 
-// 代码编辑器 Tab 类型
+// 代码编辑器 Tab
 type CodeEditorTab = 'css' | 'js' | 'html'
-const activeCodeTab = ref<CodeEditorTab>('css')
 
-function switchCodeTab(tab: CodeEditorTab) {
-  playTap()
-  activeCodeTab.value = tab
+interface CodeTabDef {
+  key: CodeEditorTab
+  /** 标签上显示的文件名 */
+  file: string
+  icon: Component
+  /** 选中时的图标色 */
+  accent: string
+  /** hover 时的图标色（未选中态） */
+  groupHoverAccent: string
+  /** 选中时底部那条高亮线 */
+  bar: string
+  /** 状态栏左侧提示 */
+  hint: string
+  /** 状态栏右侧语言名 */
+  lang: string
 }
+
+// 声明成非空元组而不是数组：这样 CODE_TABS[0] 在 noUncheckedIndexedAccess
+// 下也是确定有值的，下面取默认标签页时不必写非空断言。
+const CODE_TABS: [CodeTabDef, ...CodeTabDef[]] = [
+  {
+    key: 'css', file: 'style.css', icon: Paintbrush,
+    accent: 'text-theme-primary', groupHoverAccent: 'group-hover:text-theme-primary',
+    bar: 'bg-theme-primary', hint: 'CSS 样式会覆盖现有样式', lang: 'CSS',
+  },
+  {
+    key: 'js', file: 'script.js', icon: Terminal,
+    accent: 'text-amber-400', groupHoverAccent: 'group-hover:text-amber-400',
+    bar: 'bg-amber-400', hint: '脚本在页面加载时执行', lang: 'JavaScript',
+  },
+  {
+    key: 'html', file: 'custom.html', icon: FileCode,
+    accent: 'text-cyan-400', groupHoverAccent: 'group-hover:text-cyan-400',
+    bar: 'bg-cyan-400', hint: 'HTML 添加到 body 末尾', lang: 'HTML',
+  },
+]
+
+const activeCodeTab = ref<CodeEditorTab>('css')
+const currentCodeTab = computed(
+  () => CODE_TABS.find(t => t.key === activeCodeTab.value) ?? CODE_TABS[0],
+)
 
 // 打字音效节流
 let lastTypingSound = 0
@@ -811,6 +816,21 @@ const emit = defineEmits<{
   save: [customApi: string, customCSS: string]
 }>()
 
+/**
+ * 面板开关状态仍由父组件（App.vue）通过 isOpen / close 驱动，这里只是把它
+ * 适配成 Dialog 需要的 v-model。音效挂在 setter 上 —— Reka 处理 Esc 与点击
+ * 遮罩时只会把 open 置为 false，不经过任何组件内的函数。
+ */
+const open = computed({
+  get: () => props.isOpen,
+  set: (value: boolean) => {
+    if (!value) {
+      playTap()
+      emit('close')
+    }
+  },
+})
+
 // API 服务器选项 - 从 JSON 读取
 const apiOptions = [
   ...apiData.servers.map(server => ({ value: server.key, label: server.label })),
@@ -1015,11 +1035,6 @@ watch(() => props.isOpen, (isOpen) => {
     localEnableSound.value = settingsStore.settings.enableSound
   }
 }, { immediate: true })
-
-function close() {
-  playTap()
-  emit('close')
-}
 
 function save() {
   playCelebration()
