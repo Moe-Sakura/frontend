@@ -64,6 +64,21 @@
                 <h2 class="text-lg font-bold text-gray-800 dark:text-white">外观</h2>
                 <p class="text-sm text-gray-500 dark:text-slate-400">主题色、明暗模式与圆角</p>
               </div>
+
+              <!-- 已经是默认值时禁用，免得点了没反应还不知道为什么 -->
+              <button
+                type="button"
+                class="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all
+                       text-gray-500 hover:bg-theme-primary/10 hover:text-theme-primary
+                       disabled:pointer-events-none disabled:opacity-35
+                       dark:text-slate-400 dark:hover:bg-theme-primary-darker/25 dark:hover:text-theme-primary-light"
+                :disabled="uiStore.isAppearanceDefault"
+                :title="uiStore.isAppearanceDefault ? '当前已是默认外观' : '把主题色、明暗模式与圆角一起恢复默认'"
+                @click="resetAppearance"
+              >
+                <RotateCcw :size="14" />
+                <span>恢复默认</span>
+              </button>
             </div>
 
             <!-- 预设主题色 -->
@@ -627,6 +642,7 @@ import {
   Settings as SettingsIcon,
   ChevronLeft,
   Pipette,
+  RotateCcw,
   Paintbrush,
   Info,
   Server,
@@ -708,6 +724,13 @@ const derivedAccent = computed(() =>
 function onPickColor(event: Event) {
   const value = (event.target as HTMLInputElement).value
   if (value) { uiStore.setThemeColor(value.toLowerCase()) }
+}
+
+/** 外观三项一起恢复默认 */
+function resetAppearance() {
+  if (uiStore.isAppearanceDefault) { return }
+  playCelebration()
+  uiStore.resetAppearance()
 }
 
 function selectThemeMode(mode: ThemeMode) {

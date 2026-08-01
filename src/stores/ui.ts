@@ -197,7 +197,21 @@ export const useUIStore = defineStore('ui', () => {
     radius.value = value
     applyRadius(value)
   }
-  
+
+  /** 外观三项（主题色/明暗模式/圆角）是否都还是默认值 */
+  const isAppearanceDefault = computed(() =>
+    themeMode.value === DEFAULT_PERSISTED_STATE.themeMode
+    && themeColor.value === DEFAULT_PERSISTED_STATE.themeColor
+    && radius.value === DEFAULT_PERSISTED_STATE.radius,
+  )
+
+  /** 把外观三项一起恢复默认 */
+  function resetAppearance() {
+    setThemeMode(DEFAULT_PERSISTED_STATE.themeMode)
+    setThemeColor(DEFAULT_PERSISTED_STATE.themeColor)
+    setRadius(DEFAULT_PERSISTED_STATE.radius)
+  }
+
   function setCustomCSS(css: string) {
     customCSS.value = css
   }
@@ -539,6 +553,8 @@ export const useUIStore = defineStore('ui', () => {
     setDarkMode,
     setThemeColor,
     setRadius,
+    isAppearanceDefault,
+    resetAppearance,
     setCustomCSS,
     // 模态框方法
     openCommentsModal,
