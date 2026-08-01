@@ -15,17 +15,97 @@
       <span v-else class="text-sm font-bold">{{ Math.round(scrollProgress) }}%</span>
     </button>
 
-    <!-- 站点导航按钮 -->
-    <button
-      v-show="searchStore.hasResults"
-      v-ripple
-      :aria-label="showPlatformNav ? '关闭站点导航' : '打开站点导航'"
-      class="fab-button nav-btn"
-      :class="{ 'nav-open': showPlatformNav }"
-      @click="handleTogglePlatformNav"
-    >
-      <component :is="showPlatformNav ? X : Grid3x3" :size="20" />
-    </button>
+    <!--
+      站点导航：触发器就在这里，所以用真正锚定的 Popover —— 定位、翻转、
+      点击外部关闭、Esc 全部由 Reka 负责，不必再写死 bottom-20/right-4。
+    -->
+    <Popover v-model:open="navOpen">
+      <PopoverTrigger as-child>
+        <button
+          v-show="searchStore.hasResults"
+          v-ripple
+          :aria-label="navOpen ? '关闭站点导航' : '打开站点导航'"
+          class="fab-button nav-btn"
+          :class="{ 'nav-open': navOpen }"
+        >
+          <component :is="navOpen ? X : Grid3x3" :size="20" />
+        </button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        side="top"
+        align="end"
+        :side-offset="12"
+        class="nav-panel flex max-h-[60vh] flex-col rounded-2xl border-0 p-0 shadow-2xl shadow-black/20"
+      >
+        <!-- 标题栏 -->
+        <div class="nav-header flex items-center justify-between rounded-t-2xl px-4 py-3">
+          <div class="flex items-center gap-2">
+            <div
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-theme-primary to-theme-accent shadow-md shadow-theme-primary/30"
+            >
+              <Grid3x3 :size="16" class="text-white" />
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-gray-800 dark:text-white">
+                站点导航
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-slate-400">
+                {{ totalResults }} 个结果
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 dark:text-slate-500">
+              {{ searchStore.platformResults.size }} 站点
+            </span>
+            <button
+              class="flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-theme-primary/5 hover:text-theme-primary dark:hover:bg-theme-primary-darker/30"
+              @click="navOpen = false"
+            >
+              <X :size="16" />
+            </button>
+          </div>
+        </div>
+
+        <!-- 平台列表 -->
+        <div class="custom-scrollbar flex-1 overflow-y-auto px-2 py-2">
+          <button
+            v-for="([platformName, platformData], index) in searchStore.platformResults"
+            :key="platformName"
+            v-ripple
+            class="nav-item mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 last:mb-0"
+            :style="{ animationDelay: `${index * 30}ms` }"
+            @click="handleScrollToPlatform(platformName)"
+          >
+            <!-- 平台图标 -->
+            <div
+              class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg shadow-md"
+              :class="getPlatformIconBg(platformData.color)"
+            >
+              <component
+                :is="getPlatformIcon(platformData.color)"
+                :size="14"
+                class="text-white"
+              />
+            </div>
+
+            <!-- 平台名称 -->
+            <span
+              v-text-scroll
+              class="flex-1 text-left text-sm font-medium text-gray-700 dark:text-slate-200"
+            >
+              {{ platformName }}
+            </span>
+
+            <!-- 结果数量 -->
+            <Badge class="count-badge border-transparent px-2 py-1 text-xs">
+              {{ platformData.items.length }}
+            </Badge>
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
 
     <!-- 作品介绍按钮 -->
     <button
@@ -61,86 +141,6 @@
       <component :is="uiStore.isHistoryModalOpen ? X : History" :size="20" />
     </button>
   </div>
-
-  <!-- 站点导航面板 - 独立于按钮组，避免 transform 影响 fixed 定位 -->
-  <Teleport to="body">
-    <Transition
-      enter-active-class="transition-all duration-200 ease-out"
-      enter-from-class="opacity-0 scale-90 translate-y-2"
-      enter-to-class="opacity-100 scale-100 translate-y-0"
-      leave-active-class="transition-all duration-150 ease-in"
-      leave-from-class="opacity-100 scale-100 translate-y-0"
-      leave-to-class="opacity-0 scale-90 translate-y-2"
-    >
-      <div
-        v-if="showPlatformNav && searchStore.hasResults"
-        class="nav-panel fixed z-50 flex flex-col
-               bottom-20 right-4 w-72 max-h-[60vh]
-               rounded-2xl shadow-2xl shadow-black/20"
-      >
-        <!-- 标题栏 -->
-        <div class="nav-header flex items-center justify-between px-4 py-3 rounded-t-2xl">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-theme-primary to-theme-accent flex items-center justify-center shadow-md shadow-theme-primary/30">
-              <Grid3x3 :size="16" class="text-white" />
-            </div>
-            <div>
-              <h3 class="font-bold text-sm text-gray-800 dark:text-white">站点导航</h3>
-              <p class="text-xs text-gray-500 dark:text-slate-400">{{ totalResults }} 个结果</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-400 dark:text-slate-500">
-              {{ searchStore.platformResults.size }} 站点
-            </span>
-            <button
-              class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-theme-primary hover:bg-theme-primary/5 dark:hover:bg-theme-primary-darker/30 transition-colors"
-              @click="togglePlatformNav(true)"
-            >
-              <X :size="16" />
-            </button>
-          </div>
-        </div>
-        
-        <!-- 平台列表 -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar px-2 py-2">
-          <button
-            v-for="([platformName, platformData], index) in searchStore.platformResults"
-            :key="platformName"
-            v-ripple
-            class="nav-item w-full px-3 py-2.5 mb-1 last:mb-0 flex items-center gap-3 rounded-xl transition-all duration-200"
-            :style="{ animationDelay: `${index * 30}ms` }"
-            @click="handleScrollToPlatform(platformName)"
-          >
-            <!-- 平台图标 -->
-            <div
-              class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md"
-              :class="getPlatformIconBg(platformData.color)"
-            >
-              <component 
-                :is="getPlatformIcon(platformData.color)" 
-                :size="14"
-                class="text-white"
-              />
-            </div>
-            
-            <!-- 平台名称 -->
-            <span 
-              v-text-scroll 
-              class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 text-left"
-            >
-              {{ platformName }}
-            </span>
-            
-            <!-- 结果数量 -->
-            <span class="count-badge text-xs px-2 py-1">
-              {{ platformData.items.length }}
-            </span>
-          </button>
-        </div>
-      </div>
-    </Transition>
-  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -151,6 +151,8 @@ import { playTap, playButton, playTransitionUp, playTransitionDown, playSwipe } 
 import { throttle } from '@/composables/useDebounce'
 import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare, History, Star, Circle, DollarSign, XCircle } from '@lucide/vue'
 import type { FunctionalComponent } from 'vue'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge'
 
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
@@ -206,19 +208,19 @@ function toggleHistory() {
   uiStore.toggleHistoryModal()
 }
 
-function togglePlatformNav(withSound = false) {
-  const isClosing = showPlatformNav.value
-  showPlatformNav.value = !showPlatformNav.value
-  
-  // 如果是通过面板内的关闭按钮调用，需要播放音效
-  if (withSound) {
-    if (isClosing) {
-      playTransitionDown()
-    } else {
-      playTransitionUp()
-    }
-  }
-}
+/**
+ * 站点导航的开关状态。所有关闭路径（点触发器、面板内的 X、点击外部、Esc、
+ * 点某个平台跳转过去）都收敛到这个 setter 上放音效 —— 迁移前音效散在
+ * togglePlatformNav(withSound)、handleTogglePlatformNav 和 scrollToPlatform
+ * 三处，那个 withSound 参数就是为了区分调用来源，现在不需要了。
+ */
+const navOpen = computed({
+  get: () => showPlatformNav.value,
+  set: (value: boolean) => {
+    if (value) { playTransitionUp() } else { playTransitionDown() }
+    showPlatformNav.value = value
+  },
+})
 
 // 带音效的操作函数
 function handleScrollToTop() {
@@ -241,16 +243,6 @@ function handleToggleHistory() {
   toggleHistory()
 }
 
-function handleTogglePlatformNav() {
-  // 根据当前状态播放不同音效
-  if (showPlatformNav.value) {
-    playTransitionDown()
-  } else {
-    playTransitionUp()
-  }
-  showPlatformNav.value = !showPlatformNav.value
-}
-
 function handleScrollToPlatform(platformName: string) {
   playTap()
   scrollToPlatform(platformName)
@@ -271,9 +263,8 @@ function scrollToPlatform(platformName: string) {
       }, 50)
     })
     
-    // 滚动后关闭导航
-    playTransitionDown()
-    showPlatformNav.value = false
+    // 滚动后关闭导航（音效由 navOpen 的 setter 负责）
+    navOpen.value = false
   }
 }
 
@@ -449,7 +440,7 @@ onUnmounted(() => {
 
 /* 站点导航面板 - 液态玻璃效果 */
 .nav-panel {
-  /* 不设置 position，使用模板中的 fixed */
+  /* 定位交给 Popover（floating-ui），这里只管观感 */
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));
