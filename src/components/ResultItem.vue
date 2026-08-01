@@ -2,6 +2,7 @@
 import { Link as LinkIcon, ExternalLink, FileText, Copy, Check } from '@lucide/vue'
 import { ref } from 'vue'
 import { playTap, playNotification } from '@/composables/useSound'
+import { Badge } from '@/components/ui/badge'
 
 defineProps<{
   index: number
@@ -71,24 +72,35 @@ async function copyLink(url: string) {
       
       <!-- 复制按钮 -->
       <button
-        class="shrink-0 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 
+        class="shrink-0 p-1.5 rounded-lg opacity-0 group-hover:opacity-100
                text-gray-400 hover:text-theme-primary dark:hover:text-theme-accent
                hover:bg-theme-primary/10 dark:hover:bg-theme-accent/10
                transition-all"
         :class="{ '!opacity-100 !text-green-500': copied }"
         :title="copied ? '已复制' : '复制链接'"
+        :aria-label="copied ? '已复制链接' : '复制链接'"
         @click.stop="copyLink(source.url)"
       >
         <component :is="copied ? Check : Copy" :size="14" />
       </button>
     </div>
-    
+
+    <!--
+      复制成功原先只体现为图标从 Copy 变成 Check —— 屏幕阅读器用户完全收不到
+      反馈。这里用一个 aria-live 区域播报，视觉上不占位。
+    -->
+    <span class="sr-only" role="status" aria-live="polite">
+      {{ copied ? '链接已复制到剪贴板' : '' }}
+    </span>
+
     <!-- 资源相对路径（从URL中提取） -->
     <div v-if="source.url" class="flex items-center gap-2 mt-2 ml-7 sm:ml-9">
       <LinkIcon :size="12" class="text-theme-primary/50 dark:text-theme-accent/50 shrink-0" />
-      <span class="text-xs text-gray-500 dark:text-slate-400 break-all font-mono bg-gray-100/80 dark:bg-slate-800/80 px-2 py-1 rounded">
+      <Badge
+        class="rounded border-transparent bg-gray-100/80 px-2 py-1 font-mono text-xs font-normal break-all whitespace-normal text-gray-500 dark:bg-slate-800/80 dark:text-slate-400"
+      >
         {{ decodeUrl(source.url) }}
-      </span>
+      </Badge>
     </div>
   </div>
 </template>

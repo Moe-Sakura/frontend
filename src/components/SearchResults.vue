@@ -49,34 +49,34 @@
               </div>
             
               <!-- 推荐/付费标签 -->
-              <span
+              <Badge
                 v-if="getRecommendText(platformData.color)"
-                class="px-3 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-1.5"
+                class="gap-1.5 rounded-full border-transparent px-3 py-1 text-xs font-bold shadow-md"
                 :class="getRecommendChipClass(platformData.color)"
               >
                 <component :is="platformData.color === 'red' ? AlertTriangle : Crown" :size="14" />
                 {{ getRecommendText(platformData.color) }}
-              </span>
-            
+              </Badge>
+
               <!-- 站点的所有标签（去重） -->
-              <template v-for="tag in getUniqueTags(platformData)" :key="tag">
-                <span
-                  :class="getResultTagChipClass(tag)"
-                  class="px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 border"
-                >
-                  <component :is="getResultTagIcon(tag)" :size="12" />
-                  <span>{{ getResultTagLabel(tag) }}</span>
-                </span>
-              </template>
-            
+              <Badge
+                v-for="tag in getUniqueTags(platformData)"
+                :key="tag"
+                :class="getResultTagChipClass(tag)"
+                class="gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold shadow-sm"
+              >
+                <component :is="getResultTagIcon(tag)" :size="12" />
+                <span>{{ getResultTagLabel(tag) }}</span>
+              </Badge>
+
               <!-- 结果数量 -->
-              <span
-                class="ml-auto px-3 py-1.5 rounded-full font-bold text-sm shadow-md flex items-center gap-2 shrink-0"
+              <Badge
+                class="ml-auto shrink-0 gap-2 rounded-full border-transparent px-3 py-1.5 text-sm font-bold shadow-md"
                 :class="getCountBadgeClass(platformData.color)"
               >
                 <List :size="16" />
                 {{ platformData.items.length }}
-              </span>
+              </Badge>
             </div>
           
             <!-- 错误信息 -->
@@ -136,6 +136,7 @@ import { playTap } from '@/composables/useSound'
 import LazyRender from '@/components/LazyRender.vue'
 import ResultItem from '@/components/ResultItem.vue'
 import ResultFilterPanel from '@/components/ResultFilterPanel.vue'
+import { Badge } from '@/components/ui/badge'
 import {
   getResultTagChipClass,
   getResultTagIcon,
