@@ -3,45 +3,8 @@ import { useUIStore } from '@/stores/ui'
 import { useSearchStore } from '@/stores/search'
 import { playTap, playButton, playSwipe } from '@/composables/useSound'
 
-// 快捷键配置
-export const SHORTCUTS = {
-  ESCAPE: 'Escape',           // 关闭当前面板
-  SETTINGS: ',',              // 打开设置
-  COMMENTS: 'c',              // 打开评论
-  VNDB: 'v',                  // 打开 VNDB
-  HISTORY: 'y',               // 打开搜索历史
-  SEARCH: '/',                // 聚焦搜索框
-  SCROLL_TOP: 't',            // 回到顶部
-  HOME: 'h',                  // 返回首页
-  NAV: 'n',                   // 站点导航
-  NEXT_PLATFORM: ']',         // 下一个平台
-  PREV_PLATFORM: '[',         // 上一个平台
-} as const
-
-export interface ShortcutInfo {
-  key: string
-  description: string
-  modifier?: 'ctrl' | 'alt' | 'shift'
-  category?: 'navigation' | 'action' | 'scroll'
-}
-
-// 快捷键帮助信息
-export const shortcutsList: ShortcutInfo[] = [
-  // 导航类
-  { key: 'Esc', description: '关闭当前面板', category: 'navigation' },
-  { key: 'H', description: '返回首页', category: 'navigation' },
-  { key: ',', description: '打开/关闭设置', category: 'navigation' },
-  { key: 'C', description: '打开/关闭评论', category: 'navigation' },
-  { key: 'V', description: '打开/关闭作品介绍', category: 'navigation' },
-  { key: 'Y', description: '打开/关闭搜索历史', category: 'navigation' },
-  { key: 'N', description: '站点导航', category: 'navigation' },
-  // 操作类
-  { key: '/', description: '聚焦搜索框', category: 'action' },
-  // 滚动类
-  { key: 'T', description: '回到顶部', category: 'scroll' },
-  { key: '[', description: '上一个平台', category: 'scroll' },
-  { key: ']', description: '下一个平台', category: 'scroll' },
-]
+// 快捷键的展示信息（分组、图标、说明）统一在 config/shortcuts.ts，
+// 由 KeyboardHelpPanel 渲染。本文件只负责按键分发。
 
 export function useKeyboardShortcuts() {
   const uiStore = useUIStore()
@@ -128,15 +91,6 @@ export function useKeyboardShortcuts() {
     if (navBtn) {
       navBtn.click()
     }
-  }
-
-  // 显示快捷键帮助
-  function showHelp() {
-    uiStore.showToast(
-      'info',
-      '按键: Esc关闭 | H首页 | ,设置 | C评论 | V作品 | Y历史 | N导航 | /搜索 | T顶部 | [/]平台',
-      6000,
-    )
   }
 
   // 关闭所有面板
@@ -284,15 +238,8 @@ export function useKeyboardShortcuts() {
     window.removeEventListener('keydown', handleKeyDown)
   })
 
-  return {
-    shortcutsList,
-    focusSearch,
-    scrollToTop,
-    scrollToPlatform,
-    scrollToNextPlatform,
-    scrollToPrevPlatform,
-    toggleNav,
-    showHelp,
-  }
+  // 不返回任何东西：这个 composable 只有注册/注销全局监听这一个副作用，
+  // App.vue 也只是 useKeyboardShortcuts() 调一下。之前返回的那组函数
+  // 全部只在本文件的 handleKeyDown 内部使用，没有任何外部消费者。
 }
 
