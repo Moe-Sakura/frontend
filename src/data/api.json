@@ -14,14 +14,17 @@
       "key": "netlify",
       "label": "Netlify",
       "url": "https://netlify.api.searchgal.top"
+    },
+    {
+      "key": "0721ciallo",
+      "label": "GalGame频道",
+      "url": "https://gal.0721ciallo.top"
+    },
+    {
+      "key": "0721ciallo-gc",
+      "label": "GalGame频道备用",
+      "url": "https://gal.0721ciallo.top/gc"
     }
-  ],
-  "retiredServers": [
-    "https://us-west.api.searchgal.top",
-    "https://us-east.api.searchgal.top",
-    "https://sg.api.searchgal.top",
-    "https://de.api.searchgal.top",
-    "https://jp.api.searchgal.top"
   ],
   "deployUrl": "https://github.com/Moe-Sakura/SearchGal",
   "contributeUrl": "https://github.com/Moe-Sakura/frontend/edit/dev/src/data/api.json"
