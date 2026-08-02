@@ -194,7 +194,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useUIStore } from '@/stores/ui'
 import { useHistoryStore } from '@/stores/history'
 import type { SearchHistory } from '@/utils/persistence'
@@ -244,14 +244,21 @@ const emit = defineEmits<{
 const open = computed({
   get: () => uiStore.isHistoryModalOpen,
   set: (value: boolean) => {
-    if (value) {
-      playTransitionUp()
-      historyStore.loadHistory()
-    } else {
-      playTransitionDown()
-    }
+    if (value) { playTransitionUp() } else { playTransitionDown() }
     uiStore.isHistoryModalOpen = value
   },
+})
+
+/**
+ * 加载必须用 watch 而不是塞进上面的 setter。
+ *
+ * setter 只在**组件自己**写 open 时才跑（点面板内的关闭按钮、Esc、点击外部）。
+ * 但打开这个面板的入口在别处：FloatingButtons 的 FAB 与键盘快捷键都是直接调
+ * uiStore.toggleHistoryModal() 改 store，绕过 setter —— 那样列表永远是空的。
+ * watch 监听 store 本身，无论谁改都会触发。
+ */
+watch(() => uiStore.isHistoryModalOpen, (isOpen) => {
+  if (isOpen) { historyStore.loadHistory() }
 })
 
 function handleSelectHistory(item: SearchHistory) {
