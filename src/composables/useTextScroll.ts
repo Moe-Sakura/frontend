@@ -12,6 +12,21 @@ interface TextScrollElementExtended extends HTMLElement {
 }
 
 /**
+ * 用滚动容器包裹文本内容
+ *
+ * 必须用 textContent 赋值，不能拼进 innerHTML —— Vue 渲染时已经把内容转义成
+ * 文本，用 textContent 读回来拿到的是解码后的原始字符，再塞进 innerHTML 会让
+ * 其中的标记被重新解析成真实 HTML。本指令作用在用户可控的搜索历史条目上
+ * （SearchHistoryModal），形如 <img src=x onerror=...> 的搜索词会因此变成活的 DOM。
+ */
+function wrapContent(el: HTMLElement, content: string) {
+  const inner = document.createElement('span')
+  inner.className = 'text-scroll-inner'
+  inner.textContent = content
+  el.replaceChildren(inner)
+}
+
+/**
  * 检测元素文本是否溢出，并设置滚动动画
  */
 export const vTextScroll = {
@@ -24,7 +39,7 @@ export const vTextScroll = {
     // 保存并包装内容
     const content = el.textContent || ''
     extEl._textScrollContent = content
-    el.innerHTML = `<span class="text-scroll-inner">${content}</span>`
+    wrapContent(el, content)
     
     // 检查溢出
     const checkOverflow = () => {
@@ -91,7 +106,7 @@ export const vTextScroll = {
       if (!inner || currentContent !== extEl._textScrollContent) {
         const newContent = el.textContent || ''
         extEl._textScrollContent = newContent
-        el.innerHTML = `<span class="text-scroll-inner">${newContent}</span>`
+        wrapContent(el, newContent)
       }
       
       // 重新检查溢出
