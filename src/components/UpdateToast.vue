@@ -1,4 +1,11 @@
 <template>
+  <!--
+    语义上就是一条 toast，但项目还没装 sonner；shadcn 的 Alert 是块级卡片
+    （bg-card / border / grid 布局 + [&>svg] 选择器），套上来要推翻背景、边框、
+    圆角和整套内部结构，纯属硬凑，所以保留这块自绘的渐变胶囊。
+    缺的是无障碍语义：加 role="status" 让屏幕阅读器知道「发现新版本」这件事，
+    aria-atomic 保证标题和副标题一起播报，而不是只念变化的那一行。
+  -->
   <Transition
     enter-active-class="transition-all duration-300 ease-out"
     enter-from-class="opacity-0 translate-y-4 scale-95"
@@ -9,10 +16,13 @@
   >
     <div
       v-if="needRefresh"
-      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-3 rounded-2xl bg-gradient-to-r from-[#ff1493] to-[#d946ef] text-white shadow-xl shadow-pink-500/30 flex items-center gap-3 max-w-[90vw] sm:max-w-md"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-3 rounded-2xl bg-gradient-to-r from-theme-primary to-theme-accent text-white shadow-xl shadow-theme-primary/30 flex items-center gap-3 max-w-[90vw] sm:max-w-md"
     >
-      <!-- 图标 -->
-      <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+      <!-- 图标：Tailwind v4 已移除 flex-shrink-* 别名，这里必须写 shrink-0 才真的不被压扁 -->
+      <div class="shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
         <RefreshCw :size="18" class="animate-spin" />
       </div>
 

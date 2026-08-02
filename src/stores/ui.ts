@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
+import { DEFAULT_THEME_PRESET } from '@/config/themePresets'
+import { applyThemeColor } from '@/utils/themeColor'
+import { applyRadius, clampRadiusPercent, DEFAULT_RADIUS_PERCENT } from '@/utils/radius'
 
 // 主题模式类型
 export type ThemeMode = 'system' | 'light' | 'dark'
@@ -9,6 +12,10 @@ export interface PersistedUIState {
   // 主题
   themeMode: ThemeMode
   isDarkMode: boolean
+  /** 预设主题色 key，见 config/themePresets.ts */
+  themeColor: string
+  /** 圆角百分比 0–100，见 utils/radius.ts */
+  radius: number
   customCSS: string
   
   // 模态框状态
@@ -36,6 +43,8 @@ const SESSION_KEY = 'ui-session-state'
 const DEFAULT_PERSISTED_STATE: PersistedUIState = {
   themeMode: 'system',
   isDarkMode: false,
+  themeColor: DEFAULT_THEME_PRESET,
+  radius: DEFAULT_RADIUS_PERCENT,
   customCSS: '',
   isCommentsModalOpen: false,
   isVndbPanelOpen: false,
@@ -55,6 +64,8 @@ export const useUIStore = defineStore('ui', () => {
   // 主题相关
   const themeMode = ref<ThemeMode>('system')
   const isDarkMode = ref(false)
+  const themeColor = ref<string>(DEFAULT_THEME_PRESET)
+  const radius = ref<number>(DEFAULT_RADIUS_PERCENT)
   const customCSS = ref('')
   let systemThemeCleanup: (() => void) | null = null
   
@@ -167,7 +178,40 @@ export const useUIStore = defineStore('ui', () => {
   function setDarkMode(value: boolean) {
     setThemeMode(value ? 'dark' : 'light')
   }
-  
+
+  /**
+   * 设置预设主题色
+   * @param key config/themePresets.ts 中的预设 key
+   */
+  function setThemeColor(key: string) {
+    themeColor.value = key
+    applyThemeColor(key)
+  }
+
+  /**
+   * 设置圆角
+   * @param percent 0–100，越界会被夹回区间
+   */
+  function setRadius(percent: number) {
+    const value = clampRadiusPercent(percent)
+    radius.value = value
+    applyRadius(value)
+  }
+
+  /** 外观三项（主题色/明暗模式/圆角）是否都还是默认值 */
+  const isAppearanceDefault = computed(() =>
+    themeMode.value === DEFAULT_PERSISTED_STATE.themeMode
+    && themeColor.value === DEFAULT_PERSISTED_STATE.themeColor
+    && radius.value === DEFAULT_PERSISTED_STATE.radius,
+  )
+
+  /** 把外观三项一起恢复默认 */
+  function resetAppearance() {
+    setThemeMode(DEFAULT_PERSISTED_STATE.themeMode)
+    setThemeColor(DEFAULT_PERSISTED_STATE.themeColor)
+    setRadius(DEFAULT_PERSISTED_STATE.radius)
+  }
+
   function setCustomCSS(css: string) {
     customCSS.value = css
   }
@@ -335,6 +379,8 @@ export const useUIStore = defineStore('ui', () => {
         }
         
         themeMode.value = savedThemeMode ?? DEFAULT_PERSISTED_STATE.themeMode
+        themeColor.value = parsed.themeColor ?? DEFAULT_PERSISTED_STATE.themeColor
+        radius.value = clampRadiusPercent(parsed.radius ?? DEFAULT_PERSISTED_STATE.radius)
         customCSS.value = parsed.customCSS ?? DEFAULT_PERSISTED_STATE.customCSS
         showSearchHistory.value = parsed.showSearchHistory ?? DEFAULT_PERSISTED_STATE.showSearchHistory
       }
@@ -371,6 +417,8 @@ export const useUIStore = defineStore('ui', () => {
     try {
       const state: Partial<PersistedUIState> = {
         themeMode: themeMode.value,
+        themeColor: themeColor.value,
+        radius: radius.value,
         customCSS: customCSS.value,
         showSearchHistory: showSearchHistory.value,
         lastVisitTime: Date.now(),
@@ -401,7 +449,7 @@ export const useUIStore = defineStore('ui', () => {
 
   // 监听需要持久化的状态变化（localStorage - 长期偏好）
   watch(
-    [themeMode, customCSS, showSearchHistory],
+    [themeMode, themeColor, radius, customCSS, showSearchHistory],
     () => {
       if (isInitialized.value) {
         savePersistedState()
@@ -436,7 +484,11 @@ export const useUIStore = defineStore('ui', () => {
 
     // 应用主题模式
     setThemeMode(themeMode.value)
-    
+
+    // 应用预设主题色
+    applyThemeColor(themeColor.value)
+    applyRadius(radius.value)
+
     isInitialized.value = true
     
     // 恢复滚动位置
@@ -473,6 +525,8 @@ export const useUIStore = defineStore('ui', () => {
     isInitialized,
     themeMode,
     isDarkMode,
+    themeColor,
+    radius,
     customCSS,
     isCommentsModalOpen,
     isVndbPanelOpen,
@@ -497,6 +551,10 @@ export const useUIStore = defineStore('ui', () => {
     setThemeMode,
     toggleDarkMode,
     setDarkMode,
+    setThemeColor,
+    setRadius,
+    isAppearanceDefault,
+    resetAppearance,
     setCustomCSS,
     // 模态框方法
     openCommentsModal,

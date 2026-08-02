@@ -5,6 +5,7 @@
     <button
       v-show="showScrollToTop"
       v-ripple
+      type="button"
       aria-label="回到顶部"
       class="fab-button scroll-top-btn"
       @click="handleScrollToTop"
@@ -15,22 +16,109 @@
       <span v-else class="text-sm font-bold">{{ Math.round(scrollProgress) }}%</span>
     </button>
 
-    <!-- 站点导航按钮 -->
-    <button
-      v-show="searchStore.hasResults"
-      v-ripple
-      :aria-label="showPlatformNav ? '关闭站点导航' : '打开站点导航'"
-      class="fab-button nav-btn"
-      :class="{ 'nav-open': showPlatformNav }"
-      @click="handleTogglePlatformNav"
-    >
-      <component :is="showPlatformNav ? X : Grid3x3" :size="20" />
-    </button>
+    <!--
+      站点导航：触发器就在这里，所以用真正锚定的 Popover —— 定位、翻转、
+      点击外部关闭、Esc 全部由 Reka 负责，不必再写死 bottom-20/right-4。
+    -->
+    <Popover v-model:open="navOpen">
+      <PopoverTrigger as-child>
+        <button
+          v-show="searchStore.hasResults"
+          v-ripple
+          type="button"
+          :aria-label="navOpen ? '关闭站点导航' : '打开站点导航'"
+          class="fab-button nav-btn"
+          :class="{ 'nav-open': navOpen }"
+        >
+          <component :is="navOpen ? X : Grid3x3" :size="20" />
+        </button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        side="top"
+        align="end"
+        :side-offset="12"
+        class="nav-panel flex max-h-[60vh] flex-col rounded-2xl border-0 p-0 shadow-2xl shadow-black/20"
+      >
+        <!-- 标题栏 -->
+        <div class="nav-header flex items-center justify-between rounded-t-2xl px-4 py-3">
+          <div class="flex items-center gap-2">
+            <div
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-theme-primary to-theme-accent shadow-md shadow-theme-primary/30"
+            >
+              <Grid3x3 :size="16" class="text-white" />
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-gray-800 dark:text-white">
+                站点导航
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-slate-400">
+                {{ totalResults }} 个结果
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 dark:text-slate-500">
+              {{ searchStore.platformResults.size }} 站点
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="关闭站点导航"
+              class="size-7 rounded-full text-gray-400 hover:bg-theme-primary/5 hover:text-theme-primary dark:hover:bg-theme-primary-darker/30"
+              @click="navOpen = false"
+            >
+              <X :size="16" />
+            </Button>
+          </div>
+        </div>
+
+        <!-- 平台列表 -->
+        <div class="custom-scrollbar flex-1 overflow-y-auto px-2 py-2">
+          <button
+            v-for="([platformName, platformData], index) in searchStore.platformResults"
+            :key="platformName"
+            v-ripple
+            type="button"
+            class="nav-item mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 last:mb-0"
+            :style="{ animationDelay: `${index * 30}ms` }"
+            @click="handleScrollToPlatform(platformName)"
+          >
+            <!-- 平台图标 -->
+            <div
+              class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg shadow-md"
+              :class="getPlatformIconBg(platformData.color)"
+            >
+              <component
+                :is="getPlatformIcon(platformData.color)"
+                :size="14"
+                class="text-white"
+              />
+            </div>
+
+            <!-- 平台名称 -->
+            <span
+              v-text-scroll
+              class="flex-1 text-left text-sm font-medium text-gray-700 dark:text-slate-200"
+            >
+              {{ platformName }}
+            </span>
+
+            <!-- 结果数量 -->
+            <Badge class="count-badge border-transparent px-2 py-1 text-xs">
+              {{ platformData.items.length }}
+            </Badge>
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
 
     <!-- 作品介绍按钮 -->
     <button
       v-show="searchStore.vndbInfo"
       v-ripple
+      type="button"
       :aria-label="uiStore.isVndbPanelOpen ? '关闭作品介绍' : '打开作品介绍'"
       class="fab-button vndb-btn"
       :class="{ 'vndb-open': uiStore.isVndbPanelOpen }"
@@ -42,6 +130,7 @@
     <!-- 评论按钮 -->
     <button
       v-ripple
+      type="button"
       :aria-label="uiStore.isCommentsModalOpen ? '关闭评论' : '打开评论'"
       class="fab-button comments-btn"
       :class="{ 'comments-open': uiStore.isCommentsModalOpen }"
@@ -53,6 +142,7 @@
     <!-- 搜索历史按钮 -->
     <button
       v-ripple
+      type="button"
       :aria-label="uiStore.isHistoryModalOpen ? '关闭搜索历史' : '打开搜索历史'"
       class="fab-button history-btn"
       :class="{ 'history-open': uiStore.isHistoryModalOpen }"
@@ -61,86 +151,6 @@
       <component :is="uiStore.isHistoryModalOpen ? X : History" :size="20" />
     </button>
   </div>
-
-  <!-- 站点导航面板 - 独立于按钮组，避免 transform 影响 fixed 定位 -->
-  <Teleport to="body">
-    <Transition
-      enter-active-class="transition-all duration-200 ease-out"
-      enter-from-class="opacity-0 scale-90 translate-y-2"
-      enter-to-class="opacity-100 scale-100 translate-y-0"
-      leave-active-class="transition-all duration-150 ease-in"
-      leave-from-class="opacity-100 scale-100 translate-y-0"
-      leave-to-class="opacity-0 scale-90 translate-y-2"
-    >
-      <div
-        v-if="showPlatformNav && searchStore.hasResults"
-        class="nav-panel fixed z-50 flex flex-col
-               bottom-20 right-4 w-72 max-h-[60vh]
-               rounded-2xl shadow-2xl shadow-black/20"
-      >
-        <!-- 标题栏 -->
-        <div class="nav-header flex items-center justify-between px-4 py-3 rounded-t-2xl">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff1493] to-[#d946ef] flex items-center justify-center shadow-md shadow-pink-500/30">
-              <Grid3x3 :size="16" class="text-white" />
-            </div>
-            <div>
-              <h3 class="font-bold text-sm text-gray-800 dark:text-white">站点导航</h3>
-              <p class="text-xs text-gray-500 dark:text-slate-400">{{ totalResults }} 个结果</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-400 dark:text-slate-500">
-              {{ searchStore.platformResults.size }} 站点
-            </span>
-            <button
-              class="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-[#ff1493] hover:bg-pink-50 dark:hover:bg-pink-900/30 transition-colors"
-              @click="togglePlatformNav(true)"
-            >
-              <X :size="16" />
-            </button>
-          </div>
-        </div>
-        
-        <!-- 平台列表 -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar px-2 py-2">
-          <button
-            v-for="([platformName, platformData], index) in searchStore.platformResults"
-            :key="platformName"
-            v-ripple
-            class="nav-item w-full px-3 py-2.5 mb-1 last:mb-0 flex items-center gap-3 rounded-xl transition-all duration-200"
-            :style="{ animationDelay: `${index * 30}ms` }"
-            @click="handleScrollToPlatform(platformName)"
-          >
-            <!-- 平台图标 -->
-            <div
-              class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md"
-              :class="getPlatformIconBg(platformData.color)"
-            >
-              <component 
-                :is="getPlatformIcon(platformData.color)" 
-                :size="14"
-                class="text-white"
-              />
-            </div>
-            
-            <!-- 平台名称 -->
-            <span 
-              v-text-scroll 
-              class="flex-1 text-sm font-medium text-gray-700 dark:text-slate-200 text-left"
-            >
-              {{ platformName }}
-            </span>
-            
-            <!-- 结果数量 -->
-            <span class="count-badge text-xs px-2 py-1">
-              {{ platformData.items.length }}
-            </span>
-          </button>
-        </div>
-      </div>
-    </Transition>
-  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -151,6 +161,9 @@ import { playTap, playButton, playTransitionUp, playTransitionDown, playSwipe } 
 import { throttle } from '@/composables/useDebounce'
 import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare, History, Star, Circle, DollarSign, XCircle } from '@lucide/vue'
 import type { FunctionalComponent } from 'vue'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
@@ -206,19 +219,19 @@ function toggleHistory() {
   uiStore.toggleHistoryModal()
 }
 
-function togglePlatformNav(withSound = false) {
-  const isClosing = showPlatformNav.value
-  showPlatformNav.value = !showPlatformNav.value
-  
-  // 如果是通过面板内的关闭按钮调用，需要播放音效
-  if (withSound) {
-    if (isClosing) {
-      playTransitionDown()
-    } else {
-      playTransitionUp()
-    }
-  }
-}
+/**
+ * 站点导航的开关状态。所有关闭路径（点触发器、面板内的 X、点击外部、Esc、
+ * 点某个平台跳转过去）都收敛到这个 setter 上放音效 —— 迁移前音效散在
+ * togglePlatformNav(withSound)、handleTogglePlatformNav 和 scrollToPlatform
+ * 三处，那个 withSound 参数就是为了区分调用来源，现在不需要了。
+ */
+const navOpen = computed({
+  get: () => showPlatformNav.value,
+  set: (value: boolean) => {
+    if (value) { playTransitionUp() } else { playTransitionDown() }
+    showPlatformNav.value = value
+  },
+})
 
 // 带音效的操作函数
 function handleScrollToTop() {
@@ -241,16 +254,6 @@ function handleToggleHistory() {
   toggleHistory()
 }
 
-function handleTogglePlatformNav() {
-  // 根据当前状态播放不同音效
-  if (showPlatformNav.value) {
-    playTransitionDown()
-  } else {
-    playTransitionUp()
-  }
-  showPlatformNav.value = !showPlatformNav.value
-}
-
 function handleScrollToPlatform(platformName: string) {
   playTap()
   scrollToPlatform(platformName)
@@ -271,9 +274,8 @@ function scrollToPlatform(platformName: string) {
       }, 50)
     })
     
-    // 滚动后关闭导航
-    playTransitionDown()
-    showPlatformNav.value = false
+    // 滚动后关闭导航（音效由 navOpen 的 setter 负责）
+    navOpen.value = false
   }
 }
 
@@ -314,7 +316,7 @@ onUnmounted(() => {
   /* 半透明效果 */
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   
   /* 性能优化 */
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
@@ -323,7 +325,7 @@ onUnmounted(() => {
 
 .dark .fab-button {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -349,7 +351,7 @@ onUnmounted(() => {
 .fab-button:hover {
   transform: translate3d(0, -4px, 0) scale(1.08);
   box-shadow: 
-    0 16px 48px rgba(255, 20, 147, 0.35),
+    0 16px 48px rgba(var(--brand-primary), 0.35),
     0 8px 24px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border-color: rgba(255, 255, 255, 0.5);
@@ -357,7 +359,7 @@ onUnmounted(() => {
 
 .dark .fab-button:hover {
   box-shadow: 
-    0 16px 48px rgba(255, 105, 180, 0.4),
+    0 16px 48px rgba(var(--brand-primary-light), 0.4),
     0 8px 24px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.25);
@@ -374,14 +376,14 @@ onUnmounted(() => {
 }
 
 .comments-btn {
-  background: linear-gradient(135deg, #ff1493, #c71585);
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark)));
   color: white;
 }
 
 .comments-btn.comments-open {
   background: linear-gradient(135deg, rgb(255, 105, 180), rgb(199, 21, 133));
   color: white;
-  border-color: rgba(255, 105, 180, 0.5);
+  border-color: rgba(var(--brand-primary-light), 0.5);
 }
 
 .history-btn {
@@ -396,7 +398,7 @@ onUnmounted(() => {
 }
 
 .vndb-btn {
-  background: linear-gradient(135deg, #d946ef, #c026d3);
+  background: linear-gradient(135deg, rgb(var(--brand-accent)), rgb(var(--brand-accent-dark)));
   color: white;
 }
 
@@ -414,7 +416,7 @@ onUnmounted(() => {
 .nav-btn.nav-open {
   background: linear-gradient(135deg, rgb(255, 105, 180), rgb(232, 121, 249));
   color: white;
-  border-color: rgba(255, 105, 180, 0.5);
+  border-color: rgba(var(--brand-primary-light), 0.5);
 }
 
 .fab-button i {
@@ -435,12 +437,12 @@ onUnmounted(() => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(255, 20, 147, 0.5), rgba(217, 70, 239, 0.5));
+  background: linear-gradient(180deg, rgba(var(--brand-primary), 0.5), rgba(var(--brand-accent), 0.5));
   border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(255, 20, 147, 0.7), rgba(217, 70, 239, 0.7));
+  background: linear-gradient(180deg, rgba(var(--brand-primary), 0.7), rgba(var(--brand-accent), 0.7));
 }
 
 /* ============================================
@@ -449,9 +451,9 @@ onUnmounted(() => {
 
 /* 站点导航面板 - 液态玻璃效果 */
 .nav-panel {
-  /* 不设置 position，使用模板中的 fixed */
+  /* 定位交给 Popover（floating-ui），这里只管观感 */
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.15));
   overflow: hidden;
 }
@@ -459,19 +461,19 @@ onUnmounted(() => {
 /* 站点导航面板 - 暗色模式 */
 .dark .nav-panel {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* 标题栏 */
 .nav-header {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.08), rgba(217, 70, 239, 0.05));
-  border-bottom: 1px solid rgba(255, 20, 147, 0.15);
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.08), rgba(var(--brand-accent), 0.05));
+  border-bottom: 1px solid rgba(var(--brand-primary), 0.15);
 }
 
 .dark .nav-header {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.12), rgba(217, 70, 239, 0.08));
-  border-bottom: 1px solid rgba(255, 105, 180, 0.15);
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.12), rgba(var(--brand-accent), 0.08));
+  border-bottom: 1px solid rgba(var(--brand-primary-light), 0.15);
 }
 
 /* 导航项 - GPU 加速动画 */
@@ -484,7 +486,7 @@ onUnmounted(() => {
 }
 
 .nav-item:hover {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.08), rgba(217, 70, 239, 0.05));
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.08), rgba(var(--brand-accent), 0.05));
   transform: translate3d(4px, 0, 0);
 }
 
@@ -493,7 +495,7 @@ onUnmounted(() => {
 }
 
 .dark .nav-item:hover {
-  background: linear-gradient(135deg, rgba(255, 20, 147, 0.15), rgba(217, 70, 239, 0.1));
+  background: linear-gradient(135deg, rgba(var(--brand-primary), 0.15), rgba(var(--brand-accent), 0.1));
 }
 
 @keyframes navItemSlideIn {
@@ -518,14 +520,14 @@ onUnmounted(() => {
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, #ff1493, #d946ef);
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-accent)));
   border-radius: 0.5rem;
-  box-shadow: 0 2px 6px rgba(255, 20, 147, 0.3);
+  box-shadow: 0 2px 6px rgba(var(--brand-primary), 0.3);
 }
 
 .dark .count-badge {
-  background: linear-gradient(135deg, #ff69b4, #e879f9);
-  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.4);
+  background: linear-gradient(135deg, rgb(var(--brand-primary-light)), rgb(var(--brand-accent-light)));
+  box-shadow: 0 2px 8px rgba(var(--brand-primary-light), 0.4);
 }
 
 /* 底部栏 */

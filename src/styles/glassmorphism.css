@@ -11,11 +11,10 @@
 
 :root {
   /* ========== 主题色 ========== */
-  /* 主色调 - 艳粉 (可修改此处切换主题色) */
-  --color-primary: 255, 20, 147;        /* 主色 #ff1493 */
-  --color-primary-light: 255, 105, 180; /* 浅主色 #ff69b4 */
-  --color-primary-pale: 255, 228, 242;  /* 极浅主色 #ffe4f2 */
-  
+  /* --brand-primary / -light / -lighter / -pale / -dark / -darker 及辅助色
+     统一定义在 styles/theme.css（本文件在其之后加载，重复定义会覆盖它并
+     导致预设主题色失效）。切换主题色请改 config/themePresets.ts。 */
+
   /* 背景色 */
   --color-bg-light: 255, 255, 255;      /* 亮色背景 #ffffff */
   --color-bg-dark: 30, 41, 59;          /* 暗色背景 #1e293b */
@@ -34,8 +33,8 @@
   --color-info: 59, 130, 246;           /* 信息 #3b82f6 */
   
   /* 兼容旧变量名 */
-  --glass-pink: var(--color-primary);
-  --glass-pink-light: var(--color-primary-light);
+  --glass-pink: var(--brand-primary);
+  --glass-pink-light: var(--brand-primary-light);
   
   /* ========== 透明度变量 ========== */
   /* 基础透明度 - 亮色模式 */
@@ -69,15 +68,10 @@
   --opacity-border-dark-hover: 0.3;
   
   /* ========== 圆角变量 ========== */
-  --radius-xs: 0.375rem;          /* 6px - 小按钮 */
-  --radius-sm: 0.5rem;            /* 8px - 小元素 */
-  --radius-md: 0.75rem;           /* 12px - 按钮/输入框 */
-  --radius-lg: 1rem;              /* 16px - 卡片 */
-  --radius-xl: 1.25rem;           /* 20px - 面板 */
-  --radius-2xl: 1.5rem;           /* 24px - 模态框 */
-  --radius-3xl: 2rem;             /* 32px - 大圆角 */
-  --radius-full: 9999px;          /* 完全圆角 */
-  
+  /* --radius-xs ~ --radius-3xl 已移至 styles/tailwind.css 的 @theme，
+     那里同时供 rounded-* 工具类和这里的 var(--radius-*) 直读。值未改动。 */
+  --radius-full: 9999px;          /* 完全圆角（rounded-full 工具类不读它，仅供 var() 直读） */
+
   /* ========== 阴影变量 ========== */
   /* 亮色模式阴影 */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -88,9 +82,9 @@
   --shadow-2xl: 0 16px 48px rgba(0, 0, 0, 0.18);
   
   /* 主题色阴影 */
-  --shadow-primary-sm: 0 2px 8px rgba(var(--color-primary), 0.1);
-  --shadow-primary-md: 0 4px 16px rgba(var(--color-primary), 0.12);
-  --shadow-primary-lg: 0 8px 24px rgba(var(--color-primary), 0.15);
+  --shadow-primary-sm: 0 2px 8px rgba(var(--brand-primary), 0.1);
+  --shadow-primary-md: 0 4px 16px rgba(var(--brand-primary), 0.12);
+  --shadow-primary-lg: 0 8px 24px rgba(var(--brand-primary), 0.15);
   
   /* ========== 过渡时间 ========== */
   --transition-fast: 0.15s;
@@ -117,8 +111,8 @@
   --border-thick: 2px;
   
   /* ========== 组合变量 ========== */
-  --glass-border-light: rgba(var(--color-primary), var(--opacity-border));
-  --glass-border-dark: rgba(var(--color-primary-light), var(--opacity-border-dark));
+  --glass-border-light: rgba(var(--brand-primary), var(--opacity-border));
+  --glass-border-dark: rgba(var(--brand-primary-light), var(--opacity-border-dark));
 }
 
 /* ========== 搜索输入框效果 ========== */
@@ -195,7 +189,8 @@
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--glass-border-light);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
+  /* 跟随圆角设置（原先写死 16px，切档时这里不动会与卡片其余部分对不齐） */
+  border-radius: var(--radius-lg);
   transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 

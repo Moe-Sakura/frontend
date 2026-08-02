@@ -68,7 +68,7 @@ export function loadSearchState(): SearchState | null {
       localStorage.removeItem(STORAGE_KEY)
       return null
     }
-    
+
     return state
   } catch (error) {
     // 解析失败，清除无效数据

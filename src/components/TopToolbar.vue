@@ -1,66 +1,129 @@
 <template>
-  <div class="top-toolbar fixed top-4 right-4 z-50 flex items-center gap-2 sm:gap-3">
-    <!-- 保存背景图按钮 -->
-    <button
-      v-show="hasBackgroundImage"
-      :aria-label="showSaveTip ? '保存成功' : '保存背景图'"
-      class="toolbar-button"
-      :class="{ 'save-success': showSaveTip }"
-      @click="saveBackgroundImage"
-    >
-      <component :is="showSaveTip ? Check : Download" :size="20" />
-    </button>
+  <!--
+    Provider 暂时挂在组件内部：Reka 的 Tooltip 没有 Provider 祖先会直接抛注入错误，
+    而 App.vue 不在本次改动范围内。日后 App.vue 加了全局 Provider 可以删掉这一层，
+    嵌套 Provider 只是内层覆盖外层的延迟配置，没有副作用。
+  -->
+  <TooltipProvider :delay-duration="400">
+    <div class="top-toolbar fixed top-4 right-4 z-50 flex items-center gap-2 sm:gap-3">
+      <!-- 保存背景图按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <button
+            v-show="hasBackgroundImage"
+            type="button"
+            aria-label="保存背景图"
+            class="toolbar-button"
+            :class="{ 'save-success': showSaveTip }"
+            @click="saveBackgroundImage"
+          >
+            <component :is="showSaveTip ? Check : Download" :size="20" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          保存背景图
+        </TooltipContent>
+      </Tooltip>
 
-    <!-- 分享搜索按钮 -->
-    <button
-      v-show="hasSearchResults"
-      :aria-label="showCopiedTip ? '已复制' : '分享搜索'"
-      class="toolbar-button"
-      :class="{ 'share-copied': showCopiedTip }"
-      @click="shareSearch"
-    >
-      <component :is="showCopiedTip ? Check : Share2" :size="20" />
-    </button>
+      <!-- 分享搜索按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <button
+            v-show="hasSearchResults"
+            type="button"
+            aria-label="分享搜索"
+            class="toolbar-button"
+            :class="{ 'share-copied': showCopiedTip }"
+            @click="shareSearch"
+          >
+            <component :is="showCopiedTip ? Check : Share2" :size="20" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          分享搜索
+        </TooltipContent>
+      </Tooltip>
 
-    <!-- GitHub 按钮 -->
-    <a
-      href="https://github.com/Moe-Sakura"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="访问 GitHub 仓库"
-      class="toolbar-button github-button"
-    >
-      <GithubIcon :size="20" />
-    </a>
+      <!-- GitHub 按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <a
+            href="https://github.com/Moe-Sakura"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="访问 GitHub 仓库"
+            class="toolbar-button github-button"
+          >
+            <GithubIcon :size="20" />
+          </a>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          GitHub 仓库
+        </TooltipContent>
+      </Tooltip>
 
-    <!-- 键盘快捷键按钮 -->
-    <button
-      aria-label="键盘快捷键"
-      class="toolbar-button keyboard-button"
-      @click="toggleKeyboardHelp"
-    >
-      <Keyboard :size="20" />
-    </button>
+      <!-- 键盘快捷键按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <button
+            type="button"
+            aria-label="键盘快捷键"
+            class="toolbar-button keyboard-button"
+            @click="toggleKeyboardHelp"
+          >
+            <Keyboard :size="20" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          键盘快捷键
+        </TooltipContent>
+      </Tooltip>
 
-    <!-- 设置按钮 -->
-    <button
-      aria-label="设置"
-      class="toolbar-button settings-button"
-      @click="openSettings"
-    >
-      <Settings :size="20" />
-    </button>
-  </div>
+      <!-- 设置按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <button
+            type="button"
+            aria-label="设置"
+            class="toolbar-button settings-button"
+            @click="openSettings"
+          >
+            <Settings :size="20" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          设置
+        </TooltipContent>
+      </Tooltip>
+
+      <!--
+        保存/复制的结果原先是把按钮的 aria-label 临时改成「保存成功」「已复制」——
+        这是 toast 形状的反馈被塞进了按钮名字：屏幕阅读器只有在焦点恰好停在该按钮上
+        时才可能读到，而且「保存成功」当按钮名字本身就有歧义。现在按钮名字保持稳定，
+        瞬时结果统一走这个不占位的 aria-live 区域播报。
+      -->
+      <span class="sr-only" role="status" aria-live="polite">
+        {{ liveMessage }}
+      </span>
+    </div>
+  </TooltipProvider>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { generateShareURL } from '@/utils/urlParams'
 import { Check, Download, Share2, Keyboard, Settings } from '@lucide/vue'
 import GithubIcon from '@/components/GithubIcon.vue'
-import { playTap, playCelebration, playNotification, playSwipe } from '@/composables/useSound'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  playTap,
+  playCelebration,
+  playNotification,
+  playSwipe,
+  playCaution,
+} from '@/composables/useSound'
 
 const searchStore = useSearchStore()
 const uiStore = useUIStore()
@@ -79,6 +142,35 @@ const emit = defineEmits<{
 const showSaveTip = ref(false)
 const showCopiedTip = ref(false)
 
+/*
+ * 屏幕阅读器播报文本。这里天然是 toast 的形状，等 sonner 装上后整段可以换成
+ * toast('背景图已保存')，届时删掉 liveMessage / announce 与模板里的 aria-live 区域即可。
+ */
+const liveMessage = ref('')
+let liveMessageTimer: ReturnType<typeof setTimeout> | undefined
+
+/** 给 aria-live 区域发一条播报 */
+function announce(message: string) {
+  if (liveMessageTimer !== undefined) {
+    clearTimeout(liveMessageTimer)
+  }
+  // 往 aria-live 里写入和上次一模一样的文本不会触发重播，先清空再在下一帧写入
+  liveMessage.value = ''
+  void nextTick(() => {
+    liveMessage.value = message
+  })
+  // 播报完就清掉，避免用户之后浏览这块区域时读到早已过期的结果
+  liveMessageTimer = setTimeout(() => {
+    liveMessage.value = ''
+  }, 5000)
+}
+
+onUnmounted(() => {
+  if (liveMessageTimer !== undefined) {
+    clearTimeout(liveMessageTimer)
+  }
+})
+
 // 计算属性
 const hasBackgroundImage = computed(() => !!props.currentBackgroundUrl)
 const hasSearchResults = computed(() => searchStore.hasResults)
@@ -96,7 +188,8 @@ async function shareSearch() {
     await navigator.clipboard.writeText(shareURL)
     playNotification()
     showCopiedTip.value = true
-    
+    announce('分享链接已复制到剪贴板')
+
     setTimeout(() => {
       showCopiedTip.value = false
     }, 2000)
@@ -112,12 +205,14 @@ async function shareSearch() {
       // eslint-disable-next-line @typescript-eslint/no-deprecated
       document.execCommand('copy')
       showCopiedTip.value = true
-      
+      announce('分享链接已复制到剪贴板')
+
       setTimeout(() => {
         showCopiedTip.value = false
       }, 2000)
     } catch (err) {
-      // 静默处理
+      // 两条复制路径都失败时视觉上没有任何变化，至少让屏幕阅读器知道操作没成功
+      announce('复制失败，请手动复制地址栏链接')
     }
     
     document.body.removeChild(textarea)
@@ -136,79 +231,131 @@ function openSettings() {
   emit('openSettings')
 }
 
+/** 文件系统不允许出现在文件名中的字符 */
+const INVALID_FILENAME_CHARS = /[\\/:*?"<>|]/g
+
+/** 图源常把尺寸等信息 URL 编码进文件名，解码失败时原样返回 */
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'image/avif': 'avif',
+  'image/bmp': 'bmp',
+  'image/svg+xml': 'svg',
+}
+
+/**
+ * 由图片地址与 MIME 推导文件名
+ * @param sourceUrl 应传重定向后的最终地址：随机图 API 的入口（/v1/img?t=…）里没有文件名
+ */
+function buildImageFilename(sourceUrl: string, mimeType: string): string {
+  let filename = 'searchgal-background'
+  let extension = 'jpg'
+
+  try {
+    const rawName = new URL(sourceUrl).pathname.split('/').pop() ?? ''
+    // 图源常把尺寸等信息编码进文件名（如 xxx_%5B79%201%5D.avif），先还原再清洗
+    const lastPart = safeDecode(rawName)
+
+    if (lastPart.includes('.')) {
+      const nameParts = lastPart.split('.')
+      extension = nameParts.pop() || extension
+      filename = nameParts.join('.')
+    } else if (lastPart) {
+      filename = lastPart
+    }
+  } catch {
+    // 地址不合法时用默认文件名
+  }
+
+  if (mimeType) {
+    extension = MIME_TO_EXT[mimeType] || extension
+  }
+
+  // 去掉文件名里不能用的字符，并把连续空白压成单个下划线
+  filename = filename
+    .replace(INVALID_FILENAME_CHARS, '')
+    .replace(/\s+/g, '_')
+    .replace(/^[._]+|[._]+$/g, '')
+
+  if (!filename) {
+    filename = 'searchgal-background'
+  }
+
+  // 部分随机图 API 的文件名很长，截断避免超出文件系统限制
+  if (filename.length > 50) {
+    filename = filename.slice(0, 50)
+  }
+
+  return `${filename}.${extension}`
+}
+
+function triggerDownload(href: string, filename: string) {
+  const link = document.createElement('a')
+  link.href = href
+  link.download = filename
+  link.style.display = 'none'
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+function flashSaveTip() {
+  showSaveTip.value = true
+  setTimeout(() => {
+    showSaveTip.value = false
+  }, 2000)
+}
+
 // 保存背景图（使用源格式和文件名）
 async function saveBackgroundImage() {
   if (!props.currentBackgroundUrl) {return}
   playSwipe()
-  
+
   try {
     const response = await fetch(props.currentBackgroundUrl)
+    if (!response.ok) {throw new Error(`HTTP ${response.status}`)}
+
     const blob = await response.blob()
-    
-    // 从 URL 中提取文件名和扩展名
-    let filename = 'searchgal-background'
-    let extension = 'jpg'
-    
-    try {
-      const url = new URL(props.currentBackgroundUrl)
-      const pathname = url.pathname
-      const parts = pathname.split('/')
-      const lastPart = parts[parts.length - 1]
-      
-      if (lastPart?.includes('.')) {
-        // 有文件名和扩展名
-        const nameParts = lastPart.split('.')
-        extension = nameParts.pop() || 'jpg'
-        filename = nameParts.join('.')
-      } else if (lastPart) {
-        // 只有文件名，没有扩展名
-        filename = lastPart
-      }
-      
-      // 根据 MIME 类型确定扩展名
-      if (blob.type) {
-        const mimeToExt: Record<string, string> = {
-          'image/jpeg': 'jpg',
-          'image/jpg': 'jpg',
-          'image/png': 'png',
-          'image/gif': 'gif',
-          'image/webp': 'webp',
-          'image/bmp': 'bmp',
-          'image/svg+xml': 'svg',
-        }
-        extension = mimeToExt[blob.type] || extension
-      }
-    } catch (e) {
-      // URL 解析失败，使用默认值
-    }
-    
-    // 如果文件名太长，截断
-    if (filename.length > 50) {
-      filename = filename.substring(0, 50)
-    }
-    
-    // 创建下载链接
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${filename}.${extension}`
-    link.style.display = 'none'
-    
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    
-    setTimeout(() => {
-      URL.revokeObjectURL(url)
-    }, 100)
-    
+    const objectUrl = URL.createObjectURL(blob)
+
+    // response.url 是跟随重定向后的真实图片地址，文件名取它才有意义
+    triggerDownload(objectUrl, buildImageFilename(response.url || props.currentBackgroundUrl, blob.type))
+    setTimeout(() => { URL.revokeObjectURL(objectUrl) }, 100)
+
     playCelebration()
-    showSaveTip.value = true
-    setTimeout(() => {
-      showSaveTip.value = false
-    }, 2000)
+    flashSaveTip()
+    announce('背景图已保存')
   } catch (error) {
-    // 静默处理
+    /*
+     * 自定义随机图 API 大多不返回 Access-Control-Allow-Origin，fetch 会被浏览器拦截
+     * （背景图本身是 CSS background-image，不受 CORS 限制，所以只有下载会失败）。
+     * 跨域时 <a download> 会被忽略，只能退回到新标签页打开原图让用户自行保存。
+     */
+    console.warn('[TopToolbar] 背景图下载失败（多为图源未开放 CORS），回退到新标签页打开：', error)
+
+    const opened = window.open(props.currentBackgroundUrl, '_blank', 'noopener,noreferrer')
+    if (opened) {
+      playNotification()
+      flashSaveTip()
+      // 这条路径下图片只是被打开而非落盘，播报要说清楚还需要用户自己动手
+      announce('已在新标签页打开背景图，请手动保存')
+    } else {
+      // 弹窗被拦截，什么都做不了，至少给个失败反馈
+      playCaution()
+      announce('背景图保存失败，浏览器拦截了新标签页')
+    }
   }
 }
 </script>
@@ -223,10 +370,10 @@ async function saveBackgroundImage() {
   
   /* 半透明效果 */
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-button, 0.75));
-  border: var(--border-thin, 1px) solid rgba(var(--color-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12));
   
-  color: rgb(199, 21, 133);
+  color: rgb(var(--brand-primary-dark, 199, 21, 133));
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -255,23 +402,23 @@ async function saveBackgroundImage() {
 /* 暗色主题 */
 .dark .toolbar-button {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-button-dark, 0.75));
-  border-color: rgba(var(--color-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  color: rgb(var(--color-primary-light, 255, 179, 217));
+  color: rgb(var(--brand-primary-light, 255, 179, 217));
 }
 
 .toolbar-button:hover {
   transform: translate3d(0, -3px, 0) scale(1.08);
-  box-shadow: 
-    0 16px 40px rgba(255, 20, 147, 0.3),
+  box-shadow:
+    0 16px 40px rgba(var(--brand-primary, 255, 20, 147), 0.3),
     0 8px 20px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   border-color: rgba(255, 255, 255, 0.5);
 }
 
 .dark .toolbar-button:hover {
-  box-shadow: 
-    0 16px 40px rgba(255, 105, 180, 0.35),
+  box-shadow:
+    0 16px 40px rgba(var(--brand-primary-light, 255, 105, 180), 0.35),
     0 8px 20px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.2);
@@ -286,28 +433,28 @@ async function saveBackgroundImage() {
   text-decoration: none;
 }
 
-/* 保存成功状态 - 艳粉渐变 */
+/* 保存成功状态 - 主题色渐变 */
 .save-success {
-  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119)) !important;
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark))) !important;
   color: white !important;
-  border-color: rgba(236, 72, 153, 0.5) !important;
+  border-color: rgba(var(--brand-primary), 0.5) !important;
   box-shadow: 
-    0 8px 20px rgba(236, 72, 153, 0.4),
-    0 0 30px rgba(236, 72, 153, 0.3) !important;
+    0 8px 20px rgba(var(--brand-primary), 0.4),
+    0 0 30px rgba(var(--brand-primary), 0.3) !important;
 }
 
 .save-success i {
   color: white !important;
 }
 
-/* 分享已复制状态 - 艳粉渐变 */
+/* 分享已复制状态 - 主题色渐变 */
 .share-copied {
-  background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119)) !important;
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark))) !important;
   color: white !important;
-  border-color: rgba(236, 72, 153, 0.5) !important;
+  border-color: rgba(var(--brand-primary), 0.5) !important;
   box-shadow: 
-    0 8px 20px rgba(236, 72, 153, 0.4),
-    0 0 30px rgba(236, 72, 153, 0.3) !important;
+    0 8px 20px rgba(var(--brand-primary), 0.4),
+    0 0 30px rgba(var(--brand-primary), 0.3) !important;
 }
 
 .share-copied i {

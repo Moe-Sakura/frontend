@@ -205,12 +205,17 @@ export default defineConfig({
         chunkFileNames: 'js/[name]-[hash].js',
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // 必须先于 vue-core 判断：@lucide/vue 的路径同样包含 "/vue/"
-            if (id.includes('/@lucide/vue/')) {
+            // 必须先于 vue-core 判断：这些包的路径同样包含 "/vue/"，
+            // 落进 vue-core 会把它们拖进首屏关键链路。
+            // @floating-ui/vue 是 reka-ui 的依赖，只有浮层组件才需要。
+            if (id.includes('/@lucide/vue/') || id.includes('/@floating-ui/')) {
               return 'ui-libs';
             }
             if (id.includes('/vue/') || id.includes('/@vue/')) {
               return 'vue-core';
+            }
+            if (id.includes('/reka-ui/')) {
+              return 'ui-libs';
             }
             if (id.includes('/pinia/')) {
               return 'pinia';

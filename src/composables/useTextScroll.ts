@@ -1,73 +1,19 @@
-import { ref, onMounted, onUnmounted, watchEffect, type Ref } from 'vue'
-
-
 /**
- * 检测元素文本是否溢出，并设置滚动动画
+ * 文本溢出滚动指令
+ *
+ * 原文件还导出过一个 useTextScroll(elementRef) composable，做同一件事的
+ * 组合式版本，但全项目零调用点（main.ts 只注册了 vTextScroll 指令），已删除。
  */
-export function useTextScroll(elementRef: Ref<HTMLElement | null>) {
-  const isOverflowing = ref(false)
-  let resizeObserver: ResizeObserver | null = null
 
-  function checkOverflow() {
-    const el = elementRef.value
-    if (!el) {return}
-
-    // 检查是否溢出
-    const isOver = el.scrollWidth > el.clientWidth
-    isOverflowing.value = isOver
-
-    // 添加/移除溢出类
-    if (isOver) {
-      el.classList.add('is-overflowing')
-      // 计算滚动时长（基于文本长度）
-      const duration = Math.max(5, el.scrollWidth / 50)
-      el.style.setProperty('--scroll-duration', `${duration}s`)
-    } else {
-      el.classList.remove('is-overflowing')
-    }
-  }
-
-  onMounted(() => {
-    // 初始检查
-    checkOverflow()
-
-    // 监听元素大小变化
-    if (elementRef.value && 'ResizeObserver' in window) {
-      resizeObserver = new ResizeObserver(checkOverflow)
-      resizeObserver.observe(elementRef.value)
-    }
-  })
-
-  onUnmounted(() => {
-    if (resizeObserver) {
-      resizeObserver.disconnect()
-    }
-  })
-
-  // 当 ref 变化时重新检查
-  watchEffect(() => {
-    if (elementRef.value) {
-      checkOverflow()
-    }
-  })
-
-  return {
-    isOverflowing,
-    checkOverflow,
-  }
-}
-
-/**
- * 指令：自动检测溢出并添加滚动效果
- * 使用方式：v-text-scroll
- */
-// 扩展类型以存储原始内容和检查函数
 interface TextScrollElementExtended extends HTMLElement {
   _textScrollObserver?: ResizeObserver
   _textScrollContent?: string
   _checkOverflow?: () => void
 }
 
+/**
+ * 检测元素文本是否溢出，并设置滚动动画
+ */
 export const vTextScroll = {
   mounted(el: HTMLElement) {
     const extEl = el as TextScrollElementExtended

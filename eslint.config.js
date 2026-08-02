@@ -17,6 +17,13 @@ export default tseslint.config(
       '**/.vscode/**',
       '**/.idea/**',
       '**/coverage/**',
+      // shadcn-vue CLI 生成的组件源码。属于 vendored 代码：由
+      // `shadcn-vue add` 写入、按需手工改造，不是日常手写的地方。
+      // 纳入类型感知 lint 会让 pnpm check 多花 6 分钟且几乎查不出东西；
+      // 保持贴近上游也方便日后重新 add 时比对差异。
+      'src/components/ui/**',
+      // Node 构建脚本，不在 tsconfig 的 project 里
+      'scripts/**/*.mjs',
     ],
   },
 

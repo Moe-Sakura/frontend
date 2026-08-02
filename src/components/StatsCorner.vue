@@ -1,31 +1,44 @@
 <template>
-  <!-- 左上角状态指示器 -->
-  <div class="fixed top-4 left-4 z-40">
-    <a
-      href="https://status.searchgal.top"
-      target="_blank"
-      rel="noopener noreferrer"
-      :class="[
-        'status-link glassmorphism-card rounded-2xl shadow-lg px-3 py-2 flex items-center gap-2 transition-all duration-300 hover:scale-105',
-        statusClass
-      ]"
-      :title="statusText"
-    >
-      <!-- 状态图标 -->
-      <component
-        :is="statusIcon"
-        :size="16"
-        :class="[
-          isChecking ? 'animate-pulse' : '',
-          statusIconClass
-        ]"
-      />
-      <!-- 延迟显示 -->
-      <span class="text-sm font-medium tabular-nums">
-        {{ isChecking ? '...' : (responseTime ? `${responseTime}ms` : '--') }}
-      </span>
-    </a>
-  </div>
+  <!--
+    左上角状态指示器。
+    Provider 挂在组件内部而不是 App.vue：Reka 的 Tooltip 没有 Provider 祖先会直接抛注入错误，
+    而 App.vue 不在本次改动范围内；将来 App.vue 有了全局 Provider 就能删掉这一层。
+  -->
+  <TooltipProvider :delay-duration="400">
+    <div class="fixed top-4 left-4 z-40">
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <a
+            href="https://status.searchgal.top"
+            target="_blank"
+            rel="noopener noreferrer"
+            :class="[
+              'status-link glassmorphism-card rounded-2xl shadow-lg px-3 py-2 flex items-center gap-2 transition-all duration-300 hover:scale-105',
+              statusClass
+            ]"
+            :aria-label="statusAriaLabel"
+          >
+            <!-- 状态图标 -->
+            <component
+              :is="statusIcon"
+              :size="16"
+              :class="[
+                isChecking ? 'animate-pulse' : '',
+                statusIconClass
+              ]"
+            />
+            <!-- 延迟显示 -->
+            <span class="text-sm font-medium tabular-nums">
+              {{ isChecking ? '...' : (responseTime ? `${responseTime}ms` : '--') }}
+            </span>
+          </a>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          服务状态：{{ statusText }}
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  </TooltipProvider>
 
   <!-- 左下角统计（Vue 控制显示） -->
   <div
@@ -33,16 +46,22 @@
     :class="showStats ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'"
   >
     <div class="stats-card glassmorphism-card rounded-2xl shadow-lg px-4 py-3 flex flex-col gap-2">
+      <!--
+        title 只对鼠标悬停有效，屏幕阅读器读到的是一串没有上下文的数字，
+        所以额外补一段 sr-only 说明数字的含义（视觉上不占位）。
+      -->
       <!-- 访问量 -->
       <div class="flex items-center gap-2" title="总访问量 (PV)">
         <Eye :size="16" class="text-theme-primary dark:text-theme-accent" />
+        <span class="sr-only">总访问量</span>
         <span class="font-semibold text-gray-800 dark:text-slate-100">{{ statsStore.visitorStats.pv }}</span>
       </div>
       <!-- 分隔线 -->
-      <div class="h-px bg-gray-300/50 dark:bg-slate-600/50" />
+      <Separator class="bg-gray-300/50 dark:bg-slate-600/50" />
       <!-- 访客数 -->
       <div class="flex items-center gap-2" title="独立访客 (UV)">
         <Users :size="16" class="text-theme-primary dark:text-theme-accent" />
+        <span class="sr-only">独立访客</span>
         <span class="font-semibold text-gray-800 dark:text-slate-100">{{ statsStore.visitorStats.uv }}</span>
       </div>
     </div>
@@ -53,6 +72,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { Eye, Users, Activity, Wifi, WifiOff } from '@lucide/vue'
 import { useStatsStore } from '@/stores/stats'
+import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const statsStore = useStatsStore()
 const showStats = ref(false)
@@ -70,6 +91,15 @@ const statusText = computed(() => {
   if (isOnline.value) {return '正常'}
   if (isOffline.value) {return '异常'}
   return '未知'
+})
+
+/*
+ * 链接的可访问名字原先由内容决定，屏幕阅读器只会读到「123ms 链接」——
+ * 既不知道这是什么服务的延迟，也不知道点开会去哪。
+ */
+const statusAriaLabel = computed(() => {
+  const latency = !isChecking.value && responseTime.value ? `，响应 ${responseTime.value} 毫秒` : ''
+  return `服务状态：${statusText.value}${latency}，在新标签页打开状态页`
 })
 
 // 状态图标

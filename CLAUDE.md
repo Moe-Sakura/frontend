@@ -19,6 +19,7 @@ SearchGal 是一个 Galgame 聚合搜索前端，使用现代 Web 技术构建�
 | 构建 | Vite | 8.1 |
 | 状态管理 | Pinia | 4.0 |
 | 样式 | Tailwind CSS | 4.3 |
+| UI 组件 | shadcn-vue（底层 reka-ui） | reka 2.10 |
 | 图标 | @lucide/vue | 1.28 |
 | 虚拟列表 | @tanstack/vue-virtual | 3.13 |
 | 音效 | Web Audio API | - |
@@ -41,6 +42,7 @@ src/
 ├── components/       # Vue 组件
 │   ├── SearchHeader.vue      # 搜索框 + 模式切换
 │   ├── SearchResults.vue     # 搜索结果列表
+│   ├── ResultFilterPanel.vue # 结果筛选栏 (渠道 / 获取方式)
 │   ├── ResultItem.vue        # 单条搜索结果
 │   ├── SearchErrorCard.vue   # 搜索错误卡片
 │   ├── VndbPanel.vue         # VNDB 游戏信息面板
@@ -58,11 +60,11 @@ src/
 │   ├── LazyRender.vue        # 视口内才渲染的懒渲染容器
 │   └── GithubIcon.vue        # GitHub 图标 (Lucide v1 已移除品牌图标)
 ├── composables/      # 组合式函数
+│   ├── useSearchOrchestration.ts # SSE 搜索编排 + URL 同步 + VNDB 预取
 │   ├── useSound.ts           # Web Audio API 音效
 │   ├── useKeyboardShortcuts.ts # 全局快捷键
 │   ├── usePerformance.ts     # 性能工具
 │   ├── useProgress.ts        # 进度条 (样式运行时注入)
-│   ├── useScrollLock.ts      # 滚动锁定
 │   ├── useDebounce.ts        # 防抖
 │   ├── useImageViewer.ts     # 图片预览状态
 │   ├── useBackgroundImage.ts # 随机背景图
@@ -84,7 +86,9 @@ src/
 │   └── theme.css     # 主题变量
 ├── utils/            # 工具函数
 │   ├── persistence.ts # LocalStorage 持久化
-│   ├── theme.ts      # 主题管理
+│   ├── apiHealth.ts  # 分流探活 (启动时不通则回落默认节点)
+│   ├── theme.ts      # 明暗主题 + 自定义 CSS/JS/HTML
+│   ├── themeColor.ts # 预设主题色 → CSS 变量
 │   └── urlParams.ts  # URL 参数处理
 ├── directives/       # 自定义指令
 │   └── vRipple.ts    # Material Design 涟漪点击效果
@@ -97,8 +101,14 @@ src/
 │   ├── friends.json  # 友链
 │   └── repository-opengraph.json
 ├── config/           # 配置
+│   ├── shortcuts.ts  # 快捷键展示信息（分组/图标/说明）
+│   ├── themePresets.ts # 预设主题色 + 取色器辅助色推导
+│   ├── resultTags.ts # 搜索结果标签
+│   ├── usageNotice.ts / friendLinks.ts # 首页静态内容
 │   ├── index.ts      # 统一配置入口
-│   └── env.ts        # 环境变量
+│   ├── env.ts        # 环境变量
+│   ├── themePresets.ts # 预设主题色列表
+│   └── resultTags.ts   # 结果标签 (渠道/方式) 文案·图标·配色
 ├── App.vue           # 根组件
 └── main.ts           # 入口文件
 ```
@@ -195,6 +205,64 @@ playSelect()
 > `playToggle` 等 19 个）连同 `LegacySoundType` / `playLegacySound` 已删除，
 > 不要再引用。
 
+### shadcn-vue 组件
+
+组件源码在 `src/components/ui/`，**属于 vendored 代码**：由 CLI 写入、按需手工
+改造，不是日常手写的地方（ESLint 已忽略该目录，vue-tsc 仍覆盖）。
+
+已安装并在用：alert、alert-dialog、badge、button、dialog、input、label、
+popover、separator、switch、tabs、toggle-group、tooltip。
+
+新增组件：
+
+```bash
+pnpm dlx shadcn-vue@latest add <组件名>
+node scripts/patch-ui-borders.mjs   # 必须，见下
+pnpm lint:fix
+```
+
+跑完 CLI 后**必须 review `src/styles/tailwind.css` 的 diff**，它每次都会写回三样
+被刻意移除的东西：Google Fonts 的 Inter `@import`、`--font-heading`、以及
+`@layer base` 全局重置。那段重置里的 `body { bg-background }` 会盖掉 Ken Burns
+背景图（且只在亮色模式下坏），`* { border-border }` 会把项目现有的裸 border 从
+currentColor 刷成语义色。替代方案是 `scripts/patch-ui-borders.mjs`，它给生成组件
+里的裸 `border` 逐个补显式 `border-border`，作用域只在 `components/ui/` 内。
+
+#### 三个反复踩到的坑
+
+**1. 关闭音效必须挂在 `v-model:open` 的 setter 上**，不能挂在组件自己的
+`close()` 里。Reka 处理 Esc、点遮罩、点关闭按钮时只把 open 置为 false，
+不会调用组件里的任何函数：
+
+```ts
+const open = computed({
+  get: () => uiStore.isXxxOpen,
+  set: (v) => { if (v) { playTransitionUp() } else { playTransitionDown() }; uiStore.isXxxOpen = v },
+})
+```
+
+**2. scoped 样式进不去 shadcn 组件内部。** `ToggleGroupItem`、`Button` 等渲染出的
+元素拿不到本组件的 `data-v-*` 属性（组件的根元素拿得到，它再往下渲染的子元素
+拿不到）。直接写 `.foo { ... }` 会编译成 `.foo[data-v-xxx]`，永远匹配不上，且
+**没有任何报错**——样式静默落回组件自带的 variant。要从拿得到 data-v 的祖先
+穿透进去：
+
+```css
+/* ✗ 无效 */
+.mode-btn[data-state='on'] { color: #fff; }
+/* ✓ */
+.mode-switch :deep(.mode-btn[data-state='on']) { color: #fff; }
+```
+
+**3. 图标传给 shadcn 组件时必须显式写 `size-*` 类。** lucide 的 `:size` 渲染成
+svg 的 width/height **属性**，而 `buttonVariants` 基类里的
+`[&_svg:not([class*='size-'])]:size-4` 是 **CSS**——CSS 一定赢过表现属性。
+不写的话 20/24/28px 的图标会被静默压成 16px：
+
+```vue
+<Button size="icon"><ChevronLeft :size="24" class="size-6" /></Button>
+```
+
 ### 液态玻璃效果
 
 样式定义在 `src/styles/glassmorphism.css`，直接加单个类即可，无需嵌套结构：
@@ -211,6 +279,33 @@ playSelect()
 > 早期还定义过 `glass`、`glass-gpu`、`glassmorphism-button/modal/panel/fab/
 > overlay/toolbar-button/search-button/mode-switch` 等 10 个类，因长期无引用已删除。
 > 新增玻璃拟态元素时，优先复用上面三个类或直接用 Tailwind 组合。
+
+### 主题色
+
+主题色变量集中定义在 `src/styles/theme.css`，**全部是 RGB 三元组**
+（`255, 20, 147`）而不是十六进制：
+
+```css
+color: rgb(var(--color-primary));              /* 实色 */
+border-color: rgba(var(--color-primary), .15); /* 带透明度 */
+```
+
+写成 `#ff1493` 会让 `rgba()` 语法非法、整条声明被丢弃，务必保持三元组。
+Tailwind 侧在 `App.vue` 的 `@theme inline` 里接了同一批变量，因此
+`text-theme-primary`、`bg-theme-accent/10`、`shadow-theme-primary/30`
+这类工具类同样会跟随主题色变化。可用色阶：
+
+`theme-primary` / `-light` / `-lighter` / `-pale` / `-dark` / `-darker`、
+`theme-accent` / `-light` / `-dark`。
+
+新增主题色请改 `src/config/themePresets.ts`（只需给主色与辅助色，其余色阶由
+`utils/themeColor.ts` 按 HSL 明度推导），切换入口在设置面板的「外观」卡片。
+
+> 注意：根目录 `tailwind.config.js` 是 Tailwind v3 时代的遗留文件，v4 未经
+> `@config` 引入，**不会生效**；颜色以 `App.vue` 的 `@theme inline` 为准。
+
+组件里写死颜色前先想想：这个颜色应该跟随主题色吗？跟随就用变量；
+像结果标签（自建盘=粉、直接下载=绿）那种彼此需要区分的语义色才写死。
 
 ### 动画
 
@@ -354,8 +449,14 @@ A: 使用 `!important` 或增加选择器特异性，检查 CSS 加载顺序
 | 快捷键 | `src/composables/useKeyboardShortcuts.ts` |
 | 环境变量 / 配置 | `src/config/env.ts`, `src/config/index.ts`, `.env.example` |
 | 搜索源列表 | `src/data/api.json` |
+| shadcn 组件 | `src/components/ui/`（vendored，ESLint 已忽略） |
+| 新增 shadcn 组件后 | `node scripts/patch-ui-borders.mjs` |
+| 搜索编排 | `src/composables/useSearchOrchestration.ts` |
+| 圆角 / 主题色 | `src/utils/radius.ts`, `src/utils/themeColor.ts` |
 | 液态玻璃 | `src/styles/glassmorphism.css` |
-| 主题色 | `src/styles/theme.css` |
+| 主题色变量 | `src/styles/theme.css`, `src/App.vue` 的 `@theme inline` |
+| 预设主题色 | `src/config/themePresets.ts`, `src/utils/themeColor.ts` |
+| 结果标签 / 筛选 | `src/config/resultTags.ts`, `src/components/ResultFilterPanel.vue` |
 | 全局样式 | `src/styles/base.css` |
 | 自定义指令 | `src/directives/vRipple.ts` |
 | Vite 配置 / 分包 | `vite.config.ts` |

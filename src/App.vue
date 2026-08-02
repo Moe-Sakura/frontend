@@ -74,6 +74,7 @@ import {
   applyCustomHTML,
 } from '@/utils/theme'
 import { scheduleIdleTask } from '@/composables/usePerformance'
+import { shouldFallBackFromApi } from '@/utils/apiHealth'
 import { useBackgroundImage } from '@/composables/useBackgroundImage'
 import { initSoundFromSettings, syncSoundWithSettings } from '@/composables/useSound'
 
@@ -132,6 +133,22 @@ function handleHistorySelect(item: { query: string; mode: 'game' | 'patch' }) {
   uiStore.isHistoryModalOpen = false
 }
 
+// 选中的分流不通就回落到默认节点
+async function ensureSelectedApiReachable() {
+  const selected = searchStore.customApi
+  if (!selected) { return }
+
+  // 判断逻辑（含「本机没网」的对照探测）在 utils/apiHealth.ts
+  if (!await shouldFallBackFromApi(selected)) { return }
+
+  // 探活最坏要二十几秒，期间用户可能已经自己换了节点，别覆盖掉
+  if (searchStore.customApi !== selected) { return }
+
+  console.warn(`[api] 分流 ${selected} 不可用，已回落到默认节点`)
+  // SearchHeader 监听了 store，会同步清掉地址栏里那个陈旧的 ?api=
+  searchStore.setCustomApi('')
+}
+
 onMounted(async () => {
   // === 关键任务：立即执行 ===
   
@@ -150,7 +167,11 @@ onMounted(async () => {
 
   // 恢复保存的搜索状态
   searchStore.restoreState()
-  
+
+  // 探活选中的分流：可能是已下线的节点，或用户填的一个已经失效的自定义 API。
+  // 默认节点不用测（它就是回落目标），也不阻塞启动。
+  void ensureSelectedApiReachable()
+
   // === 非关键任务：空闲时执行 ===
   
   scheduleIdleTask(() => {
@@ -204,10 +225,7 @@ function saveSettings(customApi: string, newCustomCSS: string) {
 </script>
 
 <style>
-@import "tailwindcss";
-
-/* Tailwind v4: 配置 dark 变体使用 .dark 类 */
-@custom-variant dark (&:where(.dark, .dark *));
+/* Tailwind 入口、dark 变体与主题色 @theme 见 src/styles/tailwind.css */
 
 /* Ken Burns 动画效果 - 使用 CSS 动画实现更流畅的背景切换 */
 .ken-burns {
