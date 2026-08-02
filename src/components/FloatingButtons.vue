@@ -5,6 +5,7 @@
     <button
       v-show="showScrollToTop"
       v-ripple
+      type="button"
       aria-label="回到顶部"
       class="fab-button scroll-top-btn"
       @click="handleScrollToTop"
@@ -24,6 +25,7 @@
         <button
           v-show="searchStore.hasResults"
           v-ripple
+          type="button"
           :aria-label="navOpen ? '关闭站点导航' : '打开站点导航'"
           class="fab-button nav-btn"
           :class="{ 'nav-open': navOpen }"
@@ -59,12 +61,16 @@
             <span class="text-xs text-gray-400 dark:text-slate-500">
               {{ searchStore.platformResults.size }} 站点
             </span>
-            <button
-              class="flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-theme-primary/5 hover:text-theme-primary dark:hover:bg-theme-primary-darker/30"
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="关闭站点导航"
+              class="size-7 rounded-full text-gray-400 hover:bg-theme-primary/5 hover:text-theme-primary dark:hover:bg-theme-primary-darker/30"
               @click="navOpen = false"
             >
               <X :size="16" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -74,6 +80,7 @@
             v-for="([platformName, platformData], index) in searchStore.platformResults"
             :key="platformName"
             v-ripple
+            type="button"
             class="nav-item mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 last:mb-0"
             :style="{ animationDelay: `${index * 30}ms` }"
             @click="handleScrollToPlatform(platformName)"
@@ -111,6 +118,7 @@
     <button
       v-show="searchStore.vndbInfo"
       v-ripple
+      type="button"
       :aria-label="uiStore.isVndbPanelOpen ? '关闭作品介绍' : '打开作品介绍'"
       class="fab-button vndb-btn"
       :class="{ 'vndb-open': uiStore.isVndbPanelOpen }"
@@ -122,6 +130,7 @@
     <!-- 评论按钮 -->
     <button
       v-ripple
+      type="button"
       :aria-label="uiStore.isCommentsModalOpen ? '关闭评论' : '打开评论'"
       class="fab-button comments-btn"
       :class="{ 'comments-open': uiStore.isCommentsModalOpen }"
@@ -133,6 +142,7 @@
     <!-- 搜索历史按钮 -->
     <button
       v-ripple
+      type="button"
       :aria-label="uiStore.isHistoryModalOpen ? '关闭搜索历史' : '打开搜索历史'"
       class="fab-button history-btn"
       :class="{ 'history-open': uiStore.isHistoryModalOpen }"
@@ -153,6 +163,7 @@ import { ArrowUp, X, Grid3x3, BookOpen, MessageSquare, History, Star, Circle, Do
 import type { FunctionalComponent } from 'vue'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 const searchStore = useSearchStore()
 const uiStore = useUIStore()

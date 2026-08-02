@@ -97,18 +97,25 @@
           
             <!-- 加载更多按钮 -->
             <div v-if="platformData.items.length > platformData.displayedCount" class="load-more mt-6 flex justify-center">
-              <button
-                class="px-6 py-3 rounded-xl
-                     bg-theme-primary hover:bg-theme-primary-dark dark:bg-theme-primary-dark dark:hover:bg-theme-primary
-                     text-white font-bold shadow-lg shadow-theme-primary/30 dark:shadow-theme-primary-dark/30
-                     hover:scale-105 active:scale-95
-                     transition-all duration-200
-                     flex items-center gap-2"
+              <!--
+                default 变体就是 bg-primary，而 --primary 取的正是 rgb(var(--brand-primary))，
+                所以原来手写的 bg-theme-primary / text-white 全部可以删掉，
+                而且这样能跟着用户在设置面板里改的主题色走。
+                has-[>svg]:px-6 是必须的：size="lg" 自带 has-[>svg]:px-4，它带 :has() 提权
+                (0,1,1) 会赢过普通的 px-6，不覆盖的话内边距会从 24px 缩到 16px。
+                ArrowDown 要显式写 size-[18px]，否则被基类的 svg size-4 压成 16px。
+              -->
+              <Button
+                type="button"
+                size="lg"
+                class="h-auto rounded-xl px-6 py-3 has-[>svg]:px-6
+                       font-bold shadow-lg shadow-theme-primary/30 dark:shadow-theme-primary-dark/30
+                       duration-200 hover:scale-105 active:scale-95"
                 @click="loadMore(platformName)"
               >
-                <ArrowDown :size="18" />
+                <ArrowDown :size="18" class="size-[18px]" />
                 <span>加载更多 ({{ Math.min(20, platformData.items.length - platformData.displayedCount) }})</span>
-              </button>
+              </Button>
             </div>
           
             <!-- 已加载全部提示 -->
@@ -137,6 +144,7 @@ import LazyRender from '@/components/LazyRender.vue'
 import ResultItem from '@/components/ResultItem.vue'
 import ResultFilterPanel from '@/components/ResultFilterPanel.vue'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   getResultTagChipClass,
   getResultTagIcon,

@@ -11,14 +11,20 @@
         class="comments-header flex-row flex-shrink-0 items-center justify-between space-y-0 border-b border-white/10 px-3 py-2.5 select-none sm:px-5 sm:py-4 md:rounded-t-3xl dark:border-slate-700/50"
       >
         <!-- 返回按钮 - 移动端 -->
-        <button
+        <!-- ChevronLeft 必须显式写 size-5：基类的 [&_svg:not([class*='size-'])]:size-4
+             是 CSS，会赢过 lucide 渲染的 width/height 属性，20px 会被静默压成 16px。
+             hover:text-* 两条是压 ghost 自带的 hover:text-accent-foreground —— 原样式
+             hover 时不变色，不压住会跳成 brand-primary-darker/lighter -->
+        <Button
           v-ripple
-          class="-ml-2 flex items-center gap-1 rounded-xl px-3 py-2 font-medium text-theme-primary transition-all hover:bg-theme-primary/5 md:hidden dark:text-theme-primary-light dark:hover:bg-theme-primary-darker/20"
+          type="button"
+          variant="ghost"
+          class="-ml-2 h-auto gap-1 rounded-xl px-3 py-2 font-medium text-theme-primary hover:bg-theme-primary/5 hover:text-theme-primary md:hidden dark:text-theme-primary-light dark:hover:bg-theme-primary-darker/20 dark:hover:text-theme-primary-light"
           @click="open = false"
         >
-          <ChevronLeft :size="20" />
+          <ChevronLeft :size="20" class="size-5" />
           <span class="text-sm sm:text-base">返回</span>
-        </button>
+        </Button>
 
         <!-- 标题 -->
         <div class="flex items-center gap-2 md:ml-0">
@@ -47,13 +53,18 @@
         <!-- 右侧按钮组 -->
         <div class="flex items-center gap-2">
           <!-- 关闭按钮 - 仅桌面端 -->
-          <button
-            class="hidden h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-all hover:bg-red-50 hover:text-red-500 md:flex dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+          <!-- hidden 会顶掉基类的 inline-flex，md:flex 是另一个修饰符所以保留下来 -->
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="关闭"
             title="关闭"
+            class="hidden rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-500 md:flex dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
             @click="open = false"
           >
             <X :size="16" />
-          </button>
+          </Button>
 
           <!-- 移动端占位 -->
           <div class="w-8 md:hidden" />
@@ -85,6 +96,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 interface ArtalkInstance {
   destroy(): void

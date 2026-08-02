@@ -1,65 +1,122 @@
 <template>
-  <div class="top-toolbar fixed top-4 right-4 z-50 flex items-center gap-2 sm:gap-3">
-    <!-- 保存背景图按钮 -->
-    <button
-      v-show="hasBackgroundImage"
-      :aria-label="showSaveTip ? '保存成功' : '保存背景图'"
-      class="toolbar-button"
-      :class="{ 'save-success': showSaveTip }"
-      @click="saveBackgroundImage"
-    >
-      <component :is="showSaveTip ? Check : Download" :size="20" />
-    </button>
+  <!--
+    Provider 暂时挂在组件内部：Reka 的 Tooltip 没有 Provider 祖先会直接抛注入错误，
+    而 App.vue 不在本次改动范围内。日后 App.vue 加了全局 Provider 可以删掉这一层，
+    嵌套 Provider 只是内层覆盖外层的延迟配置，没有副作用。
+  -->
+  <TooltipProvider :delay-duration="400">
+    <div class="top-toolbar fixed top-4 right-4 z-50 flex items-center gap-2 sm:gap-3">
+      <!-- 保存背景图按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <button
+            v-show="hasBackgroundImage"
+            type="button"
+            aria-label="保存背景图"
+            class="toolbar-button"
+            :class="{ 'save-success': showSaveTip }"
+            @click="saveBackgroundImage"
+          >
+            <component :is="showSaveTip ? Check : Download" :size="20" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          保存背景图
+        </TooltipContent>
+      </Tooltip>
 
-    <!-- 分享搜索按钮 -->
-    <button
-      v-show="hasSearchResults"
-      :aria-label="showCopiedTip ? '已复制' : '分享搜索'"
-      class="toolbar-button"
-      :class="{ 'share-copied': showCopiedTip }"
-      @click="shareSearch"
-    >
-      <component :is="showCopiedTip ? Check : Share2" :size="20" />
-    </button>
+      <!-- 分享搜索按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <button
+            v-show="hasSearchResults"
+            type="button"
+            aria-label="分享搜索"
+            class="toolbar-button"
+            :class="{ 'share-copied': showCopiedTip }"
+            @click="shareSearch"
+          >
+            <component :is="showCopiedTip ? Check : Share2" :size="20" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          分享搜索
+        </TooltipContent>
+      </Tooltip>
 
-    <!-- GitHub 按钮 -->
-    <a
-      href="https://github.com/Moe-Sakura"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="访问 GitHub 仓库"
-      class="toolbar-button github-button"
-    >
-      <GithubIcon :size="20" />
-    </a>
+      <!-- GitHub 按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <a
+            href="https://github.com/Moe-Sakura"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="访问 GitHub 仓库"
+            class="toolbar-button github-button"
+          >
+            <GithubIcon :size="20" />
+          </a>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          GitHub 仓库
+        </TooltipContent>
+      </Tooltip>
 
-    <!-- 键盘快捷键按钮 -->
-    <button
-      aria-label="键盘快捷键"
-      class="toolbar-button keyboard-button"
-      @click="toggleKeyboardHelp"
-    >
-      <Keyboard :size="20" />
-    </button>
+      <!-- 键盘快捷键按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <button
+            type="button"
+            aria-label="键盘快捷键"
+            class="toolbar-button keyboard-button"
+            @click="toggleKeyboardHelp"
+          >
+            <Keyboard :size="20" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          键盘快捷键
+        </TooltipContent>
+      </Tooltip>
 
-    <!-- 设置按钮 -->
-    <button
-      aria-label="设置"
-      class="toolbar-button settings-button"
-      @click="openSettings"
-    >
-      <Settings :size="20" />
-    </button>
-  </div>
+      <!-- 设置按钮 -->
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <button
+            type="button"
+            aria-label="设置"
+            class="toolbar-button settings-button"
+            @click="openSettings"
+          >
+            <Settings :size="20" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          设置
+        </TooltipContent>
+      </Tooltip>
+
+      <!--
+        保存/复制的结果原先是把按钮的 aria-label 临时改成「保存成功」「已复制」——
+        这是 toast 形状的反馈被塞进了按钮名字：屏幕阅读器只有在焦点恰好停在该按钮上
+        时才可能读到，而且「保存成功」当按钮名字本身就有歧义。现在按钮名字保持稳定，
+        瞬时结果统一走这个不占位的 aria-live 区域播报。
+      -->
+      <span class="sr-only" role="status" aria-live="polite">
+        {{ liveMessage }}
+      </span>
+    </div>
+  </TooltipProvider>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import { useUIStore } from '@/stores/ui'
 import { generateShareURL } from '@/utils/urlParams'
 import { Check, Download, Share2, Keyboard, Settings } from '@lucide/vue'
 import GithubIcon from '@/components/GithubIcon.vue'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   playTap,
   playCelebration,
@@ -85,6 +142,35 @@ const emit = defineEmits<{
 const showSaveTip = ref(false)
 const showCopiedTip = ref(false)
 
+/*
+ * 屏幕阅读器播报文本。这里天然是 toast 的形状，等 sonner 装上后整段可以换成
+ * toast('背景图已保存')，届时删掉 liveMessage / announce 与模板里的 aria-live 区域即可。
+ */
+const liveMessage = ref('')
+let liveMessageTimer: ReturnType<typeof setTimeout> | undefined
+
+/** 给 aria-live 区域发一条播报 */
+function announce(message: string) {
+  if (liveMessageTimer !== undefined) {
+    clearTimeout(liveMessageTimer)
+  }
+  // 往 aria-live 里写入和上次一模一样的文本不会触发重播，先清空再在下一帧写入
+  liveMessage.value = ''
+  void nextTick(() => {
+    liveMessage.value = message
+  })
+  // 播报完就清掉，避免用户之后浏览这块区域时读到早已过期的结果
+  liveMessageTimer = setTimeout(() => {
+    liveMessage.value = ''
+  }, 5000)
+}
+
+onUnmounted(() => {
+  if (liveMessageTimer !== undefined) {
+    clearTimeout(liveMessageTimer)
+  }
+})
+
 // 计算属性
 const hasBackgroundImage = computed(() => !!props.currentBackgroundUrl)
 const hasSearchResults = computed(() => searchStore.hasResults)
@@ -102,7 +188,8 @@ async function shareSearch() {
     await navigator.clipboard.writeText(shareURL)
     playNotification()
     showCopiedTip.value = true
-    
+    announce('分享链接已复制到剪贴板')
+
     setTimeout(() => {
       showCopiedTip.value = false
     }, 2000)
@@ -118,12 +205,14 @@ async function shareSearch() {
       // eslint-disable-next-line @typescript-eslint/no-deprecated
       document.execCommand('copy')
       showCopiedTip.value = true
-      
+      announce('分享链接已复制到剪贴板')
+
       setTimeout(() => {
         showCopiedTip.value = false
       }, 2000)
     } catch (err) {
-      // 静默处理
+      // 两条复制路径都失败时视觉上没有任何变化，至少让屏幕阅读器知道操作没成功
+      announce('复制失败，请手动复制地址栏链接')
     }
     
     document.body.removeChild(textarea)
@@ -247,6 +336,7 @@ async function saveBackgroundImage() {
 
     playCelebration()
     flashSaveTip()
+    announce('背景图已保存')
   } catch (error) {
     /*
      * 自定义随机图 API 大多不返回 Access-Control-Allow-Origin，fetch 会被浏览器拦截
@@ -259,9 +349,12 @@ async function saveBackgroundImage() {
     if (opened) {
       playNotification()
       flashSaveTip()
+      // 这条路径下图片只是被打开而非落盘，播报要说清楚还需要用户自己动手
+      announce('已在新标签页打开背景图，请手动保存')
     } else {
       // 弹窗被拦截，什么都做不了，至少给个失败反馈
       playCaution()
+      announce('背景图保存失败，浏览器拦截了新标签页')
     }
   }
 }

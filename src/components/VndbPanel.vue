@@ -13,13 +13,19 @@
         class="glassmorphism-navbar flex-row flex-shrink-0 items-center justify-between space-y-0 border-b border-white/10 px-4 py-3 select-none sm:px-6 sm:py-4 md:rounded-t-3xl dark:border-slate-700/50"
       >
         <!-- 返回按钮 - 移动端 -->
-        <button
-          class="flex items-center gap-1 font-medium text-theme-primary transition-colors hover:opacity-80 md:hidden dark:text-theme-primary-light"
+        <!-- ChevronLeft 必须显式写 size-6：基类的 [&_svg:not([class*='size-'])]:size-4
+             是 CSS，会赢过 lucide 渲染的 width/height 属性，否则 24px 被静默压成 16px。
+             has-[>svg]:px-0 也不能少：default size 自带 has-[>svg]:px-3，它带 :has()
+             提权 (0,1,1) 会赢过普通的 px-0，不覆盖的话图标会平白多出 12px 内边距。 -->
+        <Button
+          type="button"
+          variant="ghost"
+          class="h-auto gap-1 px-0 font-medium text-theme-primary hover:opacity-80 has-[>svg]:px-0 md:hidden dark:text-theme-primary-light"
           @click="open = false"
         >
-          <ChevronLeft :size="24" />
+          <ChevronLeft :size="24" class="size-6" />
           <span class="text-base">返回</span>
-        </button>
+        </Button>
 
         <!-- 标题 -->
         <div class="flex items-center gap-2 md:ml-0">
@@ -35,48 +41,65 @@
         <!-- 右侧按钮组 -->
         <div class="flex items-center gap-2">
           <!-- 一键翻译按钮 -->
-          <button
+          <!-- 灰态改由 disabled: 前缀承载（原本是三元 :class）；disabled:pointer-events-auto
+               是必须的：基类的 disabled:pointer-events-none 会连 cursor-wait 一起吞掉，
+               而等待光标是「翻译中」这个状态唯一的额外反馈。
+               而 pointer-events 一放开，:hover 在禁用态也会命中（点完按钮指针本来就停在上面），
+               所以还要写 disabled:hover: 把灰底钉死，不能指望 disabled 排在 hover 之后。
+               has-[>svg]:px-3 也不能省：size="sm" 自带 has-[>svg]:px-2.5，它的 :has(>svg)
+               选择器比裸 px-3 特异性高，不显式盖掉的话左右内边距会比旁边的 VNDB 药丸窄 2px。
+               文字在 sm 以下断点隐藏、只剩图标，所以必须给可访问名。 -->
+          <Button
             v-if="!hasAnyTranslation"
-            class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
-            :class="isTranslatingAll 
-              ? 'bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 cursor-wait' 
-              : 'text-white bg-violet-500 hover:bg-violet-600'"
+            type="button"
+            size="sm"
             :disabled="isTranslatingAll"
+            :aria-label="isTranslatingAll ? '翻译中' : 'AI 翻译'"
+            class="h-auto gap-1 rounded-full bg-violet-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-600 has-[>svg]:px-3 disabled:pointer-events-auto disabled:cursor-wait disabled:bg-gray-200 disabled:text-gray-500 disabled:hover:bg-gray-200 dark:disabled:bg-slate-700 dark:disabled:text-slate-400 dark:disabled:hover:bg-slate-700"
             @click="handleTranslateAll"
           >
-            <Loader v-if="isTranslatingAll" :size="14" class="animate-spin" />
-            <Bot v-else :size="14" />
+            <Loader v-if="isTranslatingAll" :size="14" class="size-3.5 animate-spin" />
+            <Bot v-else :size="14" class="size-3.5" />
             <span class="hidden sm:inline">{{ isTranslatingAll ? '翻译中...' : 'AI 翻译' }}</span>
-          </button>
+          </Button>
           <!-- 翻译完成后的切换按钮 -->
-          <button
+          <!-- h-auto 让它与右边同样是药丸的 VNDB <a> 等高 -->
+          <Button
             v-else
-            class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-900/30 hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors"
+            type="button"
+            variant="secondary"
+            size="sm"
+            :aria-label="showOriginal ? '切换到译文' : '切换到原文'"
+            class="h-auto gap-1 rounded-full bg-violet-100 px-3 py-1.5 text-sm font-medium text-violet-600 hover:bg-violet-200 has-[>svg]:px-3 dark:bg-violet-900/30 dark:text-violet-400 dark:hover:bg-violet-900/50"
             @click="toggleAllTranslations"
           >
-            <ArrowLeftRight :size="14" />
+            <ArrowLeftRight :size="14" class="size-3.5" />
             <span class="hidden sm:inline">{{ showOriginal ? '译文' : '原文' }}</span>
-          </button>
-            
+          </Button>
+
           <!-- VNDB 链接按钮 -->
           <a
             :href="vndbUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-white bg-theme-primary hover:bg-[#e6007f]"
+            class="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-white bg-theme-primary hover:bg-theme-primary-dark"
           >
             <ExternalLink :size="14" />
             <span class="hidden sm:inline">VNDB</span>
           </a>
-          
+
           <!-- 关闭按钮 - 仅桌面端 -->
-          <button
-            class="hidden h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-all hover:bg-red-50 hover:text-red-500 md:flex dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
             title="关闭"
+            aria-label="关闭"
+            class="hidden rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-500 md:flex dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
             @click="open = false"
           >
             <X :size="16" />
-          </button>
+          </Button>
         </div>
       </DialogHeader>
 
@@ -88,8 +111,13 @@
             <div class="flex flex-col sm:flex-row gap-4">
               <!-- 封面图 -->
               <div v-if="searchStore.vndbInfo.mainImageUrl" class="sm:w-40 md:w-48 flex-shrink-0">
+                <!-- 只是一块包住 <img> 的点击热区，Button 的 inline-flex/h-9/px-4 全要推翻，
+                     所以保留原生。aria-label 不能省：否则可访问名会取 <img alt>（游戏主标题），
+                     屏幕阅读器只会念出游戏名，读不出「点了会打开大图」 -->
                 <button
+                  type="button"
                   class="block w-full"
+                  aria-label="查看封面大图"
                   @click="openGallery(0)"
                 >
                   <img
@@ -124,8 +152,11 @@
                   >
                     {{ name }}
                   </span>
+                  <!-- 必须与上面那串视觉完全一致的别名 <span> 药丸像素级对齐，
+                       而 span 换不成 Button，所以这一半也保留原生 -->
                   <button
                     v-if="searchStore.vndbInfo.names.length > 4"
+                    type="button"
                     class="px-2 py-0.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 text-xs rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
                     @click="toggleSection('names')"
                   >
@@ -342,13 +373,16 @@
                     </span>
                   </a>
                 </div>
-                <button
+                <Button
                   v-if="searchStore.vndbInfo.relations.length > 5"
-                  class="w-full mt-1.5 py-1 text-[10px] font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  class="mt-1.5 h-auto w-full py-1 text-[10px] font-medium text-amber-600 dark:text-amber-400"
                   @click="toggleSection('relations')"
                 >
                   {{ expandedSections.relations ? '收起' : `+${searchStore.vndbInfo.relations.length - 5} 更多` }}
-                </button>
+                </Button>
               </div>
 
               <!-- 外部链接 -->
@@ -382,13 +416,16 @@
                 <h3 class="text-sm font-bold text-gray-800 dark:text-white">角色</h3>
                 <span class="text-xs text-gray-400 dark:text-slate-500">({{ characters.length }})</span>
               </div>
-              <button
+              <Button
                 v-if="characters.length > 8"
-                class="text-[10px] font-medium text-rose-600 dark:text-rose-400 hover:underline"
+                type="button"
+                variant="link"
+                size="sm"
+                class="h-auto p-0 text-[10px] font-medium text-rose-600 dark:text-rose-400"
                 @click="toggleSection('characters')"
               >
                 {{ expandedSections.characters ? '收起' : `全部` }}
-              </button>
+              </Button>
             </div>
             <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
               <a
@@ -448,13 +485,16 @@
                   <Bot :size="10" />
                   <span>AI 译文</span>
                 </div>
-                <button
+                <Button
                   v-if="quotes.length > 3"
-                  class="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  class="h-auto p-0 text-[10px] font-medium text-indigo-600 dark:text-indigo-400"
                   @click="toggleSection('quotes')"
                 >
                   {{ expandedSections.quotes ? '收起' : `全部` }}
-                </button>
+                </Button>
               </div>
             </div>
             <div class="space-y-2">
@@ -525,10 +565,14 @@
                 <span class="text-xs text-gray-400">({{ searchStore.vndbInfo.screenshots.length }})</span>
               </div>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <!-- 同封面图：纯点击热区，保留原生。显式 aria-label 是为了让可访问名说清
+                     「查看」这个动作，而不是沿用 <img alt> 那个纯描述性的「截图 N」 -->
                 <button
                   v-for="(screenshot, index) in searchStore.vndbInfo.screenshots"
                   :key="index"
+                  type="button"
                   class="group block overflow-hidden rounded-lg hover:scale-[1.02] transition-transform bg-gray-100 dark:bg-slate-700"
+                  :aria-label="`查看截图 ${index + 1}`"
                   @click="openGallery(index + 1)"
                 >
                   <img
@@ -564,6 +608,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import {
   BookOpen,
   ChevronLeft,
@@ -1034,13 +1079,15 @@ function formatRelation(relation: string): string {
   background: transparent;
 }
 
+/* 滚动条与链接色都走品牌变量：用户在调色盘换主题色后这几处要跟着变，
+   写死 hex 会留下一条永远是粉色的滚动条 */
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ff1493, #d946ef);
-  border-radius: 10px;
+  background: linear-gradient(180deg, rgb(var(--brand-primary)), rgb(var(--brand-accent)));
+  border-radius: var(--radius-full, 9999px);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c71585, #c026d3);
+  background: linear-gradient(180deg, rgb(var(--brand-primary-dark)), rgb(var(--brand-accent-dark)));
 }
 
 /* 描述文本 Markdown 样式 */
@@ -1054,7 +1101,7 @@ function formatRelation(relation: string): string {
 }
 
 .prose-description :deep(a) {
-  color: #ff1493;
+  color: rgb(var(--brand-primary));
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -1064,7 +1111,7 @@ function formatRelation(relation: string): string {
 }
 
 .dark .prose-description :deep(a) {
-  color: #ff69b4;
+  color: rgb(var(--brand-primary-light));
 }
 
 /* 剧透文字 - 模糊效果，悬停显示 */

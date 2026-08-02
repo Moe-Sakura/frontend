@@ -10,14 +10,21 @@
       <DialogHeader
         class="glassmorphism-navbar flex-row flex-shrink-0 items-center justify-between space-y-0 border-b border-white/10 px-4 py-3 select-none sm:px-6 sm:py-4 md:rounded-t-3xl dark:border-slate-700/50"
       >
-        <!-- 返回按钮 - 仅移动端 -->
-        <button
-          class="flex items-center gap-1 font-medium text-theme-primary transition-colors active:scale-95 md:hidden dark:text-theme-primary-light"
+        <!--
+          返回按钮 - 仅移动端。
+          has-[>svg]:px-0 不是冗余：size 变体里的 has-[>svg]:px-3 编译成
+          `:has(*>svg)`，特异性比裸 px-0 高一档，光写 px-0 压不住它，
+          图标会平白多出 12px 内边距把标题挤偏。
+        -->
+        <Button
+          type="button"
+          variant="ghost"
+          class="h-auto gap-1 px-0 font-medium text-theme-primary active:scale-95 has-[>svg]:px-0 md:hidden dark:text-theme-primary-light"
           @click="open = false"
         >
-          <ChevronLeft :size="24" />
+          <ChevronLeft :size="24" class="size-6" />
           <span class="text-base">返回</span>
-        </button>
+        </Button>
 
         <!-- 标题 -->
         <div class="flex items-center gap-2 md:ml-0">
@@ -32,22 +39,31 @@
 
         <!-- 右侧按钮组 -->
         <div class="flex items-center gap-2">
-          <!-- 保存按钮 -->
-          <button
-            class="rounded-full bg-theme-primary px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-theme-primary/25 transition-all hover:bg-theme-primary-dark active:scale-95"
+          <!--
+            保存按钮：default 变体的 bg-primary 就是 --brand-primary，
+            用户在下面换主题色时它会跟着变，比手写 bg-theme-primary 少一条路径。
+          -->
+          <Button
+            type="button"
+            size="sm"
+            class="h-auto rounded-full px-4 py-1.5 font-semibold shadow-lg shadow-theme-primary/25 active:scale-95"
             @click="save"
           >
             保存
-          </button>
+          </Button>
 
           <!-- 关闭按钮 - 仅桌面端 -->
-          <button
-            class="hidden h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-all hover:bg-red-50 hover:text-red-500 md:flex dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            class="hidden rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-500 md:flex dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+            aria-label="关闭"
             title="关闭"
             @click="open = false"
           >
             <X :size="16" />
-          </button>
+          </Button>
         </div>
       </DialogHeader>
 
@@ -65,20 +81,26 @@
                 <p class="text-sm text-gray-500 dark:text-slate-400">主题色、明暗模式与圆角</p>
               </div>
 
-              <!-- 已经是默认值时禁用，免得点了没反应还不知道为什么 -->
-              <button
+              <!--
+                已经是默认值时禁用，免得点了没反应还不知道为什么。
+                disabled:opacity-35 会顶掉基类的 disabled:opacity-50；基类同时带的
+                disabled:pointer-events-none 与迁移前手写的一致，禁用态下 :title
+                气泡本来就不弹，行为没变。
+              -->
+              <Button
                 type="button"
-                class="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all
-                       text-gray-500 hover:bg-theme-primary/10 hover:text-theme-primary
-                       disabled:pointer-events-none disabled:opacity-35
+                variant="ghost"
+                size="sm"
+                class="ml-auto h-auto shrink-0 gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium
+                       text-gray-500 hover:bg-theme-primary/10 hover:text-theme-primary disabled:opacity-35
                        dark:text-slate-400 dark:hover:bg-theme-primary-darker/25 dark:hover:text-theme-primary-light"
                 :disabled="uiStore.isAppearanceDefault"
                 :title="uiStore.isAppearanceDefault ? '当前已是默认外观' : '把主题色、明暗模式与圆角一起恢复默认'"
                 @click="resetAppearance"
               >
-                <RotateCcw :size="14" />
+                <RotateCcw :size="14" class="size-3.5" />
                 <span>恢复默认</span>
-              </button>
+              </Button>
             </div>
 
             <!-- 预设主题色 -->
@@ -215,20 +237,25 @@
             <div class="space-y-3">
               <!-- 导出导入按钮 -->
               <div class="flex gap-3">
-                <button
-                  class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
+                <Button
+                  type="button"
+                  variant="outline"
+                  :class="HISTORY_ACTION_CLASS"
                   @click="exportHistory"
                 >
-                  <Download :size="18" />
+                  <Download :size="16" />
                   <span>导出记录</span>
-                </button>
-                <button
-                  class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-950/60 active:scale-[0.98] transition-all text-sm"
+                </Button>
+                <!-- 触发的是下面那个隐藏 file input，type="button" 尤其不能少 -->
+                <Button
+                  type="button"
+                  variant="outline"
+                  :class="HISTORY_ACTION_CLASS"
                   @click="triggerImport"
                 >
-                  <Upload :size="18" />
+                  <Upload :size="16" />
                   <span>导入记录</span>
-                </button>
+                </Button>
                 <!-- 隐藏的文件输入框 -->
                 <input
                   ref="fileInputRef"
@@ -314,12 +341,18 @@
               </div>
             </div>
 
-            <!-- API 选项列表 -->
-            <div class="space-y-2">
+            <!--
+              API 选项列表：这是一组单选而不是四个独立按钮，缺的是语义不是样式，
+              所以保留原生 button 只补 radiogroup/radio —— 套 Button 反而要覆盖
+              一层 bg-primary，还会跟这里 flex-col sm:flex-row 的两行布局打架。
+            -->
+            <div class="space-y-2" role="radiogroup" aria-label="聚搜 API 后端">
               <button
                 v-for="option in apiOptions"
                 :key="option.value"
                 type="button"
+                role="radio"
+                :aria-checked="selectedApiOption === option.value"
                 :class="[
                   'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-xl transition-all duration-200 text-left',
                   selectedApiOption === option.value
@@ -550,6 +583,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { percentToRem } from '@/utils/radius'
@@ -780,6 +814,16 @@ function getRepoName(url: string): string {
 
 // 组件挂载时初始化
 void initGitHubHash()
+
+/**
+ * 导出/导入两个按钮外观完全一致，抽出来免得日后改一处漏一处。
+ * 琥珀色的 border/bg 会整条盖掉 outline 变体自带的 border-border bg-background，
+ * 剩下的只有一个无害的 shadow-xs。
+ */
+const HISTORY_ACTION_CLASS =
+  'h-auto flex-1 rounded-xl border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-600 '
+  + 'hover:bg-amber-100 active:scale-[0.98] '
+  + 'dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-950/60'
 
 // 导入导出状态
 const importStatus = ref<'idle' | 'success' | 'error'>('idle')

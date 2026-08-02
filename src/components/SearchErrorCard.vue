@@ -62,12 +62,17 @@
             </div>
           </div>
 
-          <button
-            class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-red-400 transition-all hover:scale-110 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-300"
+          <!-- 原先既无 title 也无 aria-label，纯图标按钮对屏幕阅读器完全无名 -->
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="关闭错误提示"
+            class="rounded-lg text-red-400 hover:scale-110 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-300"
             @click="emit('close')"
           >
-            <X :size="18" />
-          </button>
+            <X :size="16" />
+          </Button>
         </div>
 
         <!-- 建议操作 -->
@@ -75,21 +80,33 @@
           class="mt-4 flex flex-wrap items-center gap-2 border-t border-red-200/30 pt-3 dark:border-red-800/30"
         >
           <span class="text-xs font-medium text-red-500/80 dark:text-red-400/80">快速操作：</span>
+          <!--
+            保留原生 <button>：背景是渐变。tailwind-merge 消不掉 Button 的
+            hover:bg-primary/90（background-image 与 background-color 是两个属性），
+            换 Button 得额外写 hover:bg-transparent hover:text-white 等 6 个覆盖类
+            才压得住，为一个焦点圈不划算。焦点圈这里手写补上。
+          -->
           <button
             v-ripple="'rgba(239, 68, 68, 0.3)'"
-            class="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-red-500/20 transition-all hover:from-red-600 hover:to-rose-600 hover:shadow-lg hover:shadow-red-500/30 disabled:opacity-50"
+            type="button"
+            class="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-red-500/20 transition-all outline-none hover:from-red-600 hover:to-rose-600 hover:shadow-lg hover:shadow-red-500/30 focus-visible:ring-3 focus-visible:ring-red-500/50 disabled:opacity-50"
             :disabled="retryDisabled"
             @click="emit('retry')"
           >
             <RefreshCw :size="12" :class="{ 'animate-spin': retryDisabled }" />
             <span>{{ retryDisabled ? '请稍候...' : '重新搜索' }}</span>
           </button>
-          <button
-            class="rounded-lg border border-red-200/50 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-800/30 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+          <!-- hover:text-* 是压 outline 自带的 hover:text-accent-foreground（品牌粉），
+               不然红色错误卡上的按钮一 hover 就变粉 -->
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            class="h-auto rounded-lg border-red-200/50 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 hover:text-red-600 dark:border-red-800/30 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 dark:hover:text-red-400"
             @click="emit('close')"
           >
             关闭提示
-          </button>
+          </Button>
           <a
             href="https://status.searchgal.top"
             target="_blank"
@@ -112,6 +129,7 @@ import { AlertCircle, Clock, RefreshCw, Server, Wifi, WifiOff, X } from '@lucide
 import { describeSearchError, type SearchErrorKind } from '@/utils/searchError'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 const props = defineProps<{
   error: string

@@ -39,14 +39,21 @@
         <div class="flex items-center gap-1">
           <AlertDialog v-model:open="confirmClearOpen">
             <AlertDialogTrigger v-if="history.length > 0" as-child>
-              <button
+              <!-- Trash2 要显式写 size-3.5(14px)：基类的 [&_svg:not([class*='size-'])]:size-4
+                   是 CSS，会赢过 lucide 的 width/height 属性，否则被撑到 16px。
+                   原先只有 title，title 不是可靠的可访问名，补 aria-label -->
+              <Button
                 v-ripple="'rgba(239, 68, 68, 0.3)'"
-                class="flex h-7 w-7 items-center justify-center rounded-full text-red-400 transition-all hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label="清空搜索历史"
                 title="清空历史"
+                class="size-7 rounded-full text-red-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
                 @click="playCaution()"
               >
-                <Trash2 :size="14" />
-              </button>
+                <Trash2 class="size-3.5" />
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent class="glassmorphism-card">
               <AlertDialogHeader>
@@ -69,12 +76,17 @@
             </AlertDialogContent>
           </AlertDialog>
 
-          <button
-            class="flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-slate-700 dark:hover:text-gray-300"
+          <!-- 原先既无 title 也无 aria-label，纯图标按钮对屏幕阅读器完全无名 -->
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="关闭搜索历史"
+            class="size-7 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-slate-700 dark:hover:text-gray-300"
             @click="open = false"
           >
             <X :size="16" />
-          </button>
+          </Button>
         </div>
       </DialogHeader>
 
@@ -156,14 +168,22 @@
                   {{ item.resultCount }}
                 </span>
 
-                <!-- 删除按钮 -->
-                <button
+                <!--
+                  icon-xs 正好是 size-6 且强制 svg size-3(12px)，与原尺寸一致。
+                  颜色从 <X> 挪到按钮上：基类有 [&_svg]:pointer-events-none，
+                  挂在 svg 上的 hover:text-red-500 永远不会触发。
+                  focus-visible:opacity-100 让键盘用户能看见这颗默认透明的按钮。
+                -->
+                <Button
                   type="button"
-                  class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md opacity-0 transition-all group-hover:opacity-100 hover:bg-red-100 dark:hover:bg-red-900/30"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="删除这条历史"
+                  class="shrink-0 rounded-md text-gray-400 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-500"
                   @click.stop="handleRemoveItem(index)"
                 >
-                  <X :size="12" class="text-gray-400 hover:text-red-500" />
-                </button>
+                  <X />
+                </Button>
               </div>
             </TransitionGroup>
           </div>
@@ -205,6 +225,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 const uiStore = useUIStore()
 const historyStore = useHistoryStore()
