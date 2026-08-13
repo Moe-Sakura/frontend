@@ -263,6 +263,35 @@ svg 的 width/height **属性**，而 `buttonVariants` 基类里的
 <Button size="icon"><ChevronLeft :size="24" class="size-6" /></Button>
 ```
 
+### 层级刻度
+
+全局层叠用 `src/styles/tailwind.css` 里的刻度，不要再写裸数字：
+
+| 工具类 | 值 | 用途 |
+|--------|----|----|
+| `z-background` | -2 | Ken Burns 背景图层 |
+| `z-backdrop` | 1 | 背景之上的可读性遮罩 |
+| `z-floating` | 40 | 顶部工具栏、FAB、统计角标（互不重叠） |
+| `z-modal` | 50 | 模态遮罩与内容 |
+| `z-lightbox` | 60 | 图片灯箱（从面板里打开，须压在面板之上） |
+| `z-toast` | 70 | 全局提示 |
+| `z-progress` | 80 | 顶部加载进度条 |
+
+两条边界：
+
+**只管全局层叠。** 组件内部的层级（搜索框里的图标与进度填充、灯箱里的按钮、
+ToggleGroupItem 的 focus 提升）各自处在自己的层叠上下文中，继续用 `z-10` /
+`z-20` 这类小数字是对的，纳入刻度反而误导。
+
+**`z-modal` 的 50 不能改。** 它是 shadcn 生成组件写死的值（`DialogOverlay` /
+`DialogContent` / `PopoverContent` / `TooltipContent` 基类里都是 `z-50`，
+位于 vendored 的 `components/ui/` 下，每次 `shadcn-vue add` 都会被重写）。
+刻度里保留这一档是为了让其余档位有明确的参照，改只能改别的档。
+
+> 为什么要这套：迁移到 shadcn 后 TopToolbar 与所有 Dialog/Popover/Tooltip
+> 全挤在 z-50，压盖关系纯靠 portal 挂载先后决定。「作品介绍面板里点截图，
+> 灯箱出现在面板下面」就是这么来的。
+
 ### 液态玻璃效果
 
 样式定义在 `src/styles/glassmorphism.css`，直接加单个类即可，无需嵌套结构：

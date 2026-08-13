@@ -5,7 +5,7 @@
     而 App.vue 不在本次改动范围内；将来 App.vue 有了全局 Provider 就能删掉这一层。
   -->
   <TooltipProvider :delay-duration="400">
-    <div class="fixed top-4 left-4 z-40">
+    <div class="fixed top-4 left-4 z-floating">
       <Tooltip>
         <TooltipTrigger as-child>
           <a
@@ -42,7 +42,7 @@
 
   <!-- 左下角统计（Vue 控制显示） -->
   <div
-    class="fixed bottom-4 left-4 z-40 transition-all duration-300"
+    class="fixed bottom-4 left-4 z-floating transition-all duration-300"
     :class="showStats ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'"
   >
     <div class="stats-card glassmorphism-card rounded-2xl shadow-lg px-4 py-3 flex flex-col gap-2">

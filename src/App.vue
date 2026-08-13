@@ -12,7 +12,7 @@
     <!-- 背景层容器 - GPU 加速 -->
     <div
       id="background-container" 
-      class="fixed inset-0 z-[-2] overflow-hidden gpu-layer"
+      class="fixed inset-0 z-background overflow-hidden gpu-layer"
     >
       <!-- 默认背景纹理（无图片时显示） -->
       <div
@@ -29,7 +29,7 @@
       />
       
       <!-- 半透明遮罩层（提升内容可读性） -->
-      <div class="absolute inset-0 bg-white/15 dark:bg-slate-900/30 z-[1]" />
+      <div class="absolute inset-0 bg-white/15 dark:bg-slate-900/30 z-backdrop" />
     </div>
 
     <main class="flex-1 flex flex-col min-h-screen">

@@ -170,13 +170,14 @@ onUnmounted(() => {
       一样浮在黑幕上。原设计背后只有照片背景，5% 看不出来，套进 Dialog 之后
       就露馅了。
 
-      z-[60] 而不是继承基类的 z-50 —— 项目里所有 Dialog / Popover / Tooltip
+      z-lightbox 而不是继承基类的 z-50 —— 项目里所有 Dialog / Popover / Tooltip
       的内容与遮罩全是 z-50，同层级时纯靠挂载先后决定压盖。灯箱在语义上就是
-      「压在所有面板之上」的东西，把它显式抬到 60，就不必赌 portal 的挂载顺序。
+      「压在所有面板之上」的东西，显式抬高就不必赌 portal 的挂载顺序。
+      刻度定义见 styles/tailwind.css 的「层级刻度」一节。
     -->
     <DialogContent
       :show-close-button="false"
-      class="inset-0 z-[60] flex max-w-none translate-x-0 translate-y-0 cursor-pointer items-center justify-center gap-0 rounded-none border-0 bg-black p-0 shadow-none select-none sm:max-w-none"
+      class="inset-0 z-lightbox flex max-w-none translate-x-0 translate-y-0 cursor-pointer items-center justify-center gap-0 rounded-none border-0 bg-black p-0 shadow-none select-none sm:max-w-none"
       @click="open = false"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"

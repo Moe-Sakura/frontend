@@ -5,7 +5,7 @@
     嵌套 Provider 只是内层覆盖外层的延迟配置，没有副作用。
   -->
   <TooltipProvider :delay-duration="400">
-    <div class="top-toolbar fixed top-4 right-4 z-50 flex items-center gap-2 sm:gap-3">
+    <div class="top-toolbar fixed top-4 right-4 z-floating flex items-center gap-2 sm:gap-3">
       <!-- 保存背景图按钮 -->
       <Tooltip>
         <TooltipTrigger as-child>
