@@ -1,6 +1,6 @@
 <template>
   <!-- 浮动按钮组 -->
-  <div class="floating-buttons fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col gap-2 sm:gap-3 z-40">
+  <div class="floating-buttons fixed bottom-4 sm:bottom-6 right-4 sm:right-6 flex flex-col gap-2 sm:gap-3 z-floating">
     <!-- 回到顶部按钮 - 显示滚动进度 -->
     <button
       v-show="showScrollToTop"

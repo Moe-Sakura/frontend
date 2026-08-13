@@ -50,7 +50,7 @@ function createElements() {
         top: 0;
         left: 0;
         right: 0;
-        z-index: 9999;
+        z-index: var(--z-progress, 80);
       }
       
       #progress-bar .progress-bar {
@@ -86,7 +86,7 @@ function createElements() {
         position: fixed;
         top: 16px;
         right: 16px;
-        z-index: 9999;
+        z-index: var(--z-progress, 80);
       }
       
       #progress-bar .spinner-icon {

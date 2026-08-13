@@ -19,7 +19,7 @@
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-3 rounded-2xl bg-gradient-to-r from-theme-primary to-theme-accent text-white shadow-xl shadow-theme-primary/30 flex items-center gap-3 max-w-[90vw] sm:max-w-md"
+      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-toast px-4 py-3 rounded-2xl bg-gradient-to-r from-theme-primary to-theme-accent text-white shadow-xl shadow-theme-primary/30 flex items-center gap-3 max-w-[90vw] sm:max-w-md"
     >
       <!-- 图标：Tailwind v4 已移除 flex-shrink-* 别名，这里必须写 shrink-0 才真的不被压扁 -->
       <div class="shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
