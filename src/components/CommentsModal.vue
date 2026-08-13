@@ -1,5 +1,19 @@
 <template>
-  <Dialog v-model:open="open">
+  <!--
+    modal={false} 是必须的，不是偷懒。
+
+    Artalk 用 document.body.appendChild 把自己的浮层容器 .atk-layer-wrap
+    （登录框、通知、图片查看器都在里面）挂在 body 上，也就是**这个 Dialog 的
+    DOM 子树之外**。而 Reka 的模态 Dialog 会给 body 加 pointer-events: none、
+    给外部兄弟节点加 aria-hidden、并装一个会把焦点拽回来的 focus trap ——
+    三条叠加的结果是评论登录框点不到、输不了字、屏幕阅读器也读不到。
+
+    迁移前这里是普通的 Teleport div，没有任何拦截，所以是这次迁移引入的回归。
+    托管会往 body 挂浮层的第三方组件，与捕获式模态框本质上不兼容。
+
+    代价是丢掉 Reka 自带的滚动锁定，下面用一个 watch 自己补上。
+  -->
+  <Dialog v-model:open="open" :modal="false">
     <DialogContent
       :show-close-button="false"
       class="comments-modal inset-0 flex translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 p-0 shadow-2xl shadow-black/20
@@ -116,6 +130,36 @@ const open = computed({
     if (value) { playTransitionUp() } else { playTransitionDown() }
     uiStore.isCommentsModalOpen = value
   },
+})
+
+/**
+ * 自己做滚动锁定 —— 上面用了 modal={false}，Reka 的 useBodyScrollLock 不会生效。
+ *
+ * 记录进入前的 overflow 再还原，而不是无脑写 ''：这个面板可能在别的 Dialog
+ * （已经锁了滚动）之上打开，直接清空会把外层的锁一起解掉。
+ * 监听 store 而不是塞进上面的 setter：打开入口在 FloatingButtons 与快捷键里，
+ * 它们直接改 store、不走 setter（搜索历史面板就栽在这上面过）。
+ */
+let previousBodyOverflow: string | null = null
+
+watch(() => uiStore.isCommentsModalOpen, (isOpen) => {
+  if (isOpen) {
+    if (previousBodyOverflow === null) {
+      previousBodyOverflow = document.body.style.overflow
+    }
+    document.body.style.overflow = 'hidden'
+  } else if (previousBodyOverflow !== null) {
+    document.body.style.overflow = previousBodyOverflow
+    previousBodyOverflow = null
+  }
+})
+
+onUnmounted(() => {
+  // 组件被卸载时（异步组件可能被回收）别把锁留在 body 上
+  if (previousBodyOverflow !== null) {
+    document.body.style.overflow = previousBodyOverflow
+    previousBodyOverflow = null
+  }
 })
 
 // 检查并滚动到指定评论
