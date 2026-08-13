@@ -160,12 +160,23 @@ onUnmounted(() => {
   <Dialog v-model:open="open">
     <!--
       灯箱要的是「整块黑幕就是内容」的观感，所以直接把 DialogContent 铺满全屏、
-      涂上 bg-black/95，Reka 自带的 overlay 藏在它底下。点击关闭也就落在这一层，
+      涂上纯黑，Reka 自带的 overlay 藏在它底下。点击关闭也就落在这一层，
       不再依赖 pointerDownOutside（全屏内容压根没有 outside）。
+
+      两处刻意的取值：
+
+      bg-black 而不是原来的 bg-black/95 —— 灯箱只从 VndbPanel 里打开，而那个
+      面板是 rgba(255,255,255,.85) 的白底，5% 的透光会让面板的矩形轮廓像鬼影
+      一样浮在黑幕上。原设计背后只有照片背景，5% 看不出来，套进 Dialog 之后
+      就露馅了。
+
+      z-[60] 而不是继承基类的 z-50 —— 项目里所有 Dialog / Popover / Tooltip
+      的内容与遮罩全是 z-50，同层级时纯靠挂载先后决定压盖。灯箱在语义上就是
+      「压在所有面板之上」的东西，把它显式抬到 60，就不必赌 portal 的挂载顺序。
     -->
     <DialogContent
       :show-close-button="false"
-      class="inset-0 flex max-w-none translate-x-0 translate-y-0 cursor-pointer items-center justify-center gap-0 rounded-none border-0 bg-black/95 p-0 shadow-none select-none sm:max-w-none"
+      class="inset-0 z-[60] flex max-w-none translate-x-0 translate-y-0 cursor-pointer items-center justify-center gap-0 rounded-none border-0 bg-black p-0 shadow-none select-none sm:max-w-none"
       @click="open = false"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
