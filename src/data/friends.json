@@ -107,6 +107,12 @@
       "desc": "免费分享 Galgame 资源，免登录自建直链下载",
       "url": "https://sakugal.com/",
       "logo": "https://sakugal.com/favicon.ico"
+    },
+    {
+      "name": "GALNAVI",
+      "desc": "ACG 二次元资源导航网站",
+      "url": "https://galnavi.top/",
+      "logo": "https://assets.galnavi.top/icon.png"
     }
   ]
 }
