@@ -218,6 +218,7 @@ onUnmounted(() => {
       </div>
 
       <!-- 图片 -->
+      <!-- biome-ignore lint/a11y/useKeyWithClickEvents: 图片本身没有操作，点击只阻止对话框关闭。 -->
       <img
         v-show="currentImage"
         :src="currentImage?.src"

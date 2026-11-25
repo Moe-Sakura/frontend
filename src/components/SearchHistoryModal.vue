@@ -122,6 +122,7 @@
               leave-to-class="opacity-0 scale-95"
               move-class="transition-all duration-200"
             >
+              <!-- biome-ignore lint/a11y/useSemanticElements: 历史行内有独立删除按钮，原生按钮会嵌套；外层已有 Enter 和 Space 操作。 -->
               <div
                 v-for="(item, index) in history"
                 :key="item.query + item.mode + index"
