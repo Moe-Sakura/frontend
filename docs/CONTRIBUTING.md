@@ -53,12 +53,12 @@
 
 5. **安装依赖**
    ```bash
-   pnpm install
+   bun install --frozen-lockfile
    ```
 
 6. **开发**
    ```bash
-   pnpm run dev
+   bun run dev
    ```
 
 7. **提交更改**

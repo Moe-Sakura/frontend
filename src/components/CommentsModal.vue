@@ -261,9 +261,9 @@ onUnmounted(() => {
 })
 </script>
 
-<style>
+<style scoped>
 /* 评论面板 - 半透明效果 */
-.comments-modal {
+:global(.comments-modal) {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
   border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
@@ -272,13 +272,13 @@ onUnmounted(() => {
 
 /* 移动端无底部边框 */
 @media (max-width: 767px) {
-  .comments-modal {
+  :global(.comments-modal) {
     border-bottom: none;
   }
 }
 
 /* 评论面板 - 暗色模式 */
-.dark .comments-modal {
+:global(.dark .comments-modal) {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
   border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -334,7 +334,7 @@ onUnmounted(() => {
 }
 
 /* 评论高亮动画 */
-.atk-comment-highlight {
+.comments-container :deep(.atk-comment-highlight) {
   animation: comment-highlight 2s ease-out;
 }
 

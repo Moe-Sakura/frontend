@@ -286,9 +286,9 @@ onMounted(() => {
 })
 </script>
 
-<style>
+<style scoped>
 /* 历史记录面板 - 右下角弹出 (亮色模式) */
-.history-modal {
+:global(.history-modal) {
   background: linear-gradient(
     180deg,
     rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85)) 0%,
@@ -299,13 +299,13 @@ onMounted(() => {
 }
 
 /* 历史记录面板 - 右下角弹出 (暗色模式) */
-.dark .history-modal {
+:global(.dark .history-modal) {
   background: linear-gradient(
     180deg,
     rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88)) 0%,
     rgba(30, 27, 17, var(--opacity-panel-dark-hover, 0.92)) 100%
-  ) !important;
-  border: var(--border-thin, 1px) solid rgba(var(--color-warning, 251, 191, 36), var(--opacity-border-dark, 0.2)) !important;
+  );
+  border: var(--border-thin, 1px) solid rgba(var(--color-warning, 251, 191, 36), var(--opacity-border-dark, 0.2));
 }
 
 /* 头部样式 */
@@ -314,7 +314,7 @@ onMounted(() => {
 }
 
 .dark .history-header {
-  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-header-dark, 0.7)) !important;
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-header-dark, 0.7));
 }
 
 /* 历史记录项 */
@@ -327,7 +327,7 @@ onMounted(() => {
 }
 
 .dark .history-item:hover {
-  background: rgba(251, 191, 36, 0.12) !important;
+  background: rgba(251, 191, 36, 0.12);
 }
 
 /* 自定义滚动条 */

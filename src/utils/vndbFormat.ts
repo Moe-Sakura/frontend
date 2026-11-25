@@ -14,7 +14,7 @@ export function formatDate(dateString: string): string {
   if (!dateString) {return '未知'}
   
   const date = new Date(dateString)
-  if (isNaN(date.getTime())) {return dateString}
+  if (Number.isNaN(date.getTime())) {return dateString}
   
   const year = date.getFullYear()
   const month = date.getMonth() + 1

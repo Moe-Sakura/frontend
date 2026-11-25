@@ -8,7 +8,7 @@
  *
  * 这里改为逐个组件补上显式颜色：效果等价，作用域只在 components/ui/ 内部。
  *
- * 每次 `pnpm dlx shadcn-vue@latest add <组件>` 之后跑一次：
+ * 每次 `bunx shadcn-vue@latest add <组件>` 之后跑一次：
  *   node scripts/patch-ui-borders.mjs
  *
  * 幂等：已经带了描边色的类串会被跳过。

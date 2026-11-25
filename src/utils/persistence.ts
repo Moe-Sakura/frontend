@@ -41,7 +41,7 @@ export function saveSearchState(state: Omit<SearchState, 'version' | 'timestamp'
     }
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave))
-  } catch (error) {
+  } catch {
     // localStorage 可能已满或被禁用，静默处理
   }
 }
@@ -70,7 +70,7 @@ export function loadSearchState(): SearchState | null {
     }
 
     return state
-  } catch (error) {
+  } catch {
     // 解析失败，清除无效数据
     localStorage.removeItem(STORAGE_KEY)
     return null
@@ -83,7 +83,7 @@ export function loadSearchState(): SearchState | null {
 export function clearSearchState(): void {
   try {
     localStorage.removeItem(STORAGE_KEY)
-  } catch (error) {
+  } catch {
     // 静默处理
   }
 }
@@ -106,7 +106,7 @@ export function saveSearchHistory(history: SearchHistory): void {
     historyList.unshift(history)
     
     localStorage.setItem(HISTORY_KEY, JSON.stringify(historyList))
-  } catch (error) {
+  } catch {
     // 静默处理
   }
 }
@@ -126,7 +126,7 @@ export function loadSearchHistory(): SearchHistory[] {
     const MAX_AGE = 30 * 24 * 60 * 60 * 1000
     const now = Date.now()
     return historyList.filter(item => now - item.timestamp < MAX_AGE)
-  } catch (error) {
+  } catch {
     return []
   }
 }
@@ -138,7 +138,7 @@ export function clearSearchHistory(): void {
   try {
     const HISTORY_KEY = 'searchgal_history'
     localStorage.removeItem(HISTORY_KEY)
-  } catch (error) {
+  } catch {
     // 静默处理
   }
 }
@@ -150,7 +150,7 @@ export function saveAllSearchHistory(historyList: SearchHistory[]): void {
   try {
     const HISTORY_KEY = 'searchgal_history'
     localStorage.setItem(HISTORY_KEY, JSON.stringify(historyList))
-  } catch (error) {
+  } catch {
     // 静默处理
   }
 }
@@ -161,10 +161,9 @@ export function saveAllSearchHistory(historyList: SearchHistory[]): void {
 export function getStorageInfo(): { used: number; total: number; percentage: number } {
   try {
     let used = 0
-    for (const key in localStorage) {
-      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
-        used += localStorage[key].length + key.length
-      }
+    for (const key of Object.keys(localStorage)) {
+      const value = localStorage.getItem(key)
+      if (value !== null) { used += value.length + key.length }
     }
     
     // 大多数浏览器 localStorage 限制为 5-10MB
@@ -172,7 +171,7 @@ export function getStorageInfo(): { used: number; total: number; percentage: num
     const percentage = (used / total) * 100
     
     return { used, total, percentage }
-  } catch (error) {
+  } catch {
     return { used: 0, total: 0, percentage: 0 }
   }
 }
