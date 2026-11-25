@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": ["src/**/*.{js,mjs,cjs,ts,tsx,vue}", "env.d.ts", "!src/components/ui"]
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "linter": {
+    "rules": {
+      "preset": "recommended"
+    }
+  },
+  "assist": {
+    "enabled": false
+  },
+  "html": {
+    "experimentalFullSupportEnabled": true
+  }
+}

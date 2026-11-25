@@ -21,7 +21,6 @@ export interface PersistOptions {
 
 // 扩展 Pinia 类型 - 使用 interface 合并
 declare module 'pinia' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface DefineStoreOptionsBase<S, Store> {
     persist?: boolean | PersistOptions
     undoRedo?: boolean
@@ -221,7 +220,6 @@ export function piniaPerformance(context: PiniaPluginContext) {
       if (!stats.actionDurations.has(name)) {
         stats.actionDurations.set(name, [])
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       stats.actionDurations.get(name)!.push(duration)
     })
   })

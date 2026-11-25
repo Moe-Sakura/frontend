@@ -347,6 +347,7 @@
               一层 bg-primary，还会跟这里 flex-col sm:flex-row 的两行布局打架。
             -->
             <div class="space-y-2" role="radiogroup" aria-label="聚搜 API 后端">
+              <!-- biome-ignore lint/a11y/useSemanticElements: 现有原生按钮提供键盘操作，单选状态由 aria-checked 表达。 -->
               <button
                 v-for="option in apiOptions"
                 :key="option.value"

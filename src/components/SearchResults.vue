@@ -170,7 +170,7 @@ function getUniqueTags(platformData: PlatformData) {
   const allTags = new Set<string>()
   platformData.items.forEach(item => {
     if (item.tags && item.tags.length > 0) {
-      item.tags.forEach(tag => allTags.add(tag))
+      item.tags.forEach(tag => { allTags.add(tag) })
     }
   })
   return Array.from(allTags)

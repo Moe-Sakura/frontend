@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-v-html -->
 <template>
   <Dialog v-model:open="open">
     <DialogContent
@@ -537,6 +536,7 @@
                 >TouchGal ↗</a>
               </div>
               <div class="relative rounded-lg overflow-hidden bg-black">
+                <!-- biome-ignore lint/a11y/useMediaCaption: TouchGal 只提供 PV 视频地址，未提供字幕轨道。 -->
                 <video
                   ref="pvVideoRef"
                   :src="pvVideoUrl"
@@ -841,7 +841,6 @@ function openGallery(startIndex: number) {
     searchStore.vndbInfo.screenshots.forEach((screenshot, index) => {
       images.push({
         src: screenshot,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         caption: `${searchStore.vndbInfo!.mainName} - 截图 ${index + 1}`,
       })
     })

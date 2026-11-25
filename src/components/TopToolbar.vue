@@ -202,7 +202,6 @@ async function shareSearch() {
     textarea.select()
     
     try {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
       document.execCommand('copy')
       showCopiedTip.value = true
       announce('分享链接已复制到剪贴板')
