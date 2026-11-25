@@ -43,7 +43,6 @@ export const vTextScroll = {
     
     // 检查溢出
     const checkOverflow = () => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const inner = el.querySelector('.text-scroll-inner')!
       if (!inner) { return }
       
@@ -88,7 +87,6 @@ export const vTextScroll = {
     // 检查内容是否变化
     requestAnimationFrame(() => {
       // 获取当前实际文本内容（排除克隆的内容）
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const inner = el.querySelector('.text-scroll-inner')!
       let currentContent: string
       

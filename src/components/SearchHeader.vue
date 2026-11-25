@@ -219,7 +219,7 @@
               >
                 <component :is="callout.icon" :size="14" class="text-white" />
               </div>
-              <!-- eslint-disable-next-line vue/no-v-html -- 文案是 config 里的编译期常量，无运行时输入 -->
+              <!-- 文案是 config 里的编译期常量，无运行时输入 -->
               <p class="text-sm" :class="callout.textClass" v-html="callout.html" />
             </div>
           </div>
@@ -237,7 +237,7 @@
                 class="flex-shrink-0 mt-0.5"
                 :class="tip.iconClass"
               />
-              <!-- eslint-disable-next-line vue/no-v-html -- 同上 -->
+              <!-- 同上 -->
               <p v-html="tip.html" />
             </div>
           </div>
@@ -256,7 +256,7 @@
               >
                 <component :is="callout.icon" :size="14" class="text-white" />
               </div>
-              <!-- eslint-disable-next-line vue/no-v-html -- 同上 -->
+              <!-- 同上 -->
               <p class="text-sm" :class="callout.textClass" v-html="callout.html" />
             </div>
           </div>

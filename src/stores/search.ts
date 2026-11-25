@@ -109,7 +109,7 @@ export const useSearchStore = defineStore('search', () => {
   function getPlatformTags(platform: PlatformData): string[] {
     const tags = new Set<string>()
     for (const item of platform.items) {
-      item.tags?.forEach(tag => tags.add(tag))
+      item.tags?.forEach(tag => { tags.add(tag) })
     }
     return Array.from(tags)
   }
@@ -118,7 +118,7 @@ export const useSearchStore = defineStore('search', () => {
   const availableTags = computed(() => {
     const tags = new Set<string>()
     for (const platform of platformResults.value.values()) {
-      getPlatformTags(platform).forEach(tag => tags.add(tag))
+      getPlatformTags(platform).forEach(tag => { tags.add(tag) })
     }
     return tags
   })

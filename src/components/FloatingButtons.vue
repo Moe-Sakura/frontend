@@ -260,7 +260,6 @@ function handleScrollToPlatform(platformName: string) {
 }
 
 function scrollToPlatform(platformName: string) {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const targetElement = document.querySelector(`[data-platform="${platformName}"]`)!
 
   if (targetElement) {
