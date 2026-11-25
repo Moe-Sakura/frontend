@@ -81,9 +81,9 @@ interface FieldDef {
 const fields: FieldDef[] = [
   { key: 'vndbApiBaseUrl', label: 'VNDB API 地址', type: 'url', placeholder: 'https://api.vndb.org/kana' },
   { key: 'vndbImageProxyUrl', label: 'VNDB 图片代理地址', type: 'url', placeholder: 'https://rp.searchgal.top/' },
-  { key: 'aiTranslateApiUrl', label: 'AI 翻译 API 地址', type: 'url', placeholder: 'https://ai.searchgal.top/v1/chat/completions' },
+  { key: 'aiTranslateApiUrl', label: 'AI 翻译 API 地址', type: 'url', placeholder: '留空使用站点 AI 翻译' },
   { key: 'aiTranslateApiKey', label: 'AI 翻译 API Key', type: 'password', placeholder: 'sk-...', mono: true },
-  { key: 'aiTranslateModel', label: 'AI 翻译模型', type: 'text', placeholder: 'Qwen/Qwen2.5-32B-Instruct' },
+  { key: 'aiTranslateModel', label: 'AI 翻译模型', type: 'text', placeholder: 'deepseek-flash' },
   { key: 'backgroundImageApiUrl', label: '背景图片 API 地址', type: 'url', placeholder: 'https://api.illlights.com/v1/img' },
   { key: 'videoParseApiUrl', label: '视频解析 API 地址', type: 'url', placeholder: 'https://vp.searchgal.top/' },
 ]
