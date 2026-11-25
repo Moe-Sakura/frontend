@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { debounce } from '@/composables/useDebounce'
+import { MANAGED_TRANSLATION_PATH } from '@/api/translationRequest'
 
 export interface UserSettings {
   customApi: string
@@ -28,9 +29,9 @@ export interface UserSettings {
 export const DEFAULT_API_CONFIG = {
   vndbApiBaseUrl: 'https://api.vndb.org/kana',
   vndbImageProxyUrl: 'https://rp.searchgal.top/',
-  aiTranslateApiUrl: 'https://ai.searchgal.top/v1/chat/completions',
-  aiTranslateApiKey: 'sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e',
-  aiTranslateModel: 'Qwen/Qwen2.5-32B-Instruct',
+  aiTranslateApiUrl: MANAGED_TRANSLATION_PATH,
+  aiTranslateApiKey: '',
+  aiTranslateModel: 'deepseek-flash',
   backgroundImageApiUrl: 'https://api.illlights.com/v1/img',
   videoParseApiUrl: 'https://vp.searchgal.top/',
 }
@@ -73,6 +74,12 @@ export const useSettingsStore = defineStore('settings', () => {
       const saved = localStorage.getItem('userSettings')
       if (saved) {
         const parsed = JSON.parse(saved)
+        if (parsed?.aiTranslateApiUrl === 'https://ai.searchgal.top/v1/chat/completions'
+          && parsed.aiTranslateModel === 'Qwen/Qwen2.5-32B-Instruct') {
+          delete parsed.aiTranslateApiUrl
+          delete parsed.aiTranslateApiKey
+          delete parsed.aiTranslateModel
+        }
         settings.value = { ...DEFAULT_SETTINGS, ...parsed }
       }
     } catch (error) {
