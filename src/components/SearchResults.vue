@@ -270,16 +270,16 @@ function getRecommendText(color: string) {
   content-visibility: auto;
   contain-intrinsic-size: auto 400px;
   
-  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-card, 0.8)) !important;
-  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15)) !important;
-  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.1)) !important;
+  background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-card, 0.8));
+  border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.1));
 }
 
 /* 暗色模式 */
 .dark .result-card {
-  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-dark, 0.8)) !important;
-  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2)) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-card-dark, 0.8));
+  border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 /* 结果项 - 简化动画，仅使用 transform */

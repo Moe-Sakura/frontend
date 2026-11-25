@@ -260,7 +260,7 @@ function handleScrollToPlatform(platformName: string) {
 }
 
 function scrollToPlatform(platformName: string) {
-  const targetElement = document.querySelector(`[data-platform="${platformName}"]`)!
+  const targetElement = document.querySelector(`[data-platform="${platformName}"]`)
 
   if (targetElement) {
     // 先瞬间滚动到目标位置附近，触发途中的 LazyRender 渲染
@@ -299,7 +299,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style>
+<style scoped>
 .fab-button {
   width: 44px;
   height: 44px;
@@ -356,6 +356,11 @@ onUnmounted(() => {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+.fab-button:active {
+  transform: translate3d(0, -2px, 0) scale(1.02);
+}
+
+
 .dark .fab-button:hover {
   box-shadow: 
     0 16px 48px rgba(var(--brand-primary-light), 0.4),
@@ -363,11 +368,6 @@ onUnmounted(() => {
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.25);
 }
-
-.fab-button:active {
-  transform: translate3d(0, -2px, 0) scale(1.02);
-}
-
 /* 各按钮特定颜色 - 艳粉主题 */
 .scroll-top-btn {
   background: linear-gradient(135deg, rgb(236, 72, 153), rgb(219, 39, 119));
@@ -449,7 +449,7 @@ onUnmounted(() => {
    ============================================ */
 
 /* 站点导航面板 - 液态玻璃效果 */
-.nav-panel {
+:global(.nav-panel) {
   /* 定位交给 Popover（floating-ui），这里只管观感 */
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
@@ -458,7 +458,7 @@ onUnmounted(() => {
 }
 
 /* 站点导航面板 - 暗色模式 */
-.dark .nav-panel {
+:global(.dark .nav-panel) {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
   border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);

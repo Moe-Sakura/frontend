@@ -515,11 +515,6 @@ defineExpose({
   transition: opacity 0.3s ease;
 }
 
-.search-input-wrapper:hover .search-box::after,
-.search-input-wrapper:focus-within .search-box::after {
-  opacity: 1;
-}
-
 .dark .search-box::after {
   background: linear-gradient(
     135deg,
@@ -530,6 +525,11 @@ defineExpose({
   opacity: 0.4;
 }
 
+
+.search-input-wrapper:hover .search-box::after,
+.search-input-wrapper:focus-within .search-box::after {
+  opacity: 1;
+}
 .dark .search-input-wrapper:hover .search-box::after,
 .dark .search-input-wrapper:focus-within .search-box::after {
   opacity: 0.7;
@@ -557,9 +557,9 @@ defineExpose({
 
 /* 搜索中输入框透明背景，好让底下的进度填充层透出来 */
 .search-input-wrapper.is-searching .glassmorphism-input {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 /* 上面把输入框打成全透明后，这层补回不透明底色，否则会直接露出背景图 */

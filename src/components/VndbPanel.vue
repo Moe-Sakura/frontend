@@ -822,26 +822,27 @@ function handleImageError(event: Event) {
 
 // 打开图片画廊
 function openGallery(startIndex: number) {
-  if (!searchStore.vndbInfo) {
+  const info = searchStore.vndbInfo
+  if (!info) {
     return
   }
   
   const images = []
   
   // 添加封面
-  if (searchStore.vndbInfo.mainImageUrl) {
+  if (info.mainImageUrl) {
     images.push({
-      src: searchStore.vndbInfo.mainImageUrl,
-      caption: `${searchStore.vndbInfo.mainName} - 游戏封面`,
+      src: info.mainImageUrl,
+      caption: `${info.mainName} - 游戏封面`,
     })
   }
   
   // 添加截图
-  if (searchStore.vndbInfo.screenshots) {
-    searchStore.vndbInfo.screenshots.forEach((screenshot, index) => {
+  if (info.screenshots) {
+    info.screenshots.forEach((screenshot, index) => {
       images.push({
         src: screenshot,
-        caption: `${searchStore.vndbInfo!.mainName} - 截图 ${index + 1}`,
+        caption: `${info.mainName} - 截图 ${index + 1}`,
       })
     })
   }
@@ -865,9 +866,9 @@ const renderedDescription = computed(() => {
 })
 </script>
 
-<style>
+<style scoped>
 /* VNDB 面板 - 半透明效果 */
-.vndb-page {
+:global(.vndb-page) {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
   border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
@@ -876,13 +877,13 @@ const renderedDescription = computed(() => {
 
 /* 移动端无底部边框 */
 @media (max-width: 767px) {
-  .vndb-page {
+  :global(.vndb-page) {
     border-bottom: none;
   }
 }
 
 /* VNDB 面板 - 暗色模式 */
-.dark .vndb-page {
+:global(.dark .vndb-page) {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
   border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);

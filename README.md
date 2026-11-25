@@ -47,8 +47,8 @@
 ## 📦 安装
 
 ### 前置要求
-- Node.js 18+
-- pnpm 8+ (推荐) 或 npm
+- Node.js 26
+- Bun 1.4
 
 ### 克隆项目
 ```bash
@@ -67,24 +67,31 @@ cp .env.example .env
 
 ### 安装依赖
 ```bash
-pnpm install
+bun install --frozen-lockfile
 ```
 
 ## 🚀 开发
 
 ### 启动开发服务器
 ```bash
-pnpm dev
+bun run dev
 ```
 
 ### 构建生产版本
 ```bash
-pnpm build
+bun run build
 ```
 
 ### 预览生产构建
 ```bash
-pnpm preview
+bun run preview
+```
+
+### 检查与测试
+
+```bash
+bun run check  # Vue 类型检查和 Biome
+bun run test   # Vitest
 ```
 
 ## 📁 项目结构
@@ -206,7 +213,7 @@ netlify deploy --prod
 ### Cloudflare Pages
 ```bash
 # 构建
-pnpm run build
+bun run build
 
 # 上传 dist 目录到 Cloudflare Pages
 ```

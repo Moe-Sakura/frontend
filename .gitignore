@@ -4,7 +4,6 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
@@ -24,8 +23,7 @@ dist-ssr
 *.sw?
 
 .history
-.pnpm-store
-.pnpm-lock.yaml
+*.tsbuildinfo
 
 # 环境变量文件
 .env

@@ -193,7 +193,7 @@ async function shareSearch() {
     setTimeout(() => {
       showCopiedTip.value = false
     }, 2000)
-  } catch (error) {
+  } catch {
     const textarea = document.createElement('textarea')
     textarea.value = shareURL
     textarea.style.position = 'fixed'
@@ -209,7 +209,7 @@ async function shareSearch() {
       setTimeout(() => {
         showCopiedTip.value = false
       }, 2000)
-    } catch (err) {
+    } catch {
       // 两条复制路径都失败时视觉上没有任何变化，至少让屏幕阅读器知道操作没成功
       announce('复制失败，请手动复制地址栏链接')
     }
@@ -415,49 +415,30 @@ async function saveBackgroundImage() {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-.dark .toolbar-button:hover {
+.toolbar-button:active {
+  transform: translate3d(0, 0, 0) scale(0.95);
+}
+
+
+/* 保存或复制完成时保留渐变，包括按钮仍处于深色悬停态时。 */
+.toolbar-button:is(.save-success, .share-copied) {
+  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark)));
+  color: white;
+  border-color: rgba(var(--brand-primary), 0.5);
+  box-shadow:
+    0 8px 20px rgba(var(--brand-primary), 0.4),
+    0 0 30px rgba(var(--brand-primary), 0.3);
+}
+
+.dark .toolbar-button:not(:where(.save-success, .share-copied)):hover {
   box-shadow:
     0 16px 40px rgba(var(--brand-primary-light, 255, 105, 180), 0.35),
     0 8px 20px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.2);
 }
-
-.toolbar-button:active {
-  transform: translate3d(0, 0, 0) scale(0.95);
-}
-
 /* GitHub 按钮特殊样式 */
 .github-button {
   text-decoration: none;
 }
-
-/* 保存成功状态 - 主题色渐变 */
-.save-success {
-  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark))) !important;
-  color: white !important;
-  border-color: rgba(var(--brand-primary), 0.5) !important;
-  box-shadow: 
-    0 8px 20px rgba(var(--brand-primary), 0.4),
-    0 0 30px rgba(var(--brand-primary), 0.3) !important;
-}
-
-.save-success i {
-  color: white !important;
-}
-
-/* 分享已复制状态 - 主题色渐变 */
-.share-copied {
-  background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-primary-dark))) !important;
-  color: white !important;
-  border-color: rgba(var(--brand-primary), 0.5) !important;
-  box-shadow: 
-    0 8px 20px rgba(var(--brand-primary), 0.4),
-    0 0 30px rgba(var(--brand-primary), 0.3) !important;
-}
-
-.share-copied i {
-  color: white !important;
-}
 </style>
-

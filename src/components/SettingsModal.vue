@@ -486,6 +486,7 @@
                   v-model="localCustomCSS"
                   :highlight="highlightCSS"
                   :line-numbers="true"
+                  :auto-style-line-numbers="false"
                   class="code-editor"
                   @input="handleTyping"
                 />
@@ -495,6 +496,7 @@
                   v-model="localCustomJS"
                   :highlight="highlightJS"
                   :line-numbers="true"
+                  :auto-style-line-numbers="false"
                   class="code-editor"
                   @input="handleTyping"
                 />
@@ -504,6 +506,7 @@
                   v-model="localCustomHTML"
                   :highlight="highlightHTML"
                   :line-numbers="true"
+                  :auto-style-line-numbers="false"
                   class="code-editor"
                   @input="handleTyping"
                 />
@@ -1208,9 +1211,9 @@ function onAdvancedApiReset() {
 }
 </script>
 
-<style>
+<style scoped>
 /* 设置面板 - 半透明效果 */
-.settings-page {
+:global(.settings-page) {
   background: rgba(var(--color-bg-light, 255, 255, 255), var(--opacity-panel, 0.85));
   will-change: transform;
   border: var(--border-thin, 1px) solid rgba(var(--brand-primary, 255, 20, 147), var(--opacity-border, 0.15));
@@ -1219,13 +1222,13 @@ function onAdvancedApiReset() {
 
 /* 移动端无底部边框 */
 @media (max-width: 767px) {
-  .settings-page {
+  :global(.settings-page) {
     border-bottom: none;
   }
 }
 
 /* 设置面板 - 暗色模式 */
-.dark .settings-page {
+:global(.dark .settings-page) {
   background: rgba(var(--color-bg-dark, 30, 41, 59), var(--opacity-panel-dark, 0.88));
   border-color: rgba(var(--brand-primary-light, 255, 105, 180), var(--opacity-border-dark, 0.2));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -1401,124 +1404,124 @@ function onAdvancedApiReset() {
 }
 
 /* IDE 风格代码编辑器 */
-.code-editor {
-  font-family: Consolas, "Monaco", "JetBrains Mono", "Fira Code", monospace !important;
-  font-size: 13px !important;
-  line-height: 1.5 !important;
-  min-height: 240px !important;
-  max-height: 360px !important;
-  background: #1e1e1e !important;
-  color: #d4d4d4 !important;
-  caret-color: #aeafad !important;
-  tab-size: 2 !important;
+.settings-page .code-editor {
+  font-family: Consolas, "Monaco", "JetBrains Mono", "Fira Code", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 240px;
+  max-height: 360px;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  caret-color: #aeafad;
+  tab-size: 2;
   /* 外层容器只处理垂直滚动 */
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* 禁止代码换行 */
-.code-editor .prism-editor__textarea,
-.code-editor .prism-editor__editor,
-.code-editor pre,
-.code-editor code {
-  white-space: pre !important;
-  word-wrap: normal !important;
-  overflow-wrap: normal !important;
+.settings-page .code-editor :deep(.prism-editor__textarea),
+.settings-page .code-editor :deep(.prism-editor__editor),
+.settings-page .code-editor :deep(pre),
+.settings-page .code-editor :deep(code) {
+  white-space: pre;
+  word-wrap: normal;
+  overflow-wrap: normal;
 }
 
 /* 让编辑器填满整个区域，点击空白处也能聚焦 */
-.code-editor .prism-editor__container {
-  min-height: 220px !important;
+.settings-page .code-editor :deep(.prism-editor__container) {
+  min-height: 220px;
   /* 容器启用水平滚动 */
-  overflow-x: auto !important;
-  overflow-y: visible !important;
+  overflow-x: auto;
+  overflow-y: visible;
 }
 
-.code-editor .prism-editor__textarea,
-.code-editor .prism-editor__editor {
-  min-height: 220px !important;
-  outline: none !important;
+.settings-page .code-editor :deep(.prism-editor__textarea),
+.settings-page .code-editor :deep(.prism-editor__editor) {
+  min-height: 220px;
+  outline: none;
   /* 编辑区域内容不换行 */
-  min-width: max-content !important;
+  min-width: max-content;
 }
 
-.code-editor .prism-editor__textarea:focus {
-  outline: none !important;
+.settings-page .code-editor :deep(.prism-editor__textarea:focus) {
+  outline: none;
 }
 
-/* 行号样式 - VS Code 风格 */
-.code-editor .prism-editor__line-numbers {
-  padding: 0 1rem 0 0.5rem !important;
-  background: #1e1e1e !important;
-  color: #858585 !important;
-  user-select: none !important;
-  text-align: right !important;
-  min-width: 2.5rem !important;
-  border-right: none !important;
-  margin-right: 0 !important;
+/* 行号由组件样式管理，避免 Prism 把预览的透明背景复制给行号。 */
+.settings-page .code-editor :deep(.prism-editor__line-numbers) {
+  padding: 0 1rem 0 0.5rem;
+  background: #1e1e1e;
+  color: #858585;
+  user-select: none;
+  text-align: right;
+  min-width: 2.5rem;
+  border-right: none;
+  margin-right: 0;
 }
 
 /* 当前行高亮 */
-.code-editor .prism-editor__line-number {
+.settings-page .code-editor :deep(.prism-editor__line-number) {
   transition: color 0.1s;
 }
 
 /* VS Code Dark+ 主题色 */
-.code-editor .token.selector {
-  color: #d7ba7d !important;
+.settings-page .code-editor :deep(.token.selector) {
+  color: #d7ba7d;
 }
 
-.code-editor .token.property {
-  color: #9cdcfe !important;
+.settings-page .code-editor :deep(.token.property) {
+  color: #9cdcfe;
 }
 
-.code-editor .token.punctuation {
-  color: #d4d4d4 !important;
+.settings-page .code-editor :deep(.token.punctuation) {
+  color: #d4d4d4;
 }
 
-.code-editor .token.string {
-  color: #ce9178 !important;
+.settings-page .code-editor :deep(.token.string) {
+  color: #ce9178;
 }
 
-.code-editor .token.number,
-.code-editor .token.unit {
-  color: #b5cea8 !important;
+.settings-page .code-editor :deep(.token.number),
+.settings-page .code-editor :deep(.token.unit) {
+  color: #b5cea8;
 }
 
-.code-editor .token.function {
-  color: #dcdcaa !important;
+.settings-page .code-editor :deep(.token.function) {
+  color: #dcdcaa;
 }
 
-.code-editor .token.comment {
-  color: #6a9955 !important;
+.settings-page .code-editor :deep(.token.comment) {
+  color: #6a9955;
   font-style: italic;
 }
 
-.code-editor .token.atrule,
-.code-editor .token.keyword {
-  color: #c586c0 !important;
+.settings-page .code-editor :deep(.token.atrule),
+.settings-page .code-editor :deep(.token.keyword) {
+  color: #c586c0;
 }
 
-.code-editor .token.important {
-  color: #569cd6 !important;
+.settings-page .code-editor :deep(.token.important) {
+  color: #569cd6;
 }
 
-.code-editor .token.tag {
-  color: #569cd6 !important;
+.settings-page .code-editor :deep(.token.tag) {
+  color: #569cd6;
 }
 
-.code-editor .token.attr-name {
-  color: #9cdcfe !important;
+.settings-page .code-editor :deep(.token.attr-name) {
+  color: #9cdcfe;
 }
 
-.code-editor .token.attr-value {
-  color: #ce9178 !important;
+.settings-page .code-editor :deep(.token.attr-value) {
+  color: #ce9178;
 }
 
 /* 选中文本样式 - VS Code 风格 */
-.code-editor .prism-editor__textarea::selection,
-.code-editor .prism-editor__editor *::selection {
-  background-color: #264f78 !important;
+.settings-page .code-editor :deep(.prism-editor__textarea::selection),
+.settings-page .code-editor :deep(.prism-editor__editor *::selection) {
+  background-color: #264f78;
 }
 
 /* VS Code 风格滚动条 */

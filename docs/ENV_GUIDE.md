@@ -20,7 +20,7 @@ cp .env.example .env
 
 3. 启动开发服务器：
 ```bash
-pnpm dev
+bun run dev
 ```
 
 ## 配置项说明
@@ -194,7 +194,7 @@ VITE_ENABLE_DEBUG=true
 ### 环境变量没有生效
 
 1. 检查变量名是否以 `VITE_` 开头
-2. 重启开发服务器 (`pnpm dev`)
+2. 重启开发服务器 (`bun run dev`)
 3. 检查 `.env` 文件语法是否正确
 4. 使用 `console.log(config)` 查看加载的配置
 

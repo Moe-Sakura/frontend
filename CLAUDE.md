@@ -216,9 +216,9 @@ popover、separator、switch、tabs、toggle-group、tooltip。
 新增组件：
 
 ```bash
-pnpm dlx shadcn-vue@latest add <组件名>
+bunx shadcn-vue@latest add <组件名>
 node scripts/patch-ui-borders.mjs   # 必须，见下
-pnpm lint:fix
+bun run lint:fix
 ```
 
 跑完 CLI 后**必须 review `src/styles/tailwind.css` 的 diff**，它每次都会写回三样
