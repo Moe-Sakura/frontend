@@ -28,12 +28,24 @@ describe('站点翻译接口', () => {
     expect(await response.json()).toEqual({ translation: '你好' })
     const [url, config] = fetchMock.mock.calls[0] ?? []
     expect(url).toBe('https://api.choosec.cn/v1/chat/completions')
+    expect(config?.redirect).toBe('manual')
     expect(new Headers(config?.headers).get('Authorization')).toBe('Bearer test-secret')
     expect(JSON.parse(String(config?.body))).toMatchObject({
       model: 'deepseek-flash',
       messages: [{ role: 'system' }, { role: 'user', content: 'Hello' }],
       stream: false,
     })
+  })
+
+  it('拒绝上游跳转，密钥只用于固定的 ChooseC 地址', async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(Response.redirect('https://other.example/'))
+    vi.stubGlobal('fetch', fetchMock)
+    const response = await onRequest({
+      request: request({ mode: 'description', text: 'Hello' }),
+      env: { CHOOSEC_API_KEY: 'test-secret' },
+    })
+    expect(response.status).toBe(502)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
   it('拒绝跨站、未知模式和缺失密钥，且不发送上游请求', async () => {
