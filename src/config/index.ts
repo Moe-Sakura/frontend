@@ -100,8 +100,9 @@ function getEnv<T extends EnvValue>(key: string, defaultValue: T): T {
   }
   
   // 数字转换
-  if (!isNaN(Number(value)) && value !== '') {
-    return Number(value) as T
+  const numericValue = Number(value)
+  if (!Number.isNaN(numericValue)) {
+    return numericValue as T
   }
   
   return value as T

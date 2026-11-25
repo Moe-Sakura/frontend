@@ -217,10 +217,12 @@ export function piniaPerformance(context: PiniaPluginContext) {
       const duration = performance.now() - startTime
       
       // 记录执行时间
-      if (!stats.actionDurations.has(name)) {
-        stats.actionDurations.set(name, [])
+      const durations = stats.actionDurations.get(name)
+      if (durations) {
+        durations.push(duration)
+      } else {
+        stats.actionDurations.set(name, [duration])
       }
-      stats.actionDurations.get(name)!.push(duration)
     })
   })
   

@@ -48,8 +48,8 @@ declare module 'artalk/dist/Artalk.mjs' {
     getComments(): unknown[]
   }
 
-  class Artalk {
-    static init(config: ArtalkConfig): ArtalkInstance
+  const Artalk: {
+    init(config: ArtalkConfig): ArtalkInstance
   }
 
   export default Artalk
