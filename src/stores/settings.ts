@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { debounce } from '@/composables/useDebounce'
+import { MANAGED_TRANSLATION_PATH } from '@/api/translationRequest'
 
 export interface UserSettings {
   customApi: string
@@ -28,9 +29,9 @@ export interface UserSettings {
 export const DEFAULT_API_CONFIG = {
   vndbApiBaseUrl: 'https://api.vndb.org/kana',
   vndbImageProxyUrl: 'https://rp.searchgal.top/',
-  aiTranslateApiUrl: 'https://ai.searchgal.top/v1/chat/completions',
-  aiTranslateApiKey: 'sk-Md5kXePgq6HJjPa1Cf3265511bEe4e4c888232A0837e371e',
-  aiTranslateModel: 'Qwen/Qwen2.5-32B-Instruct',
+  aiTranslateApiUrl: MANAGED_TRANSLATION_PATH,
+  aiTranslateApiKey: '',
+  aiTranslateModel: 'deepseek-flash',
   backgroundImageApiUrl: 'https://api.illlights.com/v1/img',
   videoParseApiUrl: 'https://vp.searchgal.top/',
 }
@@ -67,6 +68,39 @@ export const useSettingsStore = defineStore('settings', () => {
   const historyIndex = ref(-1)
   const maxHistoryLength = 20
   
+  let translationSettingsReady = Promise.resolve()
+
+  const legacyKeyDigest = '1f6f2bea47ce4bb6a11906d892e915414a35457afe0f2a57a887092d2a7aeb47'
+
+  async function migrateLegacyTranslationSettings() {
+    const { aiTranslateApiUrl, aiTranslateApiKey, aiTranslateModel } = settings.value
+    if (aiTranslateApiUrl !== 'https://ai.searchgal.top/v1/chat/completions'
+      || aiTranslateModel !== 'Qwen/Qwen2.5-32B-Instruct'
+      || typeof aiTranslateApiKey !== 'string' || !globalThis.crypto?.subtle) return
+
+    const bytes = new TextEncoder().encode(aiTranslateApiKey)
+    const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes)
+    const fingerprint = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
+    if (fingerprint !== legacyKeyDigest) return
+
+    const migrated = {
+      aiTranslateApiUrl: DEFAULT_API_CONFIG.aiTranslateApiUrl,
+      aiTranslateApiKey: DEFAULT_API_CONFIG.aiTranslateApiKey,
+      aiTranslateModel: DEFAULT_API_CONFIG.aiTranslateModel,
+    }
+    for (const snapshot of [settings.value, ...settingsHistory.value]) {
+      if (snapshot.aiTranslateApiUrl === aiTranslateApiUrl
+        && snapshot.aiTranslateApiKey === aiTranslateApiKey
+        && snapshot.aiTranslateModel === aiTranslateModel) {
+        Object.assign(snapshot, migrated)
+      }
+    }
+  }
+
+  function waitForTranslationSettings() {
+    return translationSettingsReady
+  }
+
   // 从 localStorage 加载设置
   function loadSettings() {
     try {
@@ -83,6 +117,7 @@ export const useSettingsStore = defineStore('settings', () => {
     // 初始化历史记录
     settingsHistory.value = [{ ...settings.value }]
     historyIndex.value = 0
+    translationSettingsReady = migrateLegacyTranslationSettings().catch(() => {})
   }
   
   // 立即把当前设置写入 localStorage（用于 unload 等需要同步落盘的场景）
@@ -255,6 +290,7 @@ export const useSettingsStore = defineStore('settings', () => {
     
     // 方法
     loadSettings,
+    waitForTranslationSettings,
     saveSettings,
     updateSetting,
     updateSettings,

@@ -214,3 +214,7 @@ VITE_ENABLE_DEBUG=true
 - [Vite 环境变量文档](https://vitejs.dev/guide/env-and-mode.html)
 - [SearchGal 项目文档](./README.md)
 
+
+### 站点 AI 翻译
+
+Cloudflare Pages 的 `/api/translate` 使用 ChooseC 的 `deepseek-flash`。在 Pages 的 Variables and Secrets 中将 `CHOOSEC_API_KEY` 配置为加密 Secret。本地用 Wrangler Pages 预览时，在未跟踪的 `.dev.vars` 中配置同名密钥。纯静态托管可在高级 API 设置中填写自己的翻译服务地址、模型和密钥。
