@@ -42,7 +42,7 @@ export async function onRequest({ request, env }: TranslationContext): Promise<R
   try {
     const upstream = await fetch(UPSTREAM_URL, {
       method: 'POST',
-      redirect: 'error',
+      redirect: 'manual',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(buildTranslationRequest(input.mode, input.text, MODEL)),
       signal: AbortSignal.timeout(25_000),
