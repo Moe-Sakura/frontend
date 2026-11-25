@@ -14,6 +14,14 @@ export function getVndbApiBaseUrl(): string {
   }
 }
 
+export async function waitForTranslationSettings(): Promise<void> {
+  try {
+    await useSettingsStore().waitForTranslationSettings()
+  } catch {
+    // 未初始化 Pinia 时，翻译使用默认配置。
+  }
+}
+
 export function getAiTranslateApiUrl(): string {
   try {
     const settingsStore = useSettingsStore()

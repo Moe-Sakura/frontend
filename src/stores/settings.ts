@@ -68,18 +68,45 @@ export const useSettingsStore = defineStore('settings', () => {
   const historyIndex = ref(-1)
   const maxHistoryLength = 20
   
+  let translationSettingsReady = Promise.resolve()
+
+  const legacyKeyDigest = '1f6f2bea47ce4bb6a11906d892e915414a35457afe0f2a57a887092d2a7aeb47'
+
+  async function migrateLegacyTranslationSettings() {
+    const { aiTranslateApiUrl, aiTranslateApiKey, aiTranslateModel } = settings.value
+    if (aiTranslateApiUrl !== 'https://ai.searchgal.top/v1/chat/completions'
+      || aiTranslateModel !== 'Qwen/Qwen2.5-32B-Instruct'
+      || typeof aiTranslateApiKey !== 'string' || !globalThis.crypto?.subtle) return
+
+    const bytes = new TextEncoder().encode(aiTranslateApiKey)
+    const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes)
+    const fingerprint = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
+    if (fingerprint !== legacyKeyDigest) return
+
+    const migrated = {
+      aiTranslateApiUrl: DEFAULT_API_CONFIG.aiTranslateApiUrl,
+      aiTranslateApiKey: DEFAULT_API_CONFIG.aiTranslateApiKey,
+      aiTranslateModel: DEFAULT_API_CONFIG.aiTranslateModel,
+    }
+    for (const snapshot of [settings.value, ...settingsHistory.value]) {
+      if (snapshot.aiTranslateApiUrl === aiTranslateApiUrl
+        && snapshot.aiTranslateApiKey === aiTranslateApiKey
+        && snapshot.aiTranslateModel === aiTranslateModel) {
+        Object.assign(snapshot, migrated)
+      }
+    }
+  }
+
+  function waitForTranslationSettings() {
+    return translationSettingsReady
+  }
+
   // 从 localStorage 加载设置
   function loadSettings() {
     try {
       const saved = localStorage.getItem('userSettings')
       if (saved) {
         const parsed = JSON.parse(saved)
-        if (parsed?.aiTranslateApiUrl === 'https://ai.searchgal.top/v1/chat/completions'
-          && parsed.aiTranslateModel === 'Qwen/Qwen2.5-32B-Instruct') {
-          delete parsed.aiTranslateApiUrl
-          delete parsed.aiTranslateApiKey
-          delete parsed.aiTranslateModel
-        }
         settings.value = { ...DEFAULT_SETTINGS, ...parsed }
       }
     } catch (error) {
@@ -90,6 +117,7 @@ export const useSettingsStore = defineStore('settings', () => {
     // 初始化历史记录
     settingsHistory.value = [{ ...settings.value }]
     historyIndex.value = 0
+    translationSettingsReady = migrateLegacyTranslationSettings().catch(() => {})
   }
   
   // 立即把当前设置写入 localStorage（用于 unload 等需要同步落盘的场景）
@@ -262,6 +290,7 @@ export const useSettingsStore = defineStore('settings', () => {
     
     // 方法
     loadSettings,
+    waitForTranslationSettings,
     saveSettings,
     updateSetting,
     updateSettings,

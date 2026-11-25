@@ -2,7 +2,7 @@
  * AI 翻译 API，支持站点默认翻译和用户自定义服务。
  */
 import type { TranslateAllResult, TranslateMode } from '@/types/vndb'
-import { getAiTranslateApiKey, getAiTranslateApiUrl, getAiTranslateModel } from './config'
+import { getAiTranslateApiKey, getAiTranslateApiUrl, getAiTranslateModel, waitForTranslationSettings } from './config'
 import {
   buildTranslationRequest,
   MANAGED_TRANSLATION_PATH,
@@ -17,6 +17,7 @@ async function requestTranslation(
   mode: TranslationRequestMode,
   maxRetries: number,
 ): Promise<string | null> {
+  await waitForTranslationSettings()
   const url = getAiTranslateApiUrl()
   const managed = url === MANAGED_TRANSLATION_PATH
   const key = managed ? '' : getAiTranslateApiKey()
